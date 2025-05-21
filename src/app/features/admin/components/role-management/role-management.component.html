@@ -1,0 +1,127 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">Gestion des Rôles</h2>
+    <div class="flex space-x-4">
+      <mat-form-field class="w-64">
+        <mat-label>Rechercher</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Filtrer les rôles...">
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="createRole()">
+        <mat-icon>add</mat-icon>
+        Nouveau Rôle
+      </button>
+    </div>
+  </div>
+
+  <!-- Formulaire de création/édition -->
+  <div *ngIf="roleForm" class="mb-6">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{isEditing ? 'Modifier le Rôle' : 'Nouveau Rôle'}}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="roleForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <mat-form-field class="w-full">
+              <mat-label>Nom du rôle</mat-label>
+              <input matInput formControlName="nom" required>
+              <mat-error *ngIf="roleForm.get('nom')?.hasError('required')">
+                Le nom est requis
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" required></textarea>
+              <mat-error *ngIf="roleForm.get('description')?.hasError('required')">
+                La description est requise
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div formGroupName="permissions" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <mat-checkbox formControlName="gestionDossiers">
+              Gestion des Dossiers
+            </mat-checkbox>
+            <mat-checkbox formControlName="validationGarages">
+              Validation des Garages
+            </mat-checkbox>
+            <mat-checkbox formControlName="gestionEpaves">
+              Gestion des Épaves
+            </mat-checkbox>
+            <mat-checkbox formControlName="gestionRoles">
+              Gestion des Rôles
+            </mat-checkbox>
+          </div>
+
+          <div class="flex justify-end space-x-2">
+            <button mat-button type="button" (click)="roleForm.reset()">
+              Annuler
+            </button>
+            <button mat-raised-button color="primary" (click)="saveRole()" [disabled]="!roleForm.valid">
+              {{isEditing ? 'Mettre à jour' : 'Créer'}}
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Liste des rôles -->
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" matSort>
+      <!-- Nom -->
+      <ng-container matColumnDef="nom">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Nom</th>
+        <td mat-cell *matCellDef="let row">{{row.nom}}</td>
+      </ng-container>
+
+      <!-- Description -->
+      <ng-container matColumnDef="description">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Description</th>
+        <td mat-cell *matCellDef="let row">{{row.description}}</td>
+      </ng-container>
+
+      <!-- Permissions -->
+      <ng-container matColumnDef="permissions">
+        <th mat-header-cell *matHeaderCellDef>Permissions</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="flex flex-wrap gap-2">
+            <span *ngIf="row.permissions.gestionDossiers" class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+              Dossiers
+            </span>
+            <span *ngIf="row.permissions.validationGarages" class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+              Garages
+            </span>
+            <span *ngIf="row.permissions.gestionEpaves" class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
+              Épaves
+            </span>
+            <span *ngIf="row.permissions.gestionRoles" class="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+              Rôles
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="flex space-x-2">
+            <button mat-icon-button color="primary" (click)="editRole(row)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deleteRole(row)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Sélectionner la page des rôles"></mat-paginator>
+  </div>
+</div> 

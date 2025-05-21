@@ -1,0 +1,90 @@
+<div class="p-4">
+  <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xl font-semibold">Gestion des Épaves</h2>
+    <mat-form-field class="w-64">
+      <mat-label>Rechercher</mat-label>
+      <input matInput (keyup)="applyFilter($event)" placeholder="Filtrer les épaves...">
+    </mat-form-field>
+  </div>
+
+  <div class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" matSort>
+      <!-- Marque -->
+      <ng-container matColumnDef="marque">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Marque</th>
+        <td mat-cell *matCellDef="let row">{{row.marque}}</td>
+      </ng-container>
+
+      <!-- Modèle -->
+      <ng-container matColumnDef="modele">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Modèle</th>
+        <td mat-cell *matCellDef="let row">{{row.modele}}</td>
+      </ng-container>
+
+      <!-- Année -->
+      <ng-container matColumnDef="annee">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Année</th>
+        <td mat-cell *matCellDef="let row">{{row.annee}}</td>
+      </ng-container>
+
+      <!-- Immatriculation -->
+      <ng-container matColumnDef="immatriculation">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Immatriculation</th>
+        <td mat-cell *matCellDef="let row">{{row.immatriculation}}</td>
+      </ng-container>
+
+      <!-- Propriétaire -->
+      <ng-container matColumnDef="proprietaire">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Propriétaire</th>
+        <td mat-cell *matCellDef="let row">{{row.proprietaire}}</td>
+      </ng-container>
+
+      <!-- Documents -->
+      <ng-container matColumnDef="documents">
+        <th mat-header-cell *matHeaderCellDef>Documents</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="flex space-x-2">
+            <mat-icon [ngClass]="{'text-green-500': row.documents.certificatDestruction, 'text-red-500': !row.documents.certificatDestruction}">
+              {{row.documents.certificatDestruction ? 'check_circle' : 'cancel'}}
+            </mat-icon>
+            <mat-icon [ngClass]="{'text-green-500': row.documents.certificatNonGage, 'text-red-500': !row.documents.certificatNonGage}">
+              {{row.documents.certificatNonGage ? 'check_circle' : 'cancel'}}
+            </mat-icon>
+            <mat-icon [ngClass]="{'text-green-500': row.documents.certificatNonVol, 'text-red-500': !row.documents.certificatNonVol}">
+              {{row.documents.certificatNonVol ? 'check_circle' : 'cancel'}}
+            </mat-icon>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Date d'annonce -->
+      <ng-container matColumnDef="dateAnnonce">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date d'annonce</th>
+        <td mat-cell *matCellDef="let row">{{row.dateAnnonce | date:'dd/MM/yyyy'}}</td>
+      </ng-container>
+
+      <!-- Actions -->
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef>Actions</th>
+        <td mat-cell *matCellDef="let row">
+          <div class="flex space-x-2">
+            <button mat-icon-button color="primary" (click)="validerEpave(row)" [disabled]="row.statut !== 'EN_ATTENTE'">
+              <mat-icon>check</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="rejeterEpave(row)" [disabled]="row.statut !== 'EN_ATTENTE'">
+              <mat-icon>close</mat-icon>
+            </button>
+            <button mat-icon-button color="accent">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Sélectionner la page des épaves"></mat-paginator>
+  </div>
+</div> 

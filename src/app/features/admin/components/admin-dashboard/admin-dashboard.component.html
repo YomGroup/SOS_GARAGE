@@ -1,0 +1,58 @@
+<div class="container mx-auto p-4">
+  <h1 class="text-2xl font-bold mb-6">Tableau de Bord Administrateur</h1>
+
+  <!-- Statistiques -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <mat-card>
+      <mat-card-content>
+        <div class="text-center">
+          <h3 class="text-lg font-semibold">Total Dossiers</h3>
+          <p class="text-3xl font-bold text-blue-600">{{stats.totalDossiers}}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="text-center">
+          <h3 class="text-lg font-semibold">Dossiers en Cours</h3>
+          <p class="text-3xl font-bold text-orange-600">{{stats.dossiersEnCours}}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="text-center">
+          <h3 class="text-lg font-semibold">Garages en Attente</h3>
+          <p class="text-3xl font-bold text-yellow-600">{{stats.garagesEnAttente}}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card>
+      <mat-card-content>
+        <div class="text-center">
+          <h3 class="text-lg font-semibold">Épaves en Attente</h3>
+          <p class="text-3xl font-bold text-red-600">{{stats.epavesEnAttente}}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Onglets -->
+  <mat-tab-group (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Gestion des Dossiers">
+      <app-dossier-management></app-dossier-management>
+    </mat-tab>
+    <mat-tab label="Validation Garages">
+      <app-garage-validation></app-garage-validation>
+    </mat-tab>
+    <mat-tab label="Gestion des Épaves">
+      <app-epave-management></app-epave-management>
+    </mat-tab>
+    <mat-tab label="Gestion des Rôles">
+      <app-role-management></app-role-management>
+    </mat-tab>
+  </mat-tab-group>
+</div> 
