@@ -2,10 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { DossierManagementComponent } from '../dossier-management/dossier-management.component';
 import { GarageValidationComponent } from '../garage-validation/garage-validation.component';
 import { EpaveManagementComponent } from '../epave-management/epave-management.component';
 import { RoleManagementComponent } from '../role-management/role-management.component';
+import { LineChartComponent, BarChartComponent, DoughnutChartComponent } from '../../../../shared/components/charts';
+import { RecentActivityComponent } from '../../../../shared/components/recent-activity/recent-activity.component';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -14,10 +20,18 @@ import { RoleManagementComponent } from '../role-management/role-management.comp
     CommonModule,
     MatTabsModule,
     MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatButtonToggleModule,
     DossierManagementComponent,
     GarageValidationComponent,
     EpaveManagementComponent,
-    RoleManagementComponent
+    RoleManagementComponent,
+    LineChartComponent,
+    BarChartComponent,
+    DoughnutChartComponent,
+    RecentActivityComponent
   ],
   standalone: true
 })

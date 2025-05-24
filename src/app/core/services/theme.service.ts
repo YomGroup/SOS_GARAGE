@@ -1,14 +1,13 @@
 import { Injectable, signal, PLATFORM_ID, inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { ThemePersistenceService, THEME_CONSTANTS } from './theme-persistence.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ThemeService {
-  private readonly THEME_KEY = 'theme';
-  private readonly DARK_THEME = 'dark';
-  private readonly LIGHT_THEME = 'light';
   private platformId = inject(PLATFORM_ID);
+  private themePersistence = inject(ThemePersistenceService);
 
   isDarkMode = signal<boolean>(this.getInitialTheme());
 
@@ -19,14 +18,11 @@ export class ThemeService {
   }
 
   private getInitialTheme(): boolean {
-    if (isPlatformBrowser(this.platformId)) {
-      const savedTheme = localStorage.getItem(this.THEME_KEY);
-      if (savedTheme) {
-        return savedTheme === this.DARK_THEME;
-      }
-      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = this.themePersistence.getTheme();
+    if (savedTheme) {
+      return savedTheme === THEME_CONSTANTS.DARK;
     }
-    return false;
+    return this.themePersistence.getSystemTheme();
   }
 
   toggleTheme(): void {
@@ -38,9 +34,9 @@ export class ThemeService {
 
   private applyTheme(isDark: boolean): void {
     if (isPlatformBrowser(this.platformId)) {
-      const theme = isDark ? this.DARK_THEME : this.LIGHT_THEME;
-      document.documentElement.classList.toggle(this.DARK_THEME, isDark);
-      localStorage.setItem(this.THEME_KEY, theme);
+      const theme = isDark ? THEME_CONSTANTS.DARK : THEME_CONSTANTS.LIGHT;
+      document.documentElement.classList.toggle(THEME_CONSTANTS.DARK, isDark);
+      this.themePersistence.saveTheme(theme);
     }
   }
 } 

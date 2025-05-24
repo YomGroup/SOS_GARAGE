@@ -40,6 +40,68 @@
     </mat-card>
   </div>
 
+  <!-- Charts Row -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Monthly Case Trends -->
+    <div class="card lg:col-span-2">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Tendances mensuelles des dossiers</h2>
+        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #chartMenu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>download</mat-icon>
+            <span>Télécharger CSV</span>
+          </button>
+          <button mat-menu-item>
+            <mat-icon>print</mat-icon>
+            <span>Imprimer</span>
+          </button>
+        </mat-menu>
+      </div>
+      <app-line-chart></app-line-chart>
+    </div>
+
+    <!-- Cases by Status -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Dossiers par statut</h2>
+        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+      </div>
+      <app-doughnut-chart></app-doughnut-chart>
+    </div>
+  </div>
+
+  <!-- Repair Analytics & Recent Activity -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+    <!-- Repair Performance -->
+    <div class="card lg:col-span-2">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Performance des réparations</h2>
+        <div>
+          <mat-button-toggle-group value="weekly" aria-label="Période">
+            <mat-button-toggle value="weekly">Hebdomadaire</mat-button-toggle>
+            <mat-button-toggle value="monthly">Mensuel</mat-button-toggle>
+            <mat-button-toggle value="yearly">Annuel</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </div>
+      <app-bar-chart></app-bar-chart>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Activité récente</h2>
+        <a href="#" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Voir tout</a>
+      </div>
+      <app-recent-activity></app-recent-activity>
+    </div>
+  </div>
+
   <!-- Onglets -->
   <mat-tab-group (selectedTabChange)="onTabChange($event)">
     <mat-tab label="Gestion des Dossiers">
