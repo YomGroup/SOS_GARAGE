@@ -1,0 +1,122 @@
+/* Import des polices */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan:wght@700&display=swap');
+
+/* Variables de couleurs */
+:root {
+  --color-primary: #004aad;
+  --color-secondary: #aa38cb;
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-disabled: #d3d3d3;
+  --color-error: #ff0000;
+}
+
+/* Styles de base */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--color-white);
+  color: var(--color-black);
+}
+
+/* Styles des titres */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Agrandir', sans-serif;
+  font-weight: bold;
+}
+
+/* Styles des boutons */
+.btn-primary {
+  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-white);
+  font-family: 'Agrandir', sans-serif;
+  border-radius: 24px;
+  padding: 12px 24px;
+  border: none;
+  cursor: pointer;
+  transition: box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 4px 12px rgba(0, 74, 173, 0.3);
+}
+
+.btn-secondary {
+  background-color: var(--color-white);
+  color: var(--color-secondary);
+  font-family: 'Poppins', sans-serif;
+  border: 2px solid var(--color-secondary);
+  border-radius: 24px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+}
+
+/* Styles des notifications */
+.notification {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.notification-badge {
+  background-color: var(--color-error);
+  color: var(--color-white);
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+/* Styles des icônes */
+.icon {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  fill: none;
+}
+
+.icon-filled {
+  fill: currentColor;
+}
+
+/* Styles des éléments désactivés */
+.disabled {
+  color: var(--color-disabled);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Styles des messages système */
+.system-message {
+  font-family: 'League Spartan', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+
+/* Styles des formulaires */
+.form-label {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.form-input {
+  border: 1px solid var(--color-disabled);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.2);
+} 

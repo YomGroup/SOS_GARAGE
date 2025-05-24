@@ -1,16 +1,17 @@
-import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Injectable } from '@angular/core';
+import { createEffect, ofType } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { map, mergeMap, catchError, switchMap } from 'rxjs/operators';
+import { catchError, map, mergeMap } from 'rxjs/operators';
 import { HttpClient } from '@angular/common/http';
 
 import * as CasesActions from '../actions/cases.actions';
-import { Case } from '../reducers/cases.reducer';
+import { BaseEffects } from './base.effects';
 
 @Injectable()
-export class CasesEffects {
-  private actions$ = inject(Actions);
-  private http = inject(HttpClient);
+export class CasesEffects extends BaseEffects {
+  constructor(private http: HttpClient) {
+    super();
+  }
 
   // Charger les dossiers
   loadCases$ = createEffect(() =>
