@@ -11,5 +11,10 @@ export const routes: Routes = [
       path: '',
       redirectTo: 'admin',
       pathMatch: 'full'
-    }
+    },
+    {
+      path: 'garage',
+      loadChildren: () =>
+        import('./features/garage/garage.module').then(m => m.GarageModule)
+    },
   ];
