@@ -15,6 +15,6 @@ export const routes: Routes = [
     {
       path: 'garage',
       loadChildren: () =>
-        import('./features/garage/garage.module').then(m=>m.GarageModule)
+        import('./features/garage/garage.module').then(m => m.GarageModule)
     },
   ];
