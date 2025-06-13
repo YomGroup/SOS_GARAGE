@@ -58,14 +58,14 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class LayoutComponent {
   private themeService = inject(ThemeService);
-  
+
   sidebarCollapsed = signal(false);
   isDarkMode = this.themeService.isDarkMode;
-  
+
   toggleSidebar() {
     this.sidebarCollapsed.update(state => !state);
   }
-  
+
   toggleTheme() {
     this.themeService.toggleTheme();
   }

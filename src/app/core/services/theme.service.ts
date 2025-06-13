@@ -6,7 +6,7 @@ import { isPlatformBrowser } from '@angular/common';
 })
 export class ThemeService {
   private readonly THEME_KEY = 'theme';
-  private readonly DARK_THEME = 'dark';
+  private readonly DARK_THEME = 'light';
   private readonly LIGHT_THEME = 'light';
   private platformId = inject(PLATFORM_ID);
 

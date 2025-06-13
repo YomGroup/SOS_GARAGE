@@ -1,0 +1,329 @@
+<a href="/" class="back-home btn btn-primary-custom">
+        <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
+    </a>
+<div class="auth-container">
+        <div class="auth-card">
+            <div class="row g-0">
+                <!-- Left side - Branding -->
+                <div class="col-lg-5">
+                    <div class="auth-left">
+                        <div class="car-icon">
+                            <i class="fas fa-car-side"></i>
+                        </div>
+                        <div class="brand-logo">SOS MON GARAGE
+                             
+                        </div>
+                        <p class="lead mb-4">Votre partenaire de confiance pour la gestion de vos sinistres automobiles</p>
+                        <div class="features">
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Déclaration rapide en 5 minutes
+                            </div>
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Assistance 24h/24 et 7j/7
+                            </div>
+                            <div class="mb-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Suivi en temps réel
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right side - Forms -->
+                <div class="col-lg-7">
+                    <div class="auth-right">
+                        <!-- Login Form -->
+                        <div id="loginForm" class="auth-form active">
+                            <div class="text-center mb-4">
+                                <h2 class="text-primary-blue fw-bold">Connexion</h2>
+                                <p class="text-muted">Connectez-vous à votre espace personnel</p>
+                            </div>
+
+                            <form id="loginFormSubmit">
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" class="form-control" placeholder="Votre adresse email" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" placeholder="Votre mot de passe" required>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                                        <label class="form-check-label" for="rememberMe">
+                                            Se souvenir de moi
+                                        </label>
+                                    </div>
+                                    <a href="#" class="forgot-password">Mot de passe oublié ?</a>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-custom w-100 mb-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                                </button>
+                            </form>
+
+                            <div class="divider">
+                                <span>ou continuer avec</span>
+                            </div>
+
+                            <div class="social-login">
+                                <a href="#" class="social-btn">
+                                    <i class="fab fa-google"></i>
+                                    Continuer avec Google
+                                </a>
+                                <a href="#" class="social-btn">
+                                    <i class="fab fa-facebook"></i>
+                                    Continuer avec Facebook
+                                </a>
+                            </div>
+
+                            <div class="switch-form">
+                                <span class="text-muted">Pas encore de compte ? </span>
+                                <a  href="/register" class=" switch-btn" >Créer un compte</a>
+                            </div>
+                        </div>
+
+                        <!-- Register Form -->
+                        <div id="registerForm" class="auth-form">
+                            <div class="text-center mb-4">
+                                <h2 class="text-primary-blue fw-bold">Inscription</h2>
+                                <p class="text-muted">Créez votre compte en quelques minutes</p>
+                            </div>
+
+                            <form id="registerFormSubmit">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Prénom" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="fas fa-user"></i>
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Nom" required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-envelope"></i>
+                                        </span>
+                                        <input type="email" class="form-control" placeholder="Adresse email" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        <input type="tel" class="form-control" placeholder="Numéro de téléphone" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" placeholder="Mot de passe" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" placeholder="Confirmer le mot de passe" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-4">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="acceptTerms" required>
+                                        <label class="form-check-label" for="acceptTerms">
+                                            J'accepte les <a href="#" class="text-primary-custom">conditions d'utilisation</a>
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="acceptNewsletter">
+                                        <label class="form-check-label" for="acceptNewsletter">
+                                            Je souhaite recevoir les actualités par email
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary-custom w-100 mb-3">
+                                    <i class="fas fa-user-plus me-2"></i>Créer mon compte
+                                </button>
+                            </form>
+
+                            <div class="divider">
+                                <span>ou s'inscrire avec</span>
+                            </div>
+
+                            <div class="social-login">
+                                <a href="#" class="social-btn">
+                                    <i class="fab fa-google"></i>
+                                    S'inscrire avec Google
+                                </a>
+                                <a href="#" class="social-btn">
+                                    <i class="fab fa-facebook"></i>
+                                    S'inscrire avec Facebook
+                                </a>
+                            </div>
+
+                            <div class="switch-form">
+                                <span class="text-muted">Déjà un compte ? </span>
+                                <button class="switch-btn" onclick="switchToLogin()">Se connecter</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-check-circle fa-4x text-success"></i>
+                    </div>
+                    <h4 class="text-success mb-3">Inscription réussie !</h4>
+                    <p class="text-muted mb-4">
+                        Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter et commencer à utiliser nos services.
+                    </p>
+                    <button type="button" class="btn btn-primary-custom" data-bs-dismiss="modal" onclick="switchToLogin()">
+                        Se connecter maintenant
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form switching
+        function switchToRegister() {
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.add('active');
+        }
+
+        function switchToLogin() {
+            document.getElementById('registerForm').classList.remove('active');
+            document.getElementById('loginForm').classList.add('active');
+        }
+
+        // Form submissions
+        document.getElementById('loginFormSubmit').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Simulate login process
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Connexion...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Simulate successful login - redirect to dashboard
+                window.location.href = '/dashboard';
+            }, 2000);
+        });
+
+        document.getElementById('registerFormSubmit').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Basic validation
+            const password = this.querySelector('input[type="password"]').value;
+            const confirmPassword = this.querySelectorAll('input[type="password"]')[1].value;
+            
+            if (password !== confirmPassword) {
+                alert('Les mots de passe ne correspondent pas.');
+                return;
+            }
+            
+            // Simulate registration process
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Création...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Show success modal
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+            }, 2000);
+        });
+
+        // Social login handlers
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const provider = this.textContent.includes('Google') ? 'Google' : 'Facebook';
+                
+                // Simulate social login
+                this.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Connexion avec ${provider}...`;
+                
+                setTimeout(() => {
+                    // Redirect to dashboard or show error
+                    window.location.href = '/dashboard';
+                }, 1500);
+            });
+        });
+
+        // Input focus effects
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Password strength indicator (for register form)
+        const passwordInput = document.querySelector('#registerForm input[type="password"]');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                
+                if (password.length >= 8) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+                
+                // You can add visual feedback here
+                console.log('Password strength:', strength);
+            });
+        }
+    </script>

@@ -1,0 +1,37 @@
+    <!-- Mobile Toggle Button -->
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Sidebar -->
+   <div class="sidebar" [class.collapsed]="isCollapsed">
+    <div class="sidebar-header">
+        <button class="toggle-btn" (click)="toggleSidebar()">
+            <i class="fas" [class.fa-bars]="!isCollapsed" [class.fa-times]="isCollapsed"></i>
+        </button>
+        <a class="navbar-brand text-primary-blue" href="/">
+            <i class="fas fa-car-side"></i>
+            <span class="brand-text">SOS MON GARAGE</span>
+        </a>
+        <small class="opacity-75">Espace Client</small>
+    </div>
+    <nav class="sidebar-nav">
+        <ul class="nav flex-column">
+            <li class="nav-item" *ngFor="let item of menuItems">
+                <a [routerLink]="item.link" class="nav-link" [title]="item.text">
+                    <i [class]="item.icon"></i>
+                    <span class="link-text">{{item.text}}</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+    <!-- Main Content -->
+    <div class=" main-content" id="mainContent"  [class.expanded]="isCollapsed">
+  
+        <router-outlet></router-outlet>    
+    </div>
+    
+
+
