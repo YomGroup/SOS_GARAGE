@@ -11,9 +11,9 @@ import { routes } from './app/app.routes';
 
   await keycloakService.init({
     config: {
-      url: 'http://localhost:8080',
+      url: 'https://keyckoak-prod-production.up.railway.app',
       realm: 'sos-garage',                      
-      clientId: 'sosmongarage',
+      clientId: 'sosmongaragefront',
     },
     initOptions: {
       onLoad: 'login-required',
