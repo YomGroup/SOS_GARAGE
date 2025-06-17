@@ -1,81 +1,56 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-100">
-  <!-- Header -->
-  <div class="bg-white/70 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-    <div class="container mx-auto px-6 py-4">
-      <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.288L7.455 6.833m9.09 0L12 2.288m0 17.424l4.545-4.545M12 19.712l-4.545-4.545"/>
-            </svg>
-          </div>
-          <h1 class="text-2xl font-bold bg-gradient-to-r from-purple-800 to-pink-800 bg-clip-text text-transparent">
-            Centre d'Aide
-          </h1>
-        </div>
-        <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300">
-          Nous Contacter
-        </button>
-      </div>
-    </div>
-  </div>
+ 
 
   <div class="container mx-auto px-6 py-8">
     <!-- Hero Section -->
     <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold text-slate-800 mb-4">Comment pouvons-nous vous aider ?</h2>
-      <p class="text-xl text-slate-600 mb-8">Trouvez rapidement les réponses à vos questions ou contactez notre équipe</p>
-      
-      <!-- Barre de recherche -->
-      <div class="max-w-2xl mx-auto relative">
-        <input 
-          type="text" 
-          placeholder="Rechercher dans l'aide..." 
-          class="w-full px-6 py-4 pl-12 bg-white/70 backdrop-blur-sm border border-white/30 rounded-2xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 text-lg"
-        >
-        <svg class="absolute left-4 top-5 w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-      </div>
-    </div>
-
+    
     <!-- Boutons d'action rapide -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-      <div class="group bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-500 cursor-pointer">
-        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-          </svg>
-        </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Chat en Direct</h3>
-        <p class="text-slate-600">Discutez avec notre équipe support en temps réel</p>
-        <div class="mt-4 text-sm text-green-600 font-semibold">● En ligne maintenant</div>
+     <!-- Contact Information -->
+    <div class=" backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+      <div class="text-center mb-8">
+        <h3 class="text-3xl font-bold text-slate-800 mb-4">Besoin d'aide personnalisée ?</h3>
+        <p class="text-slate-600">Notre équipe est là pour vous accompagner</p>
       </div>
-
-      <div class="group bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-500 cursor-pointer">
-        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-          </svg>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-slate-800 mb-2">Email</h4>
+          <p class="text-slate-600">supportvotresite.com</p>
         </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Email Support</h3>
-        <p class="text-slate-600">Envoyez-nous un email pour un support détaillé</p>
-        <div class="mt-4 text-sm text-slate-500">Réponse sous 24h</div>
-      </div>
-
-      <div class="group bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:shadow-xl transition-all duration-500 cursor-pointer">
-        <div class="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-          </svg>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-slate-800 mb-2">Téléphone</h4>
+          <p class="text-slate-600">+33 1 23 45 67 89</p>
         </div>
-        <h3 class="text-xl font-bold text-slate-800 mb-2">Téléphone</h3>
-        <p class="text-slate-600">Appelez-nous directement pour une aide immédiate</p>
-        <div class="mt-4 text-sm text-slate-500">Lun-Ven 9h-18h</div>
+        
+        <div class="text-center">
+          <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <h4 class="text-lg font-bold text-slate-800 mb-2">Adresse</h4>
+          <p class="text-slate-600">123 Rue de la Tech<br>75001 Paris</p>
+        </div>
       </div>
     </div>
+  </div>
+</div>
+
 
     <!-- FAQ Section -->
     <div class="mb-12">
@@ -148,103 +123,8 @@
       </div>
     </div>
 
-    <!-- Guides et Tutoriels -->
-    <div class="mb-12">
-      <h3 class="text-3xl font-bold text-slate-800 text-center mb-8">Guides & Tutoriels</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="group bg-white/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:shadow-xl transition-all duration-500">
-          <div class="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-            <svg class="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
-          </div>
-          <div class="p-6">
-            <h4 class="text-xl font-bold text-slate-800 mb-2">Guide de Démarrage</h4>
-            <p class="text-slate-600 mb-4">Apprenez les bases de la gestion de véhicules en 5 minutes</p>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-500">📖 Lecture 5 min</span>
-              <button class="text-purple-600 hover:text-purple-800 font-semibold">Lire →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="group bg-white/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:shadow-xl transition-all duration-500">
-          <div class="h-48 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center">
-            <svg class="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <div class="p-6">
-            <h4 class="text-xl font-bold text-slate-800 mb-2">Tutoriel Vidéo</h4>
-            <p class="text-slate-600 mb-4">Regardez comment utiliser toutes les fonctionnalités</p>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-500">🎥 Vidéo 10 min</span>
-              <button class="text-purple-600 hover:text-purple-800 font-semibold">Regarder →</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="group bg-white/70 backdrop-blur-sm rounded-2xl overflow-hidden border border-white/20 hover:shadow-xl transition-all duration-500">
-          <div class="h-48 bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
-            <svg class="w-16 h-16 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-          </div>
-          <div class="p-6">
-            <h4 class="text-xl font-bold text-slate-800 mb-2">Documentation API</h4>
-            <p class="text-slate-600 mb-4">Intégrez notre système avec vos outils existants</p>
-            <div class="flex items-center justify-between">
-              <span class="text-sm text-slate-500">🔧 Technique</span>
-              <button class="text-purple-600 hover:text-purple-800 font-semibold">Explorer →</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contact Information -->
-    <div class="bg-white/70 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-      <div class="text-center mb-8">
-        <h3 class="text-3xl font-bold text-slate-800 mb-4">Besoin d'aide personnalisée ?</h3>
-        <p class="text-slate-600">Notre équipe est là pour vous accompagner</p>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Email</h4>
-          <p class="text-slate-600">supportvotresite.com</p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-            </svg>
-          </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Téléphone</h4>
-          <p class="text-slate-600">+33 1 23 45 67 89</p>
-        </div>
-        
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-          </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Adresse</h4>
-          <p class="text-slate-600">123 Rue de la Tech<br>75001 Paris</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
+ 
+   
 <script>
 function toggleFAQ(button) {
   const content = button.nextElementSibling;

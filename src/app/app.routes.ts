@@ -10,12 +10,11 @@ import { EspaceclientComponent } from './espaceclient/espaceclient.component';
 import { HomeDashboardComponent } from './home-dashboard/home-dashboard.component';
 import { LoginComponent } from './login/login.component';
 import { RegisterComponent } from './register/register.component';
-import { DeclarationroulantComponent } from './declarationroulant/declarationroulant.component';
-import { DeclarationNonroulantComponent } from './declaration-nonroulant/declaration-nonroulant.component';
 import { SinistreComponent } from './sinistre/sinistre.component';
 import { DocumentComponent } from './document/document.component';
 import { ProfileComponent } from './profile/profile.component';
-
+import { HomeComponent } from './home/home.component';
+import { MessageComponent } from './message/message.component';
 
 export const routes: Routes = [
   {
@@ -37,16 +36,16 @@ export const routes: Routes = [
     path: 'clientDashboard',
     component: EspaceclientComponent,
     children: [
-      { path: '', component: HomeDashboardComponent },
+      { path: '', component: HomeComponent },
       { path: 'vehicules', component: VehiculesComponent },
       { path: 'declarations', component: DeclarationsComponent },
       { path: 'support', component: SupportComponent },
       { path: 'notification', component: NotificationComponent },
       { path: 'sinistre', component: SinistreComponent },
       { path: 'document', component: DocumentComponent },
-      { path: 'roulant', component: DeclarationroulantComponent },
-      { path: 'nonroulant', component: DeclarationNonroulantComponent },
-      { path: 'profiles', component: ProfileComponent }]
+
+      { path: 'message', component: MessageComponent },
+      { path: 'profiles', component: ProfileComponent },]
   },
   {
     path: '',

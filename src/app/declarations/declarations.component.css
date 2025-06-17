@@ -1,0 +1,737 @@
+/* 1. Correction du progress indicator - cercles séparés par des lignes */
+.progress-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e8d4f0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.step.active {
+    background-color: #5a0bba;
+    color: white;
+}
+
+.step.completed {
+    background-color: #8b2eb8;
+    color: white;
+}
+
+/* Ligne de connexion entre les étapes */
+.step:not(:last-child) {
+    margin-right: 60px;
+    position: relative;
+}
+
+.step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(100% + 10px);
+    width: 40px;
+    height: 2px;
+    background-color: #e8d4f0;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.step.completed:not(:last-child)::after {
+    background-color: black;
+}
+
+/* 2. Correction des cartes véhicule selon la maquette */
+.vehicle-status {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.radio-group {
+    flex: 1;
+    max-width: 400px;
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+.radio-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 180px;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Style par défaut pour toutes les cartes - même style */
+.radio-label {
+    background: white;
+    color: #8b5cf6;
+    border: 3px solid #8b5cf6;
+    opacity: 0.7;
+}
+
+/* État sélectionné pour "Mon véhicule est roulant" */
+.radio-group input[value="rolling"]:checked+.radio-label {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    color: white;
+    border: none;
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* État sélectionné pour "Mon véhicule est Non roulant" */
+.radio-group input[value="not-rolling"]:checked+.radio-label {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    color: white;
+    border: none;
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* États hover */
+.radio-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* 3. Correction du dropdown véhicule */
+/* Correction du dropdown véhicule selon la maquette */
+.vehicle-selection {
+    background: linear-gradient(135deg, #1e4db8 10%, #8b2eb8 100%);
+    padding: 50px;
+    border-radius: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+}
+
+.vehicle-dropdown {
+    position: relative;
+    background: white;
+    border: 3px solid #8b5cf6;
+    border-radius: 15px;
+    padding: 20px 30px;
+    cursor: pointer;
+    color: #8b5cf6;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.vehicle-dropdown:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
+}
+
+.vehicle-dropdown.open {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    color: white;
+    border: none;
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.vehicle-dropdown::after {
+    content: '▼';
+    font-size: 14px;
+    transition: transform 0.3s ease;
+    color: #8b5cf6;
+}
+
+.vehicle-dropdown.open::after {
+    transform: rotate(180deg);
+    color: white;
+}
+
+/* Style de la liste déroulante */
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    margin-top: 8px;
+    padding: 0;
+    list-style: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    overflow: hidden;
+}
+
+.dropdown-list li {
+    padding: 15px 20px;
+    cursor: pointer;
+    color: #374151;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.dropdown-list li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-list li:hover {
+    background-color: #f8fafc;
+    color: #8b5cf6;
+}
+
+/* Animation d'apparition de la liste */
+.dropdown-list {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 4. Correction des boutons de navigation */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 150%;
+    margin-top: 40px;
+    max-width: 600px;
+
+}
+
+.btn-back {
+    padding: 15px 30px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background-color: white;
+    color: #9ca3af;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-back:not(:disabled) {
+    color: #6b7280;
+    cursor: pointer;
+    border-color: #d1d5db;
+}
+
+.btn-back:not(:disabled):hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-next {
+    padding: 15px 30px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(30, 77, 184, 0.7) 0%, rgba(139, 46, 184, 0.7) 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+
+}
+
+.btn-next:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 5. Ajustement du conteneur de contenu */
+.step-content {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
+
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+}
+
+.step-content h2 {
+    margin-bottom: 30px;
+    color: #1f2937;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+/* 6. Conteneur principal */
+/*
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}*/
+
+.claim-declaration h1 {
+    text-align: left;
+    color: #1f2937;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.instruction {
+    text-align: left;
+    color: #6b7280;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+/* 7. Sections upload */
+.file-upload,
+.photo-upload {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.upload-area {
+    border: 2px solid #8b5cf6;
+    border-radius: 15px;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-area:hover {
+    border-color: #8b5cf6;
+    background-color: #faf7ff;
+}
+
+.upload-area i {
+    font-size: 48px;
+    color: #8b5cf6;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.upload-area p {
+    color: #6b7280;
+    font-size: 22px;
+    margin: 0;
+}
+
+.help-text {
+    margin-top: 20px;
+    color: #6b7280;
+    font-size: 14px;
+    text-align: center;
+}
+
+.help-text a {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+/* 8. Correction de la section Signature de document selon la maquette */
+.document-signing {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.document-preview {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 0;
+    margin-bottom: 30px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.document-header {
+    background: #f8fafc;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: center;
+}
+
+.document-header h3 {
+    margin: 0;
+    color: #1f2937;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.document-content {
+    flex: 1;
+    padding: 40px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+}
+
+.document-placeholder {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 16px;
+}
+
+.document-placeholder i {
+    font-size: 48px;
+    color: #d1d5db;
+    margin-bottom: 15px;
+    display: block;
+}
+
+/* Bouton de signature */
+.btn-sign {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px 30px;
+    border: 3px solid #3b82f6;
+    border-radius: 15px;
+    background: white;
+    color: #3b82f6;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.btn-sign:hover {
+    background: #3b82f6;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.btn-sign i {
+    font-size: 20px;
+}
+
+/* État signé */
+.btn-sign.signed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    cursor: default;
+}
+
+.btn-sign.signed:hover {
+    transform: none;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+/* Animation de signature */
+.btn-sign.signing {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-sign.signing::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 0;
+    border: 2px solid #3b82f6;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Success Message Styles */
+.success-message {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 60px 40px;
+}
+
+.success-icon {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 30px;
+    animation: successPulse 2s ease-in-out;
+}
+
+.success-icon i {
+    font-size: 48px;
+    color: white;
+}
+
+.success-message h2 {
+    color: #1f2937;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.success-message p {
+    color: #6b7280;
+    font-size: 18px;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+.btn-contact {
+    padding: 18px 40px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(to right, #f83600, #c8ae2b);
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-contact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* Animations */
+@keyframes successPulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .document-preview {
+        min-height: 300px;
+    }
+
+    .document-content {
+        padding: 20px;
+        min-height: 200px;
+    }
+
+    .btn-sign {
+        font-size: 16px;
+        padding: 15px 25px;
+    }
+}
+
+.custom-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    user-select: none;
+    padding: 10px 0;
+}
+
+/* Masquer la checkbox par défaut */
+.custom-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Créer la checkbox personnalisée */
+.custom-checkbox .checkmark {
+    position: relative;
+    height: 24px;
+    width: 24px;
+    background-color: #fff;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Au survol */
+.custom-checkbox:hover .checkmark {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Quand la checkbox est cochée */
+.custom-checkbox input[type="checkbox"]:checked~.checkmark {
+    background-color: #8215a9;
+    border-color: #8215a9;
+}
+
+/* Créer la coche */
+.custom-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Afficher la coche quand cochée */
+.custom-checkbox input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+/* État focus pour l'accessibilité */
+.custom-checkbox input[type="checkbox"]:focus~.checkmark {
+    outline: 2px solid #7607f4;
+    outline-offset: 2px;
+}
+
+/* Styles pour les messages de statut */
+.custom-checkbox+span {
+    margin-left: 10px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* Message "Signature en cours..." */
+span[ng-reflect-ng-if="true"]:first-of-type {
+    color: #ffc107;
+}
+
+/* Message "Document signé" */
+span[ng-reflect-ng-if="true"]:last-of-type {
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Animation pour la transition */
+.custom-checkbox .checkmark {
+    animation: none;
+}
+
+.custom-checkbox input[type="checkbox"]:checked~.checkmark {
+    animation: checkboxPulse 0.3s ease-in-out;
+}
+
+@keyframes checkboxPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .custom-checkbox {
+        font-size: 14px;
+    }
+
+    .custom-checkbox .checkmark {
+        height: 20px;
+        width: 20px;
+        margin-right: 10px;
+    }
+
+    .custom-checkbox .checkmark:after {
+        left: 6px;
+        top: 2px;
+        width: 5px;
+        height: 10px;
+    }
+}

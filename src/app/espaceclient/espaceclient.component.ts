@@ -1,28 +1,47 @@
 import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-espaceclient',
-  imports: [RouterOutlet, RouterLink, CommonModule],
+  imports: [RouterOutlet, RouterLink, CommonModule, RouterLinkActive, HttpClientModule],
   templateUrl: './espaceclient.component.html',
   styleUrl: './espaceclient.component.css'
 })
 export class EspaceclientComponent {
-  menuItems = [
-    { icon: 'fas fa-tachometer-alt', text: 'Tableau de bord', link: '/clientDashboard/' },
-    { icon: 'fas fa-car', text: 'Mes véhicules', link: '/clientDashboard/vehicules' },
-    { icon: 'fas fa-file-alt', text: 'Mes sinistres', link: '/clientDashboard/declarations' },
-    { icon: 'fas fa-plus-circle', text: 'Déclarer un sinistre', link: '/clientDashboard/sinistre' },
-    { icon: 'fas fa-folder', text: 'Mes documents', link: '/clientDashboard/document' },
-    { icon: 'fas fa-user', text: 'Mon profil', link: '/clientDashboard/profiles' },
-    { icon: 'fas fa-headset', text: 'Support', link: '/clientDashboard/support' },
-    { icon: 'fas fa-sign-out-alt', text: 'Déconnexion', link: '#', class: 'mt-4 text-warning' }
+
+  vehiclesCount: number = 0;
+
+
+  claimsCount = 9;
+  processingCount = 7;
+  currentDate = '10 Janvier 2025';
+
+  recentClaims = [
+    { id: 'SIN-001', status: 'Clôture', vehicle: 'Mercedes AMG', date: '15 Mai 2025' },
+    { id: 'SIN-001', status: 'Clôture', vehicle: 'Mercedes AMG', date: '15 Mai 2025' },
+    { id: 'SIN-001', status: 'Clôture', vehicle: 'Mercedes AMG', date: '15 Mai 2025' }
   ];
-  isCollapsed = false;
+
+  notifications = [
+    { message: 'Le sinistre-001 à été traité avec succès il y a 30 mn', read: false },
+    { message: 'Documents à signer pour le sinistre-001 il y a 39 mn', read: false }
+  ];
+  logout() {
+    // Implement logout logic
+    console.log('Logging out...');
+  }
   toggleSidebar() {
-    this.isCollapsed = !this.isCollapsed;
-    // Vous pouvez aussi sauvegarder l'état dans localStorage
-    // localStorage.setItem('sidebarCollapsed', String(this.isCollapsed));
+    const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('mainContent');
+    const header = document.getElementById('header');
+    const toggleBtn = document.querySelector('.sidebar-toggle');
+
+    sidebar?.classList.toggle('collapsed');
+    mainContent?.classList.toggle('collapsed');
+    header?.classList.toggle('collapsed');
+    toggleBtn?.classList.toggle('collapsed');
   }
 }
