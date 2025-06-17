@@ -1,87 +1,142 @@
-<div class="p-4">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold">Gestion des Dossiers</h2>
-    <mat-form-field class="w-64">
-      <mat-label>Rechercher</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Filtrer les dossiers...">
-    </mat-form-field>
+<!-- dossier-management.component.html -->
+<div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="w-full">
+      <div class="flex items-center gap-4">
+        <mat-icon class="text-indigo-600 text-3xl w-8 h-8">folder_open</mat-icon>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">📁 Gestion des Dossiers</h1>
+          <p class="text-gray-500 text-sm md:text-base">Gérez et suivez vos dossiers en temps réel</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" matSort>
-      <!-- Numéro de dossier -->
-      <ng-container matColumnDef="numero">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Numéro</th>
-        <td mat-cell *matCellDef="let row">{{row.numero}}</td>
-      </ng-container>
-
-      <!-- Type -->
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-        <td mat-cell *matCellDef="let row">{{row.type}}</td>
-      </ng-container>
-
-      <!-- Statut -->
-      <ng-container matColumnDef="statut">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
-        <td mat-cell *matCellDef="let row">
-          <span [ngClass]="{
-            'px-2 py-1 rounded-full text-sm': true,
-            'bg-yellow-100 text-yellow-800': row.statut === 'EN_COURS',
-            'bg-green-100 text-green-800': row.statut === 'VALIDÉ',
-            'bg-red-100 text-red-800': row.statut === 'REJETÉ'
-          }">
-            {{row.statut}}
-          </span>
-        </td>
-      </ng-container>
-
-      <!-- Date de création -->
-      <ng-container matColumnDef="dateCreation">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date de création</th>
-        <td mat-cell *matCellDef="let row">{{row.dateCreation | date:'dd/MM/yyyy'}}</td>
-      </ng-container>
-
-      <!-- Documents -->
-      <ng-container matColumnDef="documents">
-        <th mat-header-cell *matHeaderCellDef>Documents</th>
-        <td mat-cell *matCellDef="let row">
-          <div class="flex space-x-2">
-            <mat-icon [ngClass]="{'text-green-500': row.documents.contratAssurance, 'text-red-500': !row.documents.contratAssurance}">
-              {{row.documents.contratAssurance ? 'check_circle' : 'cancel'}}
-            </mat-icon>
-            <mat-icon [ngClass]="{'text-green-500': row.documents.carteGrise, 'text-red-500': !row.documents.carteGrise}">
-              {{row.documents.carteGrise ? 'check_circle' : 'cancel'}}
-            </mat-icon>
-            <mat-icon [ngClass]="{'text-green-500': row.documents.facture, 'text-red-500': !row.documents.facture}">
-              {{row.documents.facture ? 'check_circle' : 'cancel'}}
-            </mat-icon>
+  <!-- Main Card -->
+  <div class="w-full bg-white/80 backdrop-blur-lg rounded-xl shadow-2xl border border-white/30 overflow-hidden">
+    <!-- Toolbar -->
+    <div class="p-4 md:p-6 border-b border-gray-200 bg-gradient-to-r from-white to-gray-50 flex flex-wrap justify-between items-center gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <mat-icon class="bg-indigo-50 text-indigo-600 p-2 rounded-lg text-xl w-9 h-9 flex items-center justify-center">description</mat-icon>
+          <div>
+            <h2 class="text-lg md:text-xl font-semibold text-gray-800">Liste des Dossiers</h2>
+            <span class="text-gray-500 text-xs md:text-sm">{{ dataSource.data.length }} dossiers au total</span>
           </div>
-        </td>
-      </ng-container>
+        </div>
+      </div>
 
-      <!-- Actions -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let row">
-          <div class="flex space-x-2">
-            <button mat-icon-button color="primary" (click)="validerDossier(row)" [disabled]="row.statut !== 'EN_COURS'">
-              <mat-icon>check</mat-icon>
-            </button>
-            <button mat-icon-button color="warn" (click)="rejeterDossier(row)" [disabled]="row.statut !== 'EN_COURS'">
-              <mat-icon>close</mat-icon>
-            </button>
-            <button mat-icon-button color="accent">
-              <mat-icon>visibility</mat-icon>
-            </button>
-          </div>
-        </td>
-      </ng-container>
+      <div class="flex flex-col md:flex-row gap-3 items-center w-full md:w-auto">
+        <mat-form-field class="w-full md:w-80" appearance="outline">
+          <mat-label>Rechercher un dossier...</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Rechercher...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+        <button mat-stroked-button class="w-full md:w-auto border border-gray-200 bg-gray-100 hover:bg-gray-200 flex items-center justify-center">
+          <mat-icon>filter_list</mat-icon>
+          <span class="ml-2">Filtrer</span>
+        </button>
+      </div>
+    </div>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Sélectionner la page des dossiers"></mat-paginator>
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table mat-table [dataSource]="dataSource" matSort class="w-full bg-transparent">
+        <!-- Colonne Dossier -->
+        <ng-container matColumnDef="numero">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Dossier</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-semibold text-xs md:text-sm">
+                {{ dossier.numero.slice(-2) }}
+              </div>
+              <div>
+                <div class="font-semibold text-gray-800 text-xs md:text-sm">Dossier #{{ dossier.numero }}</div>
+                <div class="text-gray-500 text-xs">ID: {{ dossier.numero }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Type -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Type</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4">
+            <mat-chip-set>
+              <mat-chip class="bg-gray-100 text-gray-700 font-medium text-xs md:text-sm">
+                <mat-icon matChipAvatar class="text-base">{{ getTypeIcon(dossier.type) }}</mat-icon>
+                {{ dossier.type }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Statut -->
+        <ng-container matColumnDef="statut">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Statut</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4">
+            <mat-chip-set>
+              <mat-chip [class]="getStatutClass(dossier.statut)" class="font-semibold border text-xs md:text-sm">
+                <mat-icon matChipAvatar class="text-base">{{ getStatutIcon(dossier.statut) }}</mat-icon>
+                {{ dossier.statut.replace('_', ' ') }}
+              </mat-chip>
+            </mat-chip-set>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Date -->
+        <ng-container matColumnDef="dateCreation">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100 flex items-center gap-2 text-gray-500 text-xs md:text-sm">
+            <mat-icon class="text-base w-4 h-4">calendar_today</mat-icon>
+            <span>{{ formatDate(dossier.dateCreation) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Documents -->
+        <ng-container matColumnDef="documents">
+          <th mat-header-cell *matHeaderCellDef class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Documents</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <mat-icon [class]="getDocumentClass(dossier.documents.contratAssurance)" matTooltip="Contrat d'assurance" class="text-base rounded-full p-1 w-6 h-6">
+                {{ getDocumentIcon(dossier.documents.contratAssurance) }}
+              </mat-icon>
+              <mat-icon [class]="getDocumentClass(dossier.documents.carteGrise)" matTooltip="Carte grise" class="text-base rounded-full p-1 w-6 h-6">
+                {{ getDocumentIcon(dossier.documents.carteGrise) }}
+              </mat-icon>
+              <mat-icon [class]="getDocumentClass(dossier.documents.facture)" matTooltip="Facture" class="text-base rounded-full p-1 w-6 h-6">
+                {{ getDocumentIcon(dossier.documents.facture) }}
+              </mat-icon>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Colonne Actions -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="px-4 md:px-6 py-3 md:py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+          <td mat-cell *matCellDef="let dossier" class="px-4 md:px-6 py-3 md:py-4 border-b border-gray-100">
+            <div class="flex items-center justify-center gap-1">
+              <button mat-icon-button class="transition-all hover:scale-110 hover:bg-green-50 hover:text-green-600" matTooltip="Valider" (click)="validerDossier(dossier)">
+                <mat-icon>check</mat-icon>
+              </button>
+              <button mat-icon-button class="transition-all hover:scale-110 hover:bg-red-50 hover:text-red-600" matTooltip="Rejeter" (click)="rejeterDossier(dossier)">
+                <mat-icon>close</mat-icon>
+              </button>
+              <button mat-icon-button class="transition-all hover:scale-110 hover:bg-blue-50 hover:text-blue-600" matTooltip="Voir les détails" (click)="voirDossier(dossier)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gradient-to-r hover:from-indigo-50/10 hover:to-blue-50/10 transition-all"></tr>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons class="p-4 border-t border-gray-100 bg-gradient-to-r from-white to-gray-50"></mat-paginator>
   </div>
-</div> 
+</div>

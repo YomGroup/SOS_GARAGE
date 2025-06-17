@@ -214,11 +214,24 @@
   transition-duration: 150ms;
 }
 
+.filter-white {
+  filter: brightness(0) invert(1);
+}
+
 /* Focus styles */
 .focus\:outline-none:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
 }
+
+.stats-card {
+  @apply rounded-xl bg-gradient-to-r from-blue-700 to-purple-600 shadow-md;
+}
+
+mat-card:hover {
+  @apply transform scale-[1.01] shadow-2xl transition-all duration-200;
+}
+
 
 /* Material Icons */
 .material-icons {

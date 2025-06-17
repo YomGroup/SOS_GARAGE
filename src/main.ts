@@ -2,8 +2,12 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { AppComponent } from './app/app.component';
 import { importProvidersFrom } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
+import { provideRouter } from '@angular/router';
+import { routes } from './app/app.routes';
+//import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
 
+// Configuration Keycloak temporairement désactivée
+/*
 (async () => {
   const keycloakService = new KeycloakService();
 
@@ -20,12 +24,14 @@ import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
     },
     enableBearerInterceptor: true,
   });
+*/
 
-  await bootstrapApplication(AppComponent, {
-    providers: [
-      provideHttpClient(),
-      importProvidersFrom(KeycloakAngularModule),
-      { provide: KeycloakService, useValue: keycloakService },
-    ],
-  });
-})();
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideHttpClient(),
+    provideRouter(routes),
+    //importProvidersFrom(KeycloakAngularModule),
+    //{ provide: KeycloakService, useValue: keycloakService },
+  ],
+});
+//})();

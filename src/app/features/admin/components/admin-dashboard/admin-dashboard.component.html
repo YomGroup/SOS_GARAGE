@@ -2,51 +2,73 @@
   <h1 class="text-2xl font-bold mb-6">Tableau de Bord Administrateur</h1>
 
   <!-- Statistiques -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Total Dossiers</h3>
-          <p class="text-3xl font-bold text-blue-600">{{stats.totalDossiers}}</p>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <!-- Carte Véhicules -->
+    <mat-card class="stats-card bg-gradient-to-br from-blue-600 to-blue-800">
+      <mat-card-content class="flex items-center justify-between p-4 h-[140px]">
+        <div>
+          <h3 class="text-white text-lg font-semibold mb-1">Véhicules</h3>
+          <p class="text-white/80 text-sm font-medium mb-2">Total déclarés</p>
+          <p class="text-white text-3xl font-bold">{{ stats.totalVehicules }}</p>
+        </div>
+        <div class="bg-white/10 p-3 rounded-lg flex items-center justify-center">
+          <img src="assets/icons/folder.svg" alt="icon" class="w-10 h-10 filter brightness-0 invert" />
         </div>
       </mat-card-content>
     </mat-card>
-
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Dossiers en Cours</h3>
-          <p class="text-3xl font-bold text-orange-600">{{stats.dossiersEnCours}}</p>
+  
+    <!-- Carte Sinistres -->
+    <mat-card class="stats-card bg-gradient-to-br from-purple-600 to-purple-800">
+      <mat-card-content class="flex items-center justify-between p-4 h-[140px]">
+        <div>
+          <h3 class="text-white text-lg font-semibold mb-1">Sinistres</h3>
+          <p class="text-white/80 text-sm font-medium mb-2">Total déclarés</p>
+          <p class="text-white text-3xl font-bold">{{ stats.totalSinistres }}</p>
+        </div>
+        <div class="bg-white/10 p-3 rounded-lg flex items-center justify-center">
+          <img src="assets/icons/process.svg" alt="icon" class="w-10 h-10 filter brightness-0 invert" />
         </div>
       </mat-card-content>
     </mat-card>
-
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Garages en Attente</h3>
-          <p class="text-3xl font-bold text-yellow-600">{{stats.garagesEnAttente}}</p>
+  
+    <!-- Carte En cours -->
+    <mat-card class="stats-card bg-gradient-to-br from-green-600 to-green-800">
+      <mat-card-content class="flex items-center justify-between p-4 h-[140px]">
+        <div>
+          <h3 class="text-white text-lg font-semibold mb-1">En cours</h3>
+          <p class="text-white/80 text-sm font-medium mb-2">En traitement</p>
+          <p class="text-white text-3xl font-bold">{{ stats.enCours }}</p>
+        </div>
+        <div class="bg-white/10 p-3 rounded-lg flex items-center justify-center">
+          <img src="assets/icons/alert.svg" alt="icon" class="w-10 h-10 filter brightness-0 invert" />
         </div>
       </mat-card-content>
     </mat-card>
-
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Épaves en Attente</h3>
-          <p class="text-3xl font-bold text-red-600">{{stats.epavesEnAttente}}</p>
+  
+    <!-- Carte Épaves -->
+    <mat-card class="stats-card bg-gradient-to-br from-red-600 to-red-800">
+      <mat-card-content class="flex items-center justify-between p-4 h-[140px]">
+        <div>
+          <h3 class="text-white text-lg font-semibold mb-1">Épaves</h3>
+          <p class="text-white/80 text-sm font-medium mb-2">En attente</p>
+          <p class="text-white text-3xl font-bold">{{ stats.epavesEnAttente }}</p>
+        </div>
+        <div class="bg-white/10 p-3 rounded-lg flex items-center justify-center">
+          <img src="assets/icons/car-crash.svg" alt="icon" class="w-10 h-10 filter brightness-0 invert" />
         </div>
       </mat-card-content>
     </mat-card>
   </div>
 
-  <!-- Charts Row -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Monthly Case Trends -->
-    <div class="card lg:col-span-2">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Tendances mensuelles des dossiers</h2>
-        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
+
+<!-- Charts Row -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+  <!-- Monthly Case Trends -->
+  <mat-card class="lg:col-span-2 bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 transition-all">
+    <mat-card-content class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-800">📈 Tendances mensuelles des dossiers</h2>
+        <button mat-icon-button [matMenuTriggerFor]="chartMenu" class="text-gray-600">
           <mat-icon>more_vert</mat-icon>
         </button>
         <mat-menu #chartMenu="matMenu">
@@ -61,60 +83,107 @@
         </mat-menu>
       </div>
       <app-line-chart></app-line-chart>
-    </div>
+    </mat-card-content>
+  </mat-card>
 
-    <!-- Cases by Status -->
-    <div class="card">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Dossiers par statut</h2>
-        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
+  <!-- Recent Activity -->
+  <mat-card class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 transition-all">
+    <mat-card-content class="p-6">
+      <div class="text-2xl font-semibold text-purple-800 mb-8 flex items-center gap-2.5">
+        <span>Activité récente</span>
+        <span class="text-red-400">🔔</span>
       </div>
-      <app-doughnut-chart></app-doughnut-chart>
-    </div>
-  </div>
-
-  <!-- Repair Analytics & Recent Activity -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Repair Performance -->
-    <div class="card lg:col-span-2">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Performance des réparations</h2>
-        <div>
-          <mat-button-toggle-group value="weekly" aria-label="Période">
-            <mat-button-toggle value="weekly">Hebdomadaire</mat-button-toggle>
-            <mat-button-toggle value="monthly">Mensuel</mat-button-toggle>
-            <mat-button-toggle value="yearly">Annuel</mat-button-toggle>
-          </mat-button-toggle-group>
+      <div class="bg-white rounded-xl p-5 mb-4 shadow-lg border-l-4 border-green-400 transform transition-all duration-300 hover:translate-x-1 hover:shadow-2xl">
+        <div class="flex items-center gap-3.5 mb-2">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-green-500 flex items-center justify-center text-white">✓</div>
+          <div class="text-lg font-semibold text-purple-800 flex-1">Le sinistre-001 a été traité avec succès</div>
         </div>
+        <div class="text-gray-500 text-sm font-medium">Il y a 30 mn</div>
+      </div>
+
+      <div class="bg-white rounded-xl p-5 mb-4 shadow-lg border-l-4 border-orange-400 transform transition-all duration-300 hover:translate-x-1 hover:shadow-2xl">
+        <div class="flex items-center gap-3.5 mb-2">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 flex items-center justify-center text-white">📄</div>
+          <div class="text-lg font-semibold text-purple-800 flex-1">Documents à signer pour le sinistre-001</div>
+        </div>
+        <div class="text-gray-500 text-sm font-medium">Il y a 39 mn</div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- Repair Analytics & Sinistre déclaré -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+  <!-- Repair Performance -->
+  <mat-card class="lg:col-span-2 bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 transition-all">
+    <mat-card-content class="p-6">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-purple-800">⚙️ Performance des réparations</h2>
+        <mat-button-toggle-group value="weekly" aria-label="Période" class="bg-white/60 rounded-lg shadow-inner">
+          <mat-button-toggle value="weekly">Hebdomadaire</mat-button-toggle>
+          <mat-button-toggle value="monthly">Mensuel</mat-button-toggle>
+          <mat-button-toggle value="yearly">Annuel</mat-button-toggle>
+        </mat-button-toggle-group>
       </div>
       <app-bar-chart></app-bar-chart>
-    </div>
+    </mat-card-content>
+  </mat-card>
 
-    <!-- Recent Activity -->
-    <div class="card">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Activité récente</h2>
-        <a href="#" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Voir tout</a>
+  <!-- Sinistre déclaré -->
+  <mat-card class="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 transition-all">
+    <mat-card-content class="p-6">
+      <div class="text-2xl font-semibold text-purple-800 mb-8 flex items-center gap-2.5">
+        <span>Sinistre déclaré</span>
       </div>
-      <app-recent-activity></app-recent-activity>
-    </div>
-  </div>
+
+      <div class="bg-white rounded-xl p-5 mb-4 shadow-lg border-l-4 border-gradient-to-br from-indigo-500 to-purple-600 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 transform scale-x-0 origin-right transition-transform duration-300 hover:scale-x-100"></div>
+        <div class="flex justify-between items-center mb-1">
+          <div class="text-xl font-bold text-purple-800">SIN-001</div>
+          <div class="bg-gradient-to-r from-green-400 to-green-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">Clôturé</div>
+        </div>
+        <div class="text-purple-600 text-sm font-medium">Mercedes AMG - 15 Mai 2025</div>
+      </div>
+
+      <div class="bg-white rounded-xl p-5 mb-4 shadow-lg border-l-4 border-gradient-to-br from-indigo-500 to-purple-600 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 transform scale-x-0 origin-right transition-transform duration-300 hover:scale-x-100"></div>
+        <div class="flex justify-between items-center mb-1">
+          <div class="text-xl font-bold text-purple-800">SIN-002</div>
+          <div class="bg-gradient-to-r from-orange-400 to-orange-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">En cours</div>
+        </div>
+        <div class="text-purple-600 text-sm font-medium">BMW X5 - 16 Mai 2025</div>
+      </div>
+
+      <div class="bg-white rounded-xl p-5 mb-4 shadow-lg border-l-4 border-gradient-to-br from-indigo-500 to-purple-600 transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden">
+        <div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 transform scale-x-0 origin-right transition-transform duration-300 hover:scale-x-100"></div>
+        <div class="flex justify-between items-center mb-1">
+          <div class="text-xl font-bold text-purple-800">SIN-003</div>
+          <div class="bg-gradient-to-r from-red-400 to-red-500 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">En attente</div>
+        </div>
+        <div class="text-purple-600 text-sm font-medium">Audi RS6 - 17 Mai 2025</div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
 
   <!-- Onglets -->
-  <mat-tab-group (selectedTabChange)="onTabChange($event)">
-    <mat-tab label="Gestion des Dossiers">
-      <app-dossier-management></app-dossier-management>
-    </mat-tab>
-    <mat-tab label="Validation Garages">
-      <app-garage-validation></app-garage-validation>
-    </mat-tab>
-    <mat-tab label="Gestion des Épaves">
-      <app-epave-management></app-epave-management>
-    </mat-tab>
-    <mat-tab label="Gestion des Rôles">
-      <app-role-management></app-role-management>
-    </mat-tab>
-  </mat-tab-group>
+  <mat-card class="mb-6">
+    <mat-card-content class="p-4">
+      <mat-tab-group (selectedTabChange)="onTabChange($event)" class="custom-tabs">
+        <mat-tab label="Gestion des Dossiers">
+          <app-dossier-management></app-dossier-management>
+        </mat-tab>
+        <mat-tab label="Validation Garages">
+          <app-garage-validation></app-garage-validation>
+        </mat-tab>
+        <mat-tab label="Gestion des Épaves">
+          <app-epave-management></app-epave-management>
+        </mat-tab>
+        <mat-tab label="Gestion des Rôles">
+          <app-role-management></app-role-management>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
 </div> 

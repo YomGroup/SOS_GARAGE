@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { DashboardAdminComponent } from './features/admin/dashboard/dashboard-admin/dashboard-admin.component';
+import { ProjectDashboardComponent } from './features/test-page/test-page.component';
 
 export const routes: Routes = [
     {
@@ -17,4 +18,8 @@ export const routes: Routes = [
       loadChildren: () =>
         import('./features/garage/garage.module').then(m => m.GarageModule)
     },
+    {
+      path: 'test',
+      component: ProjectDashboardComponent
+    }
   ];

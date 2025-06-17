@@ -37,20 +37,37 @@ import { RecentActivityComponent } from '../../../../shared/components/recent-ac
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
+  
+  // Données temporaires pour le développement
   stats = {
-    totalDossiers: 0,
-    dossiersEnCours: 0,
-    garagesEnAttente: 0,
-    epavesEnAttente: 0
+    totalVehicules: 1243,
+    totalSinistres: 567,
+    enCours: 89,
+    epavesEnAttente: 32
   };
 
   constructor() { }
 
   ngOnInit(): void {
-    // TODO: Charger les statistiques depuis le backend
+    // TODO: À implémenter quand le backend sera disponible
+    // this.loadStats();
   }
 
-  onTabChange(event: any): void {
+  // Méthode à implémenter plus tard avec le backend
+  /*
+  private loadStats(): void {
+    this.adminService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des statistiques:', error);
+      }
+    });
+  }
+  */
+
+  onTabChange(event: { index: number }): void {
     this.activeTab = event.index;
   }
 } 
