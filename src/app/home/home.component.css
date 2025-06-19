@@ -1,45 +1,14 @@
+/* Styles de base */
 .dashboard {
     display: flex;
+    flex-direction: column;
     flex: 1;
     max-width: 1200px;
     margin: 0 auto;
     gap: 20px;
     padding: 20px;
+    width: 100%;
 }
-
-.sidebar {
-    width: 250px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    padding: 20px 0;
-    height: fit-content;
-}
-
-.nav-menu {
-    display: flex;
-    flex-direction: column;
-}
-
-.nav-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    text-decoration: none;
-    color: #666;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.nav-item:hover,
-.nav-item.active {
-    background-color: #f8f9fa;
-    color: #007bff;
-    border-right: 3px solid #007bff;
-}
-
-
 
 .welcome-section h1 {
     font-size: 28px;
@@ -47,15 +16,16 @@
     color: #333;
 }
 
+/* Cartes de statistiques */
 .stats-cards {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
     margin-bottom: 30px;
 }
 
 .stat-card {
-    flex: 1;
-    padding: 35px 25px;
+    padding: 25px;
     border-radius: 15px;
     text-align: left;
     color: white;
@@ -74,260 +44,42 @@
 }
 
 .stat-label {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: bold;
     margin-bottom: 5px;
 }
 
 .stat-sous-label {
-    font-size: 18px;
+    font-size: 16px;
     margin-bottom: 15px;
     opacity: 0.9;
 }
 
 .stat-number {
-    font-size: 72px;
+    font-size: 48px;
     font-weight: 700;
     line-height: 1;
 }
 
-.recent-claims {
-    margin-bottom: 30px;
-}
-
-.recent-claims h2 {
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.claim-item {
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
-}
-
-.claim-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.claim-title {
-    font-weight: bold;
-    color: #333;
-}
-
-.claim-status {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.claim-status.closed {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.claim-id {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-.timeline-item {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-
-.time {
-    color: #666;
-    min-width: 80px;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 15px;
-    margin-bottom: 30px;
-    justify-content: flex-end;
-    margin-top: 1%;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
-    color: #333;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-}
-
-.btn-danger {
-    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
-    color: white !important;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
-}
-
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
-    background: linear-gradient(135deg, #ff3742 0%, #ff2635 100%);
-}
-
-.btn-primary i,
-.btn-danger i {
-    font-size: 18px;
-}
-
-/* Classes utilitaires */
-.texte-white {
-    color: white !important;
-}
-
-.p-3 {
-    padding: 12px 24px !important;
-}
-
-.btn-primary,
-.btn-secondary {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.btn-primary {
-    background-color: #007bff;
-    color: white;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-
-.btn-secondary {
-    background-color: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background-color: #545b62;
-}
-
-.status-summary {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.status-item {
-    display: flex;
-    gap: 20px;
-    margin-bottom: 10px;
-}
-
-.label {
-    font-size: 14px;
-    color: #666;
-}
-
-.value {
-    font-weight: bold;
-    color: #333;
-}
-
+/* Colonnes doubles */
 .two-columns {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
     width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
 }
 
-.claims-column {
-    flex: 1;
-    background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
-    padding: 25px;
-    border-radius: 15px;
-}
-
+.claims-column,
 .notifications-column {
-    flex: 1;
     background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
-    padding: 25px;
+    padding: 20px;
     border-radius: 15px;
 }
 
-.claims-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.claims-header h2 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-}
-
-.status-filter {
-    color: #666;
-    font-size: 16px;
-}
-
-.notifications-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.notifications-header h2 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-}
-
+/* Éléments de réclamation */
 .claim-item {
     background: white;
-    padding: 20px;
+    padding: 15px;
     border-radius: 10px;
     margin-bottom: 15px;
     display: flex;
@@ -337,12 +89,8 @@
     border-image: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%) 1;
 }
 
-.claim-info {
-    flex: 1;
-}
-
 .claim-id {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #333;
     margin-bottom: 5px;
@@ -356,22 +104,23 @@
 .claim-status.closed {
     background: #d4edda;
     color: #155724;
-    padding: 6px 16px;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 500;
 }
 
+/* Notifications */
 .notification-item {
     display: flex;
     align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 20px;
+    gap: 12px;
+    margin-bottom: 15px;
 }
 
 .notification-icon {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -387,18 +136,201 @@
     background-color: #ffc107;
 }
 
-.notification-content {
-    flex: 1;
-}
-
 .notification-text {
-    font-size: 16px;
+    font-size: 14px;
     color: #333;
     font-weight: 500;
     margin-bottom: 5px;
 }
 
 .notification-time {
-    font-size: 14px;
+    font-size: 12px;
     color: #666;
+}
+
+/* Boutons d'action */
+.action-buttons {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+    justify-content: flex-end;
+    margin-top: 1%;
+    flex-wrap: wrap;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
+    color: #333;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+    color: white !important;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
+    white-space: nowrap;
+}
+
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+    background: linear-gradient(135deg, #ff3742 0%, #ff2635 100%);
+}
+
+/* En-têtes */
+.claims-header,
+.notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.claims-header h2,
+.notifications-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.status-filter {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Icônes SVG */
+.stat-card svg {
+    width: 50px;
+    height: 30px;
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat-card:nth-child(3) {
+        grid-column: span 2;
+    }
+
+    .two-columns {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard {
+        padding: 15px;
+    }
+
+    .welcome-section h1 {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card:nth-child(3) {
+        grid-column: span 1;
+    }
+
+    .stat-label {
+        font-size: 20px;
+    }
+
+    .stat-number {
+        font-size: 40px;
+    }
+
+    .action-buttons {
+        justify-content: center;
+    }
+
+    .btn-primary,
+    .btn-danger {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .dashboard {
+        padding: 10px;
+    }
+
+    .welcome-section h1 {
+        font-size: 20px;
+    }
+
+    .stat-card {
+        padding: 20px 15px;
+        min-height: 150px;
+    }
+
+    .stat-label {
+        font-size: 18px;
+    }
+
+    .stat-sous-label {
+        font-size: 14px;
+    }
+
+    .stat-number {
+        font-size: 36px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .claims-column,
+    .notifications-column {
+        padding: 15px;
+    }
+
+    .claim-id {
+        font-size: 14px;
+    }
+
+    .notification-text {
+        font-size: 13px;
+    }
 }

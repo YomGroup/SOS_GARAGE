@@ -11,7 +11,11 @@ export interface Vehicle {
     status: 'active' | 'inactive';
     immatriculation?: string;
     dateMiseEnCirculation?: string;
-    marque?: string; // Optional field for immatriculation
+    marque?: string;
+    cylindree?: string;
+    carteGrise?: string;
+    contratAssurance?: string;
+    assure?: number;
 }
 
 export interface Claim {
@@ -34,6 +38,9 @@ export interface TimelineEvent {
 })
 export class VehicleService {
     private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule/all';
+
+    private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
+    private apiUrlData = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
     private http = inject(HttpClient);
     private vehiclesSubject = new BehaviorSubject<Vehicle[]>([
         {
@@ -82,5 +89,14 @@ export class VehicleService {
     }
     getAllVehiculesPost(body: any = {}) {
         return this.http.get(this.apiUrl, body);
+    }
+    getVehiculesData(immatriculation: string) {
+        const url = `${this.apiUrlData}/scraper/${encodeURIComponent(immatriculation)}`;
+        return this.http.get(url);
+    }
+
+
+    addVehiculesPost(body: any = {}) {
+        return this.http.post(this.apiUrlAdd, body);
     }
 }
