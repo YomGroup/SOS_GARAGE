@@ -10,6 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
 
 interface Dossier {
   id: number;
@@ -27,6 +28,7 @@ interface Dossier {
 @Component({
   selector: 'app-dossier-management',
   templateUrl: './dossier-management.component.html',
+  styleUrl: './dossier-management.component.css',
   standalone: true,
   imports: [
     CommonModule,
@@ -38,12 +40,14 @@ interface Dossier {
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSelectModule
   ]
 })
 export class DossierManagementComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['numero', 'type', 'statut', 'dateCreation', 'documents', 'actions'];
   dataSource: MatTableDataSource<Dossier>;
+  isCardView: boolean = true;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -54,6 +58,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.loadDossiers();
+    this.initializeViewToggle();
   }
 
   ngAfterViewInit() {
@@ -196,5 +201,30 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
 
   formatDate(date: Date): string {
     return date.toLocaleDateString('fr-FR');
+  }
+
+  private initializeViewToggle(): void {
+    const cardViewBtn = document.getElementById('cardView');
+    const tableViewBtn = document.getElementById('tableView');
+    const cardViewContainer = document.getElementById('cardViewContainer');
+    const tableViewContainer = document.getElementById('tableViewContainer');
+
+    if (cardViewBtn && tableViewBtn && cardViewContainer && tableViewContainer) {
+      cardViewBtn.addEventListener('click', () => {
+        this.isCardView = true;
+        cardViewBtn.classList.add('active');
+        tableViewBtn.classList.remove('active');
+        cardViewContainer.style.display = 'flex';
+        tableViewContainer.style.display = 'none';
+      });
+
+      tableViewBtn.addEventListener('click', () => {
+        this.isCardView = false;
+        tableViewBtn.classList.add('active');
+        cardViewBtn.classList.remove('active');
+        tableViewContainer.style.display = 'block';
+        cardViewContainer.style.display = 'none';
+      });
+    }
   }
 }

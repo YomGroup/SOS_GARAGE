@@ -5,6 +5,7 @@ import { MissionReceptionComponent } from './components/mission-reception/missio
 import { ReparationManagementComponent } from './components/reparation-management/reparation-management.component';
 import { CommunicationComponent } from './components/communication/communication.component';
 import { StatisticsComponent } from './components/statistics/statistics.component';
+import { MessageComponent } from '../../message/message.component';
 
 const routes: Routes = [
   {
@@ -15,6 +16,7 @@ const routes: Routes = [
       { path: 'reparations', component: ReparationManagementComponent },
       { path: 'communication', component: CommunicationComponent },
       { path: 'statistiques', component: StatisticsComponent },
+      { path: 'message', component: MessageComponent },
       { path: '', redirectTo: 'missions', pathMatch: 'full' }
     ]
   }

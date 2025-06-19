@@ -1,0 +1,109 @@
+<div class="welcome-section">
+
+ <div class="action-buttons">
+    <button class="btn-primary" routerLink="/vehicles/add">
+        <i class="bi bi-plus"></i> Ajoutez un véhicule
+    </button>
+    <button class="btn-danger" routerLink="/declare">
+        <i class="bi bi-file-earmark-text"></i> Déclarez un Sinistre
+    </button>
+</div>
+<div class="stats-cards">
+  <div class="stat-card vehicles">
+    <div class="stat-label">Véhicule</div>
+    <div class="stat-sous-label">Déclarés</div>
+    <div class="stat-number">{{ vehiclesCount }}</div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="white" viewBox="0 0 24 24" style="position: absolute; bottom: 20px; right: 20px; opacity: 0.7;">
+      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0-1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+    </svg>
+  </div>
+
+  <div class="stat-card claims-progress">
+    <div class="stat-label">Sinistre</div>
+    <div class="stat-sous-label">Déclarés</div>
+    <div class="stat-number">07</div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="white" viewBox="0 0 24 24" style="position: absolute; bottom: 20px; right: 20px; opacity: 0.7;">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+  </div>
+
+  <div class="stat-card claims-declared">
+    <div class="stat-label">En cours</div>
+    <div class="stat-sous-label">De traitement</div>
+    <div class="stat-number">07</div>
+    <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="white" viewBox="0 0 24 24" style="position: absolute; bottom: 20px; right: 20px; opacity: 0.7;">
+      <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 15a1.5 1.5 0 11.001-3.001A1.5 1.5 0 0112 17zm1-8h-2v5h2v-5z"/>
+    </svg>
+  </div>
+</div>
+
+
+  <div class="two-columns">
+  <div class="claims-column">
+    <div class="claims-header">
+      <h2>Sinistre déclaré</h2>
+      <span class="status-filter">Etat</span>
+    </div>
+    
+    <div class="recent-claims">
+      <div class="claim-item">
+        <div class="claim-info">
+          <div class="claim-id">SIN-001</div>
+          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
+        </div>
+        <span class="claim-status closed">Clôturé</span>
+      </div>
+      
+      <div class="claim-item">
+        <div class="claim-info">
+          <div class="claim-id">SIN-001</div>
+          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
+        </div>
+        <span class="claim-status closed">Clôturé</span>
+      </div>
+      
+      <div class="claim-item">
+        <div class="claim-info">
+          <div class="claim-id">SIN-001</div>
+          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
+        </div>
+        <span class="claim-status closed">Clôturé</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="notifications-column">
+    <div class="notifications-header">
+      <h2>Notification</h2>
+      <svg width="24" height="24" fill="#ff6b6b" viewBox="0 0 24 24">
+        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+      </svg>
+    </div>
+    
+    <div class="notification-item">
+      <div class="notification-icon success">
+        <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+        </svg>
+      </div>
+      <div class="notification-content">
+        <div class="notification-text">Le sinistre-001 à été traité avec succès</div>
+        <div class="notification-time">Il y a 30 mn</div>
+      </div>
+    </div>
+    
+    <div class="notification-item">
+      <div class="notification-icon document">
+        <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+        </svg>
+      </div>
+      <div class="notification-content">
+        <div class="notification-text">Documents à signe pour le sinistre-001</div>
+        <div class="notification-time">Il y a 39 mn</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>

@@ -1,0 +1,148 @@
+/* Ajouts/modifications CSS */
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #1e4db8 0%, #3a6fd6 100%);
+  }
+  
+  .bg-gradient-green {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  }
+  
+  .bg-gradient-yellow {
+    background: linear-gradient(135deg, #ffc107 0%, #ffab00 100%);
+  }
+  
+  .bg-gradient-red {
+    background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  }
+  
+  .stats-card {
+    background: var(--gradient);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    transition: transform 0.3s ease;
+    box-shadow: var(--card-shadow);
+    height: 100%;
+  }
+  
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+  }
+  
+  .stats-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+  }
+  
+  .stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+  }
+  
+  .stats-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  
+  .card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    border: none;
+    height: 100%;
+  }
+  
+  .card-header {
+    background: transparent;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  
+  .card-body {
+    padding: 20px;
+  }
+
+.missions-history {
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--card-shadow);
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin-bottom: 1.5rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.missions-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: transparent;
+}
+
+.missions-table th, .missions-table td {
+  padding: 16px 20px;
+  text-align: left;
+}
+
+.missions-table th {
+  background: #f3e5f5;
+  color: var(--primary-blue);
+  font-weight: 600;
+  border-bottom: 2px solid #e8eaf6;
+}
+
+.missions-table tbody tr {
+  background: #fff;
+  transition: background 0.2s;
+}
+
+.missions-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.missions-table td {
+  color: #333;
+  border-bottom: 1px solid #e8eaf6;
+}
+
+.status-badge {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+}
+
+.status-inprogress {
+  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+  color: #333;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+}

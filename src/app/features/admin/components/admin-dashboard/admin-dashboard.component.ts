@@ -12,10 +12,15 @@ import { EpaveManagementComponent } from '../epave-management/epave-management.c
 import { RoleManagementComponent } from '../role-management/role-management.component';
 import { LineChartComponent, BarChartComponent, DoughnutChartComponent } from '../../../../shared/components/charts';
 import { RecentActivityComponent } from '../../../../shared/components/recent-activity/recent-activity.component';
+import { RouterModule } from '@angular/router';
+import { PerformanceChartComponent } from '../charts/performance-chart.component';
+import { DistributionChartComponent } from '../charts/distribution-chart.component';
+import { EvolutionChartComponent } from '../charts/evolution-chart.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
+  styleUrl: './admin-dashboard.component.css',
   imports: [
     CommonModule,
     MatTabsModule,
@@ -31,12 +36,17 @@ import { RecentActivityComponent } from '../../../../shared/components/recent-ac
     LineChartComponent,
     BarChartComponent,
     DoughnutChartComponent,
-    RecentActivityComponent
+    RecentActivityComponent,
+    RouterModule,
+    PerformanceChartComponent,
+    DistributionChartComponent,
+    EvolutionChartComponent
   ],
   standalone: true
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
+  currentGraph: 'performance' | 'distribution' | 'evolution' = 'performance';
   
   // Données temporaires pour le développement
   stats = {
@@ -67,7 +77,12 @@ export class AdminDashboardComponent implements OnInit {
   }
   */
 
+
   onTabChange(event: { index: number }): void {
     this.activeTab = event.index;
+  }
+
+  showGraph(type: 'performance' | 'distribution' | 'evolution'): void {
+    this.currentGraph = type;
   }
 } 

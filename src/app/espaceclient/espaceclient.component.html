@@ -1,0 +1,118 @@
+
+
+    <div class="dashboard-wrapper">
+      
+ <header class="header"  id="header">
+  
+    <div class="header-content">
+      <button class="sidebar-toggle  ml-5" (click)="toggleSidebar()">
+    <i class="bi bi-list"></i>
+  </button>
+        <div>
+           <!-- Bouton de rétractation -->
+  
+            <h1>Hello Said</h1>
+            <div class="date">10 Janvier 2025</div>
+        </div>
+        <div class="user-info">
+            <span class="icon-envelope">
+                <i class="bi bi-envelope-fill"></i>
+            </span>
+            <span class="icon-bell">
+                <i class="bi bi-bell-fill"></i>
+                <span class="notification-badge">+3</span>
+            </span>
+            <span class="user-avatar">S</span>
+        </div>
+    </div>
+</header>
+
+  <div class="dashboard">
+    <div class="sidebar" id="sidebar">
+        <img src="1.png">
+
+      <nav class="nav-menu">
+    <a routerLink="/clientDashboard" 
+       routerLinkActive="active" 
+       [routerLinkActiveOptions]="{exact: true}"
+       class="nav-item" 
+       data-tooltip="Tableau de bord">
+        <i class="bi bi-speedometer2"></i>
+        <span>Tableau de bord</span>
+    </a>
+    
+    <a routerLink="/clientDashboard/vehicules" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Mes Véhicules">
+        <i class="bi bi-car-front-fill"></i>
+        <span>Mes Véhicules</span>
+    </a>
+     <a routerLink="/clientDashboard/declarations" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Déclarer un sinistre">
+        <i class="bi bi-flag-fill"></i>
+        <span>Déclarer un sinistre</span>
+    </a>
+      <a routerLink="/clientDashboard/sinistre" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Mes Sinistres">
+        <i class="bi bi-journal-medical"></i>
+        <span>Mes Sinistres</span>
+    </a>
+    <a routerLink="/clientDashboard/document" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Mes Documents">
+        <i class="bi bi-file-earmark-text"></i>
+        <span>Mes Documents</span>
+    </a>
+      <a routerLink="/clientDashboard/message" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Message">
+        <i class="bi bi-chat-dots-fill"></i>
+        <span>Message</span>
+    </a>
+    <a routerLink="/clientDashboard/profiles" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Mon Profil">
+        <i class="bi bi-person-circle"></i>
+        <span>Mon Profil</span>
+    </a>
+    
+   <!--
+    <a routerLink="/assistance" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Assistance">
+        <i class="bi bi-question-circle-fill"></i>
+        <span>Assistance</span>
+    </a>
+-->
+    <a routerLink="/clientDashboard/support" 
+       routerLinkActive="active"
+       class="nav-item" 
+       data-tooltip="Support">
+        <i class="bi bi-headset"></i>
+        <span>Support</span>
+    </a>
+  
+    
+    <a (click)="logout()" 
+       class="nav-item" 
+       data-tooltip="Déconnexion">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Déconnexion</span>
+    </a>
+</nav>
+    </div>
+
+    <div class="main-content"  id="mainContent">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

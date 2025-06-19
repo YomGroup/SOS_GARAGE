@@ -1,0 +1,499 @@
+ <div class="min-h-screen">
+  <!-- Top Navbar -->
+        <div class="top-navbar">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0 text-primary-blue">Bienvenue, <span id="userName">Rhys Kamga</span></h5>
+                    <small class="text-muted">Dernière connexion: Aujourd'hui à 14:30</small>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="dropdown">
+                        <button class="btn btn-link position-relative" data-bs-toggle="dropdown">
+                            <i class="fas fa-bell fa-lg text-primary-blue"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                3
+                            </span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-header">Notifications récentes</li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-check-circle text-success me-2"></i>Sinistre #12 traité</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-info-circle text-info me-2"></i>Document à signer</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Rappel: Mise à jour profil</a></li>
+                        </ul>
+                    </div>
+                    <div class="avatar">RK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container-fluid px-4">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Tableau de bord</h2>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <a href="/clientDashboard/sinistre" class="quick-action" onclick="showSection('declare')">
+                            <i class="fas fa-plus-circle fa-2x mb-2"></i>
+                            <h6>Déclarer un sinistre</h6>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/clientDashboard/vehicules" class="quick-action" onclick="showSection('vehicles')">
+                            <i class="fas fa-car fa-2x mb-2"></i>
+                            <h6>Ajouter un véhicule</h6>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="#" class="quick-action">
+                            <i class="fas fa-phone fa-2x mb-2"></i>
+                            <h6>Assistance d'urgence</h6>
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="/clientDashboard/document" class="quick-action" onclick="showSection('documents')">
+                            <i class="fas fa-download fa-2x mb-2"></i>
+                            <h6>Télécharger documents</h6>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="stats-number">3</div>
+                            <div class="text-muted">Véhicules enregistrés</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stats-number">7</div>
+                            <div class="text-muted">Sinistres déclarés</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stats-number">5</div>
+                            <div class="text-muted">Dossiers clôturés</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card stats-card">
+                            <div class="stats-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stats-number">2</div>
+                            <div class="text-muted">En cours de traitement</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Claims -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Sinistres récents</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="recent-claims">
+                                    <div class="claim-item">
+                                        <div>
+                                            <strong>Sinistre #SIN-2024-001</strong>
+                                            <br>
+                                            <small class="text-muted">Mercedes AMG - 15 Mai 2024</small>
+                                        </div>
+                                        <span class="status-badge status-completed">Clôturé</span>
+                                    </div>
+                                    <div class="claim-item">
+                                        <div>
+                                            <strong>Sinistre #SIN-2024-002</strong>
+                                            <br>
+                                            <small class="text-muted">BMW X3 - 22 Mai 2024</small>
+                                        </div>
+                                        <span class="status-badge status-progress">En cours</span>
+                                    </div>
+                                    <div class="claim-item">
+                                        <div>
+                                            <strong>Sinistre #SIN-2024-003</strong>
+                                            <br>
+                                            <small class="text-muted">Audi A4 - 28 Mai 2024</small>
+                                        </div>
+                                        <span class="status-badge status-pending">En attente</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Notifications</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="notification-item">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <small>Votre sinistre #SIN-2024-001 a été traité avec succès</small>
+                                    <br>
+                                    <small class="text-muted">Il y a 2 heures</small>
+                                </div>
+                                <div class="notification-item">
+                                    <i class="fas fa-file-signature text-warning me-2"></i>
+                                    <small>Document à signer pour le sinistre #SIN-2024-002</small>
+                                    <br>
+                                    <small class="text-muted">Il y a 5 heures</small>
+                                </div>
+                                <div class="notification-item">
+                                    <i class="fas fa-info-circle text-info me-2"></i>
+                                    <small>Rappel: Mise à jour de votre profil recommandée</small>
+                                    <br>
+                                    <small class="text-muted">Hier</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicles Section -->
+            <div id="vehicles" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Mes véhicules</h2>
+                    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                        <i class="fas fa-plus me-2"></i>Ajouter un véhicule
+                    </button>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 mb-3">
+                        <div class="card vehicle-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="text-primary-blue">Mercedes AMG</h5>
+                                        <p class="text-muted mb-1">AA-123-BB</p>
+                                        <small class="text-muted">Mise en circulation: 26/08/2021</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-file-alt me-2"></i>Voir documents</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Supprimer</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Assurance:</small>
+                                    <div class="fw-bold">AXA Assurance - Tous risques</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-custom btn-sm">Voir détails</button>
+                                    <button class="btn btn-primary-custom btn-sm">Déclarer sinistre</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <div class="card vehicle-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h5 class="text-primary-blue">BMW X3</h5>
+                                        <p class="text-muted mb-1">GB-246-JK</p>
+                                        <small class="text-muted">Mise en circulation: 15/03/2020</small>
+                                    </div>
+                                    <div class="dropdown">
+                                        <button class="btn btn-link" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Modifier</a></li>
+                                            <li><a class="dropdown-item" href="#"><i class="fas fa-file-alt me-2"></i>Voir documents</a></li>
+                                            <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Supprimer</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <small class="text-muted">Assurance:</small>
+                                    <div class="fw-bold">Generali - Tiers étendu</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-outline-custom btn-sm">Voir détails</button>
+                                    <button class="btn btn-primary-custom btn-sm">Déclarer sinistre</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Claims Section -->
+            <div id="claims" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Mes sinistres</h2>
+                    <button class="btn btn-primary-custom" onclick="showSection('declare')">
+                        <i class="fas fa-plus me-2"></i>Nouveau sinistre
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Numéro</th>
+                                        <th>Véhicule</th>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>SIN-2024-001</strong></td>
+                                        <td>Mercedes AMG (AA-123-BB)</td>
+                                        <td>15 Mai 2024</td>
+                                        <td>Collision</td>
+                                        <td><span class="status-badge status-completed">Clôturé</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-custom btn-sm me-1">Voir</button>
+                                            <button class="btn btn-primary-custom btn-sm">Télécharger</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>SIN-2024-002</strong></td>
+                                        <td>BMW X3 (GB-246-JK)</td>
+                                        <td>22 Mai 2024</td>
+                                        <td>Bris de glace</td>
+                                        <td><span class="status-badge status-progress">En cours</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-custom btn-sm me-1">Voir</button>
+                                            <button class="btn btn-warning btn-sm">Signer</button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>SIN-2024-003</strong></td>
+                                        <td>Audi A4 (CD-789-EF)</td>
+                                        <td>28 Mai 2024</td>
+                                        <td>Vol</td>
+                                        <td><span class="status-badge status-pending">En attente</span></td>
+                                        <td>
+                                            <button class="btn btn-outline-custom btn-sm me-1">Voir</button>
+                                            <button class="btn btn-primary-custom btn-sm">Contacter</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Declare Claim Section -->
+            <div id="declare" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Déclarer un sinistre</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Informations du sinistre</h5>
+                            </div>
+                            <div class="card-body">
+                                <form>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Véhicule concerné</label>
+                                            <select class="form-select">
+                                                <option>Mercedes AMG (AA-123-BB)</option>
+                                                <option>BMW X3 (GB-246-JK)</option>
+                                                <option>Audi A4 (CD-789-EF)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Type de sinistre</label>
+                                            <select class="form-select">
+                                                <option>Collision</option>
+                                                <option>Bris de glace</option>
+                                                <option>Vol</option>
+                                                <option>Incendie</option>
+                                                <option>Vandalisme</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Date du sinistre</label>
+                                            <input type="date" class="form-control">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Heure du sinistre</label>
+                                            <input type="time" class="form-control">
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Lieu du sinistre</label>
+                                        <input type="text" class="form-control" placeholder="Adresse ou description du lieu">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Description du sinistre</label>
+                                        <textarea class="form-control" rows="4" placeholder="Décrivez les circonstances du sinistre"></textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Documents à joindre</label>
+                                        <input type="file" class="form-control" multiple>   
+                                    </div>  
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary-custom">Déclarer le sinistre</button>
+                                        <button type="reset" class="btn btn-outline-custom ms-2">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Aide
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="text-muted">Si vous avez besoin d'aide pour déclarer un sinistre, n'hésitez pas à contacter notre support client.</p>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-phone-alt text-primary-blue me-2"></i>+237 123 456 789</li>
+                                    <li><i class="fas fa-envelope text-primary-blue me-2"></i>  
+
+                                    <li><i class="fas fa-clock text-primary-blue me-2"></i>Disponible du lundi au vendredi, de 8h à 18h</li>
+                                </ul>
+                                <p class="text-muted">Vous pouvez également consulter notre <a href="#" class="text-primary-blue">FAQ</a> pour des réponses aux questions courantes.</p>
+
+                            </div>              
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Documents Section -->
+            <div id="documents" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Mes documents</h2>
+                    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#uploadDocumentModal">
+                        <i class="fas fa-upload me-2"></i>Uploader un document
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Nom du document</th>
+                                    <th>Date d'ajout</th>
+                                    <th>Taille</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Assurance Mercedes AMG.pdf</td>
+                                    <td>15 Mai 2024</td>
+                                    <td>1.2 MB</td>
+                                    <td>
+                                        <button class="btn btn-outline-custom btn-sm">Télécharger</button>
+                                        <button class="btn btn-danger btn-sm">Supprimer</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Contrat BMW X3.pdf</td>
+                                    <td>22 Mai 2024</td>
+                                    <td>800 KB</td>
+                                    <td>
+                                        <button class="btn btn-outline-custom btn-sm">Télécharger</button>
+                                        <button class="btn btn-danger btn-sm">Supprimer</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!-- Profile Section -->
+            <div id="profile" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Mon profil</h2>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">Nom complet</label>
+                                <input type="text" class="form-control" value="Rhys Kamga">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+
+                                <input type="email" class="form-control" value="">
+                                <small class="form-text text-muted">Nous n'utiliserons jamais votre email pour du spam.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Numéro de téléphone</label>
+                                <input type="tel" class="form-control" value="+237 123 456 789">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Adresse</label>
+                                <input type="text" class="form-control" value="Yaoundé, Cameroun">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Mot de passe</label>  
+                                <input type="password" class="form-control" value="********">
+                                <small class="form-text text-muted">Laissez vide si vous ne souhaitez pas changer votre mot de passe.</small>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary-custom">Enregistrer les modifications</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Support Section -->
+            <div id="support" class="content-section">
+                <div class="page-header">
+                    <h2 class="text-primary-blue">Support</h2>
+                </div>
+
+                <div class="card">
+                    <div class="card-body">
+                        <p class="text-muted">Si vous avez des questions ou besoin d'assistance, n'hésitez pas à nous contacter.</p>    
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-phone-alt text-primary-blue me-2"></i>+237 123 456 789</li>
+                            <li><i class="fas fa-envelope text-primary-blue me-2"></i>
+                            <li><i class="fas fa-clock text-primary-blue me-2"></i>Disponible du lundi au vendredi, de 8h à 18h</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+
+</div>  

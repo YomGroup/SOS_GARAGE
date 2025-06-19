@@ -28,6 +28,7 @@ interface Garage {
 @Component({
   selector: 'app-garage-validation',
   templateUrl: './garage-validation.component.html',
+  styleUrl: './garage-validation.component.css',
   standalone: true,
   imports: [
     CommonModule,
@@ -105,5 +106,10 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   modifierCommission(garage: Garage, nouvelleCommission: number): void {
     // TODO: Implémenter la modification de la commission
     console.log('Modification de la commission:', garage, nouvelleCommission);
+  }
+
+  viewDetails(): void {
+    // TODO: Implémenter la logique de visualisation des détails
+    console.log('Voir les détails du garage');
   }
 } 

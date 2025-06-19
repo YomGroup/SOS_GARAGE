@@ -1,0 +1,212 @@
+
+<div class="content-section" id="sinistres-passes">
+
+
+  <div class="container-fluid">
+    <!-- Statistiques -->
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="card stats-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon bg-primary">
+                <i class="fas fa-file-alt"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="mb-0">{{ sinistres.length }}</h5>
+                <p class="text-muted mb-0">Total Sinistres</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stats-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon bg-warning">
+                <i class="fas fa-clock"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="mb-0">{{ getSinistresEnCours() }}</h5>
+                <p class="text-muted mb-0">En cours</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stats-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon bg-success">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="mb-0">{{ getSinistresClotures() }}</h5>
+                <p class="text-muted mb-0">Clôturés</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <div class="card stats-card">
+          <div class="card-body">
+            <div class="d-flex align-items-center">
+              <div class="stats-icon bg-info">
+                <i class="fas fa-car"></i>
+              </div>
+              <div class="ms-3">
+                <h5 class="mb-0">{{ getTotalVehicules() }}</h5>
+                <p class="text-muted mb-0">Véhicules déclarés</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Liste des sinistres -->
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-history me-2"></i>Historique des Sinistres
+            </h5>
+          </div>
+          <div class="card-body p-0">
+            <div class="sinistre-item" 
+                 *ngFor="let sinistre of sinistres" 
+                 (click)="selectSinistre(sinistre)"
+                 [class.selected]="selectedSinistre?.id === sinistre.id">
+              
+              <div class="d-flex align-items-center justify-content-between p-3">
+                <div class="d-flex align-items-center">
+                  <div class="sinistre-icon">
+                    <i class="fas fa-car"></i>
+                  </div>
+                  <div class="ms-3">
+                    <h6 class="mb-1">{{ sinistre.vehicule }}</h6>
+                    <div class="d-flex align-items-center">
+                      <span class="badge me-2" [ngClass]="getStatutClass(sinistre.statut)">
+                        <i [class]="getStatutIcon(sinistre.statut)" class="me-1"></i>
+                        {{ sinistre.statut }}
+                      </span>
+                      <small class="text-muted">{{ sinistre.date }}</small>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <span class="badge badge-light me-2">{{ sinistre.id }}</span>
+                  <div class="vehicle-type-badge" 
+                       [class.roulant]="sinistre.typeVehicule === 'roulant'"
+                       [class.non-roulant]="sinistre.typeVehicule === 'non roulant'">
+                    <i [class]="sinistre.typeVehicule === 'roulant' ? 'fas fa-road' : 'fas fa-parking'"></i>
+                  </div>
+                  <i class="fas fa-chevron-down expand-icon ms-2" 
+                     [class.rotated]="selectedSinistre?.id === sinistre.id"></i>
+                </div>
+              </div>
+
+              <!-- Détails expandus -->
+              <div class="sinistre-details" *ngIf="selectedSinistre?.id === sinistre.id">
+                <div class="border-top p-3">
+                  <div class="row">
+                    <!-- Notifications -->
+                    <div class="col-md-6">
+                      <h6 class="text-primary mb-3">
+                        <i class="fas fa-bell me-2"></i>Notifications récentes
+                      </h6>
+                      <div class="notification-item" *ngFor="let notif of sinistre.notifications">
+                        <div class="d-flex">
+                          <div class="notification-dot"></div>
+                          <div class="ms-2">
+                            <p class="mb-1">{{ notif.message }}</p>
+                            <small class="text-muted">{{ notif.temps }}</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Documents et Photos -->
+                    <div class="col-md-6">
+                      <h6 class="text-primary mb-3">
+                        <i class="fas fa-folder me-2"></i>Documents et Photos
+                      </h6>
+                      
+                      <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Documents signés :</small>
+                        <div class="document-list">
+                          <span class="badge badge-outline me-1 mb-1" 
+                                *ngFor="let doc of sinistre.documents"
+                                (click)="viewDocument(doc)">
+                            <i class="fas fa-file-pdf me-1"></i>{{ doc }}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div class="mb-3">
+                        <small class="text-muted d-block mb-2">Photos du sinistre :</small>
+                        <div class="photo-list">
+                          <span class="badge badge-outline me-1 mb-1" 
+                                *ngFor="let photo of sinistre.photos"
+                                (click)="viewPhoto(photo)">
+                            <i class="fas fa-image me-1"></i>{{ photo }}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <small class="text-muted d-block mb-2">Constat :</small>
+                        <span class="badge badge-info">
+                          <i class="fas fa-file-contract me-1"></i>{{ sinistre.constat }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="text-center p-4" *ngIf="sinistres.length === 0">
+              <i class="fas fa-inbox text-muted" style="font-size: 3rem;"></i>
+              <p class="text-muted mt-3">Aucun sinistre déclaré</p>
+              <button class="btn btn-primary-custom">
+                <i class="fas fa-plus me-2"></i>Déclarer un sinistre
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panel latéral -->
+      <div class="col-lg-4">
+        <div class="card">
+        <div class="card mt-3">
+          <div class="card-header">
+            <h6 class="mb-0">
+              <i class="fas fa-plus me-2"></i>Actions rapides
+            </h6>
+          </div>
+          <div class="card-body">
+            <button class="btn btn-outline-primary w-100 mb-2">
+              <i class="fas fa-plus me-2"></i>Nouveau sinistre
+            </button>
+            <button class="btn btn-outline-secondary w-100 mb-2">
+              <i class="fas fa-download me-2"></i>Exporter l'historique
+            </button>
+            <button class="btn btn-outline-info w-100">
+              <i class="fas fa-print me-2"></i>Imprimer les documents
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

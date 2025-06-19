@@ -23,10 +23,12 @@ import { Notification, NotificationType } from '../../models/notification.model'
     MatTooltipModule,
     MatDividerModule
   ],
-  templateUrl: './header.component.html'
+  templateUrl: './header.component.html',
+  styleUrls: ['./header.component.css']
 })
 export class HeaderComponent {
   @Input() sidebarCollapsed = false;
+  @Input() darkMode = false;
   @Output() toggleSidebar = new EventEmitter<void>();
 
   userAvatar = 'assets/images/avatar.png';
@@ -85,5 +87,9 @@ export class HeaderComponent {
 
   logout(): void {
     // Implémenter la logique de déconnexion
+  }
+
+  onToggleSidebar() {
+    this.toggleSidebar.emit();
   }
 }
