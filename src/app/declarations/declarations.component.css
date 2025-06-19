@@ -735,3 +735,104 @@ span[ng-reflect-ng-if="true"]:last-of-type {
         height: 10px;
     }
 }
+
+/* Ajouts responsive uniquement - ne modifie pas les styles existants */
+
+/* 1. Conteneur principal */
+.claim-declaration {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* 2. Progress Indicator */
+@media (max-width: 768px) {
+    .progress-indicator {
+        max-width: 90%;
+    }
+
+    .step:not(:last-child) {
+        margin-right: 30px;
+    }
+
+    .step:not(:last-child)::after {
+        width: 30px;
+        left: calc(100% + 5px);
+    }
+}
+
+/* 3. Cartes véhicule */
+@media (max-width: 992px) {
+    .vehicle-status {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .radio-group {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+/* 4. Dropdown véhicule */
+@media (max-width: 768px) {
+    .vehicle-selection {
+        padding: 15px;
+    }
+
+    .vehicle-dropdown {
+        padding: 12px 15px;
+    }
+}
+
+/* 5. Zones d'upload */
+@media (max-width: 576px) {
+    .upload-area {
+        padding: 20px 10px;
+    }
+
+    .upload-area p {
+        font-size: 16px;
+    }
+}
+
+/* 6. Navigation */
+@media (max-width: 768px) {
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-back,
+    .btn-next {
+        width: 100%;
+    }
+}
+
+/* 7. Document signing */
+@media (max-width: 576px) {
+    .document-preview {
+        min-height: 250px;
+    }
+
+    .document-content {
+        padding: 15px;
+    }
+}
+
+/* 8. Corrections générales */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px;
+    }
+
+    .step-content h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Empêche le débordement horizontal */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}

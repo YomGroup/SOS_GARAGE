@@ -1,6 +1,8 @@
 .dashboard-wrapper {
     min-height: 100vh;
     background-color: #f5f5f5;
+    position: relative;
+    overflow-x: hidden;
 }
 
 .sidebar {
@@ -8,13 +10,17 @@
     top: 0;
     left: 0;
     width: 280px;
-    /* Largeur fixe pour correspondre à l'image */
     height: 100vh;
     background: white;
     box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     overflow-y: auto;
     padding: 0;
+    transition: transform 0.3s ease, width 0.3s ease;
+    /* Modifié */
+    transform: translateX(0);
+    /* Ajout important */
+
 }
 
 .sidebar img {
@@ -24,6 +30,7 @@
     margin: 20px auto;
     margin-top: 0;
     display: block;
+    transition: all 0.3s ease;
 }
 
 .nav-menu {
@@ -69,16 +76,23 @@
 
 .main-content {
     margin-left: 280px;
-    /* Correspond à la largeur de la sidebar */
     padding: 20px;
     min-height: calc(100vh - 80px);
+    transition: all 0.3s ease;
+    width: calc(100% - 280px);
 }
 
 .header {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     padding: 20px 30px;
-    z-index: 1000;
+    z-index: 999;
     margin-left: 280px;
+    transition: all 0.3s ease;
+    background: white;
+    position: sticky;
+    top: 0;
+    width: calc(100% - 280px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
 .header-content {
@@ -126,11 +140,7 @@
     background-color: #f8f9fa;
 }
 
-.icon-envelope i {
-    font-size: 24px !important;
-    color: #333 !important;
-}
-
+.icon-envelope i,
 .icon-bell i {
     font-size: 24px !important;
     color: #333 !important;
@@ -168,13 +178,13 @@
     cursor: pointer;
     transition: transform 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
 }
 
 .user-avatar:hover {
     transform: scale(1.05);
 }
 
-/* Point vert pour indiquer en ligne */
 .user-avatar::before {
     content: '';
     position: absolute;
@@ -187,23 +197,11 @@
     border: 2px solid white;
 }
 
-/* Style pour les écrans plus petits */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 250px;
-    }
-
-    .header,
-    .main-content {
-        margin-left: 250px;
-    }
-}
-
-/* Sidebar rétractée - ne montre que les icônes */
+/* Sidebar rétractée */
 .sidebar.collapsed {
     width: 70px;
     transform: translateX(0);
-    /* Garde la sidebar visible */
+    /* Important */
 }
 
 .sidebar.collapsed img {
@@ -219,7 +217,6 @@
 
 .sidebar.collapsed .nav-item span {
     display: none;
-    /* Cache le texte */
 }
 
 .sidebar.collapsed .nav-item i {
@@ -227,38 +224,23 @@
     margin: 0;
 }
 
-/* Ajustement du contenu principal */
-.main-content.collapsed {
-    margin-left: 70px;
-}
-
+.main-content.collapsed,
 .header.collapsed {
     margin-left: 70px;
+    width: calc(100% - 70px);
 }
 
-/* Position du bouton toggle */
+/* Bouton toggle */
 .sidebar-toggle {
     position: fixed;
     top: 20px;
     left: 240px;
-    /* Position initiale */
     z-index: 1001;
-    background: white;
-    border: none;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
 }
 
 .sidebar-toggle.collapsed {
-    left: 35px;
-    /* Position quand rétractée */
+    left: 85px;
 }
 
 .sidebar-toggle:hover {
@@ -276,15 +258,7 @@
     transform: rotate(180deg);
 }
 
-/* Transitions fluides */
-.sidebar,
-.main-content,
-.header,
-.sidebar-toggle {
-    transition: all 0.3s ease;
-}
-
-/* Tooltip pour les icônes quand rétractée */
+/* Tooltip */
 .sidebar.collapsed .nav-item {
     position: relative;
 }
@@ -308,4 +282,109 @@
 .sidebar.collapsed .nav-item::after {
     opacity: 0;
     transition: opacity 0.3s ease;
+}
+
+/* Empêcher le scroll horizontal */
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Responsive styles */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content,
+    .header {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+
+    .sidebar-toggle {
+        left: 20px;
+    }
+
+    .sidebar-toggle.collapsed {
+        left: 25px;
+    }
+
+    .header h1 {
+        font-size: 24px;
+    }
+
+    .user-info {
+        gap: 15px;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 15px 20px;
+    }
+
+    .header h1 {
+        font-size: 20px;
+    }
+
+    .date {
+        font-size: 14px;
+    }
+
+    .main-content {
+        padding: 15px;
+    }
+
+    .icon-envelope,
+    .icon-bell {
+        padding: 6px;
+    }
+
+    .icon-envelope i,
+    .icon-bell i {
+        font-size: 20px !important;
+    }
+
+    .user-info {
+        gap: 10px;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .user-info {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .header h1 {
+        font-size: 18px;
+    }
+
+    .main-content {
+        padding: 10px;
+    }
+
+    .nav-item {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
 }
