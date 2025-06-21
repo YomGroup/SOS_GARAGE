@@ -1,7 +1,9 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
+import { isPlatformBrowser } from '@angular/common';
+
 
 
 @Component({
@@ -11,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
   styleUrl: './espaceclient.component.css'
 })
 export class EspaceclientComponent implements OnInit {
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   vehiclesCount: number = 0;
 
@@ -20,19 +23,25 @@ export class EspaceclientComponent implements OnInit {
   claimsCount = 9;
   processingCount = 7;
   currentDate = '10 Janvier 2025';
+  angularReady = false;
+  lastScrollTop = 0;
   ngOnInit() {
-    this.checkScreenSize();
-    this.restoreSidebarState();
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+      this.restoreSidebarState();
+      this.angularReady = true;
+    }
   }
   @HostListener('window:resize', ['$event'])
   onResize() {
-    this.checkScreenSize();
+    if (isPlatformBrowser(this.platformId)) {
+      this.checkScreenSize();
+    }
   }
   private checkScreenSize() {
     this.isMobile = window.innerWidth <= 992;
-    if (!this.isMobile) {
-      this.sidebarVisible = true; // Toujours visible sur desktop
-    }
+    this.sidebarVisible = !this.isMobile;
+
   }
 
   private restoreSidebarState() {
@@ -60,9 +69,9 @@ export class EspaceclientComponent implements OnInit {
     if (this.isMobile) {
       this.sidebarVisible = !this.sidebarVisible;
     } else {
-      // Logique desktop existante
       this.sidebarCollapsed = !this.sidebarCollapsed;
       localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed.toString());
+
       const sidebar = document.getElementById('sidebar');
       const mainContent = document.getElementById('mainContent');
       const header = document.getElementById('header');
@@ -74,5 +83,21 @@ export class EspaceclientComponent implements OnInit {
       toggleBtn?.classList.toggle('collapsed');
     }
 
+  }
+
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    const toggleBtn = document.querySelector('.sidebar-toggle') as HTMLElement;
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+    if (scrollTop > this.lastScrollTop && scrollTop > 50) {
+      // Vers le bas → cacher
+      toggleBtn?.classList.add('hide-on-scroll');
+    } else {
+      // Vers le haut → montrer
+      toggleBtn?.classList.remove('hide-on-scroll');
+    }
+
+    this.lastScrollTop = scrollTop <= 0 ? 0 : scrollTop; // Pour éviter négatif
   }
 }

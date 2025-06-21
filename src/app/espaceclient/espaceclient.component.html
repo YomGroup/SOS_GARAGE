@@ -23,7 +23,7 @@
         </div>
     </header>
 
-    <div class="dashboard">
+<div class="dashboard" [class.initialized]="angularReady">
         <div class="sidebar" id="sidebar" [class.show]="sidebarVisible" [class.collapsed]="!isMobile && sidebarCollapsed">
             <img src="1.png" alt="Logo">
             
@@ -36,76 +36,76 @@
                     <i class="bi bi-speedometer2"></i>
                     <span>Tableau de bord</span>
                 </a>
-                <a routerLink="/clientDashboard/vehicules" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Mes Véhicules">
-        <i class="bi bi-car-front-fill"></i>
-        <span>Mes Véhicules</span>
-    </a>
-     <a routerLink="/clientDashboard/declarations" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Déclarer un sinistre">
-        <i class="bi bi-flag-fill"></i>
-        <span>Déclarer un sinistre</span>
-    </a>
-      <a routerLink="/clientDashboard/sinistre" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Mes Sinistres">
-        <i class="bi bi-journal-medical"></i>
-        <span>Mes Sinistres</span>
-    </a>
-    <a routerLink="/clientDashboard/document" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Mes Documents">
-        <i class="bi bi-file-earmark-text"></i>
-        <span>Mes Documents</span>
-    </a>
-      <a routerLink="/clientDashboard/message" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Message">
-        <i class="bi bi-chat-dots-fill"></i>
-        <span>Message</span>
-    </a>
-    <a routerLink="/clientDashboard/profiles" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Mon Profil">
-        <i class="bi bi-person-circle"></i>
-        <span>Mon Profil</span>
-    </a>
-    
-   <!--
-    <a routerLink="/assistance" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Assistance">
-        <i class="bi bi-question-circle-fill"></i>
-        <span>Assistance</span>
-    </a>
--->
-    <a routerLink="/clientDashboard/support" 
-       routerLinkActive="active"
-       class="nav-item" 
-       data-tooltip="Support">
-        <i class="bi bi-headset"></i>
-        <span>Support</span>
-    </a>
-  
-    
-    <a (click)="logout()" 
-       class="nav-item" 
-       data-tooltip="Déconnexion">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Déconnexion</span>
-    </a>
-                <!-- Vos autres liens de navigation ici -->
+                                <a routerLink="/clientDashboard/vehicules" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Mes Véhicules">
+                        <i class="bi bi-car-front-fill"></i>
+                        <span>Mes Véhicules</span>
+                    </a>
+                    <a routerLink="/clientDashboard/declarations" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Déclarer un sinistre">
+                        <i class="bi bi-flag-fill"></i>
+                        <span>Déclarer un sinistre</span>
+                    </a>
+                    <a routerLink="/clientDashboard/sinistre" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Mes Sinistres">
+                        <i class="bi bi-journal-medical"></i>
+                        <span>Mes Sinistres</span>
+                    </a>
+                    <a routerLink="/clientDashboard/document" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Mes Documents">
+                        <i class="bi bi-file-earmark-text"></i>
+                        <span>Mes Documents</span>
+                    </a>
+                    <a routerLink="/clientDashboard/message" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Message">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        <span>Message</span>
+                    </a>
+                    <a routerLink="/clientDashboard/profiles" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Mon Profil">
+                        <i class="bi bi-person-circle"></i>
+                        <span>Mon Profil</span>
+                    </a>
+                    
+                <!--
+                    <a routerLink="/assistance" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Assistance">
+                        <i class="bi bi-question-circle-fill"></i>
+                        <span>Assistance</span>
+                    </a>
+                -->
+                    <a routerLink="/clientDashboard/support" 
+                    routerLinkActive="active"
+                    class="nav-item" 
+                    data-tooltip="Support">
+                        <i class="bi bi-headset"></i>
+                        <span>Support</span>
+                    </a>
                 
-            </nav>
+                    
+                    <a (click)="logout()" 
+                    class="nav-item" 
+                    data-tooltip="Déconnexion">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                                <!-- Vos autres liens de navigation ici -->
+                                
+             </nav>
         </div>
 
         <div class="main-content" id="mainContent"  [class.collapsed]="!isMobile && sidebarCollapsed">
