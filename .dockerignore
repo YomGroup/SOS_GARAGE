@@ -1,0 +1,19 @@
+# Fichiers et dossiers liés à Git
+.git
+.gitignore
+
+# Dépendances locales
+node_modules
+
+# Fichiers de log de npm
+npm-debug.log
+
+# Dossier de build local (sera créé dans le conteneur)
+dist
+
+# Cache Angular
+.angular/cache
+
+# Fichiers de configuration des éditeurs
+.vscode
+.idea 
