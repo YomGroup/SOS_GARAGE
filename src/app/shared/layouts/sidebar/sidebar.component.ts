@@ -7,6 +7,7 @@ interface MenuItem {
   title: string;
   icon: string;
   route?: string;
+  action?: (event: MouseEvent) => void;
   children?: MenuItem[];
   expanded?: boolean;
   badge?: string;
@@ -31,16 +32,13 @@ interface MenuItem {
       <nav class="nav-menu">
         <a *ngFor="let item of menuItems"
            [routerLink]="item.route"
+           (click)="item.action ? item.action($event) : null"
            routerLinkActive="active"
            [routerLinkActiveOptions]="{exact: true}"
            class="nav-item"
            [attr.data-tooltip]="item.title">
           <i [ngClass]="item.icon"></i>
           <span>{{ item.title }}</span>
-        </a>
-        <a (click)="logout()" class="nav-item" data-tooltip="Déconnexion">
-          <i class="bi bi-box-arrow-right"></i>
-          <span>Déconnexion</span>
         </a>
       </nav>
     </aside>
@@ -234,9 +232,17 @@ export class SidebarComponent implements OnInit {
   ];
 
   get menuItems(): MenuItem[] {
-    const commonItems = [
+    const commonItems: MenuItem[] = [
       { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
-      { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' } // Route de profil commune
+      { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' },
+      { 
+        title: 'Déconnexion', 
+        icon: 'bi bi-box-arrow-right', 
+        action: (event: MouseEvent) => {
+          event.preventDefault();
+          this.logout();
+        }
+      }
     ];
 
     if (this.userRoles.includes('ROLE_ADMIN')) {
