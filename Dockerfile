@@ -12,11 +12,7 @@ RUN npm install
 COPY . .
 
 # Compiler l'application pour la production
-# Le dossier de sortie sera /app/dist/sos-garage
 RUN npm run build
-
-# DEBUG: Lister le contenu du dossier de sortie pour vérifier la compilation
-RUN ls -R /app/dist
 
 # Etape 2: Création de l'image de production légère
 FROM node:18-slim
@@ -31,10 +27,7 @@ RUN npm install --omit=dev
 COPY server.js .
 
 # Copier l'application compilée depuis l'étape de build
-COPY --from=build /app/dist/sos-garage ./dist/sos-garage
-
-# DEBUG: Lister le contenu du dossier de sortie pour vérifier la copie
-RUN ls -R /app/dist
+COPY --from=build /app/dist/sos-garage/ ./dist/sos-garage/
 
 # Exposer le port sur lequel le serveur tourne
 EXPOSE 8080

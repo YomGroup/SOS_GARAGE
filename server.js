@@ -2,15 +2,17 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-const appName = 'sos-garage'; // Corrigé pour correspondre à l'outputPath
+const appName = 'sos-garage';
+
+// Le chemin vers le dossier contenant les fichiers statiques du build Angular
+const staticFilesPath = path.join(__dirname, 'dist', appName, 'browser');
 
 // Servir les fichiers statiques de l'application Angular
-app.use(express.static(path.join(__dirname, 'dist', appName)));
+app.use(express.static(staticFilesPath));
 
 // Pour toutes les autres requêtes, renvoyer vers le fichier index.html de l'application Angular
-// C'est nécessaire pour que le routage côté client d'Angular fonctionne.
 app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'dist', appName, 'index.html'));
+    res.sendFile(path.join(staticFilesPath, 'index.html'));
 });
 
 // Démarrer le serveur
