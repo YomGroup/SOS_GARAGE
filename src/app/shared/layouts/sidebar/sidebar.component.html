@@ -1,0 +1,23 @@
+<aside class="sidebar" [class.collapsed]="collapsed">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <img src="assets/logo_sos.png" alt="Logo" />
+    </div>
+  </div>
+  
+  <nav class="nav-menu">
+    <a *ngFor="let item of menuItems"
+       [routerLink]="item.route"
+       routerLinkActive="active"
+       [routerLinkActiveOptions]="{exact: true}"
+       class="nav-item"
+       [attr.data-tooltip]="item.title">
+      <i [ngClass]="item.icon"></i>
+      <span>{{ item.title }}</span>
+    </a>
+    <a (click)="logout()" class="nav-item" data-tooltip="Déconnexion">
+      <i class="bi bi-box-arrow-right"></i>
+      <span>Déconnexion</span>
+    </a>
+  </nav>
+</aside>

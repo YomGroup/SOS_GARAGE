@@ -1,120 +1,214 @@
-<div class="container mx-auto p-4">
-  <h1 class="text-2xl font-bold mb-6">Tableau de Bord Administrateur</h1>
+<div class="min-h-screen">
+  <!-- Top Navbar -->
 
-  <!-- Statistiques -->
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Total Dossiers</h3>
-          <p class="text-3xl font-bold text-blue-600">{{stats.totalDossiers}}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
 
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Dossiers en Cours</h3>
-          <p class="text-3xl font-bold text-orange-600">{{stats.dossiersEnCours}}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Garages en Attente</h3>
-          <p class="text-3xl font-bold text-yellow-600">{{stats.garagesEnAttente}}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-
-    <mat-card>
-      <mat-card-content>
-        <div class="text-center">
-          <h3 class="text-lg font-semibold">Épaves en Attente</h3>
-          <p class="text-3xl font-bold text-red-600">{{stats.epavesEnAttente}}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Charts Row -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Monthly Case Trends -->
-    <div class="card lg:col-span-2">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Tendances mensuelles des dossiers</h2>
-        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-        <mat-menu #chartMenu="matMenu">
-          <button mat-menu-item>
-            <mat-icon>download</mat-icon>
-            <span>Télécharger CSV</span>
-          </button>
-          <button mat-menu-item>
-            <mat-icon>print</mat-icon>
-            <span>Imprimer</span>
-          </button>
-        </mat-menu>
-      </div>
-      <app-line-chart></app-line-chart>
-    </div>
-
-    <!-- Cases by Status -->
-    <div class="card">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Dossiers par statut</h2>
-        <button mat-icon-button [matMenuTriggerFor]="chartMenu">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-      </div>
-      <app-doughnut-chart></app-doughnut-chart>
-    </div>
-  </div>
-
-  <!-- Repair Analytics & Recent Activity -->
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-    <!-- Repair Performance -->
-    <div class="card lg:col-span-2">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Performance des réparations</h2>
+  <div class="container-fluid px-4">
+    <!-- Statistics -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
         <div>
-          <mat-button-toggle-group value="weekly" aria-label="Période">
-            <mat-button-toggle value="weekly">Hebdomadaire</mat-button-toggle>
-            <mat-button-toggle value="monthly">Mensuel</mat-button-toggle>
-            <mat-button-toggle value="yearly">Annuel</mat-button-toggle>
-          </mat-button-toggle-group>
+              <h3 class="stats-title opacity-90">Garages actifs</h3>
+              <div class="stats-number">156</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-building"></i>
+            </div>
+          </div>
+        </div>
+        </div>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+        <div>
+              <h3 class="stats-title opacity-90">Dossiers en cours</h3>
+              <div class="stats-number">89</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-folder"></i>
+            </div>
+          </div>
+        </div>
+        </div>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+        <div>
+              <h3 class="stats-title opacity-90">Épaves à traiter</h3>
+              <div class="stats-number">45</div>
+        </div>
+            <div class="stats-icon">
+              <i class="fas fa-car-crash"></i>
+        </div>
+        </div>
         </div>
       </div>
-      <app-bar-chart></app-bar-chart>
-    </div>
-
-    <!-- Recent Activity -->
-    <div class="card">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-medium text-gray-900 dark:text-white">Activité récente</h2>
-        <a href="#" class="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300">Voir tout</a>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Documents validés</h3>
+              <div class="stats-number">234</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
       </div>
-      <app-recent-activity></app-recent-activity>
+        </div>
+      </div>
+      </div>
+
+    <!-- Recent Activity & Tasks -->
+    <div class="row mb-4">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 opacity-90">Activité récente</h5>
+            <div class="header-actions">
+              <button class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-filter me-2"></i>Filtrer
+              </button>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="recent-claims">
+              <div class="claim-item">
+                <div>
+                  <strong class="opacity-90">Garage Auto Service Paris</strong>
+                  <br>
+                  <small class="text-muted opacity-75">Nouvelle demande d'inscription</small>
+                </div>
+                <span class="status-badge status-pending">En attente</span>
+              </div>
+              <div class="claim-item">
+                <div>
+                  <strong class="opacity-90">Dossier #DOS-2024-089</strong>
+                  <br>
+                  <small class="text-muted opacity-75">En attente de validation</small>
+                </div>
+                <span class="status-badge status-progress">En cours</span>
+              </div>
+              <div class="claim-item">
+                <div>
+                  <strong class="opacity-90">Épave BMW X3</strong>
+                  <br>
+                  <small class="text-muted opacity-75">À traiter</small>
+                </div>
+                <span class="status-badge status-pending">En attente</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 opacity-90">Tâches prioritaires</h5>
+            <button class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-plus me-2"></i>Nouvelle tâche
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="notification-item">
+              <i class="fas fa-building text-warning me-2"></i>
+              <small class="opacity-90">3 nouveaux garages à valider</small>
+              <br>
+              <small class="text-muted opacity-75">Il y a 2 heures</small>
+            </div>
+            <div class="notification-item">
+              <i class="fas fa-folder text-info me-2"></i>
+              <small class="opacity-90">5 dossiers en attente de validation</small>
+              <br>
+              <small class="text-muted opacity-75">Il y a 5 heures</small>
+</div>
+            <div class="notification-item">
+              <i class="fas fa-car-crash text-danger me-2"></i>
+              <small class="opacity-90">2 épaves à traiter en urgence</small>
+              <br>
+              <small class="text-muted opacity-75">Hier</small>
+      </div>
+      </div>
+        </div>
+      </div>
+      </div>
+
+    <!-- Analytics & Sinistres -->
+    <div class="row">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 opacity-90">Analyses et statistiques</h5>
+            <div class="graph-controls">
+              <button class="btn btn-outline-primary btn-sm me-2" (click)="showGraph('performance')">
+                <i class="fas fa-chart-line me-2"></i>Performance
+              </button>
+              <button class="btn btn-outline-primary btn-sm me-2" (click)="showGraph('distribution')">
+                <i class="fas fa-chart-pie me-2"></i>Distribution
+              </button>
+              <button class="btn btn-outline-primary btn-sm" (click)="showGraph('evolution')">
+                <i class="fas fa-chart-bar me-2"></i>Évolution
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="graph-container" *ngIf="currentGraph === 'performance'">
+              <app-performance-chart></app-performance-chart>
+            </div>
+            <div class="graph-container" *ngIf="currentGraph === 'distribution'">
+              <app-distribution-chart></app-distribution-chart>
+            </div>
+            <div class="graph-container" *ngIf="currentGraph === 'evolution'">
+              <app-evolution-chart></app-evolution-chart>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
+            <button class="btn btn-outline-primary btn-sm">
+              <i class="fas fa-plus me-2"></i>Nouveau sinistre
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="sinistre-item">
+              <div class="sinistre-header">
+                <span class="sinistre-id opacity-90">SIN-001</span>
+                <span class="status-badge status-closed">Clôturé</span>
+              </div>
+              <div class="sinistre-details">
+                <i class="fas fa-car me-2 text-primary"></i>
+                <span class="opacity-90">Mercedes AMG</span>
+                <small class="text-muted opacity-75 d-block">15 Mai 2025</small>
+              </div>
+            </div>
+            <div class="sinistre-item">
+              <div class="sinistre-header">
+                <span class="sinistre-id opacity-90">SIN-002</span>
+                <span class="status-badge status-progress">En cours</span>
+              </div>
+              <div class="sinistre-details">
+                <i class="fas fa-car me-2 text-primary"></i>
+                <span class="opacity-90">BMW X5</span>
+                <small class="text-muted opacity-75 d-block">16 Mai 2025</small>
+              </div>
+            </div>
+            <div class="sinistre-item">
+              <div class="sinistre-header">
+                <span class="sinistre-id opacity-90">SIN-003</span>
+                <span class="status-badge status-pending">En attente</span>
+              </div>
+              <div class="sinistre-details">
+                <i class="fas fa-car me-2 text-primary"></i>
+                <span class="opacity-90">Audi RS6</span>
+                <small class="text-muted opacity-75 d-block">17 Mai 2025</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
-
-  <!-- Onglets -->
-  <mat-tab-group (selectedTabChange)="onTabChange($event)">
-    <mat-tab label="Gestion des Dossiers">
-      <app-dossier-management></app-dossier-management>
-    </mat-tab>
-    <mat-tab label="Validation Garages">
-      <app-garage-validation></app-garage-validation>
-    </mat-tab>
-    <mat-tab label="Gestion des Épaves">
-      <app-epave-management></app-epave-management>
-    </mat-tab>
-    <mat-tab label="Gestion des Rôles">
-      <app-role-management></app-role-management>
-    </mat-tab>
-  </mat-tab-group>
-</div> 
+</div>

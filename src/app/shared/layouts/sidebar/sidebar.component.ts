@@ -1,19 +1,17 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatTooltipModule } from '@angular/material/tooltip';
-
-// import { AuthService } from '../../services/auth.service';
+import { KeycloakService } from 'keycloak-angular';
 
 interface MenuItem {
   title: string;
   icon: string;
   route?: string;
+  action?: (event: MouseEvent) => void;
   children?: MenuItem[];
   expanded?: boolean;
-  requiresAdmin?: boolean;
+  badge?: string;
+  isNew?: boolean;
 }
 
 @Component({
@@ -21,165 +19,247 @@ interface MenuItem {
   standalone: true,
   imports: [
     CommonModule,
-    RouterModule,
-    MatIconModule,
-    MatExpansionModule,
-    MatTooltipModule
+    RouterModule
   ],
   template: `
-    <aside 
-      class="flex flex-col z-10 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out h-screen"
-      [class.w-64]="!collapsed"
-      [class.w-20]="collapsed">
-      
-      <!-- Logo -->
-      <div class="flex h-16 items-center justify-center border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center" [class.justify-center]="collapsed">
-          <div class="flex-shrink-0 flex items-center">
-            <div class="flex items-center justify-center h-10 w-10 rounded-md bg-primary-600 text-white">
-              <mat-icon class="transform scale-75">shield</mat-icon>
-            </div>
-            <span *ngIf="!collapsed" class="ml-2 text-xl font-semibold text-gray-900 dark:text-white">SOS_GARAGE</span>
-          </div>
+    <aside class="sidebar" [class.collapsed]="collapsed">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <img src="assets/logo_sos.png" alt="Logo" />
         </div>
       </div>
       
-      <!-- Navigation -->
-      <nav class="flex-1 pt-5 pb-4 overflow-y-auto">
-        <div *ngIf="!collapsed">
-          <div *ngFor="let item of menuItems">
-            <!-- Item with Children -->
-            <div *ngIf="item.children && (!item.requiresAdmin || isAdmin)">
-              <div 
-                class="px-3 py-2 mx-3 mb-1 flex items-center justify-between text-sm font-medium cursor-pointer rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                (click)="toggleSubmenu(item)">
-                <div class="flex items-center">
-                  <mat-icon class="mr-3 text-gray-500 dark:text-gray-400">{{ item.icon }}</mat-icon>
-                  <span class="text-gray-700 dark:text-gray-300">{{ item.title }}</span>
-                </div>
-                <mat-icon *ngIf="!item.expanded" class="text-gray-500 dark:text-gray-400">expand_more</mat-icon>
-                <mat-icon *ngIf="item.expanded" class="text-gray-500 dark:text-gray-400">expand_less</mat-icon>
-              </div>
-              
-              <!-- Submenu -->
-              <div *ngIf="item.expanded" class="ml-10 space-y-1">
-                <a *ngFor="let child of item.children"
-                   [routerLink]="child.route"
-                   routerLinkActive="sidebar-item-active"
-                   class="sidebar-item py-1">
-                  {{ child.title }}
-                </a>
-              </div>
-            </div>
-            
-            <!-- Regular Item -->
-            <a *ngIf="!item.children && (!item.requiresAdmin || isAdmin)"
-               [routerLink]="item.route"
-               routerLinkActive="sidebar-item-active"
-               class="sidebar-item mx-3 mb-1">
-              <mat-icon class="text-gray-500 dark:text-gray-400">{{ item.icon }}</mat-icon>
-              <span>{{ item.title }}</span>
-            </a>
-          </div>
-        </div>
-        
-        <!-- Collapsed Menu -->
-        <div *ngIf="collapsed" class="flex flex-col items-center pt-2 space-y-3">
-          <a *ngFor="let item of menuItems" 
-             [routerLink]="item.route" 
-             routerLinkActive="bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400"
-             [matTooltip]="item.title"
-             matTooltipPosition="right"
-             class="flex items-center justify-center w-12 h-12 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800">
-            <mat-icon class="text-gray-500 dark:text-gray-400">{{ item.icon }}</mat-icon>
-          </a>
-        </div>
+      <nav class="nav-menu">
+        <a *ngFor="let item of menuItems"
+           [routerLink]="item.route"
+           (click)="item.action ? item.action($event) : null"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}"
+           class="nav-item"
+           [attr.data-tooltip]="item.title">
+          <i [ngClass]="item.icon"></i>
+          <span>{{ item.title }}</span>
+        </a>
       </nav>
-      
-      <!-- Bottom Actions -->
-      <div class="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
-        <div *ngIf="!collapsed" class="flex items-center">
-          <div class="flex-shrink-0">
-            <img 
-              class="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" 
-              src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg" 
-              alt="User avatar"
-            >
-          </div>
-          <div class="ml-3">
-            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ username }}</p>
-            <p class="text-xs font-medium text-gray-500 dark:text-gray-400 truncate">{{ userRole }}</p>
-          </div>
-        </div>
-        <div *ngIf="collapsed" class="flex justify-center">
-          <img 
-            class="h-10 w-10 rounded-full object-cover border border-gray-200 dark:border-gray-700" 
-            src="https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg"
-            alt="User avatar" 
-            matTooltip="John Doe"
-            matTooltipPosition="right"
-          >
-        </div>
-      </div>
     </aside>
-  `
+  `,
+  styles: [`
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
+      background: white;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      overflow-y: auto;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .sidebar-logo {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .sidebar-logo img {
+      width: 100%;
+      max-width: 220px;
+      height: auto;
+      margin: 20px auto 0 auto;
+      display: block;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      padding: 0 15px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 18px 20px;
+      text-decoration: none;
+      color: #4a5568;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-item:hover {
+      background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 50%);
+      color: #333;
+      transform: translateX(5px);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+      color: white;
+      border-radius: 25px;
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(30, 77, 184, 0.3);
+    }
+
+    /* Styles pour le mode collapsed */
+    .sidebar.collapsed {
+      width: 80px;
+    }
+
+    .sidebar.collapsed .sidebar-logo img {
+      max-width: 40px;
+    }
+
+    .sidebar.collapsed .nav-item {
+      padding: 18px;
+      justify-content: center;
+    }
+
+    .sidebar.collapsed .nav-item span {
+      display: none;
+    }
+
+    .sidebar.collapsed .nav-item i {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    /* Tooltip pour le mode collapsed */
+    .sidebar.collapsed .nav-item[data-tooltip]:before {
+      content: attr(data-tooltip);
+      position: absolute;
+      left: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      margin-left: 10px;
+    }
+
+    .sidebar.collapsed .nav-item[data-tooltip]:hover:before {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 250px;
+      }
+      
+      .sidebar.collapsed {
+        width: 0;
+        padding: 0;
+      }
+    }
+  `]
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Input() collapsed = false;
   
-  // private authService = inject(AuthService);
+  private keycloakService = inject(KeycloakService);
+
+  username: string = 'Visiteur';
+  userRoles: string[] = [];
   
-  isAdmin = true; // Valeur statique pour le design
-  username = 'Jesper elenga';
-  userRole = 'Administrateur';
-  
-  menuItems: MenuItem[] = [
+  async ngOnInit(): Promise<void> {
+    const isLoggedIn = await this.keycloakService.isLoggedIn();
+    if (isLoggedIn) {
+      try {
+        const userProfile = await this.keycloakService.loadUserProfile();
+        this.username = userProfile.firstName || userProfile.username || 'Utilisateur';
+        this.userRoles = this.keycloakService.getUserRoles();
+      } catch (error) {
+        console.error('Erreur lors du chargement du profil utilisateur', error);
+      }
+    }
+  }
+
+  adminMenuItems: MenuItem[] = [
+    { title: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/admin/dashboard', badge: '3' },
+    { title: 'Dossiers', icon: 'bi bi-folder', route: '/admin/dossiers' },
+    { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
+    { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     {
-      title: 'Tableau de bord',
-      icon: 'dashboard',
-      route: '/admin/dashboard' // correct
-    },
-    {
-      title: 'Dossiers',
-      icon: 'description',
-      route: '/admin/dossiers' // corrigé
-    },
-    {
-      title: 'Garages',
-      icon: 'garage',
-      route: '/admin/garages' // corrigé
-    },
-    {
-      title: 'Épaves',
-      icon: 'car_crash',
-      route: '/admin/epaves' // corrigé
-    },
-    {
-      title: 'Administration',
-      icon: 'admin_panel_settings',
-      requiresAdmin: true,
-      expanded: false,
+      title: 'Administration', icon: 'bi bi-gear', expanded: false,
       children: [
-        {
-          title: 'Utilisateurs',
-          route: '/admin/users', // à condition d’avoir UserComponent dans user/
-          icon: 'person'
-        },
-        {
-          title: 'Rôles',
-          route: '/admin/roles', // corrigé
-          icon: 'security'
-        }
+        { title: 'Utilisateurs', route: '/admin/users', icon: 'bi bi-people' },
+        { title: 'Rôles', route: '/admin/roles', icon: 'bi bi-shield-lock' }
       ]
     },
-    {
-      title: 'Paramètres',
-      icon: 'settings',
-      route: '/admin/settings' // seulement si tu as ce composant
-    }
+    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/settings' }
   ];
+
+  garageMenuItems: MenuItem[] = [
+    { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
+    { title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
+    { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
+  ];
+
+  assureMenuItems: MenuItem[] = [
+    { title: 'Tableau de bord', icon: 'bi bi-grid', route: '/clientDashboard' },
+    { title: 'Mes Véhicules', icon: 'bi bi-car-front-fill', route: '/clientDashboard/vehicules' },
+    { title: 'Mes Déclarations', icon: 'bi bi-file-earmark-text', route: '/clientDashboard/declarations' },
+    { title: 'Mes Sinistres', icon: 'bi bi-exclamation-triangle', route: '/clientDashboard/sinistre' },
+    { title: 'Mes Documents', icon: 'bi bi-folder2-open', route: '/clientDashboard/document' },
+    { title: 'Support', icon: 'bi bi-question-circle', route: '/clientDashboard/support' },
+  ];
+
+  get menuItems(): MenuItem[] {
+    const commonItems: MenuItem[] = [
+      { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
+      { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' },
+      { 
+        title: 'Déconnexion', 
+        icon: 'bi bi-box-arrow-right', 
+        action: (event: MouseEvent) => {
+          event.preventDefault();
+          this.logout();
+        }
+      }
+    ];
+
+    if (this.userRoles.includes('ROLE_ADMIN')) {
+      return [...this.adminMenuItems, ...commonItems];
+    } else if (this.userRoles.includes('ROLE_GARAGISTE')) {
+      return [...this.garageMenuItems, ...commonItems];
+    } else if (this.userRoles.includes('ROLE_ASSURE')) {
+      return [...this.assureMenuItems, ...commonItems];
+    }
+    return []; // Retourne un menu vide si aucun rôle ne correspond
+  }
   
   toggleSubmenu(item: MenuItem) {
     item.expanded = !item.expanded;
+  }
+
+  logout() {
+    this.keycloakService.logout(window.location.origin);
   }
 }

@@ -1,0 +1,53 @@
+<div class="mission-reception-container">
+  <h2 class="mission-title">Réception de Mission</h2>
+
+  <form  class="mission-form">
+    <!-- Section Documents -->
+    <div class="section">
+      <h3 class="section-title">Documents du véhicule</h3>
+      <div class="documents-row">
+        <div class="document-upload">
+          <input type="file" accept="image/*" (change)="onFileSelected($event, 'vehiclePhotos')" multiple id="vehiclePhotos" hidden #vehiclePhotos>
+          <label for="vehiclePhotos" class="upload-label">
+            <span class="icon-doc"><i class="fas fa-camera"></i></span>
+            <span>Photos du véhicule</span>
+          </label>
+        </div>
+        <div class="document-upload">
+          <input type="file" accept="image/*,.pdf" (change)="onFileSelected($event, 'accidentReport')" id="accidentReport" hidden #accidentReport>
+          <label for="accidentReport" class="upload-label">
+            <span class="icon-doc"><i class="fas fa-file-alt"></i></span>
+            <span>Constat d'accident</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section Formulaire -->
+    <div class="section">
+      <h3 class="section-title">Formulaire de prise en charge</h3>
+      <div class="form-group">
+        <label for="hasReplacementVehicle">Véhicule de secours disponible</label>
+        <select formControlName="hasReplacementVehicle" id="hasReplacementVehicle">
+          <option value="true">Oui</option>
+          <option value="false">Non</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="advantages">Avantages proposés</label>
+        <select formControlName="advantages" id="advantages" multiple>
+          <option value="pickup">Service de prise en charge</option>
+          <option value="delivery">Service de livraison</option>
+          <option value="warranty">Garantie étendue</option>
+          <option value="discount">Réduction sur les pièces</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" [disabled]="!missionForm.valid" class="btn-primary-custom">
+        Valider la prise en charge
+      </button>
+    </div>
+  </form>
+</div>

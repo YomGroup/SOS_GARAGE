@@ -6,6 +6,9 @@ import { ThemePersistenceService, THEME_CONSTANTS } from './theme-persistence.se
   providedIn: 'root'
 })
 export class ThemeService {
+  private readonly THEME_KEY = 'theme';
+  private readonly DARK_THEME = 'dark';
+  private readonly LIGHT_THEME = 'light';
   private platformId = inject(PLATFORM_ID);
   private themePersistence = inject(ThemePersistenceService);
 
@@ -18,11 +21,7 @@ export class ThemeService {
   }
 
   private getInitialTheme(): boolean {
-    const savedTheme = this.themePersistence.getTheme();
-    if (savedTheme) {
-      return savedTheme === THEME_CONSTANTS.DARK;
-    }
-    return this.themePersistence.getSystemTheme();
+    return false;
   }
 
   toggleTheme(): void {

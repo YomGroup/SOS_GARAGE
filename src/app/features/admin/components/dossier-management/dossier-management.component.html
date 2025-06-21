@@ -1,87 +1,214 @@
-<div class="p-4">
-  <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xl font-semibold">Gestion des Dossiers</h2>
-    <mat-form-field class="w-64">
-      <mat-label>Rechercher</mat-label>
-      <input matInput (keyup)="applyFilter($event)" placeholder="Filtrer les dossiers...">
-    </mat-form-field>
-  </div>
+<!-- Gestion des Dossiers -->
+<div class="content-section" id="dossiers">
+<div class="container-fluid">
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                    <div class="col-md-3">
+                        <select class="form-select">
+                            <option value="">Tous les statuts</option>
+                            <option value="en_cours">En cours</option>
+                            <option value="termine">Terminé</option>
+                            <option value="en_attente">En attente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select">
+                            <option value="">Tous les clients</option>
+                            <option value="1">Jean Dupont</option>
+                            <option value="2">Marie Martin</option>
+                            <option value="3">Pierre Durand</option>
+                        </select>
+                </div>
+                <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" placeholder="Rechercher un dossier...">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary-custom w-100">
+                            <i class="fas fa-plus me-2"></i>Nouveau
+                        </button>
+                </div>
+                </div>
+            </div>
+        </div>
 
-  <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" matSort>
-      <!-- Numéro de dossier -->
-      <ng-container matColumnDef="numero">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Numéro</th>
-        <td mat-cell *matCellDef="let row">{{row.numero}}</td>
-      </ng-container>
-
-      <!-- Type -->
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-        <td mat-cell *matCellDef="let row">{{row.type}}</td>
-      </ng-container>
-
-      <!-- Statut -->
-      <ng-container matColumnDef="statut">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
-        <td mat-cell *matCellDef="let row">
-          <span [ngClass]="{
-            'px-2 py-1 rounded-full text-sm': true,
-            'bg-yellow-100 text-yellow-800': row.statut === 'EN_COURS',
-            'bg-green-100 text-green-800': row.statut === 'VALIDÉ',
-            'bg-red-100 text-red-800': row.statut === 'REJETÉ'
-          }">
-            {{row.statut}}
-          </span>
-        </td>
-      </ng-container>
-
-      <!-- Date de création -->
-      <ng-container matColumnDef="dateCreation">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Date de création</th>
-        <td mat-cell *matCellDef="let row">{{row.dateCreation | date:'dd/MM/yyyy'}}</td>
-      </ng-container>
-
-      <!-- Documents -->
-      <ng-container matColumnDef="documents">
-        <th mat-header-cell *matHeaderCellDef>Documents</th>
-        <td mat-cell *matCellDef="let row">
-          <div class="flex space-x-2">
-            <mat-icon [ngClass]="{'text-green-500': row.documents.contratAssurance, 'text-red-500': !row.documents.contratAssurance}">
-              {{row.documents.contratAssurance ? 'check_circle' : 'cancel'}}
-            </mat-icon>
-            <mat-icon [ngClass]="{'text-green-500': row.documents.carteGrise, 'text-red-500': !row.documents.carteGrise}">
-              {{row.documents.carteGrise ? 'check_circle' : 'cancel'}}
-            </mat-icon>
-            <mat-icon [ngClass]="{'text-green-500': row.documents.facture, 'text-red-500': !row.documents.facture}">
-              {{row.documents.facture ? 'check_circle' : 'cancel'}}
-            </mat-icon>
-          </div>
-        </td>
-      </ng-container>
-
-      <!-- Actions -->
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef>Actions</th>
-        <td mat-cell *matCellDef="let row">
-          <div class="flex space-x-2">
-            <button mat-icon-button color="primary" (click)="validerDossier(row)" [disabled]="row.statut !== 'EN_COURS'">
-              <mat-icon>check</mat-icon>
+        <!-- Boutons de vue -->
+        <div class="view-toggle mb-4">
+            <button class="btn btn-outline-custom active" id="cardView">
+                <i class="fas fa-th-large me-2"></i>Vue cartes
             </button>
-            <button mat-icon-button color="warn" (click)="rejeterDossier(row)" [disabled]="row.statut !== 'EN_COURS'">
-              <mat-icon>close</mat-icon>
+            <button class="btn btn-outline-custom" id="tableView">
+                <i class="fas fa-table me-2"></i>Vue tableau
             </button>
-            <button mat-icon-button color="accent">
-              <mat-icon>visibility</mat-icon>
-            </button>
-          </div>
-        </td>
-      </ng-container>
+    </div>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+        <!-- Vue en cartes -->
+        <div class="row" id="cardViewContainer">
+            <!-- Dossier en cours -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="document-card">
+                    <div class="document-icon reports">
+                        <i class="fas fa-folder-open"></i>
+                    </div>
+                    <div class="document-info">
+                        <h6>Dossier #2025-001</h6>
+                        <p class="text-muted">Jean Dupont - Peugeot 308</p>
+                        <small class="text-muted">En cours depuis le 15/03/2025</small>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-    <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Sélectionner la page des dossiers"></mat-paginator>
-  </div>
-</div> 
+            <!-- Dossier terminé -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="document-card">
+                    <div class="document-icon insurance">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <div class="document-info">
+                        <h6>Dossier #2025-002</h6>
+                        <p class="text-muted">Marie Martin - Renault Clio</p>
+                        <small class="text-muted">Terminé le 10/03/2025</small>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dossier en attente -->
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="document-card">
+                    <div class="document-icon photos">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="document-info">
+                        <h6>Dossier #2025-003</h6>
+                        <p class="text-muted">Pierre Durand - Citroën C3</p>
+                        <small class="text-muted">En attente depuis le 08/03/2025</small>
+                    </div>
+                    <div class="document-actions">
+                        <button class="btn btn-sm btn-outline-primary" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-success" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vue en tableau (cachée par défaut) -->
+        <div class="table-responsive" id="tableViewContainer" style="display: none;">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>N° Dossier</th>
+                        <th>Client</th>
+                        <th>Véhicule</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#2025-001</td>
+                        <td>Jean Dupont</td>
+                        <td>Peugeot 308</td>
+                        <td><span class="badge bg-primary">En cours</span></td>
+                        <td>15/03/2025</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#2025-002</td>
+                        <td>Marie Martin</td>
+                        <td>Renault Clio</td>
+                        <td><span class="badge bg-success">Terminé</span></td>
+                        <td>10/03/2025</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>#2025-003</td>
+                        <td>Pierre Durand</td>
+                        <td>Citroën C3</td>
+                        <td><span class="badge bg-warning">En attente</span></td>
+                        <td>08/03/2025</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" title="Voir">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" title="Modifier">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                </td>
+            </tr>
+                </tbody>
+        </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Navigation des dossiers">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">Suivant</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>

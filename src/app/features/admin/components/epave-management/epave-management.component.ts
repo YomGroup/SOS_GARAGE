@@ -27,6 +27,7 @@ interface Epave {
 @Component({
   selector: 'app-epave-management',
   templateUrl: './epave-management.component.html',
+  styleUrls: ['./epave-management.component.css'],
   standalone: true,
   imports: [
     CommonModule,
@@ -46,12 +47,15 @@ export class EpaveManagementComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  isCardView: boolean = true;
+
   constructor() {
     this.dataSource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
     this.loadEpaves();
+    this.initializeViewToggle();
   }
 
   ngAfterViewInit() {
@@ -98,5 +102,30 @@ export class EpaveManagementComponent implements OnInit, AfterViewInit {
   rejeterEpave(epave: Epave): void {
     // TODO: Implémenter le rejet de l'épave
     console.log('Rejet de l\'épave:', epave);
+  }
+
+  private initializeViewToggle(): void {
+    const cardViewBtn = document.getElementById('cardView');
+    const tableViewBtn = document.getElementById('tableView');
+    const cardViewContainer = document.getElementById('cardViewContainer');
+    const tableViewContainer = document.getElementById('tableViewContainer');
+
+    if (cardViewBtn && tableViewBtn && cardViewContainer && tableViewContainer) {
+      cardViewBtn.addEventListener('click', () => {
+        this.isCardView = true;
+        cardViewBtn.classList.add('active');
+        tableViewBtn.classList.remove('active');
+        cardViewContainer.style.display = 'flex';
+        tableViewContainer.style.display = 'none';
+      });
+
+      tableViewBtn.addEventListener('click', () => {
+        this.isCardView = false;
+        tableViewBtn.classList.add('active');
+        cardViewBtn.classList.remove('active');
+        tableViewContainer.style.display = 'block';
+        cardViewContainer.style.display = 'none';
+      });
+    }
   }
 } 

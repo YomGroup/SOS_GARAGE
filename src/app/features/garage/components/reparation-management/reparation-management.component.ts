@@ -1,104 +1,138 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
+
+interface Reparation {
+  id: number;
+  vehicule: string;
+  statut: 'EN_COURS' | 'TERMINEE' | 'EN_ATTENTE' | 'EPAVE';
+  dateReception: Date;
+  montantDevis: number;
+  montantFacture: number;
+}
 
 @Component({
   selector: 'app-reparation-management',
+  templateUrl: './reparation-management.component.html',
+  styleUrls: ['./reparation-management.component.css'],
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
-  template: `
-    <div class="bg-white rounded-lg shadow-lg p-6">
-      <h2 class="text-2xl font-bold mb-6">Gestion des Réparations</h2>
-
-      <!-- Ordre de réparation -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold mb-4">Ordre de réparation</h3>
-        <div class="flex space-x-4">
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-            Préparer l'ordre
-          </button>
-          <button class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-            Envoyer l'ordre
-          </button>
-        </div>
-      </div>
-
-      <!-- Véhicule de remplacement -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold mb-4">Véhicule de remplacement</h3>
-        <div class="flex space-x-4">
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-            Organiser le prêt
-          </button>
-          <button class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
-            Voir les disponibilités
-          </button>
-        </div>
-      </div>
-
-      <!-- Devis et facture -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold mb-4">Devis et facture</h3>
-        <form [formGroup]="invoiceForm" (ngSubmit)="onSubmitInvoice()" class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Montant du devis</label>
-              <input type="number" formControlName="quoteAmount" 
-                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Montant de la facture</label>
-              <input type="number" formControlName="invoiceAmount" 
-                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-            </div>
-          </div>
-          <div class="flex space-x-4">
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-              Envoyer le devis
-            </button>
-            <button type="button" (click)="onSubmitInvoice()" 
-                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
-              Envoyer la facture
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Statut de la réparation -->
-      <div class="mb-8">
-        <h3 class="text-lg font-semibold mb-4">Statut de la réparation</h3>
-        <div class="flex space-x-4">
-          <select class="rounded-md border-gray-300 shadow-sm">
-            <option value="en_cours">En cours</option>
-            <option value="terminee">Terminée</option>
-            <option value="en_attente">En attente de pièces</option>
-            <option value="epave">Déclarer en épave</option>
-          </select>
-          <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-            Mettre à jour
-          </button>
-        </div>
-      </div>
-    </div>
-  `,
-  styles: []
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    MatSortModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
+    MatButtonModule,
+    MatSelectModule
+  ]
 })
-export class ReparationManagementComponent implements OnInit {
-  invoiceForm: FormGroup;
+export class ReparationManagementComponent implements OnInit, AfterViewInit {
+  displayedColumns: string[] = ['vehicule', 'statut', 'dateReception', 'montantDevis', 'montantFacture', 'actions'];
+  dataSource: MatTableDataSource<Reparation>;
+  isCardView: boolean = true;
+  filtreStatut: string = '';
 
-  constructor(private fb: FormBuilder) {
-    this.invoiceForm = this.fb.group({
-      quoteAmount: [null, [Validators.required, Validators.min(0)]],
-      invoiceAmount: [null, [Validators.required, Validators.min(0)]]
-    });
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor() {
+    this.dataSource = new MatTableDataSource();
+    // Custom filter predicate for search + statut
+    this.dataSource.filterPredicate = (data: Reparation, filter: string) => {
+      const search = filter.toLowerCase();
+      const matchStatut = this.filtreStatut ? data.statut === this.filtreStatut : true;
+      const matchText =
+        data.vehicule.toLowerCase().includes(search) ||
+        data.statut.toLowerCase().includes(search) ||
+        data.montantDevis.toString().includes(search) ||
+        data.montantFacture.toString().includes(search);
+      return matchStatut && matchText;
+    };
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadReparations();
+  }
 
-  onSubmitInvoice(): void {
-    if (this.invoiceForm.valid) {
-      console.log('Formulaire soumis:', this.invoiceForm.value);
-      // TODO: Implémenter la logique de soumission
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  loadReparations(): void {
+    const reparations: Reparation[] = [
+      {
+        id: 1,
+        vehicule: 'Peugeot 208',
+        statut: 'EN_COURS',
+        dateReception: new Date('2024-06-01'),
+        montantDevis: 1200,
+        montantFacture: 0
+      },
+      {
+        id: 2,
+        vehicule: 'Renault Clio',
+        statut: 'EN_ATTENTE',
+        dateReception: new Date('2024-05-28'),
+        montantDevis: 800,
+        montantFacture: 0
+      },
+      {
+        id: 3,
+        vehicule: 'Citroën C3',
+        statut: 'TERMINEE',
+        dateReception: new Date('2024-05-20'),
+        montantDevis: 950,
+        montantFacture: 950
+      }
+    ];
+    this.dataSource.data = reparations;
+  }
+
+  applyFilter(event: Event): void {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
+  }
+
+  // Appelé lors du changement de statut dans le select
+  onStatutChange(): void {
+    this.dataSource.filter = '' + Math.random(); // force le refresh du filtre
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
+  }
+
+  changerStatut(reparation: Reparation, nouveauStatut: string): void {
+    reparation.statut = nouveauStatut as any;
+    this.dataSource._updateChangeSubscription();
+  }
+
+  validerFacture(reparation: Reparation): void {
+    reparation.montantFacture = reparation.montantDevis;
+    reparation.statut = 'TERMINEE';
+    this.dataSource._updateChangeSubscription();
+  }
+
+  declarerEpave(reparation: Reparation): void {
+    reparation.statut = 'EPAVE';
+    this.dataSource._updateChangeSubscription();
+  }
+
+  formatDate(date: Date): string {
+    return date.toLocaleDateString('fr-FR');
   }
 } 

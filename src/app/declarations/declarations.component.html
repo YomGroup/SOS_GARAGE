@@ -1,0 +1,134 @@
+<div class="claim-declaration">
+      <div class="container">
+        <h1>Déclarez un sinistre</h1>
+        <p class="instruction">Veillez remplir l'ensemble du formulaire</p>
+
+        <div class="progress-indicator">
+          <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">1</div>
+          <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">2</div>
+          <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">3</div>
+          <div class="step" [class.active]="currentStep >= 4" [class.completed]="currentStep > 4">4</div>
+          <div class="step" [class.active]="currentStep >= 5" [class.completed]="currentStep > 5">5</div>
+        </div>
+
+        <!-- Step 1: Vehicle Status -->
+        <div class="step-content" *ngIf="currentStep === 1">
+          <h2>Information sur le véhicule</h2>
+          <div class="vehicle-status">
+            <div class="radio-group">
+              <input type="radio" id="rolling" name="vehicleStatus" value="rolling" [(ngModel)]="vehicleStatus">
+              <label for="rolling" class="radio-label">
+                <i class="icon-car-ok"></i>
+                Mon véhicule est roulant
+              </label>
+            </div>
+            <div class="radio-group">
+              <input type="radio" id="not-rolling" name="vehicleStatus" value="not-rolling" [(ngModel)]="vehicleStatus">
+              <label for="not-rolling" class="radio-label">
+                <i class="icon-car-damaged"></i>
+                Mon véhicule est Non roulant
+              </label>
+            </div>
+          </div>
+        </div>
+
+       <!-- Step 2: Vehicle Selection -->
+<div class="step-content" *ngIf="currentStep === 2">
+  <h2>Choisissez votre véhicule accidenté</h2>
+
+  <div class="vehicle-selection">
+    <div class="vehicle-dropdown" 
+         [class.open]="isDropdownOpen"
+         (click)="toggleDropdown()">
+      <span>{{ selectedVehicle || 'Sélectionner un véhicule' }}</span>
+    </div>
+
+    <ul class="dropdown-list" *ngIf="isDropdownOpen">
+      <li *ngFor="let vehicle of vehicles" 
+          (click)="selectVehicle(vehicle)">
+        {{ vehicle }}
+      </li>
+    </ul>
+  </div>
+</div>
+        <!-- Step 3: Constat -->
+        <div class="step-content" *ngIf="currentStep === 3">
+          <h2>Constat</h2>
+          <div class="file-upload">
+            <div class="upload-area" (click)="fileInput.click()">
+
+              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé votre constat</p>
+              <input #fileInput type="file" accept=".pdf,.jpg,.png" (change)="onFileSelect($event)" style="display: none;">
+            </div>
+            <p class="help-text">
+              Vous n'avez pas de constat ? <br>
+              Rendez-vous sur<a href="https://www.e-constat.fr" target="_blank"> www.e-constat.fr</a>pour réaliser le vôtre.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 4: Photos -->
+        <div class="step-content" *ngIf="currentStep === 4">
+          <h2>Image du Véhicule accidenté</h2>
+          <div class="photo-upload">
+            <div class="upload-area" (click)="photoInput.click()">
+              
+              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé Les photos du sinistre</p>
+              <input #photoInput type="file" accept="image/*" multiple (change)="onPhotoSelect($event)" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Document Signing -->
+       <!-- Step 5: Document Signing -->
+<div class="step-content" *ngIf="currentStep === 5">
+  <div class="document-signing" *ngIf="!allDocumentsSigned">
+    <h2>Document {{ currentDocument }}</h2>
+    
+    <div class="document-preview">
+      <div class="document-header">
+        <h3>Document {{ currentDocument }}</h3>
+      </div>
+      
+      <div class="document-content">
+        <div class="document-placeholder">
+          <i class="icon-document"></i>
+          <p>Contenu du document {{ currentDocument }}</p>
+          <p>Veuillez examiner le document avant de le signer</p>
+        </div>
+      </div>
+    </div>
+    <label class="custom-checkbox">
+  <input type="checkbox" [(ngModel)]="isChecked" (change)="signDocument()" />
+      <span class="checkmark"></span>
+      Je signe le document {{ currentDocument }}
+    </label>
+    <span *ngIf="isSigning">
+        Signature en cours...
+      </span>
+      <span *ngIf="isCurrentDocumentSigned">
+        Document {{ currentDocument }} signé
+      </span>
+  </div>
+
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="allDocumentsSigned">
+    <h2>Votre demande a été prise en compte</h2>
+    <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
+    <button class="btn-contact" routerLink="/assistance">
+      Contactez l'assistance
+    </button>
+  </div>
+</div>
+
+        <!-- Navigation Buttons -->
+        <div class="navigation-buttons" *ngIf="!allDocumentsSigned">
+          <button class="btn-back" (click)="previousStep()" [disabled]="currentStep === 1">
+            Retour
+          </button>
+          <button class="btn-next" (click)="nextStep()" [disabled]="!canProceed()">
+            suivant
+          </button>
+        </div>
+      </div>
+    </div>

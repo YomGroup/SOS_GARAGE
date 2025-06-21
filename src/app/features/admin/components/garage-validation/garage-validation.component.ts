@@ -7,6 +7,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface Garage {
   id: number;
@@ -26,6 +28,7 @@ interface Garage {
 @Component({
   selector: 'app-garage-validation',
   templateUrl: './garage-validation.component.html',
+  styleUrl: './garage-validation.component.css',
   standalone: true,
   imports: [
     CommonModule,
@@ -35,7 +38,9 @@ interface Garage {
     MatFormFieldModule,
     MatInputModule,
     MatIconModule,
-    MatButtonModule
+    MatButtonModule,
+    MatChipsModule,
+    MatTooltipModule
   ]
 })
 export class GarageValidationComponent implements OnInit, AfterViewInit {
@@ -101,5 +106,10 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   modifierCommission(garage: Garage, nouvelleCommission: number): void {
     // TODO: Implémenter la modification de la commission
     console.log('Modification de la commission:', garage, nouvelleCommission);
+  }
+
+  viewDetails(): void {
+    // TODO: Implémenter la logique de visualisation des détails
+    console.log('Voir les détails du garage');
   }
 } 

@@ -1,0 +1,204 @@
+
+
+  .gradient-bg {
+      background: var(--gradient);
+  }
+
+  .text-primary-blue {
+      color: var(--primary-blue);
+  }
+
+  .text-primary-purple {
+      color: var(--primary-purple);
+  }
+
+  .btn-primary-custom {
+      background: var(--gradient);
+      border: none;
+      color: white;
+      transition: all 0.3s ease;
+  }
+
+  .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 74, 173, 0.3);
+      color: white;
+  }
+
+  .btn-outline-custom {
+      border: 2px solid var(--primary-blue);
+      color: var(--primary-blue);
+      background: transparent;
+      transition: all 0.3s ease;
+  }
+
+  .btn-outline-custom:hover {
+      background: var(--primary-blue);
+      color: white;
+      transform: translateY(-2px);
+  }
+
+  .hero-section {
+      background: var(--gradient);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+  }
+
+  .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="rgba(255,255,255,0.1)" points="0,1000 1000,0 1000,1000"/></svg>');
+      background-size: cover;
+  }
+
+  .hero-content {
+      position: relative;
+      z-index: 2;
+  }
+
+  .service-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      height: 100%;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 74, 173, 0.1);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  }
+
+  .service-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0, 74, 173, 0.2);
+  }
+
+  .service-icon {
+      width: 80px;
+      height: 80px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      color: white;
+      font-size: 2rem;
+  }
+
+  .stats-section {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+
+  .stat-item {
+      text-align: center;
+      padding: 2rem;
+  }
+
+  .stat-number {
+      font-size: 3rem;
+      font-weight: bold;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: block;
+  }
+
+  .promo-banner {
+      background: var(--gradient);
+      color: white;
+      padding: 3rem 0;
+      position: relative;
+      overflow: hidden;
+  }
+
+  .promo-banner::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+  }
+
+  .promo-banner::after {
+      content: '';
+      position: absolute;
+      bottom: -30%;
+      left: -5%;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+  }
+
+  .navbar-brand {
+      font-weight: bold;
+      font-size: 1.5rem;
+  }
+
+  .process-step {
+      text-align: center;
+      padding: 1.5rem;
+  }
+
+  .process-number {
+      width: 60px;
+      height: 60px;
+      background: var(--gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      color: white;
+      font-weight: bold;
+      font-size: 1.2rem;
+  }
+
+  .testimonial-card {
+      background: white;
+      border-radius: 15px;
+      padding: 2rem;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid var(--primary-purple);
+  }
+
+  footer {
+      background: var(--primary-blue);
+      color: white;
+  }
+
+  .floating-action {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 1000;
+  }
+
+  .floating-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--gradient);
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      box-shadow: 0 5px 15px rgba(0, 74, 173, 0.4);
+      transition: all 0.3s ease;
+
+
+  }
+
+  .floating-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 25px rgba(0, 74, 173, 0.6);
+  }

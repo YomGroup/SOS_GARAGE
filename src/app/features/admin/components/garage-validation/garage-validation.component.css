@@ -1,0 +1,267 @@
+/* Styles pour la gestion des garages */
+.content-section {
+    padding: 2rem 0;
+}
+
+/* Cartes de statistiques */
+.stats-cards {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-icon.pending {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.stat-icon.active {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.stat-icon.rejected {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+}
+
+.stat-icon.total {
+    background: linear-gradient(135deg, #004AAD, #0066CC);
+}
+
+.stat-info h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--primary-blue);
+}
+
+.stat-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Cartes de garage */
+.garage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.garage-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.garage-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+.garage-header {
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.garage-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.garage-title h4 {
+    margin: 0;
+    color: var(--primary-blue);
+    font-weight: 600;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.badge.pending {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.badge.active {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.badge.rejected {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+.garage-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.garage-content {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.garage-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #6c757d;
+}
+
+.info-item i {
+    color: var(--primary-blue);
+    font-size: 1.1rem;
+}
+
+.garage-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.detail-item .label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-item .value {
+    color: var(--primary-blue);
+    font-weight: 500;
+}
+
+.garage-footer {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Styles pour les boutons */
+.btn-primary-custom {
+    background: var(--gradient);
+    border: none;
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 74, 173, 0.4);
+    color: white;
+}
+
+.btn-outline-custom {
+    border: 2px solid var(--primary-blue);
+    color: var(--primary-blue);
+    background: transparent;
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* Styles pour les filtres */
+.form-select, .form-control {
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus, .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 74, 173, 0.25);
+}
+
+.input-group-text {
+    border-radius: 25px 0 0 25px;
+    border: 2px solid #e9ecef;
+    border-right: none;
+    background: white;
+}
+
+.input-group .form-control {
+    border-radius: 0 25px 25px 0;
+    border-left: none;
+}
+
+/* Styles pour la pagination */
+.pagination {
+    margin-top: 2rem;
+}
+
+.page-link {
+    color: var(--primary-blue);
+    border: none;
+    padding: 0.5rem 1rem;
+    margin: 0 0.25rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.page-item.active .page-link {
+    background: var(--gradient);
+    color: white;
+}
+
+.page-link:hover {
+    background: rgba(0, 74, 173, 0.1);
+    color: var(--primary-blue);
+}

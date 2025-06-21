@@ -12,10 +12,15 @@ import { EpaveManagementComponent } from '../epave-management/epave-management.c
 import { RoleManagementComponent } from '../role-management/role-management.component';
 import { LineChartComponent, BarChartComponent, DoughnutChartComponent } from '../../../../shared/components/charts';
 import { RecentActivityComponent } from '../../../../shared/components/recent-activity/recent-activity.component';
+import { RouterModule } from '@angular/router';
+import { PerformanceChartComponent } from '../charts/performance-chart.component';
+import { DistributionChartComponent } from '../charts/distribution-chart.component';
+import { EvolutionChartComponent } from '../charts/evolution-chart.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
+  styleUrl: './admin-dashboard.component.css',
   imports: [
     CommonModule,
     MatTabsModule,
@@ -31,26 +36,53 @@ import { RecentActivityComponent } from '../../../../shared/components/recent-ac
     LineChartComponent,
     BarChartComponent,
     DoughnutChartComponent,
-    RecentActivityComponent
+    RecentActivityComponent,
+    RouterModule,
+    PerformanceChartComponent,
+    DistributionChartComponent,
+    EvolutionChartComponent
   ],
   standalone: true
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
+  currentGraph: 'performance' | 'distribution' | 'evolution' = 'performance';
+  
+  // Données temporaires pour le développement
   stats = {
-    totalDossiers: 0,
-    dossiersEnCours: 0,
-    garagesEnAttente: 0,
-    epavesEnAttente: 0
+    totalVehicules: 1243,
+    totalSinistres: 567,
+    enCours: 89,
+    epavesEnAttente: 32
   };
 
   constructor() { }
 
   ngOnInit(): void {
-    // TODO: Charger les statistiques depuis le backend
+    // TODO: À implémenter quand le backend sera disponible
+    // this.loadStats();
   }
 
-  onTabChange(event: any): void {
+  // Méthode à implémenter plus tard avec le backend
+  /*
+  private loadStats(): void {
+    this.adminService.getStats().subscribe({
+      next: (stats) => {
+        this.stats = stats;
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des statistiques:', error);
+      }
+    });
+  }
+  */
+
+
+  onTabChange(event: { index: number }): void {
     this.activeTab = event.index;
+  }
+
+  showGraph(type: 'performance' | 'distribution' | 'evolution'): void {
+    this.currentGraph = type;
   }
 } 

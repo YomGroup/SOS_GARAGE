@@ -1,0 +1,328 @@
+/* Styles de base */
+.content-section {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding: 15px;
+}
+
+/* Barre de navigation supérieure */
+.top-navbar {
+    background: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+}
+
+.breadcrumb {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-bottom: 0;
+    padding: 0.5rem 0;
+}
+
+/* Cartes de statistiques */
+.stats-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+    margin-bottom: 15px;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.stats-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.stats-icon i {
+    font-size: 1.2rem;
+}
+
+/* Éléments de sinistre */
+.sinistre-item {
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sinistre-item:hover {
+    background-color: #f8f9fa;
+}
+
+.sinistre-item.selected {
+    background-color: #e3f2fd;
+    border-left: 4px solid #2196F3;
+}
+
+.sinistre-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.sinistre-icon i {
+    font-size: 1rem;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-light {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.badge-outline {
+    background-color: transparent;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.badge-outline:hover {
+    background-color: #e9ecef;
+}
+
+.badge-info {
+    background-color: #17a2b8;
+    color: white;
+}
+
+.vehicle-type-badge {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.vehicle-type-badge.roulant {
+    background-color: #28a745;
+}
+
+.vehicle-type-badge.non-roulant {
+    background-color: #dc3545;
+}
+
+/* Icône d'expansion */
+.expand-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.expand-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* Détails du sinistre */
+.sinistre-details {
+    animation: slideDown 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        max-height: 0;
+    }
+
+    to {
+        opacity: 1;
+        max-height: 500px;
+    }
+}
+
+/* Notifications */
+.notification-item {
+    margin-bottom: 0.75rem;
+}
+
+.notification-item:last-child {
+    margin-bottom: 0;
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #2196F3;
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+/* Boutons */
+.btn-primary-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-primary,
+.btn-outline-secondary,
+.btn-outline-info {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+/* En-têtes */
+.card-header h5,
+.card-header h6 {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+
+/* Disposition responsive */
+@media (min-width: 768px) {
+    .content-section {
+        padding: 20px;
+    }
+
+    .top-navbar {
+        padding: 1rem 1.5rem;
+    }
+
+    .stats-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .stats-icon i {
+        font-size: 1.5rem;
+    }
+
+    .sinistre-icon {
+        width: 50px;
+        height: 50px;
+    }
+
+    .sinistre-icon i {
+        font-size: 1.2rem;
+    }
+
+    .vehicle-type-badge {
+        width: 35px;
+        height: 35px;
+    }
+
+    .btn-primary-custom {
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+    }
+
+    .card-header h5 {
+        font-size: 1.25rem;
+    }
+
+    .card-header h6 {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .content-section {
+        padding: 25px;
+    }
+
+    .sinistre-details .row>[class*="col-"] {
+        padding-right: 15px;
+        padding-left: 15px;
+    }
+}
+
+/* Disposition pour petits écrans */
+@media (max-width: 767px) {
+    .sinistre-item .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sinistre-item .d-flex>div:last-child {
+        margin-top: 10px;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .sinistre-details .row>[class*="col-"] {
+        margin-bottom: 15px;
+    }
+
+    .sinistre-details .row>[class*="col-"]:last-child {
+        margin-bottom: 0;
+    }
+
+    .badge-outline {
+        display: inline-block;
+        margin-bottom: 5px;
+    }
+}
+
+/* Ajustements pour très petits écrans */
+@media (max-width: 575px) {
+    .content-section {
+        padding: 10px;
+    }
+
+    .stats-card .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stats-card .ms-3 {
+        margin-left: 0 !important;
+        margin-top: 10px;
+    }
+
+    .sinistre-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .vehicle-type-badge {
+        width: 25px;
+        height: 25px;
+        font-size: 0.7rem;
+    }
+}

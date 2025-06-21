@@ -1,38 +1,6 @@
 import { bootstrapApplication } from '@angular/platform-browser';
+import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
-import { importProvidersFrom } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
-import { KeycloakAngularModule, KeycloakService } from 'keycloak-angular';
-import { RouterModule } from '@angular/router';
-import { routes } from './app/app.routes'; 
 
-(async () => {
-  const keycloakService = new KeycloakService();
-
-  await keycloakService.init({
-    config: {
-      url: 'https://keyckoak-prod-production.up.railway.app',
-      realm: 'sos-garage',                      
-      clientId: 'sosmongaragefront',
-    },
-    initOptions: {
-      onLoad: 'login-required',
-      checkLoginIframe: false,
-      pkceMethod: 'S256',
-      redirectUri: 'http://localhost:4200/admin/dashboard',
-    },
-    enableBearerInterceptor: true,
-  });
-  
-
-  await bootstrapApplication(AppComponent, {
-    providers: [
-      provideHttpClient(),
-      importProvidersFrom(
-        KeycloakAngularModule,
-        RouterModule.forRoot(routes)  // <-- Ici, on ajoute RouterModule
-      ),
-      { provide: KeycloakService, useValue: keycloakService },
-    ],
-  });
-})();
+bootstrapApplication(AppComponent, appConfig)
+  .catch((err) => console.error(err));

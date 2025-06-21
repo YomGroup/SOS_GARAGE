@@ -1,0 +1,69 @@
+ <div class="vehicles-page">
+      <div class="page-header">
+        <h1>Mes Véhicules</h1>
+        <button class="btn-primary" (click)="showAddForm = true">
+          <i class="icon-plus"></i>
+          Ajouter un véhicule
+        </button>
+      </div>
+
+      <!-- Add Vehicle Form -->
+      <div class="add-vehicle-form" *ngIf="showAddForm">
+        <h2>Ajouter un nouveau véhicule</h2>
+        <form (ngSubmit)="addVehicle()" #vehicleForm="ngForm">
+          <div class="form-group">
+            <label>immatriculation</label>
+            <input type="text" [(ngModel)]="newVehicle.immatriculation"  (blur)="scrapperVehicules()" name="immatriculation" required>
+          </div>
+          <div class="form-group">
+            <label>Modèle</label>
+            <input type="text" [(ngModel)]="newVehicle.modele" name="model" required>
+          </div>
+          <div class="form-group">
+            <label>marque</label>
+            <input type="text" [(ngModel)]="newVehicle.marque" name="marque" required>
+          </div>
+          <div class="form-group">
+            <label>cylindree</label>
+            <input type="text" [(ngModel)]="newVehicle.cylindree" name="cylindree" required>
+          </div>
+             <div class="form-group">
+            <label>carteGrise</label>
+            <input type="text" [(ngModel)]="newVehicle.carteGrise" name="carteGrise" required>
+          </div>
+          <div class="form-group">
+            <label>contratAssurance</label>
+            <input type="text" [(ngModel)]="newVehicle.contratAssurance" name="contratAssurance" required>
+          </div>
+          <div class="form-group">
+  <label>Date de mise en circulation</label>
+  <input type="date" [(ngModel)]="newVehicle.dateMiseEnCirculation" name="dateMiseEnCirculation" required />
+</div>
+          <div class="form-actions">
+            <button type="button" class="btn-secondary" (click)="cancelAdd()">Annuler</button>
+            <button type="submit" class="btn-primary" [disabled]="!vehicleForm.valid">Ajouter</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Vehicles List -->
+      <div class="vehicles-grid">
+        <div class="vehicle-card" *ngFor="let vehicle of vehicles">
+          <div class="vehicle-header">
+            <h3>{{ vehicle.marque }}</h3>
+            <span class="vehicle-status" [class]="vehicle.status">
+              {{ vehicle.status === 'active' ? 'Actif' : 'Inactif' }}
+            </span>
+          </div>
+          <div class="vehicle-details">
+            <p><strong>Modèle:</strong> {{ vehicle.modele }}</p>
+            <p><strong>Année:</strong> {{ vehicle.dateMiseEnCirculation }}</p>
+            <p><strong>Plaque:</strong> {{ vehicle.immatriculation }}</p>
+          </div>
+          <div class="vehicle-actions">
+            <button class="btn-secondary">Modifier</button>
+            <button class="btn-danger" (click)="deleteVehicle(vehicle.id)">Supprimer</button>
+          </div>
+        </div>
+      </div>
+    </div>
