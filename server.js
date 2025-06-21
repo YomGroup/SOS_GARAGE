@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 const app = express();
 
-const appName = 'SOS_GARAGE'; // Assurez-vous que c'est le bon nom de projet
+const appName = 'sos-garage'; // Corrigé pour correspondre à l'outputPath
 
 // Servir les fichiers statiques de l'application Angular
 app.use(express.static(path.join(__dirname, 'dist', appName)));
