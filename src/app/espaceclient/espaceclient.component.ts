@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 
 
@@ -13,7 +14,7 @@ import { isPlatformBrowser } from '@angular/common';
   styleUrl: './espaceclient.component.css'
 })
 export class EspaceclientComponent implements OnInit {
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private auth: AuthService) { }
 
   vehiclesCount: number = 0;
 
@@ -22,16 +23,31 @@ export class EspaceclientComponent implements OnInit {
   sidebarCollapsed = false;
   claimsCount = 9;
   processingCount = 7;
-  currentDate = '10 Janvier 2025';
+  currentDate = '';
   angularReady = false;
   lastScrollTop = 0;
+  email: string = ''
   ngOnInit() {
+    const today = new Date();
+    this.currentDate = today.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
       this.restoreSidebarState();
       this.angularReady = true;
     }
+    this.email = this.auth.getToken()?.name || '';;
+    const hasRole = this.auth.hasRole('ROLE_ASSURE');
+
+    // console.log('Email:', email);
+    console.log('Est Assuré ?', hasRole);
   }
+
+
+
   @HostListener('window:resize', ['$event'])
   onResize() {
     if (isPlatformBrowser(this.platformId)) {
