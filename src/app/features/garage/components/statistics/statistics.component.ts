@@ -1,18 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
-interface MissionStats {
-  total: number;
-  completed: number;
-  inProgress: number;
-  pending: number;
-}
-
-interface FinancialStats {
-  totalInvoices: number;
-  totalCommissions: number;
-  netBalance: number;
-}
+import { DashboardGaragisteService, FinancialStats, MissionStats, RecentMission } from '../../../../services/dashboard-garagiste.service';
 
 @Component({
   selector: 'app-statistics',
@@ -25,40 +13,29 @@ interface FinancialStats {
 })
 export class StatisticsComponent implements OnInit {
   missionStats: MissionStats = {
-    total: 150,
-    completed: 98,
-    inProgress: 35,
-    pending: 17
+    total: 0,
+    completed: 0,
+    inProgress: 0,
+    pending: 0
   };
 
   financialStats: FinancialStats = {
-    totalInvoices: 45000,
-    totalCommissions: 4500,
-    netBalance: 40500
+    totalInvoices: 0,
+    totalCommissions: 0,
+    netBalance: 0
   };
 
-  recentMissions = [
-    {
-      id: 'M001',
-      date: new Date(),
-      status: 'completed',
-      amount: 1200
-    },
-    {
-      id: 'M002',
-      date: new Date(),
-      status: 'in_progress',
-      amount: 850
-    },
-    {
-      id: 'M003',
-      date: new Date(),
-      status: 'pending',
-      amount: 1500
-    }
-  ];
+  recentMissions: RecentMission[] = [];
 
-  constructor() {}
+  constructor(private dashboardService: DashboardGaragisteService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dashboardService.getDashboardData().subscribe(data => {
+      if (data) {
+        this.missionStats = data.missionStats;
+        this.financialStats = data.financialStats;
+        this.recentMissions = data.recentMissions;
+      }
+    });
+  }
 } 

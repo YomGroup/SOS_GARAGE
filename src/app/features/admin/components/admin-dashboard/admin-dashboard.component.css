@@ -350,28 +350,66 @@
 }
 
 .opacity-75 {
-  opacity: 0.75;
+  opacity: 0.75 !important;
+}
+
+@media (max-width: 992px) {
+  .card-header h5 {
+    font-size: 18px;
+  }
+
+  .claim-item, .sinistre-item, .notification-item {
+    padding: 15px;
+    margin: 0 15px 15px 15px;
+  }
+
+  .graph-controls .btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 768px) {
   .card {
-    margin-bottom: 1rem;
+    margin-bottom: 20px;
+    padding: 15px;
   }
-  
-  .sinistre-item {
-    padding: 1rem;
+
+  .sinistre-item, .claim-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
   }
-  
+
   .btn-outline-primary {
-    padding: 0.4rem 1rem;
-    font-size: 0.9rem;
+    padding: 8px 12px;
+    font-size: 14px;
   }
-  
+
   .stats-card {
-    margin-bottom: 1rem;
+    padding: 1rem;
+    text-align: center;
   }
   
+  .stats-card .d-flex {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stats-number {
+    font-size: 1.5rem;
+  }
+
   .graph-controls {
     flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container-fluid {
+    max-width: 1600px;
+    margin: auto;
   }
 } 

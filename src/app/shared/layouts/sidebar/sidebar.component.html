@@ -8,16 +8,13 @@
   <nav class="nav-menu">
     <a *ngFor="let item of menuItems"
        [routerLink]="item.route"
+       (click)="item.action ? item.action($event) : null"
        routerLinkActive="active"
        [routerLinkActiveOptions]="{exact: true}"
        class="nav-item"
        [attr.data-tooltip]="item.title">
       <i [ngClass]="item.icon"></i>
       <span>{{ item.title }}</span>
-    </a>
-    <a (click)="logout()" class="nav-item" data-tooltip="Déconnexion">
-      <i class="bi bi-box-arrow-right"></i>
-      <span>Déconnexion</span>
     </a>
   </nav>
 </aside>
