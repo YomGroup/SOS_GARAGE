@@ -14,6 +14,7 @@
     font-size: 28px;
     margin-bottom: 30px;
     color: #333;
+
 }
 
 /* Cartes de statistiques */
@@ -262,6 +263,7 @@
         margin-bottom: 20px;
     }
 
+
     .stats-cards {
         grid-template-columns: 1fr;
     }
@@ -295,6 +297,7 @@
     }
 
     .welcome-section h1 {
+
         font-size: 20px;
     }
 
@@ -332,5 +335,27 @@
 
     .notification-text {
         font-size: 13px;
+    }
+
+    .welcome-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 20px;
+        order: 2;
+    }
+
+
+    .stats-cards {
+        order: 1;
+    }
+
+    .two-columns {
+        order: 3;
     }
 }
