@@ -1,16 +1,21 @@
-<div class="app-layout" [class.dark]="isDarkMode()">
-  <app-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="toggleSidebar()" />
-  
-  <div class="layout-content" [class.sidebar-collapsed]="sidebarCollapsed()">
-    <app-header 
-      [sidebarCollapsed]="sidebarCollapsed()" 
-      (toggleSidebar)="toggleSidebar()"
+<div class="app-layout" [class.dark]="isDarkMode()" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <button
+    class="sidebar-toggle"
+    (click)="toggleSidebar()"
+    [class.collapsed]="sidebarCollapsed()"
+    aria-label="Ouvrir/fermer la barre latérale"
+  >
+    <i class="bi bi-list"></i>
+  </button>
+  <app-sidebar [collapsed]="sidebarCollapsed()"></app-sidebar>
+  <div class="layout-content">
+    <app-header
+      [sidebarCollapsed]="sidebarCollapsed()"
       (toggleTheme)="toggleTheme()"
-    />
-
+    ></app-header>
     <main class="main-content">
       <div class="content-wrapper">
-        <router-outlet />
+        <router-outlet></router-outlet>
       </div>
     </main>
   </div>

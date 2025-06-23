@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
@@ -28,6 +28,7 @@ export class SidebarComponent implements OnInit {
   @Input() collapsed = false;
   
   private keycloakService = inject(KeycloakService);
+  private cdr = inject(ChangeDetectorRef);
 
   username: string = 'Visiteur';
   userRoles: string[] = [];
@@ -39,6 +40,7 @@ export class SidebarComponent implements OnInit {
         const userProfile = await this.keycloakService.loadUserProfile();
         this.username = userProfile.firstName || userProfile.username || 'Utilisateur';
         this.userRoles = this.keycloakService.getUserRoles();
+        this.cdr.detectChanges();
       } catch (error) {
         console.error('Erreur lors du chargement du profil utilisateur', error);
       }
@@ -77,7 +79,18 @@ export class SidebarComponent implements OnInit {
 
   get menuItems(): MenuItem[] {
     const commonItems: MenuItem[] = [
-      { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
+      {
+        title: 'Messages',
+        icon: 'bi bi-envelope',
+        route: this.userRoles.includes('ROLE_GARAGISTE')
+          ? '/garage/message'
+          : this.userRoles.includes('ROLE_ADMIN')
+            ? '/admin/messages'
+            : this.userRoles.includes('ROLE_ASSURE')
+              ? '/clientDashboard/message'
+              : '/message',
+        badge: '2'
+      },
       { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' },
       { 
         title: 'Déconnexion', 
