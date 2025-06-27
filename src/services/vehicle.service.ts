@@ -16,6 +16,7 @@ export interface Vehicle {
     carteGrise?: string;
     contratAssurance?: string;
     assure?: number;
+    imageUrl?: string;
 }
 
 export interface Claim {
@@ -99,4 +100,12 @@ export class VehicleService {
     addVehiculesPost(body: any = {}) {
         return this.http.post(this.apiUrlAdd, body);
     }
+    updateVehiculesPost(id: number, body: any) {
+        return this.http.put(`${this.apiUrlAdd}/${id}`, body);
+    }
+
+    deleteVehiculesPost(id: number) {
+        return this.http.delete(`${this.apiUrlAdd}/${id}`);
+    }
+
 }

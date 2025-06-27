@@ -1,359 +1,94 @@
- <a href="/" class="back-home">
-        <i class="fas fa-arrow-left me-2"></i>Retour à l'accueil
-    </a>
-
-    <div class="register-container">
-        <div class="register-card">
-            <div class="register-header">
-                <div class="mb-3">
-                    <i class="fas fa-car-side fa-3x"></i>
-                </div>
-                <h1>SOS MON GARAGE</h1>
-                <p>Créez votre compte et profitez de nos services</p>
-            </div>
-
-            <div class="register-body">
-                <!-- Step Indicator -->
-                <div class="step-indicator">
-                    <div class="step active" id="step1">1</div>
-                    <div class="step" id="step2">2</div>
-                    <div class="step" id="step3">3</div>
-                    <div class="step" id="step4">4</div>
-                </div>
-
-                <form id="registerForm" novalidate>
-                    <!-- Step 1: Personal Info -->
-                    <div class="form-step active" id="formStep1">
-                        <h3 class="text-center text-primary-blue mb-4">Informations personnelles</h3>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-user"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="firstName" placeholder="Prénom" required>
-                                    </div>
-                                    <div class="invalid-feedback">Veuillez saisir votre prénom</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-user"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="lastName" placeholder="Nom de famille" required>
-                                    </div>
-                                    <div class="invalid-feedback">Veuillez saisir votre nom</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-birthday-cake"></i>
-                                </span>
-                                <input type="date" class="form-control" id="birthDate" required>
-                            </div>
-                            <div class="invalid-feedback">Veuillez saisir votre date de naissance</div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </span>
-                                <input type="text" class="form-control" id="address" placeholder="Adresse complète" required>
-                            </div>
-                            <div class="invalid-feedback">Veuillez saisir votre adresse</div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-mail-bulk"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="postalCode" placeholder="Code postal" required>
-                                    </div>
-                                    <div class="invalid-feedback">Code postal requis</div>
-                                </div>
-                            </div>
-                            <div class="col-md-8">
-                                <div class="form-group">
-                                    <div class="input-group">
-                                        <span class="input-group-text">
-                                            <i class="fas fa-city"></i>
-                                        </span>
-                                        <input type="text" class="form-control" id="city" placeholder="Ville" required>
-                                    </div>
-                                    <div class="invalid-feedback">Ville requise</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="text-center mt-4">
-                            <button type="button" class="btn btn-primary-custom px-5" onclick="nextStep(1)">
-                                Suivant <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Contact Info -->
-                    <div class="form-step" id="formStep2">
-                        <h3 class="text-center text-primary-blue mb-4">Informations de contact</h3>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-envelope"></i>
-                                </span>
-                                <input type="email" class="form-control" id="email" placeholder="Adresse email" required>
-                            </div>
-                            <div class="invalid-feedback">Veuillez saisir une adresse email valide</div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-phone"></i>
-                                </span>
-                                <input type="tel" class="form-control" id="phone" placeholder="Numéro de téléphone" required>
-                            </div>
-                            <div class="invalid-feedback">Numéro de téléphone requis</div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-mobile-alt"></i>
-                                </span>
-                                <input type="tel" class="form-control" id="mobile" placeholder="Téléphone portable (optionnel)">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label text-primary-blue">Préférence de contact</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="contactPref" id="contactEmail" value="email" checked>
-                                    <label class="form-check-label" for="contactEmail">
-                                        <i class="fas fa-envelope me-1"></i> Email
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="contactPref" id="contactPhone" value="phone">
-                                    <label class="form-check-label" for="contactPhone">
-                                        <i class="fas fa-phone me-1"></i> Téléphone
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="contactPref" id="contactSMS" value="sms">
-                                    <label class="form-check-label" for="contactSMS">
-                                        <i class="fas fa-sms me-1"></i> SMS
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-outline-custom px-4" onclick="prevStep(2)">
-                                <i class="fas fa-arrow-left me-2"></i> Précédent
-                            </button>
-                            <button type="button" class="btn btn-primary-custom px-5" onclick="nextStep(2)">
-                                Suivant <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 3: Security -->
-                    <div class="form-step" id="formStep3">
-                        <h3 class="text-center text-primary-blue mb-4">Sécurité du compte</h3>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                <input type="password" class="form-control" id="password" placeholder="Mot de passe" required>
-                            </div>
-                            <div class="password-strength">
-                                <div class="strength-bar">
-                                    <div class="strength-fill" id="strengthBar"></div>
-                                </div>
-                                <small class="text-muted mt-1 d-block" id="strengthText">
-                                    Le mot de passe doit contenir au moins 8 caractères
-                                </small>
-                            </div>
-                            <div class="invalid-feedback">Mot de passe requis (minimum 8 caractères)</div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-lock"></i>
-                                </span>
-                                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirmer le mot de passe" required>
-                            </div>
-                            <div class="invalid-feedback">Les mots de passe ne correspondent pas</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label text-primary-blue">Question de sécurité</label>
-                            <select class="form-control" id="securityQuestion" required>
-                                <option value="">Choisissez une question</option>
-                                <option value="pet">Nom de votre premier animal de compagnie ?</option>
-                                <option value="school">Nom de votre école primaire ?</option>
-                                <option value="mother">Nom de jeune fille de votre mère ?</option>
-                                <option value="city">Ville de naissance ?</option>
-                            </select>
-                            <div class="invalid-feedback">Veuillez choisir une question de sécurité</div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-group">
-                                <span class="input-group-text">
-                                    <i class="fas fa-key"></i>
-                                </span>
-                                <input type="text" class="form-control" id="securityAnswer" placeholder="Votre réponse" required>
-                            </div>
-                            <div class="invalid-feedback">Réponse requise</div>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-outline-custom px-4" onclick="prevStep(3)">
-                                <i class="fas fa-arrow-left me-2"></i> Précédent
-                            </button>
-                            <button type="button" class="btn btn-primary-custom px-5" onclick="nextStep(3)">
-                                Suivant <i class="fas fa-arrow-right ms-2"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Step 4: Terms & Confirmation -->
-                    <div class="form-step" id="formStep4">
-                        <h3 class="text-center text-primary-blue mb-4">Finalisation</h3>
-
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Presque terminé !</strong> Veuillez accepter nos conditions pour créer votre compte.
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="acceptTerms" required>
-                                <label class="form-check-label" for="acceptTerms">
-                                    J'accepte les <a href="#" class="text-primary-custom">conditions générales d'utilisation</a> et la <a href="#" class="text-primary-custom">politique de confidentialité</a>
-                                </label>
-                                <div class="invalid-feedback">Vous devez accepter les conditions</div>
-                            </div>
-
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="acceptNewsletter">
-                                <label class="form-check-label" for="acceptNewsletter">
-                                    Je souhaite recevoir les actualités et offres spéciales par email
-                                </label>
-                            </div>
-
-                            <div class="form-check mb-3">
-                                <input class="form-check-input" type="checkbox" id="acceptSMS">
-                                <label class="form-check-label" for="acceptSMS">
-                                    J'accepte de recevoir des notifications SMS pour les urgences
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="divider">
-                            <span>ou s'inscrire avec</span>
-                        </div>
-
-                        <div class="social-register">
-                            <a href="#" class="social-btn mb-2">
-                                <i class="fab fa-google"></i>
-                                Continuer avec Google
-                            </a>
-                            <a href="#" class="social-btn">
-                                <i class="fab fa-facebook"></i>
-                                Continuer avec Facebook
-                            </a>
-                        </div>
-
-                        <div class="d-flex justify-content-between mt-4">
-                            <button type="button" class="btn btn-outline-custom px-4" onclick="prevStep(4)">
-                                <i class="fas fa-arrow-left me-2"></i> Précédent
-                            </button>
-                            <button type="submit" class="btn btn-primary-custom px-5">
-                                <i class="fas fa-user-plus me-2"></i> Créer mon compte
-                            </button>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Success Step -->
-                <div class="form-step" id="successStep">
-                    <div class="success-animation">
-                        <div class="success-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <h2 class="text-success mb-3">Compte créé avec succès !</h2>
-                        <p class="text-muted mb-4">
-                            Félicitations ! Votre compte SOS MON GARAGE a été créé. 
-                            Vous pouvez maintenant vous connecter et commencer à utiliser nos services.
-                        </p>
-                        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                            <a href="/login" class="btn btn-primary-custom btn-lg px-4">
-                                <i class="fas fa-sign-in-alt me-2"></i>Se connecter
-                            </a>
-                            <a href="/" class="btn btn-outline-custom btn-lg px-4">
-                                <i class="fas fa-home me-2"></i>Accueil
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="login-link">
-                    <span class="text-muted">Vous avez déjà un compte ? </span>
-                    <a href="/login" class="login-btn">Se connecter</a>
-                </div>
-            </div>
+<div class="registration-container">
+  <div class="registration-layout">
+    <!-- Colonne de gauche avec le logo -->
+    <div class="left-column">
+      <div class="header-section">
+        <div class="logo-container">
+          <img src="assets/logo_sos.png" alt="Logo" class="logo" />
         </div>
+        <div class="brand-text">
+          <h1>SOS Mon Garage</h1>
+          <p>Votre solution d'assistance automobile</p>
+        </div>
+      </div>
     </div>
-<script>
-        let currentStep = 1;
-        const totalSteps = 4;
-
-        // Navigation between steps
-        function nextStep(step) {
-            if (validateStep(step)) {
-                showStep(step + 1);
-            }
-        }
-
-        function prevStep(step) {
-            showStep(step - 1);
-        }
-
-        function showStep(step) {
-            // Hide all steps
-            document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.step').forEach(s => {
-                s.classList.remove('active');
-                s.classList.remove('completed');
-            });
-
-            // Show current step
-            document.getElementById(`formStep${step}`).classList.add('active');
-            document.getElementById(`step${step}`).classList.add('active');
-
-            // Mark previous steps as completed
-            for (let i = 1; i < step; i++) {
-                document.getElementById(`step${i}`).classList.add('completed');
-            }
-
-            currentStep = step;
-        }
-    </script>
+    
+    <!-- Colonne de droite avec le contenu -->
+    <div class="right-column">
+      <!-- Sélection du type d'utilisateur -->
+      <div *ngIf="!userType" class="user-type-selection">
+        <h2>Choisissez le type de compte</h2>
+        <div class="user-type-buttons">
+          <button class="btn-user-type btn-primary-custom" (click)="selectUserType('assure')">
+            Assuré
+          </button>
+          <button class="btn-user-type btn-outline-custom" (click)="selectUserType('garagiste')">
+            Garagiste
+          </button>
+        </div>
+      </div>
+      
+      <!-- Formulaire d'inscription -->
+      <form *ngIf="userType" [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="registration-form">
+        <div class="form-header">
+          <button type="button" class="btn-back" (click)="goBack()">
+            ← Retour
+          </button>
+          <h2 *ngIf="userType === 'assure'" class="form-title">Inscription Assuré</h2>
+          <h2 *ngIf="userType === 'garagiste'" class="form-title">Inscription Garagiste</h2>
+        </div>
+       
+        <!-- Champs pour Assuré -->
+        <div *ngIf="userType === 'assure'">
+          <div class="form-group">
+            <input formControlName="nom" placeholder="Nom" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="prenom" placeholder="Prénom" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="email" placeholder="Email" type="email" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="adresse" placeholder="Adresse" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="adressePostale" placeholder="Adresse postale" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="numeroPermis" placeholder="Numéro de permis" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="password" placeholder="Mot de passe" type="password" class="form-control-custom">
+          </div>
+        </div>
+       
+        <!-- Champs pour Garagiste -->
+        <div *ngIf="userType === 'garagiste'">
+          <div class="form-group">
+            <input formControlName="prenom" placeholder="Prénom" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="email" placeholder="Email" type="email" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="adresse" placeholder="Adresse" class="form-control-custom">
+          </div>
+          <div class="form-group">
+            <input formControlName="password" placeholder="Mot de passe" type="password" class="form-control-custom">
+          </div>
+        </div>
+       
+        <button type="submit" class="btn-submit" [disabled]="registerForm.invalid">
+          Créer mon compte
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

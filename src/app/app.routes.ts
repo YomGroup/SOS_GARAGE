@@ -50,18 +50,18 @@ export const routes: Routes = [
     data: { roles: ['ROLE_ASSURE'] }, // Seul l'assuré peut accéder
     children: [
       { path: '', component: HomeComponent },
-      { path: 'vehicules', component: VehiculesComponent },
-      { path: 'declarations', component: DeclarationsComponent },
-      { path: 'support', component: SupportComponent },
-      { path: 'notification', component: NotificationComponent },
-      { path: 'sinistre', component: SinistreComponent },
-      { path: 'document', component: DocumentComponent },
-      { path: 'message', component: MessageComponent },
-      { path: 'profiles', component: ProfileComponent }
+      { path: 'vehicules', component: VehiculesComponent, data: { title: 'Mes Véhicules' } },
+      { path: 'declarations', component: DeclarationsComponent, data: { title: 'Mes Déclarations' } },
+      { path: 'support', component: SupportComponent, data: { title: 'Support' } },
+      { path: 'notification', component: NotificationComponent, data: { title: 'Notifications' } },
+      { path: 'sinistre', component: SinistreComponent, data: { title: 'Mes Sinistres' } },
+      { path: 'document', component: DocumentComponent, data: { title: 'Mes Documents' } },
+      { path: 'message', component: MessageComponent, data: { title: 'Mes Messages' } },
+      { path: 'profiles', component: ProfileComponent, data: { title: 'Mon Profil' } },
     ]
   },
 
-  // ✅ Accessible publiquement
+
   {
     path: 'client',
     component: ClientLayoutComponent,
@@ -70,7 +70,6 @@ export const routes: Routes = [
     ]
   },
 
-  // ✅ pages publiques
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
       { path: 'message', component: MessageComponent },

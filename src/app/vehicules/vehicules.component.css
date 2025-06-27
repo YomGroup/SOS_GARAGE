@@ -1,247 +1,381 @@
 .vehicles-page {
     padding: 20px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    background: #f8fafc;
+    min-height: 100vh;
 }
 
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 30px;
-    padding: 20px 0;
+    margin-bottom: 40px;
+    padding: 30px 0;
 }
 
 .page-header h1 {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
-    color: #333;
+    color: #1a202c;
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border: none;
-    border-radius: 25px;
-    padding: 12px 24px;
+    border-radius: 50px;
+    padding: 16px 32px;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     text-decoration: none;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(30, 77, 184, 0.3);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(30, 77, 184, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
 }
 
-.btn-primary:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.icon-plus::before {
+    content: "+";
+    font-weight: bold;
+    font-size: 20px;
 }
 
-/* Formulaire d'ajout */
-.add-vehicle-form {
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
     background: white;
-    border-radius: 15px;
-    padding: 30px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f0f0f0;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.add-vehicle-form h2 {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid;
-    border-image: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%) 1;
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
-.form-group {
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 40px 20px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: #718096;
+    cursor: pointer;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.btn-close:hover {
+    background: #f7fafc;
+    color: #2d3748;
+}
+
+.modal-form {
+    padding: 30px 40px 40px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
     margin-bottom: 20px;
 }
 
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
 .form-group label {
-    display: block;
-    font-weight: 500;
-    color: #333;
+    font-weight: 600;
+    color: #4a5568;
     margin-bottom: 8px;
     font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .form-group input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
     font-size: 16px;
     transition: all 0.3s ease;
-    background-color: #fafafa;
+    background-color: #f7fafc;
 }
 
 .form-group input:focus {
     outline: none;
-    border-color: #1e4db8;
+    border-color: #667eea;
     background-color: white;
-    box-shadow: 0 0 0 3px rgba(30, 77, 184, 0.1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.form-actions {
+.modal-actions {
     display: flex;
-    gap: 15px;
+    gap: 16px;
     justify-content: flex-end;
-    margin-top: 30px;
-    padding-top: 20px;
-    border-top: 1px solid #f0f0f0;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid #e2e8f0;
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 24px;
+    background: #f7fafc;
+    color: #4a5568;
+    border: 2px solid #e2e8f0;
+    border-radius: 50px;
+    padding: 14px 28px;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
 }
 
 .btn-secondary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(108, 117, 125, 0.4);
+    background: #edf2f7;
+    border-color: #cbd5e0;
 }
 
-.btn-danger {
-    background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    padding: 12px 20px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(255, 71, 87, 0.3);
-}
-
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
-}
-
-/* Grille des véhicules */
+/* Modern Vehicle Cards */
 .vehicles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 24px;
 }
 
 .vehicle-card {
     background: white;
-    border-radius: 15px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    border: 1px solid #f0f0f0;
-    transition: all 0.3s ease;
-    position: relative;
+    border-radius: 16px;
     overflow: hidden;
-}
-
-.vehicle-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .vehicle-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
 }
 
-.vehicle-header {
+.vehicle-image {
+    position: relative;
+    height: 180px;
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.vehicle-icon {
+    font-size: 64px;
+    opacity: 0.8;
+    filter: grayscale(1);
+    transition: all 0.3s ease;
+}
+
+.vehicle-card:hover .vehicle-icon {
+    transform: scale(1.1);
+    filter: grayscale(0);
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+}
+
+.favorite-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    color: #e11d48;
+    transform: scale(1.1);
+}
+
+.vehicle-content {
+    padding: 20px;
+}
+
+.vehicle-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 4px;
+    line-height: 1.3;
+}
+
+.vehicle-subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.vehicle-specs {
+    margin-bottom: 20px;
+}
+
+.spec-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 0;
 }
 
-.vehicle-header h3 {
-    font-size: 20px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
+.spec-item:not(:last-child) {
+    border-bottom: 1px solid #f1f5f9;
 }
 
-.vehicle-status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    text-transform: uppercase;
-}
-
-.vehicle-status.active {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.vehicle-status.inactive {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.vehicle-details {
-    margin-bottom: 20px;
-}
-
-.vehicle-details p {
-    margin: 8px 0;
-    color: #666;
+.spec-label {
     font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
 }
 
-.vehicle-details strong {
-    color: #333;
-    font-weight: 500;
+.spec-value {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 600;
+    background: #f8fafc;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.vehicle-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
 }
 
 .vehicle-actions {
     display: flex;
-    gap: 10px;
-    justify-content: flex-end;
+    gap: 8px;
+    margin-left: auto;
 }
 
-.vehicle-actions .btn-secondary,
-.vehicle-actions .btn-danger {
-    padding: 8px 16px;
-    font-size: 14px;
-    border-radius: 20px;
+.btn-edit,
+.btn-delete {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
 }
 
-/* Icônes */
-.icon-plus::before {
-    content: "+";
-    font-weight: bold;
-    font-size: 18px;
+.btn-edit {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-edit:hover {
+    background: #dcfce7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
+}
+
+.btn-delete {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.btn-delete:hover {
+    background: #fee2e2;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
 }
 
 /* Responsive */
@@ -253,14 +387,66 @@
     .page-header {
         flex-direction: column;
         gap: 20px;
-        align-items: stretch;
+        text-align: center;
     }
 
-    .form-actions {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .modal-header,
+    .modal-form {
+        padding: 20px;
+    }
+
+    .modal-actions {
         flex-direction: column;
     }
 
-    .vehicle-actions {
-        flex-direction: column;
+    .vehicle-card {
+        margin: 0 10px;
     }
+}
+
+.fullpage-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    /* S'assurer qu'il passe devant tout */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* fond assombri */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner-container {
+    text-align: center;
+    color: white;
+}
+
+.loading-text {
+    margin-top: 12px;
+    font-size: 1.1rem;
+}
+
+.error-message {
+    color: #dc3545;
+    margin-top: 6px;
+    font-size: 0.9rem;
+}
+
+.vehicle-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    max-height: 100px;
 }
