@@ -12,40 +12,40 @@
                 <i class="fas fa-clock"></i>
               </div>
               <div class="stat-info">
-                <h3>24</h3>
+                <h3>{{ stats.enAttente }}</h3>
                 <p>En attente</p>
-      </div>
-    </div>
-  </div>
+              </div>
+            </div>
+          </div>
           <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon active">
                 <i class="fas fa-check-circle"></i>
               </div>
               <div class="stat-info">
-                <h3>156</h3>
+                <h3>{{ stats.actifs }}</h3>
                 <p>Garages actifs</p>
               </div>
-        </div>
-      </div>
+            </div>
+          </div>
           <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon rejected">
                 <i class="fas fa-times-circle"></i>
               </div>
               <div class="stat-info">
-                <h3>12</h3>
+                <h3>{{ stats.rejetes }}</h3>
                 <p>Rejetés</p>
               </div>
-      </div>
-    </div>
+            </div>
+          </div>
           <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon total">
                 <i class="fas fa-building"></i>
               </div>
               <div class="stat-info">
-                <h3>192</h3>
+                <h3>{{ stats.total }}</h3>
                 <p>Total</p>
               </div>
             </div>
@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="col-md-2">
-              <button class="btn btn-primary-custom w-100">
+              <button class="btn btn-primary-custom w-100" (click)="ajouterGarage()">
                 <i class="fas fa-plus me-2"></i>Nouveau
               </button>
             </div>
@@ -90,18 +90,18 @@
 
       <!-- Liste des garages -->
       <div class="garage-list">
-        <!-- Garage en attente -->
-        <div class="garage-card pending">
+        <!-- Garages en attente -->
+        <div class="garage-card pending" *ngFor="let reparateur of reparateursEnAttente">
           <div class="garage-header">
             <div class="garage-title">
-              <h4>Auto Service Paris</h4>
+              <h4>{{ reparateur.name }} {{ reparateur.prenom }}</h4>
               <span class="badge pending">En attente</span>
             </div>
             <div class="garage-actions">
-              <button class="btn btn-sm btn-success" title="Valider">
+              <button class="btn btn-sm btn-success" title="Valider" (click)="validerReparateur(reparateur)">
                 <i class="fas fa-check"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Rejeter">
+              <button class="btn btn-sm btn-danger" title="Rejeter" (click)="rejeterReparateur(reparateur)">
                 <i class="fas fa-times"></i>
               </button>
             </div>
@@ -110,44 +110,40 @@
             <div class="garage-info">
               <div class="info-item">
                 <i class="fas fa-map-marker-alt"></i>
-                <span>123 Avenue des Champs-Élysées, 75008 Paris</span>
+                <span>{{ reparateur.adresse }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-phone"></i>
-                <span>01 23 45 67 89</span>
+                <span>{{ reparateur.telephone }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-envelope"></i>
-                <span>contact&#64;autoservice.fr</span>
+                <span>{{ reparateur.email }}</span>
               </div>
             </div>
             <div class="garage-details">
               <div class="detail-item">
                 <span class="label">SIRET</span>
-                <span class="value">123 456 789 00012</span>
+                <span class="value">{{ reparateur.documents?.siret ? 'Oui' : 'Non' }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Spécialités</span>
-                <span class="value">Mécanique générale, Carrosserie</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Capacité</span>
-                <span class="value">10 véhicules</span>
+                <span class="label">Commission</span>
+                <span class="value">{{ reparateur.commission }}%</span>
               </div>
             </div>
           </div>
           <div class="garage-footer">
-            <button class="btn btn-outline-primary" (click)="viewDetails()">
+            <button class="btn btn-outline-primary" (click)="viewDetails(reparateur)">
               <i class="fas fa-eye me-2"></i>Voir détails
             </button>
           </div>
         </div>
 
-        <!-- Garage actif -->
-        <div class="garage-card active">
+        <!-- Garages actifs -->
+        <div class="garage-card active" *ngFor="let reparateur of reparateursActifs">
           <div class="garage-header">
             <div class="garage-title">
-              <h4>Mécanique Express</h4>
+              <h4>{{ reparateur.name }} {{ reparateur.prenom }}</h4>
               <span class="badge active">Actif</span>
             </div>
             <div class="garage-actions">
@@ -163,41 +159,37 @@
             <div class="garage-info">
               <div class="info-item">
                 <i class="fas fa-map-marker-alt"></i>
-                <span>45 Rue de la République, 69002 Lyon</span>
+                <span>{{ reparateur.adresse }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-phone"></i>
-                <span>04 56 78 90 12</span>
+                <span>{{ reparateur.telephone }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-envelope"></i>
-                <span>contact&#64;mecanique-express.fr</span>
+                <span>{{ reparateur.email }}</span>
               </div>
             </div>
             <div class="garage-details">
               <div class="detail-item">
                 <span class="label">SIRET</span>
-                <span class="value">987 654 321 00012</span>
+                <span class="value">{{ reparateur.documents?.siret ? 'Oui' : 'Non' }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Spécialités</span>
-                <span class="value">Diagnostic, Réparation</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Capacité</span>
-                <span class="value">15 véhicules</span>
+                <span class="label">Commission</span>
+                <span class="value">{{ reparateur.commission }}%</span>
               </div>
             </div>
           </div>
           <div class="garage-footer">
-            <button class="btn btn-outline-primary" (click)="viewDetails()">
+            <button class="btn btn-outline-primary" (click)="viewDetails(reparateur)">
               <i class="fas fa-eye me-2"></i>Voir détails
             </button>
           </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Pagination -->
+      <!-- Pagination -->
       <nav aria-label="Navigation des garages">
         <ul class="pagination justify-content-center">
           <li class="page-item disabled">

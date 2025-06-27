@@ -73,7 +73,7 @@ export const routes: Routes = [
   // ✅ pages publiques
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'message', component: MessageComponent },
+      { path: 'message', component: MessageComponent },
 
   { path: '', redirectTo: 'client', pathMatch: 'full' }
 ];

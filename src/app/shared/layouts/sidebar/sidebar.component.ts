@@ -52,20 +52,15 @@ export class SidebarComponent implements OnInit {
     { title: 'Dossiers', icon: 'bi bi-folder', route: '/admin/dossiers' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
     { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
-    {
-      title: 'Administration', icon: 'bi bi-gear', expanded: false,
-      children: [
-        { title: 'Utilisateurs', route: '/admin/users', icon: 'bi bi-people' },
-        { title: 'Rôles', route: '/admin/roles', icon: 'bi bi-shield-lock' }
-      ]
-    },
-    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/settings' }
+    { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
+    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }     
   ];
 
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
     { title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
     { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
+    { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
   ];
 
   assureMenuItems: MenuItem[] = [
@@ -91,7 +86,6 @@ export class SidebarComponent implements OnInit {
               : '/message',
         badge: '2'
       },
-      { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' },
       { 
         title: 'Déconnexion', 
         icon: 'bi bi-box-arrow-right', 

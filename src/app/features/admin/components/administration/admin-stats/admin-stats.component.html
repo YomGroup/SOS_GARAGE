@@ -1,0 +1,43 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-chart-bar me-2 text-primary"></i>Supervision & Statistiques</h2>
+    <p class="text-muted mb-4">Statistiques d'utilisation et alertes administratives.</p>
+    <div class="row mb-5">
+      <div class="col-md-3" *ngFor="let stat of stats">
+        <div class="stat-card" [style.borderTopColor]="stat.color">
+          <div class="stat-icon" [style.background]="stat.color">
+            <i [class]="stat.icon"></i>
+          </div>
+          <div class="stat-value">{{ stat.value }}</div>
+          <div class="stat-label">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+    <h4 class="mb-3 mt-4"><i class="fas fa-bell me-2 text-primary"></i>Alertes administratives</h4>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let alerte of alertes">
+            <td>{{ alerte.date }}</td>
+            <td>
+              <span [ngClass]="{
+                'badge bg-danger': alerte.type === 'danger',
+                'badge bg-warning': alerte.type === 'warning',
+                'badge bg-info': alerte.type === 'info',
+                'badge bg-success': alerte.type === 'success'
+              }">{{ alerte.type | titlecase }}</span>
+            </td>
+            <td>{{ alerte.message }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> 

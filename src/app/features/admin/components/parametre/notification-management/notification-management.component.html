@@ -1,0 +1,150 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-bell me-2 text-primary"></i>Gestion des Notifications</h2>
+    
+    <div class="notification-container">
+      <form class="notification-form">
+        <!-- Types de notifications -->
+        <div class="notification-section">
+          <h4 class="section-title">
+            <i class="fas fa-envelope me-2 text-primary"></i>Types de notifications
+          </h4>
+          <div class="notification-types">
+            <div class="notification-type">
+              <div class="type-header">
+                <i class="fas fa-envelope-open text-primary"></i>
+                <h5>Notifications par Email</h5>
+              </div>
+              <div class="type-options">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="emailNewCase" [(ngModel)]="emailNewCase" name="emailNewCase">
+                  <label class="form-check-label" for="emailNewCase">
+                    Nouveau dossier créé
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="emailStatusUpdate" [(ngModel)]="emailStatusUpdate" name="emailStatusUpdate">
+                  <label class="form-check-label" for="emailStatusUpdate">
+                    Mise à jour de statut
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="emailReminder" [(ngModel)]="emailReminder" name="emailReminder">
+                  <label class="form-check-label" for="emailReminder">
+                    Rappels et échéances
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="notification-type">
+              <div class="type-header">
+                <i class="fas fa-mobile-alt text-primary"></i>
+                <h5>Notifications Push</h5>
+              </div>
+              <div class="type-options">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="pushNewCase" [(ngModel)]="pushNewCase" name="pushNewCase">
+                  <label class="form-check-label" for="pushNewCase">
+                    Nouveau dossier créé
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="pushStatusUpdate" [(ngModel)]="pushStatusUpdate" name="pushStatusUpdate">
+                  <label class="form-check-label" for="pushStatusUpdate">
+                    Mise à jour de statut
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="pushUrgent" [(ngModel)]="pushUrgent" name="pushUrgent">
+                  <label class="form-check-label" for="pushUrgent">
+                    Dossiers urgents
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="notification-type">
+              <div class="type-header">
+                <i class="fas fa-sms text-primary"></i>
+                <h5>Notifications SMS</h5>
+              </div>
+              <div class="type-options">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="smsUrgent" [(ngModel)]="smsUrgent" name="smsUrgent">
+                  <label class="form-check-label" for="smsUrgent">
+                    Dossiers très urgents uniquement
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="smsSystem" [(ngModel)]="smsSystem" name="smsSystem">
+                  <label class="form-check-label" for="smsSystem">
+                    Alertes système critiques
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Fréquence des notifications -->
+        <div class="notification-section">
+          <h4 class="section-title">
+            <i class="fas fa-clock me-2 text-primary"></i>Fréquence des notifications
+          </h4>
+          <div class="frequency-options">
+            <div class="form-group">
+              <label for="emailFrequency" class="form-label">Fréquence des emails</label>
+              <select id="emailFrequency" class="form-control" [(ngModel)]="emailFrequency" name="emailFrequency">
+                <option value="immediate">Immédiat</option>
+                <option value="hourly">Toutes les heures</option>
+                <option value="daily">Résumé quotidien</option>
+                <option value="weekly">Résumé hebdomadaire</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="pushFrequency" class="form-label">Fréquence des notifications push</label>
+              <select id="pushFrequency" class="form-control" [(ngModel)]="pushFrequency" name="pushFrequency">
+                <option value="immediate">Immédiat</option>
+                <option value="batched">Regroupées (toutes les 30 min)</option>
+                <option value="urgent">Urgentes uniquement</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heures de réception -->
+        <div class="notification-section">
+          <h4 class="section-title">
+            <i class="fas fa-calendar-day me-2 text-primary"></i>Heures de réception
+          </h4>
+          <div class="time-options">
+            <div class="form-group">
+              <label for="startTime" class="form-label">Heure de début</label>
+              <input type="time" id="startTime" class="form-control" [(ngModel)]="startTime" name="startTime">
+            </div>
+            <div class="form-group">
+              <label for="endTime" class="form-label">Heure de fin</label>
+              <input type="time" id="endTime" class="form-control" [(ngModel)]="endTime" name="endTime">
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="weekendNotifications" [(ngModel)]="weekendNotifications" name="weekendNotifications">
+              <label class="form-check-label" for="weekendNotifications">
+                Recevoir les notifications le weekend
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary me-2" (click)="resetNotifications()">
+            <i class="fas fa-undo me-2"></i>Réinitialiser
+          </button>
+          <button type="submit" class="btn btn-primary-custom" (click)="saveNotifications()">
+            <i class="fas fa-save me-2"></i>Enregistrer les paramètres
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

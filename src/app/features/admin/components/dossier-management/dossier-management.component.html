@@ -48,22 +48,22 @@
 
         <!-- Vue en cartes -->
         <div class="row" id="cardViewContainer">
-            <!-- Dossier en cours -->
-            <div class="col-md-6 col-lg-4 mb-4">
+            <ng-container *ngIf="dataSource.data.length; else noDossier">
+                <div class="col-md-6 col-lg-4 mb-4" *ngFor="let dossier of dataSource.data" (click)="editDossier(dossier)" style="cursor:pointer;">
                 <div class="document-card">
                     <div class="document-icon reports">
                         <i class="fas fa-folder-open"></i>
                     </div>
                     <div class="document-info">
-                        <h6>Dossier #2025-001</h6>
-                        <p class="text-muted">Jean Dupont - Peugeot 308</p>
-                        <small class="text-muted">En cours depuis le 15/03/2025</small>
+                            <h6>Dossier #{{ dossier.numero }}</h6>
+                            <p class="text-muted">Type : {{ dossier.type }}</p>
+                            <small class="text-muted">Statut : {{ dossier.statut }}</small>
                     </div>
                     <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
+                            <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="$event.stopPropagation(); voirDossier(dossier)">
                             <i class="fas fa-eye"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-success" title="Modifier">
+                            <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="$event.stopPropagation(); editDossier(dossier)">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger" title="Supprimer">
@@ -72,56 +72,10 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Dossier terminé -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon insurance">
-                        <i class="fas fa-folder"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Dossier #2025-002</h6>
-                        <p class="text-muted">Marie Martin - Renault Clio</p>
-                        <small class="text-muted">Terminé le 10/03/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dossier en attente -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon photos">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Dossier #2025-003</h6>
-                        <p class="text-muted">Pierre Durand - Citroën C3</p>
-                        <small class="text-muted">En attente depuis le 08/03/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Modifier">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </ng-container>
+            <ng-template #noDossier>
+                <div class="col-12 text-center text-muted">Aucun dossier trouvé.</div>
+            </ng-template>
         </div>
 
         <!-- Vue en tableau (cachée par défaut) -->
@@ -130,25 +84,24 @@
                 <thead>
                     <tr>
                         <th>N° Dossier</th>
-                        <th>Client</th>
-                        <th>Véhicule</th>
+                        <th>Type</th>
                         <th>Statut</th>
                         <th>Date</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>#2025-001</td>
-                        <td>Jean Dupont</td>
-                        <td>Peugeot 308</td>
-                        <td><span class="badge bg-primary">En cours</span></td>
-                        <td>15/03/2025</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" title="Voir">
+                    <ng-container *ngIf="dataSource.data.length; else noDossierTable">
+                        <tr *ngFor="let dossier of dataSource.data">
+                            <td>#{{ dossier.numero }}</td>
+                            <td>{{ dossier.type }}</td>
+                            <td><span class="badge" [ngClass]="getStatutClass(dossier.statut)">{{ dossier.statut }}</span></td>
+                            <td>{{ formatDate(dossier.dateCreation) }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="voirDossier(dossier)">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-success" title="Modifier">
+                                <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="editDossier(dossier)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" title="Supprimer">
@@ -156,42 +109,12 @@
                             </button>
                         </td>
                     </tr>
-                    <tr>
-                        <td>#2025-002</td>
-                        <td>Marie Martin</td>
-                        <td>Renault Clio</td>
-                        <td><span class="badge bg-success">Terminé</span></td>
-                        <td>10/03/2025</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" title="Voir">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-success" title="Modifier">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
+                    </ng-container>
+                    <ng-template #noDossierTable>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Aucun dossier trouvé.</td>
                     </tr>
-                    <tr>
-                        <td>#2025-003</td>
-                        <td>Pierre Durand</td>
-                        <td>Citroën C3</td>
-                        <td><span class="badge bg-warning">En attente</span></td>
-                        <td>08/03/2025</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary" title="Voir">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-success" title="Modifier">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                </td>
-            </tr>
+                    </ng-template>
                 </tbody>
         </table>
         </div>
@@ -212,3 +135,4 @@
         </nav>
     </div>
 </div>
+<router-outlet></router-outlet>

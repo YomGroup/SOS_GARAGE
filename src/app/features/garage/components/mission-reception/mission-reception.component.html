@@ -1,53 +1,117 @@
+<!-- Réception de Mission - UI moderne améliorée -->
 <div class="mission-reception-container">
-  <h2 class="mission-title">Réception de Mission</h2>
+  <div class="container-fluid">
+    <!-- Header moderne avec ombre portée -->
+    <div class="d-flex justify-content-between align-items-center mb-4 p-3 header-section">
+      <h2 class="mission-title mb-0">
+        <i class="fas fa-clipboard-list me-2"></i>Réception des missions
+      </h2>
+      <span class="badge bg-primary fs-6 shadow-sm">{{ missions.length }} missions</span>
+    </div>
 
-  <form  class="mission-form">
-    <!-- Section Documents -->
-    <div class="section">
-      <h3 class="section-title">Documents du véhicule</h3>
-      <div class="documents-row">
-        <div class="document-upload">
-          <input type="file" accept="image/*" (change)="onFileSelected($event, 'vehiclePhotos')" multiple id="vehiclePhotos" hidden #vehiclePhotos>
-          <label for="vehiclePhotos" class="upload-label">
-            <span class="icon-doc"><i class="fas fa-camera"></i></span>
-            <span>Photos du véhicule</span>
-          </label>
+    <!-- Grille responsive des missions améliorée -->
+    <div class="row g-4 px-2">
+      <div class="col-12 col-sm-6 col-lg-4 col-xl-3" *ngFor="let mission of missions">
+        <div class="document-card h-100 d-flex flex-column justify-content-between hover-effect">
+          <div class="d-flex align-items-center mb-3">
+            <div class="document-icon reports me-3 shadow-sm">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="mission-info">
+              <h5 class="mb-1 text-truncate">{{ mission.titre }}</h5>
+              <div class="text-muted small">
+                <i class="fas fa-user me-1"></i>{{ mission.client }}
+              </div>
+              <div class="text-muted small">
+                <i class="fas fa-car me-1"></i>{{ mission.vehicule }}
+              </div>
+              <div class="text-muted small">
+                <i class="far fa-calendar-alt me-1"></i>{{ mission.date }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-auto text-end">
+            <button class="btn btn-outline-primary btn-sm px-4 rounded-pill action-btn" 
+                    (click)="ouvrirDetails(mission)">
+              <i class="fas fa-eye me-1"></i> Voir détails
+            </button>
+          </div>
         </div>
-        <div class="document-upload">
-          <input type="file" accept="image/*,.pdf" (change)="onFileSelected($event, 'accidentReport')" id="accidentReport" hidden #accidentReport>
-          <label for="accidentReport" class="upload-label">
-            <span class="icon-doc"><i class="fas fa-file-alt"></i></span>
-            <span>Constat d'accident</span>
-          </label>
+      </div>
+    </div>
+
+    <!-- Panneau latéral de détails modernisé -->
+    <div class="side-panel" [class.open]="panelOuvert">
+      <div class="side-panel-content" *ngIf="missionSelectionnee">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <h4 class="mb-0 panel-title">
+            <i class="fas fa-info-circle me-2"></i>Détails de la mission
+          </h4>
+          <button class="close-btn" (click)="fermerPanel()">
+            <i class="fas fa-times"></i>
+          </button>
         </div>
+        
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-user me-2"></i>Client</div>
+          <div class="detail-value">{{ missionSelectionnee?.client }}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-car me-2"></i>Véhicule</div>
+          <div class="detail-value">{{ missionSelectionnee?.vehicule }}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-align-left me-2"></i>Description</div>
+          <div class="detail-value">{{ missionSelectionnee?.description }}</div>
+        </div>
+        
+        <div class="detail-item">
+          <div class="detail-label"><i class="far fa-calendar-alt me-2"></i>Date</div>
+          <div class="detail-value">{{ missionSelectionnee?.date }}</div>
+        </div>
+        
+        <div class="section-divider"></div>
+        
+        <div class="photos-section">
+          <h5 class="section-subtitle">
+            <i class="fas fa-camera me-2"></i>Photos du véhicule
+          </h5>
+          <div class="photos-grid">
+            <div class="photo-thumbnail" *ngFor="let photo of missionSelectionnee?.photos">
+              <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
+              <div class="photo-overlay">
+                <i class="fas fa-search-plus"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="documents-section">
+          <h5 class="section-subtitle">
+            <i class="fas fa-file-alt me-2"></i>Documents
+          </h5>
+          <div class="documents-list">
+            <a *ngFor="let doc of missionSelectionnee?.documents" 
+               [href]="doc.url" 
+               target="_blank" 
+               class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>{{ doc.nom }}
+              <i class="fas fa-download ms-auto"></i>
+            </a>
+          </div>
+        </div>
+        
+        <button class="btn btn-primary-custom w-100 py-2 fs-5 rounded-pill mt-4 accept-btn"
+                *ngIf="missionSelectionnee"
+                (click)="accepterMission(missionSelectionnee!)">
+          <i class="fas fa-check-circle me-2"></i>Accepter la mission
+        </button>
       </div>
     </div>
-
-    <!-- Section Formulaire -->
-    <div class="section">
-      <h3 class="section-title">Formulaire de prise en charge</h3>
-      <div class="form-group">
-        <label for="hasReplacementVehicle">Véhicule de secours disponible</label>
-        <select formControlName="hasReplacementVehicle" id="hasReplacementVehicle">
-          <option value="true">Oui</option>
-          <option value="false">Non</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="advantages">Avantages proposés</label>
-        <select formControlName="advantages" id="advantages" multiple>
-          <option value="pickup">Service de prise en charge</option>
-          <option value="delivery">Service de livraison</option>
-          <option value="warranty">Garantie étendue</option>
-          <option value="discount">Réduction sur les pièces</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-actions">
-      <button type="submit" [disabled]="!missionForm.valid" class="btn-primary-custom">
-        Valider la prise en charge
-      </button>
-    </div>
-  </form>
+    
+    <!-- Overlay pour le panneau latéral -->
+    <div class="side-panel-overlay" [class.active]="panelOuvert" (click)="fermerPanel()"></div>
+  </div>
 </div>

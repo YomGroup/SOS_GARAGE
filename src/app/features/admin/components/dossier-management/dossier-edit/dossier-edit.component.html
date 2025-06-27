@@ -1,0 +1,79 @@
+<div class="edit-overlay">
+  <div class="edit-modal">
+    <div class="dialog-header">
+      <h2>
+        <i class="fas fa-folder-open me-2"></i>
+        Gestion du Dossier
+      </h2>
+      <button class="close-button" (click)="close()" aria-label="Fermer">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="dialog-content">
+      <div class="info-section">
+        <h3><i class="fas fa-info-circle me-2"></i>Informations générales</h3>
+        <p class="subtitle">Modifiez les informations du dossier et attribuez-le à un sinistre.</p>
+      </div>
+
+      <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="edit-form">
+        <div class="form-section">
+          <h3><i class="fas fa-edit me-2"></i>Détails du dossier</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="type">Type de dossier</label>
+              <input id="type" formControlName="type" class="form-control" placeholder="Type (ex: ROULANT)" />
+            </div>
+            <div class="form-group">
+              <label for="contactAssistance">Contact assistance</label>
+              <input id="contactAssistance" formControlName="contactAssistance" class="form-control" placeholder="Contact assistance" />
+            </div>
+            <div class="form-group">
+              <label for="idVehicule">ID Véhicule</label>
+              <input id="idVehicule" formControlName="idVehicule" class="form-control" placeholder="ID du véhicule" />
+            </div>
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="conditionsAcceptees" />
+                <span class="checkmark"></span>
+                Conditions acceptées
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><i class="fas fa-link me-2"></i>Attribution au sinistre</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="sinistre">Attribuer à un sinistre</label>
+              <select id="sinistre" formControlName="sinistre" class="form-control">
+                <option value="">Sélectionner un sinistre</option>
+                <option *ngFor="let s of sinistres" [value]="s.id">{{ s.nom }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>&nbsp;</label>
+              <button type="button" class="btn btn-mission" (click)="attribuerMission()">
+                <i class="fas fa-paper-plane me-2"></i>Attribuer comme mission
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3><i class="fas fa-cogs me-2"></i>Actions</h3>
+          <div class="actions-grid">
+            <button type="button" class="btn btn-secondary" (click)="close()">
+              <i class="fas fa-times me-2"></i>Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="!dossierForm.valid">
+              <i class="fas fa-save me-2"></i>Enregistrer les modifications
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 
+

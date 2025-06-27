@@ -1,0 +1,152 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-user-plus me-2 text-primary"></i>Gestion des Accès</h2>
+    <p class="text-muted mb-4">Invitations d'utilisateurs, réinitialisation de mots de passe, gestion des accès.</p>
+    
+    <!-- Messages d'erreur et de succès -->
+    <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+      <i class="fas fa-exclamation-triangle me-2"></i>{{ errorMessage }}
+    </div>
+    
+    <div *ngIf="successMessage" class="alert alert-success mb-3">
+      <i class="fas fa-check-circle me-2"></i>{{ successMessage }}
+    </div>
+    
+    <!-- Indicateur de chargement -->
+    <div *ngIf="isLoading" class="text-center mb-3">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-2">Chargement des utilisateurs...</p>
+    </div>
+    
+    <!-- Formulaire d'invitation -->
+    <form [formGroup]="invitationForm" (ngSubmit)="envoyerInvitation()" class="row g-3 mb-4">
+      <div class="col-md-2">
+        <input type="text" class="form-control" placeholder="Nom *" formControlName="nom" [ngClass]="{'is-invalid': invitationForm.get('nom')?.invalid && invitationForm.get('nom')?.touched}">
+        <div *ngIf="invitationForm.get('nom')?.hasError('required') && invitationForm.get('nom')?.touched" class="invalid-feedback">
+          Nom requis
+        </div>
+      </div>
+      <div class="col-md-2">
+        <input type="text" class="form-control" placeholder="Prénom *" formControlName="prenom" [ngClass]="{'is-invalid': invitationForm.get('prenom')?.invalid && invitationForm.get('prenom')?.touched}">
+        <div *ngIf="invitationForm.get('prenom')?.hasError('required') && invitationForm.get('prenom')?.touched" class="invalid-feedback">
+          Prénom requis
+        </div>
+      </div>
+      <div class="col-md-2">
+        <input type="email" class="form-control" placeholder="Email *" formControlName="email" [ngClass]="{'is-invalid': invitationForm.get('email')?.invalid && invitationForm.get('email')?.touched}">
+        <div *ngIf="invitationForm.get('email')?.hasError('required') && invitationForm.get('email')?.touched" class="invalid-feedback">
+          Email requis
+        </div>
+        <div *ngIf="invitationForm.get('email')?.hasError('email') && invitationForm.get('email')?.touched" class="invalid-feedback">
+          Email invalide
+        </div>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" formControlName="role" [ngClass]="{'is-invalid': invitationForm.get('role')?.invalid && invitationForm.get('role')?.touched}">
+          <option value="" disabled selected>Rôle *</option>
+          <option value="Assuré">Assuré</option>
+          <option value="Réparateur">Réparateur</option>
+        </select>
+        <div *ngIf="invitationForm.get('role')?.hasError('required') && invitationForm.get('role')?.touched" class="invalid-feedback">
+          Rôle requis
+        </div>
+      </div>
+      <div class="col-md-2">
+        <input type="tel" class="form-control" placeholder="Téléphone" formControlName="telephone">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary-custom w-100" type="submit" [disabled]="!invitationForm.valid || isLoading">
+          <i class="fas fa-paper-plane me-2"></i>Inviter
+        </button>
+      </div>
+    </form>
+    
+    <h4 class="mb-3 mt-4"><i class="fas fa-envelope-open-text me-2 text-primary"></i>Invitations en attente</h4>
+    <div class="table-responsive mb-5">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of invitations">
+            <td>{{ inv.nom }}</td>
+            <td>{{ inv.prenom }}</td>
+            <td>{{ inv.email }}</td>
+            <td>
+              <span [ngClass]="inv.role === 'Assuré' ? 'badge bg-info' : 'badge bg-warning'">
+                {{ inv.role }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="{
+                'badge bg-info': inv.statut === 'En attente',
+                'badge bg-success': inv.statut === 'Acceptée',
+                'badge bg-danger': inv.statut === 'Expirée'
+              }">{{ inv.statut }}</span>
+            </td>
+            <td>{{ inv.date }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <h4 class="mb-3 mt-4"><i class="fas fa-key me-2 text-primary"></i>Gestion des accès utilisateurs</h4>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Prénom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Dernière connexion</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of utilisateurs">
+            <td>{{ user.nom }}</td>
+            <td>{{ user.prenom }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span [ngClass]="user.role === 'Assuré' ? 'badge bg-info' : 'badge bg-warning'">
+                {{ user.role }}
+              </span>
+            </td>
+            <td>
+              <span [ngClass]="user.actif ? 'badge bg-success' : 'badge bg-danger'">
+                {{ user.actif ? 'Actif' : 'Inactif' }}
+              </span>
+            </td>
+            <td>{{ user.derniereConnexion }}</td>
+            <td>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-danger" (click)="resetPassword(user)" [disabled]="user.reset">
+                  <i class="fas fa-redo-alt"></i>
+                  <span *ngIf="!user.reset">Réinitialiser</span>
+                  <span *ngIf="user.reset"><i class="fas fa-check text-success"></i> Envoyé !</span>
+                </button>
+                <button class="btn btn-sm" 
+                        [ngClass]="user.actif ? 'btn-outline-warning' : 'btn-outline-success'" 
+                        (click)="toggleUserStatus(user)"
+                        [title]="user.actif ? 'Désactiver' : 'Activer'">
+                  <i [class]="user.actif ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> 

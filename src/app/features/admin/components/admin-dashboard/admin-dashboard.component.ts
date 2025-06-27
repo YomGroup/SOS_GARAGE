@@ -16,6 +16,8 @@ import { RouterModule } from '@angular/router';
 import { PerformanceChartComponent } from '../charts/performance-chart.component';
 import { DistributionChartComponent } from '../charts/distribution-chart.component';
 import { EvolutionChartComponent } from '../charts/evolution-chart.component';
+import { AdminService } from '../../../../../services/admin.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -40,31 +42,33 @@ import { EvolutionChartComponent } from '../charts/evolution-chart.component';
     RouterModule,
     PerformanceChartComponent,
     DistributionChartComponent,
-    EvolutionChartComponent
+    EvolutionChartComponent,
+    HttpClientModule
   ],
-  standalone: true
+  standalone: true,
+  providers: [AdminService]
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
   currentGraph: 'performance' | 'distribution' | 'evolution' = 'performance';
   
-  // Données temporaires pour le développement
   stats = {
-    totalVehicules: 1243,
-    totalSinistres: 567,
-    enCours: 89,
-    epavesEnAttente: 32
+    totalVehicules: 0,
+    totalSinistres: 0,
+    enCours: 0,
+    epavesEnAttente: 0
   };
 
-  constructor() { }
+  recentVehicules: any[] = [];
+  recentSinistres: any[] = [];
+
+  constructor(private adminService: AdminService) { }
 
   ngOnInit(): void {
-    // TODO: À implémenter quand le backend sera disponible
-    // this.loadStats();
+    this.loadStats();
+    this.loadVehicules();
   }
 
-  // Méthode à implémenter plus tard avec le backend
-  /*
   private loadStats(): void {
     this.adminService.getStats().subscribe({
       next: (stats) => {
@@ -75,8 +79,18 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
   }
-  */
 
+  private loadVehicules(): void {
+    this.adminService.getAllVehicules().subscribe({
+      next: (vehicules) => {
+        this.stats.totalVehicules = vehicules.length;
+        this.recentVehicules = vehicules.slice(0, 3); // Prend les 3 premiers pour l'affichage
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des véhicules:', error);
+      }
+    });
+  }
 
   onTabChange(event: { index: number }): void {
     this.activeTab = event.index;
@@ -85,4 +99,4 @@ export class AdminDashboardComponent implements OnInit {
   showGraph(type: 'performance' | 'distribution' | 'evolution'): void {
     this.currentGraph = type;
   }
-} 
+}

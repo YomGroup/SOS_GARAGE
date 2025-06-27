@@ -59,7 +59,22 @@
   margin: 0;
 }
 
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.stats-row > [class^='col-'] {
+  display: flex;
+}
+
 .stats-card {
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  min-height: 140px;
   background: var(--gradient);
   border-radius: 15px;
   padding: 1.5rem;
@@ -264,12 +279,17 @@
 
 .sinistre-header {
   margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
 }
 
 .sinistre-id {
   font-size: 16px;
   font-weight: 600;
   color: #1e4db8;
+  white-space: nowrap;
 }
 
 .sinistre-details {
@@ -411,5 +431,64 @@
   .container-fluid {
     max-width: 1600px;
     margin: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .card-header h5 {
+    font-size: 16px;
+  }
+
+  .claim-item, .sinistre-item, .notification-item {
+    padding: 10px;
+    margin: 0 5px 10px 5px;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+
+  .stats-card {
+    padding: 0.5rem;
+    text-align: center;
+    min-height: 100px;
+  }
+
+  .stats-card .d-flex {
+    flex-direction: column !important;
+    gap: 8px;
+  }
+
+  .graph-container {
+    min-height: 200px;
+    padding: 0.5rem;
+  }
+
+  .btn-outline-primary {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .card {
+    margin-bottom: 10px;
+    padding: 8px;
+  }
+
+  .recent-claims, .notification-item, .sinistre-item {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sinistre-details span, .claim-item strong, .sinistre-id {
+    word-break: break-word;
+  }
+
+  .sinistre-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .status-badge {
+    width: 100%;
+    max-width: none;
   }
 } 

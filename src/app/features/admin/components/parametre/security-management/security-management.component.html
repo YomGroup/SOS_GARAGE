@@ -1,0 +1,134 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-shield-alt me-2 text-primary"></i>Sécurité & Mot de passe</h2>
+    
+    <div class="security-container">
+      <!-- Changement de mot de passe -->
+      <div class="security-section">
+        <h4 class="section-title">
+          <i class="fas fa-key me-2 text-primary"></i>Changement de mot de passe
+        </h4>
+        <form class="password-form">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="currentPassword" class="form-label">Mot de passe actuel</label>
+                <div class="password-input">
+                  <input type="password" id="currentPassword" class="form-control" [(ngModel)]="currentPassword" name="currentPassword">
+                  <button type="button" class="password-toggle" (click)="togglePasswordVisibility('currentPassword')">
+                    <i class="fas" [class.fa-eye]="!showCurrentPassword" [class.fa-eye-slash]="showCurrentPassword"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="newPassword" class="form-label">Nouveau mot de passe</label>
+                <div class="password-input">
+                  <input type="password" id="newPassword" class="form-control" [(ngModel)]="newPassword" name="newPassword">
+                  <button type="button" class="password-toggle" (click)="togglePasswordVisibility('newPassword')">
+                    <i class="fas" [class.fa-eye]="!showNewPassword" [class.fa-eye-slash]="showNewPassword"></i>
+                  </button>
+                </div>
+                <div class="password-strength" *ngIf="newPassword">
+                  <div class="strength-bar">
+                    <div class="strength-fill" [ngClass]="passwordStrengthClass"></div>
+                  </div>
+                  <span class="strength-text">{{passwordStrengthText}}</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                <label for="confirmPassword" class="form-label">Confirmer le nouveau mot de passe</label>
+                <div class="password-input">
+                  <input type="password" id="confirmPassword" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword">
+                  <button type="button" class="password-toggle" (click)="togglePasswordVisibility('confirmPassword')">
+                    <i class="fas" [class.fa-eye]="!showConfirmPassword" [class.fa-eye-slash]="showConfirmPassword"></i>
+                  </button>
+                </div>
+                <div class="password-match" *ngIf="confirmPassword">
+                  <i class="fas" [class.fa-check-circle]="passwordsMatch" [class.fa-times-circle]="!passwordsMatch"></i>
+                  <span [ngClass]="passwordsMatch ? 'text-success' : 'text-danger'">
+                    {{passwordsMatch ? 'Mots de passe identiques' : 'Mots de passe différents'}}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-primary-custom" (click)="changePassword()" [disabled]="!canChangePassword()">
+              <i class="fas fa-key me-2"></i>Changer le mot de passe
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Authentification à deux facteurs -->
+      <div class="security-section">
+        <h4 class="section-title">
+          <i class="fas fa-mobile-alt me-2 text-primary"></i>Authentification à deux facteurs (2FA)
+        </h4>
+        <div class="two-factor-section">
+          <div class="two-factor-status">
+            <div class="status-indicator" [ngClass]="twoFactorEnabled ? 'enabled' : 'disabled'">
+              <i class="fas" [class.fa-check-circle]="twoFactorEnabled" [class.fa-times-circle]="!twoFactorEnabled"></i>
+              <span>{{twoFactorEnabled ? 'Activé' : 'Désactivé'}}</span>
+            </div>
+            <button type="button" class="btn" [ngClass]="twoFactorEnabled ? 'btn-outline-danger' : 'btn-outline-success'" (click)="toggleTwoFactor()">
+              <i class="fas" [class.fa-lock]="!twoFactorEnabled" [class.fa-unlock]="twoFactorEnabled"></i>
+              {{twoFactorEnabled ? 'Désactiver' : 'Activer'}} 2FA
+            </button>
+          </div>
+          <div class="two-factor-info" *ngIf="!twoFactorEnabled">
+            <p>L'authentification à deux facteurs ajoute une couche de sécurité supplémentaire à votre compte.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sessions actives -->
+      <div class="security-section">
+        <h4 class="section-title">
+          <i class="fas fa-desktop me-2 text-primary"></i>Sessions actives
+        </h4>
+        <div class="sessions-list">
+          <div class="session-item" *ngFor="let session of activeSessions">
+            <div class="session-info">
+              <div class="session-icon">
+                <i class="fas" [class.fa-desktop]="session.type === 'desktop'" [class.fa-mobile-alt]="session.type === 'mobile'" [class.fa-tablet-alt]="session.type === 'tablet'"></i>
+              </div>
+              <div class="session-details">
+                <h6>{{session.device}}</h6>
+                <p>{{session.location}} • {{session.lastActivity}}</p>
+              </div>
+            </div>
+            <div class="session-actions">
+              <button type="button" class="btn btn-sm btn-outline-danger" (click)="terminateSession(session.id)" *ngIf="!session.current">
+                <i class="fas fa-times"></i>
+              </button>
+              <span class="current-badge" *ngIf="session.current">Session actuelle</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique de connexion -->
+      <div class="security-section">
+        <h4 class="section-title">
+          <i class="fas fa-history me-2 text-primary"></i>Historique de connexion
+        </h4>
+        <div class="login-history">
+          <div class="history-item" *ngFor="let login of loginHistory">
+            <div class="history-icon">
+              <i class="fas" [class.fa-sign-in-alt]="login.success" [class.fa-exclamation-triangle]="!login.success"></i>
+            </div>
+            <div class="history-details">
+              <h6>{{login.success ? 'Connexion réussie' : 'Tentative de connexion échouée'}}</h6>
+              <p>{{login.date}} • {{login.ip}} • {{login.location}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

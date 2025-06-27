@@ -1,0 +1,101 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-clipboard-list me-2 text-primary"></i>Audit & Logs</h2>
+    <p class="text-muted mb-4">Historique des connexions</p>
+    <div class="table-responsive mb-5">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Date/Heure</th>
+            <th>Adresse IP</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of connexions">
+            <td>{{ log.utilisateur }}</td>
+            <td>{{ log.date }}</td>
+            <td>{{ log.ip }}</td>
+            <td>
+              <span [ngClass]="{
+                'badge bg-success': log.statut === 'Succès',
+                'badge bg-danger': log.statut === 'Échec'
+              }">{{ log.statut }}</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" (click)="afficherDetails(log)">
+                <i class="fas fa-eye"></i> Détails
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h4 class="mb-3 mt-4"><i class="fas fa-user-shield me-2 text-primary"></i>Suivi des actions sensibles</h4>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Utilisateur</th>
+            <th>Date/Heure</th>
+            <th>Action</th>
+            <th>Cible</th>
+            <th>Détails</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let action of actionsSensibles">
+            <td>{{ action.utilisateur }}</td>
+            <td>{{ action.date }}</td>
+            <td>
+              <span [ngClass]="{
+                'badge bg-danger': action.action === 'Suppression',
+                'badge bg-warning': action.action === 'Modification',
+                'badge bg-success': action.action === 'Ajout',
+                'badge bg-info': action.action === 'Réinitialisation'
+              }">{{ action.action }}</span>
+            </td>
+            <td>{{ action.cible }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary" (click)="afficherDetailsAction(action)">
+                <i class="fas fa-eye"></i> Détails
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modale de détails connexion -->
+<div class="modal-backdrop" *ngIf="detailsLog">
+  <div class="modal-card">
+    <h5>Détails de la connexion</h5>
+    <ul>
+      <li><b>Utilisateur :</b> {{ detailsLog?.utilisateur }}</li>
+      <li><b>Date/Heure :</b> {{ detailsLog?.date }}</li>
+      <li><b>Adresse IP :</b> {{ detailsLog?.ip }}</li>
+      <li><b>Statut :</b> {{ detailsLog?.statut }}</li>
+      <li><b>Infos :</b> {{ detailsLog?.details }}</li>
+    </ul>
+    <button class="btn btn-primary-custom mt-3" (click)="fermerDetails()">Fermer</button>
+  </div>
+</div>
+
+<!-- Modale de détails action sensible -->
+<div class="modal-backdrop" *ngIf="detailsAction">
+  <div class="modal-card">
+    <h5>Détails de l'action</h5>
+    <ul>
+      <li><b>Utilisateur :</b> {{ detailsAction?.utilisateur }}</li>
+      <li><b>Date/Heure :</b> {{ detailsAction?.date }}</li>
+      <li><b>Action :</b> {{ detailsAction?.action }}</li>
+      <li><b>Cible :</b> {{ detailsAction?.cible }}</li>
+      <li><b>Infos :</b> {{ detailsAction?.details }}</li>
+    </ul>
+    <button class="btn btn-primary-custom mt-3" (click)="fermerDetailsAction()">Fermer</button>
+  </div>
+</div> 

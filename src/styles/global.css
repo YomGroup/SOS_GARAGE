@@ -119,4 +119,33 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--color-primary);
   outline: none;
   box-shadow: 0 0 0 2px rgba(0, 74, 173, 0.2);
+}
+
+/* Styles pour les notifications Material SnackBar */
+.success-snackbar {
+  background: linear-gradient(135deg, #28a745, #20c997) !important;
+  color: var(--color-white) !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.error-snackbar {
+  background: linear-gradient(135deg, #dc3545, #e83e8c) !important;
+  color: var(--color-white) !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.warning-snackbar {
+  background: linear-gradient(135deg, #ffc107, #fd7e14) !important;
+  color: var(--color-white) !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+.info-snackbar {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)) !important;
+  color: var(--color-white) !important;
+  font-family: 'Poppins', sans-serif !important;
+  font-weight: 500 !important;
 } 

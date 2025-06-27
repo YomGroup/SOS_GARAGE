@@ -7,6 +7,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi
 
 import { routes } from './app.routes';
 import { KeycloakBearerInterceptor, KeycloakService } from 'keycloak-angular';
+import { ApiInterceptor } from './services/api-interceptor.service';
 
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
@@ -38,8 +39,14 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: KeycloakBearerInterceptor,
+      useClass: ApiInterceptor,
       multi: true
     }
+    // Temporairement désactivé pour tester
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: KeycloakBearerInterceptor,
+    //   multi: true
+    // }
   ]
 };
