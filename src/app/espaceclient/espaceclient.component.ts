@@ -1,10 +1,14 @@
-import { Component, HostListener, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, inject, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { KeycloakService } from 'keycloak-angular';
+import { AssureService } from '../../services/assure.service';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
+import { filter, map, mergeMap } from 'rxjs/operators';
 
 
 @Component({
@@ -14,10 +18,15 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './espaceclient.component.css'
 })
 export class EspaceclientComponent implements OnInit {
-  constructor(@Inject(PLATFORM_ID) private platformId: Object, private auth: AuthService) { }
+  private assureService = inject(AssureService);
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object, private auth: AuthService, private router: Router, private activatedRoute: ActivatedRoute) {
+    this.loadUserData();
+
+  }
 
   vehiclesCount: number = 0;
-
+  pageTitle: string = '';
   isMobile = false;
   sidebarVisible = false;
   sidebarCollapsed = false;
@@ -26,7 +35,55 @@ export class EspaceclientComponent implements OnInit {
   currentDate = '';
   angularReady = false;
   lastScrollTop = 0;
-  email: string = ''
+  email: string = '';
+  originalData: any = {};
+
+  userData: any = {
+    nom: '',
+    prenom: '',
+    email: '',
+    telephone: '',
+    adressePostale: '',
+    numeroPermis: '',
+    adresse: '',
+    dateNaissance: '',
+    sexe: 'M',
+    codePostal: '',
+    ville: '',
+    pays: 'FR'
+  };
+
+  private keycloakService = inject(KeycloakService);
+
+  private loadUserData(): void {
+    const userId = 8; // À remplacer par l'ID réel de l'utilisateur
+    if (userId) {
+      this.assureService.addAssurerGet(userId).subscribe({
+        next: (data: any) => {
+          this.userData = {
+            ...this.userData,
+            ...data,
+            telephone: this.formatPhoneNumber(data.telephone),
+            dateNaissance: this.formatDate(data.dateNaissance)
+          };
+          this.originalData = { ...this.userData };
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des données utilisateur', err);
+        }
+      });
+    }
+  }
+  private formatPhoneNumber(phone: string): string {
+    // Formatage du numéro de téléphone
+    return phone.replace(/(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/, '$1 $2 $3 $4 $5');
+  }
+
+  private formatDate(dateString: string): string {
+    // Formatage de la date pour l'input date
+    return dateString ? new Date(dateString).toISOString().split('T')[0] : '';
+  }
+
   ngOnInit() {
     const today = new Date();
     this.currentDate = today.toLocaleDateString('fr-FR', {
@@ -39,11 +96,20 @@ export class EspaceclientComponent implements OnInit {
       this.restoreSidebarState();
       this.angularReady = true;
     }
-    this.email = this.auth.getToken()?.name || '';;
+    this.email = this.auth.getToken()?.name || '';
     const hasRole = this.auth.hasRole('ROLE_ASSURE');
 
-    // console.log('Email:', email);
-    console.log('Est Assuré ?', hasRole);
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(() => this.activatedRoute),
+      map(route => {
+        while (route.firstChild) route = route.firstChild;
+        return route;
+      }),
+      mergeMap(route => route.data)
+    ).subscribe(data => {
+      this.pageTitle = data['title'] || '';
+    });
   }
 
 
@@ -78,9 +144,15 @@ export class EspaceclientComponent implements OnInit {
     { message: 'Documents à signer pour le sinistre-001 il y a 39 mn', read: false }
   ];
   logout() {
-    // Implement logout logic
     console.log('Logging out...');
+    this.keycloakService.logout(window.location.origin)
+      .then(() => {
+      })
+      .catch(error => {
+        console.error('Logout failed', error);
+      });
   }
+
   toggleSidebar() {
     if (this.isMobile) {
       this.sidebarVisible = !this.sidebarVisible;

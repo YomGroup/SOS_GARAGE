@@ -1,10 +1,10 @@
 <div class="welcome-section">
 
  <div class="action-buttons">
-    <button class="btn-primary" routerLink="/vehicles/add">
+    <button class="btn-primary" routerLink="/clientDashboard/vehicules" >
         <i class="bi bi-plus"></i> Ajoutez un véhicule
     </button>
-    <button class="btn-danger" routerLink="/declare">
+    <button class="btn-danger" routerLink="/clientDashboard/declarations" >
         <i class="bi bi-file-earmark-text"></i> Déclarez un Sinistre
     </button>
 </div>
@@ -21,7 +21,7 @@
   <div class="stat-card claims-progress">
     <div class="stat-label">Sinistre</div>
     <div class="stat-sous-label">Déclarés</div>
-    <div class="stat-number">07</div>
+    <div class="stat-number">{{ sinistreCount  }}</div>
     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="white" viewBox="0 0 24 24" style="position: absolute; bottom: 20px; right: 20px; opacity: 0.7;">
       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
     </svg>
@@ -30,7 +30,7 @@
   <div class="stat-card claims-declared">
     <div class="stat-label">En cours</div>
     <div class="stat-sous-label">De traitement</div>
-    <div class="stat-number">07</div>
+    <div class="stat-number">{{ sinistreCount  }}</div>
     <svg xmlns="http://www.w3.org/2000/svg" width="60" height="40" fill="white" viewBox="0 0 24 24" style="position: absolute; bottom: 20px; right: 20px; opacity: 0.7;">
       <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 15a1.5 1.5 0 11.001-3.001A1.5 1.5 0 0112 17zm1-8h-2v5h2v-5z"/>
     </svg>

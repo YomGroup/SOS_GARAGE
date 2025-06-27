@@ -7,9 +7,11 @@
     <header class="header" id="header" [class.collapsed]="!isMobile && sidebarCollapsed">
         <div class="header-content">
           <div>
-  <h1>Hello {{ email }}</h1>
-  <div class="date">{{currentDate}}</div>
-</div>
+        <h1 *ngIf="!pageTitle">Hello {{ userData.nom }}</h1>
+        <h2 *ngIf="pageTitle">{{ pageTitle }}</h2>
+
+        <div class="date">{{currentDate}}</div>
+        </div>
 
             <div class="user-info">
                 <span class="icon-envelope">
@@ -19,14 +21,18 @@
                     <i class="bi bi-bell-fill"></i>
                     <span class="notification-badge">+3</span>
                 </span>
-                <span class="user-avatar">S</span>
+                <a routerLink="/clientDashboard/profiles" 
+                    routerLinkActive="active" class="user-avatar text-decoration-none
+">
+                    <span class="user-avatar">{{ userData.prenom.charAt(0) }}</span>
+                </a>
             </div>
         </div>
     </header>
 
 <div class="dashboard" [class.initialized]="angularReady">
         <div class="sidebar" id="sidebar" [class.show]="sidebarVisible" [class.collapsed]="!isMobile && sidebarCollapsed">
-            <img src="1.png" alt="Logo">
+            <img src="assets/logo_sos.png" alt="Logo">
             
             <nav class="nav-menu">
                 <a routerLink="/clientDashboard" 

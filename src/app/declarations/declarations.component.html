@@ -52,64 +52,116 @@
   </div>
 </div>
         <!-- Step 3: Constat -->
-        <div class="step-content" *ngIf="currentStep === 3">
-          <h2>Constat</h2>
-          <div class="file-upload">
-            <div class="upload-area" (click)="fileInput.click()">
-
-              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé votre constat</p>
-              <input #fileInput type="file" accept=".pdf,.jpg,.png" (change)="onFileSelect($event)" style="display: none;">
-            </div>
-            <p class="help-text">
-              Vous n'avez pas de constat ? <br>
-              Rendez-vous sur<a href="https://www.e-constat.fr" target="_blank"> www.e-constat.fr</a>pour réaliser le vôtre.
-            </p>
-          </div>
-        </div>
-
-        <!-- Step 4: Photos -->
-        <div class="step-content" *ngIf="currentStep === 4">
-          <h2>Image du Véhicule accidenté</h2>
-          <div class="photo-upload">
-            <div class="upload-area" (click)="photoInput.click()">
-              
-              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé Les photos du sinistre</p>
-              <input #photoInput type="file" accept="image/*" multiple (change)="onPhotoSelect($event)" style="display: none;">
-            </div>
-          </div>
-        </div>
-
-        <!-- Step 5: Document Signing -->
-       <!-- Step 5: Document Signing -->
-<div class="step-content" *ngIf="currentStep === 5">
-  <div class="document-signing" *ngIf="!allDocumentsSigned">
-    <h2>Document {{ currentDocument }}</h2>
+       <!-- Step 3: Constat -->
+<div class="step-content" *ngIf="currentStep === 3">
+  <h2>Constat</h2>
+  <div class="file-upload">
+    <div class="upload-area" (click)="fileInput.click()">
+      <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléverser votre constat</p>
+      <input #fileInput type="file" accept=".pdf,.jpg,.png" 
+             (change)="onFileSelect($event)" style="display: none;">
+    </div>
     
-    <div class="document-preview">
-      <div class="document-header">
-        <h3>Document {{ currentDocument }}</h3>
+    <!-- Prévisualisation du constat -->
+    <div class="preview-container" *ngIf="constatPreviewUrl">
+      <h3>Prévisualisation :</h3>
+      
+      <!-- Affichage PDF -->
+      <div *ngIf="showPdfViewer" class="pdf-preview">
+        <pdf-viewer [src]="constatPreviewUrl" 
+                   [render-text]="true"
+                   style="width: 100%; height: 500px; border: 1px solid #ddd;">
+        </pdf-viewer>
       </div>
       
-      <div class="document-content">
-        <div class="document-placeholder">
-          <i class="icon-document"></i>
-          <p>Contenu du document {{ currentDocument }}</p>
-          <p>Veuillez examiner le document avant de le signer</p>
-        </div>
+      <!-- Affichage Image -->
+      <div *ngIf="!showPdfViewer" class="image-preview">
+        <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
+      </div>
+      
+      <button class="btn-remove" (click)="removeConstat()">
+        <i class="bi bi-trash"></i> Supprimer
+      </button>
+    </div>
+    
+    <p class="help-text">
+      Vous n'avez pas de constat ? <br>
+      Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
+    </p>
+  </div>
+</div>
+
+        <!-- Step 4: Photos -->
+      <!-- Step 4: Photos -->
+<div class="step-content" *ngIf="currentStep === 4">
+  <h2>Images du Véhicule accidenté</h2>
+  
+  <div class="upload-instructions">
+    <p>Téléversez jusqu'à 10 photos du sinistre (formats JPG, PNG)</p>
+    <p class="photo-count">{{ previewPhotos.length }}/10 photos sélectionnées</p>
+  </div>
+
+  <div class="photo-upload-area" (click)="photoInput.click()">
+    <div class="upload-icon">
+                    <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Cliquez pour ajouter des photos</p>
+
+     
+    </div>
+    <input #photoInput type="file" accept="image/jpeg,image/png" multiple 
+           (change)="onPhotoSelect($event)" style="display: none;">
+  </div>
+
+  <!-- Gallery preview -->
+  <div class="photo-gallery" *ngIf="previewPhotos.length > 0">
+    <div class="photo-item" *ngFor="let photo of previewPhotos; let i = index">
+      <img [src]="photo.url" alt="Photo du sinistre">
+      <div class="photo-overlay">
+        <button class="btn-remove" (click)="removePhoto(i); $event.stopPropagation()">
+          <i class="bi bi-trash"></i>
+        </button>
       </div>
     </div>
-    <label class="custom-checkbox">
-  <input type="checkbox" [(ngModel)]="isChecked" (change)="signDocument()" />
-      <span class="checkmark"></span>
-      Je signe le document {{ currentDocument }}
-    </label>
-    <span *ngIf="isSigning">
-        Signature en cours...
-      </span>
-      <span *ngIf="isCurrentDocumentSigned">
-        Document {{ currentDocument }} signé
-      </span>
   </div>
+</div>
+
+        <!-- Step 5: Document Signing -->
+      <!-- Step 5: Document Signing -->
+<div class="step-content" *ngIf="currentStep === 5">
+  <div class="document-signing" *ngIf="!allDocumentsSigned">
+    
+    <div class="document-preview">
+      <p>Veuillez lire attentivement le document avant de le signer.</p>
+
+      <div class="document-content">
+  <pdf-viewer 
+    [src]="currentPdf"
+    [render-text]="true"
+    style="width: 100%; height: 600px; border: 1px solid #ddd;"
+    (error)="currentPdfError = true">
+  </pdf-viewer>
+  
+  <div *ngIf="currentPdfError" class="alert alert-danger">
+    Le document n'a pas pu être chargé. Veuillez réessayer.
+  </div>
+</div>
+
+      <div class="signature-controls">
+        <label class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="isChecked" />
+          <span class="checkmark"></span>
+          Je certifie avoir lu et approuvé le document {{ currentDocument }}
+        </label>
+
+        <button class="btn btn-primary mt-2" 
+                (click)="signDocument()" 
+                [disabled]="!isChecked || isCurrentDocumentSigned || isSigning">
+          <span *ngIf="!isSigning">Signer le document</span>
+          <span *ngIf="isSigning">Signature en cours...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Success Message -->
   <div class="success-message" *ngIf="allDocumentsSigned">
@@ -131,4 +183,4 @@
           </button>
         </div>
       </div>
-    </div>
+    
