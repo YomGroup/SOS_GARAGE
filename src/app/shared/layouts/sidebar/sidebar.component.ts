@@ -117,6 +117,18 @@ export class SidebarComponent implements OnInit {
     item.expanded = !item.expanded;
   }
 
+  onLogoClick() {
+    if (this.collapsed) {
+      this.openSidebar.emit();
+    }
+  }
+
+  onItemClick(event: MouseEvent, item: MenuItem) {
+    if (item.action) {
+      item.action(event);
+    }
+  }
+
   logout() {
     this.keycloakService.logout(window.location.origin);
   }

@@ -221,7 +221,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
       this.attributionMessage = 'Réparateur introuvable.';
       return;
     }
-  
+    
     // 3. Appel API
     this.missionService.updateMissionReparateur(this.mission.id!, nouveauReparateur).subscribe({
       next: (missionMaj) => {
@@ -269,8 +269,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
       },
       error: (err) => {
         console.error('Erreur:', err);
-        this.savingCommission = false;
-      }
+      this.savingCommission = false;
+    }
     });
   }
 
