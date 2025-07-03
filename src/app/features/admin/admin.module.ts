@@ -30,7 +30,8 @@ import { PreferencesManagementComponent } from './components/parametre/preferenc
 import { NotificationManagementComponent } from './components/parametre/notification-management/notification-management.component';
 import { SecurityManagementComponent } from './components/parametre/security-management/security-management.component';
 import { CustomizationManagementComponent } from './components/parametre/customization-management/customization-management.component';
-import { DossierEditComponent } from './components/dossier-management/dossier-edit/dossier-edit.component';
+import { DossierViewComponent } from './components/dossier-management/dossier-view.component';
+import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 
 const routes: Routes = [
   {
@@ -41,12 +42,12 @@ const routes: Routes = [
     path: 'dossiers',
     component: DossierManagementComponent,
     children: [
-      { path: 'edit/:id', component: DossierEditComponent }
+      { path: 'view/:id', component: DossierViewComponent }
     ]
   },
   {
-    path: 'dossiers/edit/:id',
-    component: DossierEditComponent
+    path: 'gestion-finance',
+    component: GestionFinanceComponent
   },
   {
     path: 'garages',

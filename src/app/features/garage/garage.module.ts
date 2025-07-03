@@ -4,9 +4,6 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
 import { GarageRoutingModule } from './garage-routing.module';
-import { MessageComponent } from '../../message/message.component';
-import { GarageProfileComponent } from './components/garage-profile/garage-profile.component';
-import { MissionReceptionComponent } from './components/mission-reception/mission-reception.component';
 
 @NgModule({
   imports: [
@@ -15,10 +12,10 @@ import { MissionReceptionComponent } from './components/mission-reception/missio
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
-    GarageRoutingModule,
-    MessageComponent,
-    GarageProfileComponent,
-    MissionReceptionComponent
+    GarageRoutingModule
+  ],
+  declarations: [
+    
   ]
 })
 export class GarageModule { } 

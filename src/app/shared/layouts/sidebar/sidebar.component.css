@@ -38,6 +38,7 @@
 .sidebar-logo {
   padding: 20px;
   text-align: center;
+  cursor: pointer;
 
   img {
     width: 100%;
@@ -105,4 +106,116 @@
     white-space: nowrap;
     z-index: 1000;
   }
+}
+
+/* Sidebar mobile slide-in/out */
+@media (max-width: 992px) {
+  .sidebar.mobile {
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    z-index: 1300;
+  }
+  .sidebar.mobile.show {
+    transform: translateX(0);
+  }
+  .sidebar.mobile.hide {
+    transform: translateX(-100%);
+  }
+  .sidebar-close {
+    display: block;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    z-index: 1400;
+  }
+}
+
+.sidebar-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1400;
+  color: var(--text-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.sidebar-close i {
+  font-size: 20px;
+  transition: all 0.3s ease;
+}
+
+.collapse-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: #f5f5f5;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 16px;
+  margin-bottom: 8px;
+  transition: background 0.2s;
+  color: var(--text-color);
+}
+.collapse-btn:hover {
+  background: #eaeaea;
+}
+.collapse-btn .arrow {
+  transition: transform 0.3s ease;
+  display: inline-block;
+  font-size: 18px;
+}
+.collapse-btn.active .arrow {
+  transform: rotate(180deg);
+}
+
+.sidebar-toggle-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f5f5f5;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+  z-index: 1500;
+}
+.sidebar-toggle-btn:hover {
+  background: #eaeaea;
+}
+.sidebar-toggle-btn .chevron {
+  font-size: 22px;
+  transition: transform 0.3s ease;
+  display: inline-block;
+}
+.sidebar-toggle-btn.collapsed .chevron {
+  transform: rotate(180deg);
 }

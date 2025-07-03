@@ -7,6 +7,7 @@ import { CommunicationComponent } from './components/communication/communication
 import { StatisticsComponent } from './components/statistics/statistics.component';
 import { MessageComponent } from '../../message/message.component';
 import { GarageProfileComponent } from './components/garage-profile/garage-profile.component';
+import { GarageFinanceComponent } from './gestion-finance/garage-finance.component';
 
 const routes: Routes = [
   {
@@ -19,6 +20,7 @@ const routes: Routes = [
       { path: 'statistiques', component: StatisticsComponent },
       { path: 'message', component: MessageComponent },
       { path: 'profil', component: GarageProfileComponent },
+      { path: 'finance', component: GarageFinanceComponent },
       { path: '', redirectTo: 'missions', pathMatch: 'full' }
     ]
   }

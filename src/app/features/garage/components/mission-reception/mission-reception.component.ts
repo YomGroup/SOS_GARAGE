@@ -1,18 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-interface Mission {
-  id: number;
-  titre: string;
-  client: string;
-  vehicule: string;
-  date: string;
-  description: string;
-  photos: string[];
-  documents: { nom: string; url: string }[];
-  statut: string;
-}
+import { firstValueFrom } from 'rxjs';
+import { MissionService } from '../../../../../services/mission.service';
+import { Mission } from '../../../../../services/models-api.interface';
+import { AuthService } from '../../../../../services/auth.service';
+import { ReparateurService } from '../../../../../services/reparateur.service';
 
 @Component({
   selector: 'app-mission-reception',
@@ -22,46 +15,57 @@ interface Mission {
   styleUrls: ['./mission-reception.component.css']
 })
 export class MissionReceptionComponent implements OnInit {
-  missions: Mission[] = [
-    {
-      id: 1,
-      titre: 'Mission 001',
-      client: 'Jean Dupont',
-      vehicule: 'Peugeot 208',
-      date: '2024-06-01',
-      description: 'Remplacement pare-brise',
-      photos: ['https://via.placeholder.com/120', 'https://via.placeholder.com/120'],
-      documents: [
-        { nom: 'Constat.pdf', url: '#' },
-        { nom: 'Carte grise.pdf', url: '#' }
-      ],
-      statut: 'EN_ATTENTE'
-    },
-    {
-      id: 2,
-      titre: 'Mission 002',
-      client: 'Marie Martin',
-      vehicule: 'Renault Clio',
-      date: '2024-06-02',
-      description: "Changement d'embrayage",
-      photos: ['https://via.placeholder.com/120'],
-      documents: [
-        { nom: 'Constat.pdf', url: '#' }
-      ],
-      statut: 'EN_COURS'
-    }
-  ];
+  missions: Mission[] = [];
   filteredMissions: Mission[] = [];
   filtreStatut: string = '';
   searchText: string = '';
   isCardView: boolean = true;
   panelOuvert: boolean = false;
   missionSelectionnee: Mission | null = null;
+  loading: boolean = true;
+  error: string | null = null;
 
-  ngOnInit(): void {
-    this.filteredMissions = this.missions;
-    console.log('missions:', this.missions);
-    console.log('filteredMissions:', this.filteredMissions);
+  constructor(
+    private missionService: MissionService,
+    private authService: AuthService,
+    private reparateurService: ReparateurService
+  ) {}
+
+  async ngOnInit() {
+    await this.loadMissions();
+  }
+
+  async loadMissions(): Promise<void> {
+    try {
+      this.loading = true;
+      this.error = null;
+
+      // Récupérer l'UUID Keycloak du réparateur connecté
+      const keycloakId = this.authService.getKeycloakId();
+      if (!keycloakId) {
+        throw new Error('Utilisateur non connecté');
+      }
+
+      // Charger toutes les missions puis filtrer côté front (en attendant un endpoint dédié)
+      this.missionService.getAllMissions().subscribe({
+        next: (missions) => {
+          // Filtrer les missions attribuées à l'utilisateur connecté
+          this.missions = missions.filter(m => m.reparateur && m.reparateur.useridKeycloak === keycloakId && m.statut === 'en attente');
+          this.filteredMissions = this.missions;
+          this.loading = false;
+          console.log('Missions filtrées pour le réparateur connecté:', this.missions);
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des missions:', err);
+          this.error = 'Erreur lors du chargement des missions';
+          this.loading = false;
+        }
+      });
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation:', error);
+      this.error = 'Erreur lors de l\'initialisation';
+      this.loading = false;
+    }
   }
 
   onStatutChange() {
@@ -76,12 +80,7 @@ export class MissionReceptionComponent implements OnInit {
   applyFilter() {
     this.filteredMissions = this.missions.filter(m => {
       const matchStatut = this.filtreStatut ? m.statut === this.filtreStatut : true;
-      const matchSearch = this.searchText ? (
-        m.titre.toLowerCase().includes(this.searchText) ||
-        m.client.toLowerCase().includes(this.searchText) ||
-        m.vehicule.toLowerCase().includes(this.searchText)
-      ) : true;
-      return matchStatut && matchSearch;
+      return matchStatut;
     });
   }
 
@@ -96,8 +95,42 @@ export class MissionReceptionComponent implements OnInit {
   }
 
   accepterMission(mission: Mission) {
-    // TODO: Appeler le service pour accepter la mission
-    alert('Mission acceptée : ' + mission.titre);
-    this.fermerPanel();
+    this.missionService.updateMission(mission.id ?? 0, { statut: 'assignée' }).subscribe({
+      next: (updatedMission) => {
+        this.missions = this.missions.filter(m => m.id !== mission.id);
+        this.applyFilter();
+        alert(`Mission #${mission.id} acceptée.`);
+        this.fermerPanel();
+      },
+      error: () => alert('Erreur lors de l\'acceptation de la mission')
+    });
+  }
+
+  refuserMission(mission: Mission) {
+    this.missionService.updateMission(mission.id ?? 0, { statut: 'non assignée', reparateur: undefined }).subscribe({
+      next: () => {
+        this.missions = this.missions.filter(m => m.id !== mission.id);
+        this.applyFilter();
+        alert(`Mission #${mission.id} refusée.`);
+        this.fermerPanel();
+      },
+      error: () => alert('Erreur lors du refus de la mission')
+    });
+  }
+
+  getMissionTitle(mission: Mission): string {
+    return `Mission ${mission.id}`;
+  }
+
+  getMissionDate(mission: Mission): string {
+    return new Date(mission.dateCreation).toLocaleDateString('fr-FR');
+  }
+
+  missionEstVisible(mission: Mission): boolean {
+    return this.missions.some(m => m.id === mission.id);
+  }
+
+  isPhotosArrayNonEmpty(mission: Mission): boolean {
+    return Array.isArray(mission.photosVehicule) && mission.photosVehicule.length > 0;
   }
 } 

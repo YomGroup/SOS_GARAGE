@@ -1,15 +1,40 @@
 <div class="container-fluid px-4">
-    <!-- Titre principal -->
-    <div class="row mb-4">
-      <div class="col-12">
-        <h1 class="text-2xl font-semibold text-gray-900 mb-0">Tableau de bord Garage</h1>
-      </div>
+  <!-- Titre principal -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="text-2xl font-semibold text-gray-900 mb-0">
+        <i class="fas fa-chart-line me-2"></i>Tableau de bord Garage
+      </h1>
     </div>
-  
-    <!-- Cartes KPI -->
+  </div>
+
+  <!-- État de chargement -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+      <p class="mt-3 text-muted">Chargement des statistiques en cours...</p>
+    </div>
+  </div>
+
+  <!-- État d'erreur -->
+  <div *ngIf="error && !loading" class="error-state">
+    <div class="alert alert-danger text-center">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      {{ error }}
+      <button class="btn btn-outline-danger btn-sm ms-3" (click)="refreshStatistics()">
+        <i class="fas fa-redo me-1"></i>Réessayer
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenu principal -->
+  <div *ngIf="!loading && !error">
+    <!-- Cartes KPI Missions -->
     <div class="row mb-4">
       <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-blue">
+        <div class="stats-card">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h3 class="stats-title opacity-90">Total des missions</h3>
@@ -23,10 +48,10 @@
       </div>
       
       <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-yellow">
+        <div class="stats-card">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <h3 class="stats-title opacity-90">Réparations en cours</h3>
+              <h3 class="stats-title opacity-90">En cours</h3>
               <div class="stats-number">{{ missionStats.inProgress }}</div>
             </div>
             <div class="stats-icon">
@@ -37,10 +62,10 @@
       </div>
       
       <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-green">
+        <div class="stats-card">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <h3 class="stats-title opacity-90">Missions terminées</h3>
+              <h3 class="stats-title opacity-90">Terminées</h3>
               <div class="stats-number">{{ missionStats.completed }}</div>
             </div>
             <div class="stats-icon">
@@ -51,7 +76,7 @@
       </div>
       
       <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-red">
+        <div class="stats-card">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h3 class="stats-title opacity-90">En attente</h3>
@@ -64,40 +89,183 @@
         </div>
       </div>
     </div>
-  
-  
-     <!-- Historique des missions -->
-     <div class="missions-history">
-        <h3 class="section-title">Historique des missions</h3>
-        <div class="table-responsive">
-          <table class="missions-table">
-            <thead>
-              <tr>
-                <th>ID Mission</th>
-                <th>Date</th>
-                <th>Statut</th>
-                <th>Montant</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let mission of recentMissions">
-                <td>{{ mission.id }}</td>
-                <td>{{ mission.date | date:'short' }}</td>
-                <td>
-                  <span class="status-badge"
-                        [ngClass]="{
-                          'status-completed': mission.status === 'completed',
-                          'status-inprogress': mission.status === 'in_progress',
-                          'status-pending': mission.status === 'pending'
-                        }">
-                    {{ mission.status }}
-                  </span>
-                </td>
-                <td>{{ mission.amount | currency:'EUR' }}</td>
-              </tr>
-            </tbody>
-          </table>
+
+    <!-- Cartes KPI Financières -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total Devis</h3>
+              <div class="stats-number">{{ formatCurrency(financialStats.totalDevis) }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-file-invoice"></i>
+            </div>
+          </div>
         </div>
       </div>
-    
+      
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total Factures</h3>
+              <div class="stats-number">{{ formatCurrency(financialStats.totalFactures) }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Commissions</h3>
+              <div class="stats-number">{{ formatCurrency(financialStats.totalCommissions) }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-percentage"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Solde Net</h3>
+              <div class="stats-number">{{ formatCurrency(financialStats.netBalance) }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-wallet"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Statistiques détaillées -->
+    <div class="row mb-4">
+      <div class="col-md-6 mb-3">
+        <div class="stats-detail-card">
+          <h4 class="card-title">
+            <i class="fas fa-chart-pie me-2"></i>Répartition des missions
+          </h4>
+          <div class="stats-detail-content">
+            <div class="stat-item">
+              <span class="stat-label">Assignées</span>
+              <span class="stat-value">{{ missionStats.assigned }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.assigned, missionStats.total) }}%)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Refusées</span>
+              <span class="stat-value">{{ missionStats.refused }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.refused, missionStats.total) }}%)</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Épaves</span>
+              <span class="stat-value">{{ missionStats.epave }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.epave, missionStats.total) }}%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6 mb-3">
+        <div class="stats-detail-card">
+          <h4 class="card-title">
+            <i class="fas fa-calculator me-2"></i>Moyennes financières
+          </h4>
+          <div class="stats-detail-content">
+            <div class="stat-item">
+              <span class="stat-label">Devis moyen</span>
+              <span class="stat-value">{{ formatCurrency(financialStats.averageDevis) }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Facture moyenne</span>
+              <span class="stat-value">{{ formatCurrency(financialStats.averageFacture) }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Taux de commission</span>
+              <span class="stat-value">15%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tableau des missions récentes -->
+    <div class="recent-missions-section">
+      <h3>Historique des missions récentes</h3>
+      <div class="table-container">
+        <table class="missions-table">
+          <thead>
+            <tr>
+              <th>Mission</th>
+              <th>Date</th>
+              <th>Assuré</th>
+              <th>Véhicule</th>
+              <th>Type</th>
+              <th>Statut</th>
+              <th>Devis</th>
+              <th>Facture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let mission of recentMissions" 
+                class="mission-row" 
+                (click)="openMissionView(mission.id)"
+                [class.clickable]="true">
+              <td>
+                <div class="mission-title">{{ mission.title }}</div>
+              </td>
+              <td>{{ mission.date }}</td>
+              <td>
+                <div class="assure-info">
+                  <span class="assure-name">{{ mission.assureName }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="vehicule-info">
+                  <span class="vehicule-details">{{ mission.vehiculeInfo }}</span>
+                </div>
+              </td>
+              <td>
+                <span class="type-badge" [class]="'type-' + mission.typeSinistre.toLowerCase()">
+                  {{ mission.typeSinistre }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class]="'status-' + getStatusColor(mission.status)">
+                  {{ getStatusLabel(mission.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="amount" *ngIf="mission.devis > 0">{{ formatCurrency(mission.devis) }}</span>
+                <span class="no-amount" *ngIf="mission.devis === 0">-</span>
+              </td>
+              <td>
+                <span class="amount" *ngIf="mission.facture > 0">{{ formatCurrency(mission.facture) }}</span>
+                <span class="no-amount" *ngIf="mission.facture === 0">-</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
+</div>
+
+<!-- Composant mission-view -->
+<app-mission-view 
+  *ngIf="showMissionView && selectedMission"
+  [mission]="selectedMission"
+  [edition]="missionViewEdition"
+  (closed)="closeMissionView()"
+  (missionUpdated)="onMissionUpdated($event)">
+</app-mission-view>

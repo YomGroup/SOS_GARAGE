@@ -14,6 +14,21 @@ interface Reparateur {
     missions: any[];
   }
 
+  interface Sinistre {
+  id: number;
+  createdAt: Date | null;
+  updatedAt: Date | null;
+  type: string;
+  contactAssistance: string;
+  lienConstat: string;
+  conditionsAcceptees: boolean;
+  documents: any[];
+  notifications: any[];
+  imgUrl: string[];
+  isvalid: boolean;
+ 
+  }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,13 +41,14 @@ export class AdminService {
     return this.http.get<any[]>(`${this.apiUrl}/vehicule/all`);
   }
 
-  getStats(): Observable<any> {
-    // Implémentez cette méthode selon vos endpoints API
-    return this.http.get<any>(`${this.apiUrl}/stats`);
+  // get sinistre
+  getSinistre(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/sinistre`);
   }
 
 
-  // la partie qui gère la validation des garages 
+
+
   // Méthode pour récupérer tous les réparateurs
   getAllReparateurs(): Observable<Reparateur[]> {
     return this.http.get<Reparateur[]>(`${this.apiUrl}/reparateurs`);

@@ -6,47 +6,55 @@
       <!-- En-tête avec statistiques -->
       <div class="stats-cards mb-4">
         <div class="row">
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon pending">
-                <i class="fas fa-clock"></i>
-              </div>
-              <div class="stat-info">
-                <h3>{{ stats.enAttente }}</h3>
-                <p>En attente</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon active">
-                <i class="fas fa-check-circle"></i>
-              </div>
-              <div class="stat-info">
-                <h3>{{ stats.actifs }}</h3>
-                <p>Garages actifs</p>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">En attente</h3>
+                  <div class="stats-number">{{ stats.enAttente }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
               </div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon rejected">
-                <i class="fas fa-times-circle"></i>
-              </div>
-              <div class="stat-info">
-                <h3>{{ stats.rejetes }}</h3>
-                <p>Rejetés</p>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Garages valides</h3>
+                  <div class="stats-number">{{ stats.valides }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
               </div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon total">
-                <i class="fas fa-building"></i>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Rejetés</h3>
+                  <div class="stats-number">{{ stats.rejetes }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-times-circle"></i>
+                </div>
               </div>
-              <div class="stat-info">
-                <h3>{{ stats.total }}</h3>
-                <p>Total</p>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Total</h3>
+                  <div class="stats-number">{{ stats.total }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-building"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -91,11 +99,13 @@
       <!-- Liste des garages -->
       <div class="garage-list">
         <!-- Garages en attente -->
-        <div class="garage-card pending" *ngFor="let reparateur of reparateursEnAttente">
+        <div class="garage-card" *ngFor="let reparateur of tousLesGarages">
           <div class="garage-header">
             <div class="garage-title">
-              <h4>{{ reparateur.name }} {{ reparateur.prenom }}</h4>
-              <span class="badge pending">En attente</span>
+              <h4>{{ reparateur.nomDuGarage }}</h4>
+              <span class="badge pending" *ngIf="reparateur.isvalids === 'en attente'">En attente</span>
+              <span class="badge active" *ngIf="reparateur.isvalids === 'valide'">Valide</span>
+              <span class="badge rejected" *ngIf="reparateur.isvalids === 'rejetée'">Rejeté</span>
             </div>
             <div class="garage-actions">
               <button class="btn btn-sm btn-success" title="Valider" (click)="validerReparateur(reparateur)">
@@ -103,6 +113,9 @@
               </button>
               <button class="btn btn-sm btn-danger" title="Rejeter" (click)="rejeterReparateur(reparateur)">
                 <i class="fas fa-times"></i>
+              </button>
+              <button class="btn btn-sm btn-info" title="Modifier la commission" (click)="openCommissionPrompt(reparateur)">
+                <i class="fas fa-percent"></i>
               </button>
             </div>
           </div>
@@ -124,11 +137,20 @@
             <div class="garage-details">
               <div class="detail-item">
                 <span class="label">SIRET</span>
-                <span class="value">{{ reparateur.documents?.siret ? 'Oui' : 'Non' }}</span>
+                <span class="value">{{ reparateur.siret }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Commission</span>
-                <span class="value">{{ reparateur.commission }}%</span>
+                <span class="value" *ngIf="editedCommissionId !== reparateur.id">{{ reparateur.commission }}%
+                  <button class="btn btn-link btn-sm p-0 ms-2" (click)="startEditCommission(reparateur)" title="Modifier">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                </span>
+                <span *ngIf="editedCommissionId === reparateur.id">
+                  <input type="number" min="0" max="100" [(ngModel)]="editedCommissionValue" style="width:60px;display:inline-block;" /> %
+                  <button class="btn btn-success btn-sm ms-1" (click)="saveEditCommission(reparateur)" title="Valider"><i class="fas fa-check"></i></button>
+                  <button class="btn btn-secondary btn-sm ms-1" (click)="cancelEditCommission()" title="Annuler"><i class="fas fa-times"></i></button>
+                </span>
               </div>
             </div>
           </div>
@@ -143,8 +165,10 @@
         <div class="garage-card active" *ngFor="let reparateur of reparateursActifs">
           <div class="garage-header">
             <div class="garage-title">
-              <h4>{{ reparateur.name }} {{ reparateur.prenom }}</h4>
-              <span class="badge active">Actif</span>
+              <h4>{{ reparateur.nomDuGarage }}</h4>
+              <span class="badge pending" *ngIf="reparateur.isvalids === 'en attente'">En attente</span>
+              <span class="badge active" *ngIf="reparateur.isvalids === 'valide'">Valide</span>
+              <span class="badge rejected" *ngIf="reparateur.isvalids === 'rejetée'">Rejeté</span>
             </div>
             <div class="garage-actions">
               <button class="btn btn-sm btn-warning" title="Suspendre">
@@ -152,6 +176,9 @@
               </button>
               <button class="btn btn-sm btn-danger" title="Désactiver">
                 <i class="fas fa-ban"></i>
+              </button>
+              <button class="btn btn-sm btn-info" title="Modifier la commission" (click)="openCommissionPrompt(reparateur)">
+                <i class="fas fa-percent"></i>
               </button>
             </div>
           </div>
@@ -173,11 +200,20 @@
             <div class="garage-details">
               <div class="detail-item">
                 <span class="label">SIRET</span>
-                <span class="value">{{ reparateur.documents?.siret ? 'Oui' : 'Non' }}</span>
+                <span class="value">{{ reparateur.siret }}</span>
               </div>
               <div class="detail-item">
                 <span class="label">Commission</span>
-                <span class="value">{{ reparateur.commission }}%</span>
+                <span class="value" *ngIf="editedCommissionId !== reparateur.id">{{ reparateur.commission }}%
+                  <button class="btn btn-link btn-sm p-0 ms-2" (click)="startEditCommission(reparateur)" title="Modifier">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                </span>
+                <span *ngIf="editedCommissionId === reparateur.id">
+                  <input type="number" min="0" max="100" [(ngModel)]="editedCommissionValue" style="width:60px;display:inline-block;" /> %
+                  <button class="btn btn-success btn-sm ms-1" (click)="saveEditCommission(reparateur)" title="Valider"><i class="fas fa-check"></i></button>
+                  <button class="btn btn-secondary btn-sm ms-1" (click)="cancelEditCommission()" title="Annuler"><i class="fas fa-times"></i></button>
+                </span>
               </div>
             </div>
           </div>

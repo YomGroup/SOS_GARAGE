@@ -1,8 +1,14 @@
 <div class="header">
   <div class="header-content">
-    <div>
-      <h1 class="header-title">Hello Said</h1>
-      <div class="header-date">10 Janvier 2025</div>
+    <div class="header-left">
+      <button *ngIf="isMobile && sidebarOpened" class="header-close" (click)="closeSidebar.emit()" aria-label="Fermer la barre latérale">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <button *ngIf="isMobile && !sidebarOpened" class="header-burger" (click)="openSidebar.emit()" aria-label="Ouvrir la barre latérale">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="header-title">Bonjour {{ userName() }}</h1>
+      <div class="header-date">{{ getCurrentDate() }}</div>
     </div>
     <div class="user-info">
       <span class="icon-envelope">

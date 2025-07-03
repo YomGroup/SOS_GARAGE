@@ -8,6 +8,51 @@
     margin-bottom: 2rem;
 }
 
+/* Harmonisation stats-card avec dashboard admin */
+.stats-card {
+    flex: 1 1 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    min-height: 140px;
+    background: var(--gradient);
+    border-radius: 15px;
+    padding: 1.5rem;
+    color: white;
+    transition: transform 0.3s ease;
+    box-shadow: var(--card-shadow);
+}
+
+.stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.stats-title {
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    opacity: 0.9;
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.stats-icon {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
 .stat-card {
     background: white;
     border-radius: 15px;
@@ -264,4 +309,30 @@
 .page-link:hover {
     background: rgba(0, 74, 173, 0.1);
     color: var(--primary-blue);
+}
+
+@media (max-width: 768px) {
+    .stats-card {
+        padding: 1rem;
+        text-align: center;
+    }
+    .stats-card .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .stats-number {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .stats-card {
+        padding: 0.5rem;
+        text-align: center;
+        min-height: 100px;
+    }
+    .stats-card .d-flex {
+        flex-direction: column !important;
+        gap: 8px;
+    }
 }

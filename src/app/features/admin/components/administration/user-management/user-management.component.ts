@@ -13,6 +13,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { UserManagementService, UserDisplay, Assure, Reparateur } from '../../../../../services/user-management.service';
 import { timeout, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { Router, NavigationEnd } from '@angular/router';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-user-management',
@@ -58,7 +60,9 @@ export class UserManagementComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private userManagementService: UserManagementService
+    private userManagementService: UserManagementService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.dataSource = new MatTableDataSource<UserDisplay>([]);
     this.userFormGroup = this.fb.group({
@@ -76,14 +80,19 @@ export class UserManagementComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadUsers();
+    this.loadData();
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.loadData();
+      }
+    });
     setTimeout(() => {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
   }
 
-  loadUsers(): void {
+  loadData(): void {
     this.isLoading = true;
     this.errorMessage = '';
     
@@ -105,11 +114,13 @@ export class UserManagementComponent implements OnInit {
         this.dataSource.data = users;
         this.filteredUsers = users.slice();
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erreur détaillée lors du chargement des utilisateurs:', error);
         this.errorMessage = `Erreur lors du chargement des utilisateurs: ${error.message}`;
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -185,7 +196,7 @@ export class UserManagementComponent implements OnInit {
       
       if (this.isEditing && this.selectedUser) {
         // Mise à jour - pour l'instant, on recharge les données
-        this.loadUsers();
+        this.loadData();
         alert('Fonctionnalité de mise à jour à implémenter');
       } else {
         // Création
@@ -208,7 +219,7 @@ export class UserManagementComponent implements OnInit {
           this.userManagementService.createAssure(newAssure).subscribe({
             next: (response) => {
               console.log('Assuré créé avec succès:', response);
-              this.loadUsers();
+              this.loadData();
               this.closeUserForm();
             },
             error: (error) => {
@@ -231,7 +242,7 @@ export class UserManagementComponent implements OnInit {
           this.userManagementService.createReparateur(newReparateur).subscribe({
             next: (response) => {
               console.log('Réparateur créé avec succès:', response);
-              this.loadUsers();
+              this.loadData();
               this.closeUserForm();
             },
             error: (error) => {
@@ -258,7 +269,7 @@ export class UserManagementComponent implements OnInit {
       if (user.role === 'Assuré') {
         this.userManagementService.deleteAssure(user.id).subscribe({
           next: () => {
-            this.loadUsers();
+            this.loadData();
           },
           error: (error) => {
             console.error('Erreur lors de la suppression:', error);
@@ -270,7 +281,7 @@ export class UserManagementComponent implements OnInit {
         const reparateurId = user.id - 10000;
         this.userManagementService.deleteReparateur(reparateurId).subscribe({
           next: () => {
-            this.loadUsers();
+            this.loadData();
           },
           error: (error) => {
             console.error('Erreur lors de la suppression:', error);
@@ -286,7 +297,7 @@ export class UserManagementComponent implements OnInit {
       const reparateurId = user.id - 10000;
       this.userManagementService.toggleReparateurStatus(reparateurId, !user.actif).subscribe({
         next: () => {
-          this.loadUsers();
+          this.loadData();
         },
         error: (error) => {
           console.error('Erreur lors du changement de statut:', error);

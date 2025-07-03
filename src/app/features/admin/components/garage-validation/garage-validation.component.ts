@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -13,23 +13,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { AdminService } from '../../../../../services/admin.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ReparateurDetailsDialogComponent } from './dialogs/reparateur-details-dialog.component';
-import { Router } from '@angular/router';
-
-interface Reparateur {
-  id: number;
-  name: string;
-  prenom: string;
-  adresse: string;
-  telephone: string;
-  email: string;
-  isvalids: boolean;
-  documents?: {
-    siret: boolean;
-    assurance: boolean;
-    certification: boolean;
-  };
-  commission?: number;
-}
+import { Router, NavigationEnd } from '@angular/router';
+import { ReparateurService } from '../../../../../services/reparateur.service';
+import { Reparateur } from '../../../../../services/models-api.interface';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-garage-validation',
@@ -47,7 +35,8 @@ interface Reparateur {
     MatButtonModule,
     MatChipsModule,
     MatTooltipModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [AdminService]
 })
@@ -57,7 +46,7 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
 
   stats = {
     enAttente: 0,
-    actifs: 0,
+    valides: 0,
     rejetes: 0,
     total: 0
   };
@@ -65,16 +54,26 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
+  editedCommissionId: number | null = null;
+  editedCommissionValue: number | null = null;
+
   constructor(
-    private adminService: AdminService,
+    private reparateurService: ReparateurService,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
     this.dataSource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
-    this.loadReparateurs();
+    this.loadData();
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.loadData();
+      }
+    });
   }
 
   ngAfterViewInit() {
@@ -82,20 +81,12 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  loadReparateurs(): void {
-    this.adminService.getAllReparateurs().subscribe({
+  loadData(): void {
+    this.reparateurService.getAllReparateurs().subscribe({
       next: (reparateurs) => {
-        this.dataSource.data = reparateurs.map(r => ({
-          ...r,
-          documents: {
-            siret: true, // À adapter selon vos données réelles
-            assurance: true,
-            certification: false
-          },
-          commission: 15 // Valeur par défaut
-        }));
-
+        this.dataSource.data = reparateurs;
         this.calculateStats(reparateurs);
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erreur lors du chargement des réparateurs:', error);
@@ -105,9 +96,9 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
 
   calculateStats(reparateurs: Reparateur[]): void {
     this.stats = {
-      enAttente: reparateurs.filter(r => !r.isvalids).length,
-      actifs: reparateurs.filter(r => r.isvalids).length,
-      rejetes: 0, // À adapter si vous avez un champ pour les rejetés
+      enAttente: reparateurs.filter(r => r.isvalids === 'en attente').length,
+      valides: reparateurs.filter(r => r.isvalids === 'valide').length,
+      rejetes: reparateurs.filter(r => r.isvalids === 'rejetée').length,
       total: reparateurs.length
     };
   }
@@ -122,10 +113,10 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   }
 
   validerReparateur(reparateur: Reparateur): void {
-    this.adminService.validateReparateur(reparateur.id).subscribe({
+    const updated = { ...reparateur, isvalids: 'valide', isValids: 'valide' };
+    this.reparateurService.updateReparateur(reparateur.id ?? 0, updated).subscribe({
       next: () => {
-        reparateur.isvalids = true;
-        this.calculateStats(this.dataSource.data);
+        this.loadData();
       },
       error: (error) => {
         console.error('Erreur lors de la validation:', error);
@@ -134,11 +125,10 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   }
 
   rejeterReparateur(reparateur: Reparateur): void {
-    this.adminService.rejectReparateur(reparateur.id).subscribe({
+    const updated = { ...reparateur, isvalids: 'rejetée', isValids: 'rejetée' };
+    this.reparateurService.updateReparateur(reparateur.id ?? 0, updated).subscribe({
       next: () => {
-        // Mettre à jour le statut localement
-        // (vous pourriez aussi recharger les données)
-        this.calculateStats(this.dataSource.data);
+        this.loadData();
       },
       error: (error) => {
         console.error('Erreur lors du rejet:', error);
@@ -147,11 +137,14 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   }
 
   modifierCommission(reparateur: Reparateur, nouvelleCommission: number): void {
-    this.adminService.updateCommission(reparateur.id, nouvelleCommission).subscribe({
+    const updated = { ...reparateur, commission: nouvelleCommission, isvalids: 'valide', isValids: 'valide' };
+    this.reparateurService.updateReparateur(reparateur.id ?? 0, updated).subscribe({
       next: () => {
-        reparateur.commission = nouvelleCommission;
+        this.snackBar.open('Commission modifiée avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
       },
       error: (error) => {
+        this.snackBar.open('Erreur lors de la modification de la commission.', 'Fermer', { duration: 3000 });
         console.error('Erreur lors de la modification de la commission:', error);
       }
     });
@@ -168,15 +161,15 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
         switch (result.action) {
           case 'validate':
             // Le réparateur a été validé, recharger les données
-            this.loadReparateurs();
+            this.loadData();
             break;
           case 'reject':
             // Le réparateur a été rejeté, recharger les données
-            this.loadReparateurs();
+            this.loadData();
             break;
           case 'modifyCommission':
             // La commission a été modifiée, recharger les données
-            this.loadReparateurs();
+            this.loadData();
             break;
           case 'sendMessage':
             // Message envoyé (à implémenter selon vos besoins)
@@ -191,23 +184,69 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
     });
   }
 
-  getStatusClass(isValid: boolean): string {
-    return isValid ? 'status-active' : 'status-pending';
+  getStatusClass(isValid: string): string {
+    return isValid === 'valide' ? 'status-active' : 'status-pending';
   }
 
-  getStatusText(isValid: boolean): string {
-    return isValid ? 'Validé' : 'En attente';
+  getStatusText(isValid: string): string {
+    return isValid === 'valide' ? 'Validé' : 'En attente';
   }
 
   get reparateursEnAttente(): Reparateur[] {
-    return this.dataSource.data.filter(r => !r.isvalids);
+    return this.dataSource.data.filter(r => r.isvalids === 'en_attente');
   }
 
   get reparateursActifs(): Reparateur[] {
-    return this.dataSource.data.filter(r => r.isvalids);
+    return this.dataSource.data.filter(r => r.isvalids === 'valide');
   }
 
   ajouterGarage(): void {
     this.router.navigate(['/admin/garages/nouveau']);
+  }
+
+  openCommissionPrompt(reparateur: Reparateur): void {
+    const input = prompt('Nouvelle commission (%)', reparateur.commission !== null && reparateur.commission !== undefined ? reparateur.commission.toString() : '0');
+    if (input !== null) {
+      const value = parseFloat(input);
+      if (!isNaN(value) && value >= 0 && value <= 100) {
+        this.modifierCommission(reparateur, value);
+      } else {
+        alert('Veuillez entrer une commission valide entre 0 et 100.');
+      }
+    }
+  }
+
+  startEditCommission(reparateur: Reparateur): void {
+    this.editedCommissionId = reparateur.id ?? 0;
+    this.editedCommissionValue = reparateur.commission ?? 0;
+  }
+
+  cancelEditCommission(): void {
+    this.editedCommissionId = null;
+    this.editedCommissionValue = null;
+  }
+
+  saveEditCommission(reparateur: Reparateur): void {
+    if (this.editedCommissionValue === null || isNaN(this.editedCommissionValue) || this.editedCommissionValue < 0 || this.editedCommissionValue > 100) {
+      this.snackBar.open('Veuillez entrer une commission valide entre 0 et 100.', 'Fermer', { duration: 3000 });
+      return;
+    }
+    const updatedReparateur = { ...reparateur, commission: this.editedCommissionValue, isvalids: 'valide', isValids: 'valide' };
+    this.reparateurService.updateReparateur(reparateur.id ?? 0, updatedReparateur).subscribe({
+      next: () => {
+        this.snackBar.open('Commission modifiée avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors de la modification de la commission.', 'Fermer', { duration: 3000 });
+        console.error('Erreur lors de la modification de la commission:', error);
+      }
+    });
+    this.editedCommissionId = null;
+    this.editedCommissionValue = null;
+  }
+
+  get tousLesGarages(): Reparateur[] {
+    return this.dataSource.data;
   }
 }

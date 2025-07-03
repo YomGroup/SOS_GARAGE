@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -32,12 +32,38 @@ import { ThemeService } from '../../core/services/theme.service';
 })
 export class LayoutComponent {
   private readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
 
   readonly sidebarCollapsed = signal(false);
   readonly isDarkMode = this.themeService.isDarkMode;
+  isMobile: boolean = false;
+  isSidebarOpen: boolean = false;
 
-  toggleSidebar(): void {
-    this.sidebarCollapsed.update(state => !state);
+  constructor() {
+    this.isMobile = window.innerWidth <= 992;
+    window.addEventListener('resize', () => {
+      this.isMobile = window.innerWidth <= 992;
+      if (!this.isMobile) {
+        this.isSidebarOpen = false;
+      }
+    });
+    this.router.events.subscribe(event => {
+      if (this.isMobile) {
+        this.isSidebarOpen = false;
+      }
+    });
+  }
+
+  openSidebar() {
+    this.isSidebarOpen = true;
+  }
+
+  closeSidebar() {
+    this.isSidebarOpen = false;
+  }
+
+  toggleSidebar() {
+    this.isSidebarOpen = !this.isSidebarOpen;
   }
 
   toggleTheme(): void {

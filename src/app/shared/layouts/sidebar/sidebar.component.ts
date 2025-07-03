@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
@@ -25,7 +25,11 @@ interface MenuItem {
   styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  @Input() collapsed = false;
+  @Input() collapsed: boolean = false;
+  @Input() isMobile: boolean = false;
+  @Input() isOpen: boolean = false;
+  @Output() closeSidebar = new EventEmitter<void>();
+  @Output() openSidebar = new EventEmitter<void>();
   
   private keycloakService = inject(KeycloakService);
   private cdr = inject(ChangeDetectorRef);
@@ -50,16 +54,19 @@ export class SidebarComponent implements OnInit {
   adminMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/admin/dashboard', badge: '3' },
     { title: 'Dossiers', icon: 'bi bi-folder', route: '/admin/dossiers' },
+    { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
-    { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
+   // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
-    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }     
+    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
+    
   ];
 
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
     { title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
     { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
+    { title: 'Finance', icon: 'bi bi-cash-coin', route: '/garage/finance' },
     { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
   ];
 

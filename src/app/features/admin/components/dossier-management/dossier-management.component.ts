@@ -1,5 +1,5 @@
 // dossier-management.component.ts
-import { Component, OnInit, ViewChild, AfterViewInit, ViewContainerRef, ComponentRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ViewContainerRef, ComponentRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -13,21 +13,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { DossiersService, Dossier as APIDossier } from '../../../../../services/dossiers.service';
 import { MatDialog } from '@angular/material/dialog';
-import { DossierDetailsDialogComponent } from  './dialogs/dossier-details-dialog.component';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
-import { DossierEditComponent } from './dossier-edit/dossier-edit.component';
+import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { DossierViewComponent } from './dossier-view.component';
+import { MissionService } from '../../../../../services/mission.service';
+import { Mission } from '../../../../../services/models-api.interface';
+import { Dossier } from '../../../../../services/dossiers.service';
 
-interface Dossier {
-  id: number;
+// Étend l'interface Dossier pour l'affichage local
+export interface DossierAffichage extends Dossier {
   numero: string;
-  type: 'CONTRAT' | 'FACTURE' | 'DEVIS';
-  statut: 'EN_COURS' | 'VALIDÉ' | 'REJETÉ' | 'EN_ATTENTE';
   dateCreation: Date;
-  documents: {
-    contratAssurance: boolean;
-    carteGrise: boolean;
-    facture: boolean;
-  };
 }
 
 @Component({
@@ -47,47 +42,78 @@ interface Dossier {
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
-    DossierEditComponent,
+    DossierViewComponent,
     RouterModule,
-    DossierDetailsDialogComponent
   ]
 })
 export class DossierManagementComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['numero', 'type', 'statut', 'dateCreation', 'documents', 'actions'];
-  dataSource: MatTableDataSource<Dossier>;
+  dataSource: MatTableDataSource<DossierAffichage>;
   isCardView: boolean = true;
-  private dialogComponentRef?: ComponentRef<DossierDetailsDialogComponent>;
+  dossierSelectionne: Mission | null = null;
+  dossierEnEdition: boolean = false;
+  missions: Mission[] = [];
+  isMobile: boolean = false;
+  dossierAffichageSelectionne: DossierAffichage | null = null;
+  sinistreSelectionne: any = null;
+  sinistreDuDossier: DossierAffichage | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild('dialogContainer', { read: ViewContainerRef }) dialogContainer!: ViewContainerRef;
 
+  // Statistiques dossiers
+  totalDossiers = 0;
+  dossiersNonTraites = 0;
+  dossiersTraites = 0;
+  dossiersCommissionPayee = 0;
+
   constructor(
     private dossiersService: DossiersService, 
+    private missionService: MissionService,
     private dialog: MatDialog, 
     private router: Router, 
     private route: ActivatedRoute,
-    private viewContainerRef: ViewContainerRef
+    private viewContainerRef: ViewContainerRef,
+    private cdr: ChangeDetectorRef
   ) {
     this.dataSource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
+    this.isMobile = window.innerWidth <= 768;
+    window.addEventListener('resize', () => {
+      this.isMobile = window.innerWidth <= 768;
+    });
+    this.loadData();
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.loadData();
+      }
+    });
+  }
+
+  private loadData() {
     this.dossiersService.getDossiers().subscribe(apiDossiers => {
       this.dataSource.data = apiDossiers.map(d => ({
-        id: d.id,
+        ...d,
         numero: d.id.toString(),
-        type: (d.type === 'CONTRAT' || d.type === 'FACTURE' || d.type === 'DEVIS') ? d.type : 'CONTRAT',
-        statut: d.conditionsAcceptees ? 'VALIDÉ' : 'EN_ATTENTE',
-        dateCreation: new Date(), // à adapter si l'API fournit la date
-        documents: {
-          contratAssurance: d.documents?.length > 0, // exemple, à adapter
-          carteGrise: false, // à adapter
-          facture: false // à adapter
-        }
+        dateCreation: (d as any).dateCreation ? new Date((d as any).dateCreation) : new Date(),
+        statut: d.statut ?? (d.conditionsAcceptees ? 'VALIDÉ' : 'EN_ATTENTE'),
       }));
+      this.totalDossiers = apiDossiers.length;
+      // Dossiers non traités : pas de mission associée
+      this.dossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
+      // Dossiers traités : au moins une mission associée
+      this.dossiersTraites = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
+      // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
+      this.dossiersCommissionPayee = apiDossiers.filter(dossier => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
+      this.cdr.detectChanges();
     });
-    this.initializeViewToggle();
+    this.missionService.getAllMissions().subscribe(missions => {
+      this.missions = missions;
+      this.cdr.detectChanges();
+    });
   }
 
   ngAfterViewInit() {
@@ -170,23 +196,13 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
   }
 
   voirDossier(dossier: Dossier): void {
-   this.dialog.open(DossierDetailsDialogComponent, {
-    data: dossier,
-    width: '90vw',
-    maxWidth: '1200px',
-    autoFocus: false,
-    panelClass: 'custom-dialog-panel'
-   });
-   this.router.navigate(['/admin/dossiers/details', dossier.id]);
+    this.router.navigate(['/admin/dossiers/view', dossier.id]);
   }
 
   formatDate(date: Date): string {
     return date.toLocaleDateString('fr-FR');
   }
-
-  editDossier(dossier: Dossier): void {
-    this.router.navigate(['/admin/dossiers/edit', dossier.id]);
-  }
+  
 
   attribuerSinistre(dossier: Dossier): void {
     console.log('Attribution du dossier à un sinistre:', dossier);
@@ -200,28 +216,39 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
     this.dataSource._updateChangeSubscription();
   }
 
-  private initializeViewToggle(): void {
-    const cardViewBtn = document.getElementById('cardView');
-    const tableViewBtn = document.getElementById('tableView');
-    const cardViewContainer = document.getElementById('cardViewContainer');
-    const tableViewContainer = document.getElementById('tableViewContainer');
+  setCardView(isCard: boolean) {
+    this.isCardView = isCard;
+  }
 
-    if (cardViewBtn && tableViewBtn && cardViewContainer && tableViewContainer) {
-      cardViewBtn.addEventListener('click', () => {
-        this.isCardView = true;
-        cardViewBtn.classList.add('active');
-        tableViewBtn.classList.remove('active');
-        cardViewContainer.style.display = 'flex';
-        tableViewContainer.style.display = 'none';
-      });
+  
 
-      tableViewBtn.addEventListener('click', () => {
-        this.isCardView = false;
-        tableViewBtn.classList.add('active');
-        cardViewBtn.classList.remove('active');
-        tableViewContainer.style.display = 'block';
-        cardViewContainer.style.display = 'none';
-      });
+  ouvrirDossierView(dossier: DossierAffichage, edition: boolean = false) {
+    const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
+    if (mission) {
+      this.dossierSelectionne = mission;
+      this.dossierEnEdition = edition;
+      this.dossierAffichageSelectionne = null;
+      this.sinistreDuDossier = null;
+    } else {
+      this.dossierSelectionne = null;
+      this.dossierEnEdition = edition;
+      this.dossierAffichageSelectionne = dossier;
+      this.sinistreDuDossier = dossier;
     }
+  }
+
+  fermerDossierView() {
+    this.dossierSelectionne = null;
+    this.dossierEnEdition = false;
+    this.dossierAffichageSelectionne = null;
+  }
+
+  onMissionUpdated(updated: Mission) {
+    // Met à jour la mission dans la liste locale si besoin
+    const idx = this.missions.findIndex(m => m.id === updated.id);
+    if (idx !== -1) {
+      this.missions[idx] = updated;
+    }
+    this.dossierSelectionne = updated;
   }
 }

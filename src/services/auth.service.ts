@@ -58,6 +58,11 @@ export class AuthService {
     hasRole(role: string): boolean {
         return this.getRoles().includes(role);
     }
+
+    getKeycloakId(): string | null {
+        return this.decodedToken ? this.decodedToken['sub'] ?? null : null;
+    }
+
     registerAssure(payload: any) {
         return this.http.post(this.apiUrl, payload);
 

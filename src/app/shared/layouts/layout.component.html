@@ -1,17 +1,16 @@
 <div class="app-layout" [class.dark]="isDarkMode()" [class.sidebar-collapsed]="sidebarCollapsed()">
-  <button
-    class="sidebar-toggle"
-    (click)="toggleSidebar()"
-    [class.collapsed]="sidebarCollapsed()"
-    aria-label="Ouvrir/fermer la barre latérale"
-  >
-    <i class="bi bi-list"></i>
-  </button>
-  <app-sidebar [collapsed]="sidebarCollapsed()"></app-sidebar>
+  <!-- Overlay mobile -->
+  <div class="sidebar-overlay" [class.show]="isMobile && isSidebarOpen" (click)="closeSidebar()"></div>
+  <!-- Sidebar -->
+  <app-sidebar [collapsed]="sidebarCollapsed()" [isMobile]="isMobile" [isOpen]="isSidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
   <div class="layout-content">
     <app-header
       [sidebarCollapsed]="sidebarCollapsed()"
       (toggleTheme)="toggleTheme()"
+      [isMobile]="isMobile"
+      [sidebarOpened]="isSidebarOpen"
+      (openSidebar)="openSidebar()"
+      (closeSidebar)="closeSidebar()"
     ></app-header>
     <main class="main-content">
       <div class="content-wrapper">

@@ -12,7 +12,8 @@ import { UserManagementComponent } from './components/administration/user-manage
 import { AuditLogsComponent } from './components/administration/audit-logs/audit-logs.component';
 import { AccessManagementComponent } from './components/administration/access-management/access-management.component';
 import { AdminStatsComponent } from './components/administration/admin-stats/admin-stats.component';
-import { DossierEditComponent } from './components/dossier-management/dossier-edit/dossier-edit.component';
+import { DossierViewComponent } from './components/dossier-management/dossier-view.component';
+import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 
 
 const routes: Routes = [
@@ -24,7 +25,7 @@ const routes: Routes = [
     path: 'dossiers',
     component: DossierManagementComponent,
     children: [
-      { path: 'edit/:id', component: DossierEditComponent }
+      { path: 'view/:id', component: DossierViewComponent }
     ]
   },
   /*
@@ -32,6 +33,10 @@ const routes: Routes = [
     path: 'garages/nouveau',
     component: AddGarageComponent
   },*/
+  {
+    path: 'gestion-finance',
+    component: GestionFinanceComponent
+  },
   {
     path: 'garages',
     component: GarageValidationComponent

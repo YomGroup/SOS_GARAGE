@@ -252,6 +252,34 @@ mat-dialog-actions {
   font-size: 16px;
 }
 
+/* Statut : Validé */
+.status-active {
+  background-color: #4caf50 !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+/* Statut : Suspendu */
+.status-suspended {
+  background-color: #ff9800 !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+/* Statut : Rejeté */
+.status-rejected {
+  background-color: #f44336 !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
+/* Statut : En attente */
+.status-pending {
+  background-color: #9e9e9e !important;
+  color: #fff !important;
+  font-weight: bold;
+}
+
 @media (max-width: 768px) {
   .info-grid,
   .documents-grid,

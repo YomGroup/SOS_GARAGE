@@ -9,8 +9,41 @@
       <span class="badge bg-primary fs-6 shadow-sm">{{ missions.length }} missions</span>
     </div>
 
+    <!-- État de chargement -->
+    <div *ngIf="loading" class="loading-state">
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-3 text-muted">Chargement des missions en cours...</p>
+      </div>
+    </div>
+
+    <!-- État d'erreur -->
+    <div *ngIf="error && !loading" class="error-state">
+      <div class="alert alert-danger text-center">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        {{ error }}
+        <button class="btn btn-outline-danger btn-sm ms-3" (click)="loadMissions()">
+          <i class="fas fa-redo me-1"></i>Réessayer
+        </button>
+      </div>
+    </div>
+
+    <!-- Message si aucune mission en attente -->
+    <div *ngIf="!loading && !error && missions.length === 0" class="no-mission-state">
+      <div class="text-center py-5">
+        <div class="no-mission-icon">
+          <i class="fas fa-clipboard-check"></i>
+        </div>
+        <h4 class="text-muted mt-3">Aucune mission en attente</h4>
+        <p class="text-muted">Vous n'avez actuellement aucune mission à traiter.</p>
+        <p class="text-muted small">Les nouvelles missions apparaîtront ici automatiquement.</p>
+      </div>
+    </div>
+
     <!-- Grille responsive des missions améliorée -->
-    <div class="row g-4 px-2">
+    <div *ngIf="!loading && !error && missions.length > 0" class="row g-4 px-2">
       <div class="col-12 col-sm-6 col-lg-4 col-xl-3" *ngFor="let mission of missions">
         <div class="document-card h-100 d-flex flex-column justify-content-between hover-effect">
           <div class="d-flex align-items-center mb-3">
@@ -18,15 +51,18 @@
               <i class="fas fa-clipboard-check"></i>
             </div>
             <div class="mission-info">
-              <h5 class="mb-1 text-truncate">{{ mission.titre }}</h5>
+              <h5 class="mb-1 text-truncate">Mission #{{ mission.id }}</h5>
               <div class="text-muted small">
-                <i class="fas fa-user me-1"></i>{{ mission.client }}
+                <i class="fas fa-user me-1"></i>{{ mission.sinistre?.type || 'N/A' }}
               </div>
               <div class="text-muted small">
-                <i class="fas fa-car me-1"></i>{{ mission.vehicule }}
+                <i class="fas fa-car me-1"></i>{{ mission.sinistre?.contactAssistance || 'N/A' }}
               </div>
               <div class="text-muted small">
-                <i class="far fa-calendar-alt me-1"></i>{{ mission.date }}
+                <i class="far fa-calendar-alt me-1"></i>{{ getMissionDate(mission) }}
+              </div>
+              <div class="status-badge" [ngClass]="'status-' + mission.statut.toLowerCase()">
+                {{ mission.statut }}
               </div>
             </div>
           </div>
@@ -52,62 +88,117 @@
           </button>
         </div>
         
-        <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-user me-2"></i>Client</div>
-          <div class="detail-value">{{ missionSelectionnee?.client }}</div>
+        <!-- Détails du sinistre -->
+        <div *ngIf="missionSelectionnee.sinistre; else noSinistre">
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-user me-2"></i>Type de sinistre</div>
+            <div class="detail-value">{{ missionSelectionnee.sinistre.type }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-car me-2"></i>Contact assistance</div>
+            <div class="detail-value">{{ missionSelectionnee.sinistre.contactAssistance }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label"><i class="fas fa-file-alt me-2"></i>Lien constat</div>
+            <div class="detail-value">{{ missionSelectionnee.sinistre.lienConstat || 'Non renseigné' }}</div>
+          </div>
         </div>
-        
+        <ng-template #noSinistre>
+          <div class="alert alert-warning">Aucun sinistre associé à cette mission.</div>
+        </ng-template>
+
+        <!-- Détails mission -->
         <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-car me-2"></i>Véhicule</div>
-          <div class="detail-value">{{ missionSelectionnee?.vehicule }}</div>
+          <div class="detail-label"><i class="far fa-calendar-alt me-2"></i>Date de création</div>
+          <div class="detail-value">{{ getMissionDate(missionSelectionnee) }}</div>
         </div>
-        
         <div class="detail-item">
-          <div class="detail-label"><i class="fas fa-align-left me-2"></i>Description</div>
-          <div class="detail-value">{{ missionSelectionnee?.description }}</div>
+          <div class="detail-label"><i class="fas fa-euro-sign me-2"></i>Devis</div>
+          <div class="detail-value">{{ missionSelectionnee.devis | number:'1.0-0' }} €</div>
         </div>
-        
         <div class="detail-item">
-          <div class="detail-label"><i class="far fa-calendar-alt me-2"></i>Date</div>
-          <div class="detail-value">{{ missionSelectionnee?.date }}</div>
+          <div class="detail-label"><i class="fas fa-file-invoice-dollar me-2"></i>Facture finale</div>
+          <div class="detail-value">{{ missionSelectionnee.factureFinale | number:'1.0-0' }} €</div>
         </div>
-        
-        <div class="section-divider"></div>
-        
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-car-side me-2"></i>Prêt de véhicule</div>
+          <div class="detail-value">{{ missionSelectionnee.pretVehicule ? 'Oui' : 'Non' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-exclamation-triangle me-2"></i>Déclarée comme épave</div>
+          <div class="detail-value">{{ missionSelectionnee.declareCommeEpave ? 'Oui' : 'Non' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="fas fa-check-double me-2"></i>Épave validée par admin</div>
+          <div class="detail-value">{{ missionSelectionnee.epaveValideeParAdmin ? 'Oui' : 'Non' }}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label"><i class="far fa-calendar-check me-2"></i>Date déclaration épave</div>
+          <div class="detail-value">{{ missionSelectionnee.dateDeclarationEpave || 'Non renseignée' }}</div>
+        </div>
+
+        <!-- Photos véhicule -->
         <div class="photos-section">
           <h5 class="section-subtitle">
             <i class="fas fa-camera me-2"></i>Photos du véhicule
           </h5>
-          <div class="photos-grid">
-            <div class="photo-thumbnail" *ngFor="let photo of missionSelectionnee?.photos">
+          <div *ngIf="isPhotosArrayNonEmpty(missionSelectionnee) ; else noPhotos" class="photos-grid">
+            <div class="photo-thumbnail" *ngFor="let photo of missionSelectionnee.photosVehicule">
               <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
               <div class="photo-overlay">
                 <i class="fas fa-search-plus"></i>
               </div>
             </div>
           </div>
+          <ng-template #noPhotos>
+            <div>Aucune photo disponible.</div>
+          </ng-template>
         </div>
-        
+
+        <!-- Documents -->
         <div class="documents-section">
           <h5 class="section-subtitle">
             <i class="fas fa-file-alt me-2"></i>Documents
           </h5>
           <div class="documents-list">
-            <a *ngFor="let doc of missionSelectionnee?.documents" 
-               [href]="doc.url" 
-               target="_blank" 
-               class="document-item">
-              <i class="fas fa-file-pdf me-2"></i>{{ doc.nom }}
+            <a *ngIf="missionSelectionnee.constatAccident" [href]="missionSelectionnee.constatAccident" target="_blank" class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>Constat accident
+              <i class="fas fa-download ms-auto"></i>
+            </a>
+            <a *ngFor="let doc of missionSelectionnee.documentsAssurance" [href]="doc" target="_blank" class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>Assurance
+              <i class="fas fa-download ms-auto"></i>
+            </a>
+            <a *ngIf="missionSelectionnee.cessionCreance" [href]="missionSelectionnee.cessionCreance" target="_blank" class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>Cession de créance
+              <i class="fas fa-download ms-auto"></i>
+            </a>
+            <a *ngIf="missionSelectionnee.ordreReparation" [href]="missionSelectionnee.ordreReparation" target="_blank" class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>Ordre de réparation
               <i class="fas fa-download ms-auto"></i>
             </a>
           </div>
         </div>
         
         <button class="btn btn-primary-custom w-100 py-2 fs-5 rounded-pill mt-4 accept-btn"
-                *ngIf="missionSelectionnee"
+                *ngIf="missionSelectionnee && missionSelectionnee.statut === 'en attente'"
                 (click)="accepterMission(missionSelectionnee!)">
           <i class="fas fa-check-circle me-2"></i>Accepter la mission
         </button>
+        
+        <button class="btn btn-danger w-100 py-2 fs-5 rounded-pill mt-2"
+                *ngIf="missionSelectionnee && missionSelectionnee.statut === 'en attente'"
+                (click)="refuserMission(missionSelectionnee!)">
+          <i class="fas fa-times-circle me-2"></i>Refuser la mission
+        </button>
+        
+        <div *ngIf="missionSelectionnee && missionSelectionnee.statut !== 'en attente' && !missionEstVisible(missionSelectionnee)" 
+             class="alert alert-info mt-4 text-center">
+          <i class="fas fa-info-circle me-2"></i>
+          Cette mission a déjà été {{ missionSelectionnee.statut === 'assignée' ? 'assignée' : 
+                                    missionSelectionnee.statut === 'en cours' ? 'mise en cours' : 
+                                    missionSelectionnee.statut === 'terminée' ? 'terminée' : 'traitée' }}
+        </div>
       </div>
     </div>
     

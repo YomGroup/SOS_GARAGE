@@ -1,6 +1,62 @@
 <!-- Gestion des Dossiers -->
 <div class="content-section" id="dossiers">
 <div class="container-fluid">
+    <!-- Statistiques dossiers -->
+    <div class="row mb-4">
+        <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="stats-title opacity-90">Total dossiers</h3>
+                        <div class="stats-number">{{ totalDossiers }}</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="stats-title opacity-90">Non traités</h3>
+                        <div class="stats-number">{{ dossiersNonTraites }}</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-hourglass-start"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="stats-title opacity-90">Traités</h3>
+                        <div class="stats-number">{{ dossiersTraites }}</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="stats-title opacity-90">Commission payée</h3>
+                        <div class="stats-number">{{ dossiersCommissionPayee }}</div>
+                    </div>
+                    <div class="stats-icon">
+                        <i class="fas fa-euro-sign"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filtres -->
     <div class="card mb-4">
         <div class="card-body">
@@ -37,19 +93,19 @@
         </div>
 
         <!-- Boutons de vue -->
-        <div class="view-toggle mb-4">
-            <button class="btn btn-outline-custom active" id="cardView">
+        <div class="view-toggle mb-4" *ngIf="!isMobile">
+            <button class="btn btn-outline-custom" [class.active]="isCardView" (click)="setCardView(true)">
                 <i class="fas fa-th-large me-2"></i>Vue cartes
             </button>
-            <button class="btn btn-outline-custom" id="tableView">
+            <button class="btn btn-outline-custom" [class.active]="!isCardView" (click)="setCardView(false)">
                 <i class="fas fa-table me-2"></i>Vue tableau
             </button>
-    </div>
+        </div>
 
         <!-- Vue en cartes -->
-        <div class="row" id="cardViewContainer">
+        <div class="row" *ngIf="isMobile || isCardView" id="cardViewContainer">
             <ng-container *ngIf="dataSource.data.length; else noDossier">
-                <div class="col-md-6 col-lg-4 mb-4" *ngFor="let dossier of dataSource.data" (click)="editDossier(dossier)" style="cursor:pointer;">
+                <div class="col-md-6 col-lg-4 mb-4" *ngFor="let dossier of dataSource.data" style="cursor:pointer;">
                 <div class="document-card">
                     <div class="document-icon reports">
                         <i class="fas fa-folder-open"></i>
@@ -60,10 +116,10 @@
                             <small class="text-muted">Statut : {{ dossier.statut }}</small>
                     </div>
                     <div class="document-actions">
-                            <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="$event.stopPropagation(); voirDossier(dossier)">
+                            <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)">
                             <i class="fas fa-eye"></i>
                         </button>
-                            <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="$event.stopPropagation(); editDossier(dossier)">
+                            <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)">
                             <i class="fas fa-edit"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger" title="Supprimer">
@@ -78,8 +134,8 @@
             </ng-template>
         </div>
 
-        <!-- Vue en tableau (cachée par défaut) -->
-        <div class="table-responsive" id="tableViewContainer" style="display: none;">
+        <!-- Vue en tableau (desktop uniquement) -->
+        <div class="table-responsive" *ngIf="!isMobile && !isCardView" id="tableViewContainer">
             <table class="table table-hover">
                 <thead>
                     <tr>
@@ -95,13 +151,13 @@
                         <tr *ngFor="let dossier of dataSource.data">
                             <td>#{{ dossier.numero }}</td>
                             <td>{{ dossier.type }}</td>
-                            <td><span class="badge" [ngClass]="getStatutClass(dossier.statut)">{{ dossier.statut }}</span></td>
+                            <td><span class="badge" [ngClass]="getStatutClass(dossier.statut ?? '')">{{ dossier.statut }}</span></td>
                             <td>{{ formatDate(dossier.dateCreation) }}</td>
                             <td>
-                                <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="voirDossier(dossier)">
+                                <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="ouvrirDossierView(dossier, false)">
                                 <i class="fas fa-eye"></i>
                             </button>
-                                <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="editDossier(dossier)">
+                                <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="ouvrirDossierView(dossier, true)">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="btn btn-sm btn-outline-danger" title="Supprimer">
@@ -135,4 +191,17 @@
         </nav>
     </div>
 </div>
+
+<!-- Modale dossier-view -->
+<app-dossier-view
+  *ngIf="dossierSelectionne || dossierAffichageSelectionne"
+  [mission]="dossierSelectionne"
+  [dossier]="dossierAffichageSelectionne"
+  [sinistre]="dossierSelectionne?.sinistre"
+  [loading]="false"
+  [edition]="dossierEnEdition"
+  (closed)="fermerDossierView()"
+  (missionUpdated)="onMissionUpdated($event)">
+</app-dossier-view>
+
 <router-outlet></router-outlet>
