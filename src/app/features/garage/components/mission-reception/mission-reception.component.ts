@@ -24,6 +24,7 @@ export class MissionReceptionComponent implements OnInit {
   missionSelectionnee: Mission | null = null;
   loading: boolean = true;
   error: string | null = null;
+  processingAction: boolean = false;
 
   constructor(
     private missionService: MissionService,
@@ -87,34 +88,72 @@ export class MissionReceptionComponent implements OnInit {
   ouvrirDetails(mission: Mission) {
     this.missionSelectionnee = mission;
     this.panelOuvert = true;
+    // Empêcher le scroll du body quand le panneau est ouvert
+    document.body.style.overflow = 'hidden';
   }
 
   fermerPanel() {
     this.panelOuvert = false;
     this.missionSelectionnee = null;
+    // Restaurer le scroll du body
+    document.body.style.overflow = '';
   }
 
-  accepterMission(mission: Mission) {
-    this.missionService.updateMission(mission.id ?? 0, { statut: 'assignée' }).subscribe({
+  async accepterMission(mission: Mission) {
+    if (this.processingAction) return;
+    
+    this.processingAction = true;
+    
+    try {
+      const updatedMission = await firstValueFrom(
+        this.missionService.updateMission(mission.id ?? 0, { statut: 'assigné' })
+      );
+      
+      // Mettre à jour les deux tableaux
+      this.missions = this.missions.filter(m => m.id !== mission.id);
+      this.filteredMissions = this.filteredMissions.filter(m => m.id !== mission.id);
+      
+      this.showSuccessMessage(`Mission #${mission.id} acceptée avec succès`);
+      this.fermerPanel();
+    } catch (error: any) {
+      this.showErrorMessage(`Échec de l'acceptation: ${error.message || 'Erreur inconnue'}`);
+    } finally {
+      this.processingAction = false;
+    }
+  }
+
+  async refuserMission(mission: Mission) {
+    if (this.processingAction) return;
+    
+    this.processingAction = true;
+    console.log('Début du refus de la mission:', mission.id);
+    
+    this.missionService.updateMission(mission.id ?? 0, { 
+      statut: 'en attente'
+    }).subscribe({
       next: (updatedMission) => {
+        console.log('Mission refusée avec succès:', updatedMission);
+        
+        // Mettre à jour la liste locale
         this.missions = this.missions.filter(m => m.id !== mission.id);
         this.applyFilter();
-        alert(`Mission #${mission.id} acceptée.`);
+        
+        // Fermer le panneau et réinitialiser
         this.fermerPanel();
+        this.processingAction = false;
+        
+        // Afficher le message de succès
+        this.showSuccessMessage(`Mission #${mission.id} refusée.`);
       },
-      error: () => alert('Erreur lors de l\'acceptation de la mission')
-    });
-  }
-
-  refuserMission(mission: Mission) {
-    this.missionService.updateMission(mission.id ?? 0, { statut: 'non assignée', reparateur: undefined }).subscribe({
-      next: () => {
-        this.missions = this.missions.filter(m => m.id !== mission.id);
-        this.applyFilter();
-        alert(`Mission #${mission.id} refusée.`);
-        this.fermerPanel();
-      },
-      error: () => alert('Erreur lors du refus de la mission')
+      error: (error) => {
+        console.error('Erreur lors du refus:', error);
+        
+        // Réinitialiser l'état
+        this.processingAction = false;
+        
+        // Afficher l'erreur
+        this.showErrorMessage(`Erreur lors du refus: ${error.message || 'Erreur réseau'}`);
+      }
     });
   }
 
@@ -123,7 +162,11 @@ export class MissionReceptionComponent implements OnInit {
   }
 
   getMissionDate(mission: Mission): string {
-    return new Date(mission.dateCreation).toLocaleDateString('fr-FR');
+    return new Date(mission.dateCreation).toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   }
 
   missionEstVisible(mission: Mission): boolean {
@@ -132,5 +175,44 @@ export class MissionReceptionComponent implements OnInit {
 
   isPhotosArrayNonEmpty(mission: Mission): boolean {
     return Array.isArray(mission.photosVehicule) && mission.photosVehicule.length > 0;
+  }
+
+  // Méthode pour le trackBy pour optimiser les performances
+  trackByMissionId(index: number, mission: Mission): number {
+    return mission.id ?? index;
+  }
+
+  // Méthode pour ouvrir le visualiseur de photos (à implémenter selon vos besoins)
+  openPhotoViewer(photo: string, index: number): void {
+    // Ici vous pouvez implémenter un modal ou une lightbox pour afficher les photos
+    console.log('Ouvrir photo:', photo, 'index:', index);
+    // Exemple: this.photoViewerService.open(missionSelectionnee.photosVehicule, index);
+  }
+
+  // Méthodes pour afficher les messages de succès/erreur
+  private showSuccessMessage(message: string): void {
+    // Vous pouvez utiliser un service de notification ou des toasts
+    console.log('✅ Succès:', message);
+    // Exemple: this.notificationService.showSuccess(message);
+  }
+
+  private showErrorMessage(message: string): void {
+    // Vous pouvez utiliser un service de notification ou des toasts
+    console.error('❌ Erreur:', message);
+    // Exemple: this.notificationService.showError(message);
+  }
+
+  // Méthode pour gérer les clics sur l'overlay
+  onOverlayClick(event: Event): void {
+    if (event.target === event.currentTarget) {
+      this.fermerPanel();
+    }
+  }
+
+  // Méthode pour gérer les touches clavier
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.panelOuvert) {
+      this.fermerPanel();
+    }
   }
 } 

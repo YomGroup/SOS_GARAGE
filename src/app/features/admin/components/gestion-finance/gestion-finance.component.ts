@@ -19,14 +19,7 @@ import { catchError, forkJoin, of } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GestionFinanceComponent implements OnInit {
-  // Tous les éléments visuels inchangés
-  iconCoins = '💰';
-  iconInvoice = '🧾';
-  iconMoney = '💵';
-  iconPercent = '📊';
-  iconWallet = '💳';
-  iconEye = '👁️';
-  iconInbox = '📥';
+
 
   // Variables d'état originales
   private _missions: Mission[] = [];
