@@ -239,7 +239,7 @@
 .navigation-buttons {
     display: flex;
     justify-content: space-between;
-    gap: 150%;
+    gap: 140%;
     margin-top: 40px;
     max-width: 600px;
 
@@ -434,6 +434,11 @@
     min-height: 300px;
 }
 
+.signature-controls {
+    border-top: 1px solid #eee;
+    background-color: #f9fafb;
+}
+
 .document-placeholder {
     text-align: center;
     color: #9ca3af;
@@ -590,17 +595,27 @@
 /* Responsive */
 @media (max-width: 768px) {
     .document-preview {
-        min-height: 300px;
+        border-radius: 12px;
+        margin: 10px;
     }
 
     .document-content {
-        padding: 20px;
-        min-height: 200px;
+        padding: 10px;
+    }
+
+    pdf-viewer {
+        height: 90vh !important;
+        /* prend plus de hauteur sur mobile */
     }
 
     .btn-sign {
         font-size: 16px;
-        padding: 15px 25px;
+        padding: 12px 24px;
+        width: 100%;
+    }
+
+    .custom-checkbox {
+        font-size: 14px;
     }
 }
 

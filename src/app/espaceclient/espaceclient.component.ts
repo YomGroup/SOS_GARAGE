@@ -10,7 +10,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 
 import { filter, map, mergeMap } from 'rxjs/operators';
 
-
+import * as bootstrap from 'bootstrap';
 @Component({
   selector: 'app-espaceclient',
   imports: [RouterOutlet, RouterLink, CommonModule, RouterLinkActive, HttpClientModule],
@@ -18,18 +18,62 @@ import { filter, map, mergeMap } from 'rxjs/operators';
   styleUrl: './espaceclient.component.css'
 })
 export class EspaceclientComponent implements OnInit {
+  // Dans votre composant
+  sidebarCollapsed = false;
+  sidebarHidden = false;
+  toggleSidebar() {
+    if (this.isMobile) {
+      // Sur mobile, toggle entre cachée et ouverte pleine largeur
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    } else {
+      // Sur desktop, toggle entre largeur pleine et réduite (icônes)
+      this.sidebarCollapsed = !this.sidebarCollapsed;
+    }
+  }
+  checkWindowWidth() {
+    this.isMobile = window.innerWidth < 768;
+    if (!this.isMobile) {
+      // Par défaut sidebar visible sur desktop
+      this.sidebarCollapsed = false;
+    } else {
+      // Sidebar cachée par défaut sur mobile
+      this.sidebarCollapsed = true;
+    }
+  }
+  ngAfterViewInit() {
+    // Initialize tooltips
+    const tooltipElements = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipElements.forEach(el => new bootstrap.Tooltip(el));
+
+    // Initialize dropdowns
+    const dropdownElements = Array.from(document.querySelectorAll('.dropdown-toggle'));
+    dropdownElements.forEach(el => new bootstrap.Dropdown(el));
+  }
   private assureService = inject(AssureService);
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object, private auth: AuthService, private router: Router, private activatedRoute: ActivatedRoute) {
-    this.loadUserData();
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
 
+    if (this.userid) {
+      this.assureService.getAssurerID(this.userid).subscribe({
+        next: (data: any) => {
+          this.assureId = data.id; // adapte selon ta réponse
+          console.log('Assure ID:', this.assureId);
+          this.loadUserData();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération de l’assure  ID :', err);
+        }
+      });
+    }
+    this.checkWindowWidth();
   }
 
   vehiclesCount: number = 0;
   pageTitle: string = '';
   isMobile = false;
   sidebarVisible = false;
-  sidebarCollapsed = false;
+  // sidebarCollapsed = false;
   claimsCount = 9;
   processingCount = 7;
   currentDate = '';
@@ -54,25 +98,26 @@ export class EspaceclientComponent implements OnInit {
   };
 
   private keycloakService = inject(KeycloakService);
+  private authService = inject(AuthService);
+  userid: string | null = null;
+  assureId: number = 0;
 
   private loadUserData(): void {
-    const userId = 8; // À remplacer par l'ID réel de l'utilisateur
-    if (userId) {
-      this.assureService.addAssurerGet(userId).subscribe({
-        next: (data: any) => {
-          this.userData = {
-            ...this.userData,
-            ...data,
-            telephone: this.formatPhoneNumber(data.telephone),
-            dateNaissance: this.formatDate(data.dateNaissance)
-          };
-          this.originalData = { ...this.userData };
-        },
-        error: (err) => {
-          console.error('Erreur lors du chargement des données utilisateur', err);
-        }
-      });
-    }
+    this.assureService.addAssurerGet(this.assureId).subscribe({
+      next: (data: any) => {
+        this.userData = {
+          ...this.userData,
+          ...data,
+          telephone: this.formatPhoneNumber(data.telephone),
+          dateNaissance: this.formatDate(data.dateNaissance)
+        };
+        this.originalData = { ...this.userData };
+        console.log('Données utilisateur chargées :', this.userData);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des données utilisateur', err);
+      }
+    });
   }
   private formatPhoneNumber(phone: string): string {
     // Formatage du numéro de téléphone
@@ -85,6 +130,7 @@ export class EspaceclientComponent implements OnInit {
   }
 
   ngOnInit() {
+
     const today = new Date();
     this.currentDate = today.toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -110,6 +156,7 @@ export class EspaceclientComponent implements OnInit {
     ).subscribe(data => {
       this.pageTitle = data['title'] || '';
     });
+
   }
 
 
@@ -119,6 +166,7 @@ export class EspaceclientComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.checkScreenSize();
     }
+    this.checkWindowWidth();
   }
   private checkScreenSize() {
     this.isMobile = window.innerWidth <= 992;
@@ -152,27 +200,27 @@ export class EspaceclientComponent implements OnInit {
         console.error('Logout failed', error);
       });
   }
-
-  toggleSidebar() {
-    if (this.isMobile) {
-      this.sidebarVisible = !this.sidebarVisible;
-    } else {
-      this.sidebarCollapsed = !this.sidebarCollapsed;
-      localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed.toString());
-
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const header = document.getElementById('header');
-      const toggleBtn = document.querySelector('.sidebar-toggle');
-
-      sidebar?.classList.toggle('collapsed');
-      mainContent?.classList.toggle('collapsed');
-      header?.classList.toggle('collapsed');
-      toggleBtn?.classList.toggle('collapsed');
+  /*
+    toggleSidebar() {
+      if (this.isMobile) {
+        this.sidebarVisible = !this.sidebarVisible;
+      } else {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed.toString());
+  
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const header = document.getElementById('header');
+        const toggleBtn = document.querySelector('.sidebar-toggle');
+  
+        sidebar?.classList.toggle('collapsed');
+        mainContent?.classList.toggle('collapsed');
+        header?.classList.toggle('collapsed');
+        toggleBtn?.classList.toggle('collapsed');
+      }
+  
     }
-
-  }
-
+  */
   @HostListener('window:scroll', [])
   onWindowScroll() {
     const toggleBtn = document.querySelector('.sidebar-toggle') as HTMLElement;

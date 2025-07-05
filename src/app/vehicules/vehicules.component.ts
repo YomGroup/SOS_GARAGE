@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { VehicleService, Vehicle } from '../../services/vehicle.service';
 import { inject } from '@angular/core';
+import { AuthService } from '../../services/auth.service';
+import { AssureService } from '../../services/assure.service';
 
 @Component({
   selector: 'app-vehicules',
@@ -11,12 +13,14 @@ import { inject } from '@angular/core';
   templateUrl: './vehicules.component.html',
   styleUrl: './vehicules.component.css'
 })
-export class VehiculesComponent {
+export class VehiculesComponent implements OnInit {
   private vehiculeService = inject(VehicleService);
+  private authService = inject(AuthService);
+  private assureService = inject(AssureService);
   vehicles: Vehicle[] = [];
   showAddForm = false;
   loadingScrap = false;
-
+  isEditMode = false;
   newVehicle: any = {
     immatriculation: '',
     marque: '',
@@ -25,21 +29,38 @@ export class VehiculesComponent {
     carteGrise: '',
     contratAssurance: '',
     dateMiseEnCirculation: '',
-    imageUrl: '', // ou new Date().toISOString()
+    imgUrl: '', // ou new Date().toISOString()
     assure: null
   };
   cpt: number = 5;
   scrapErrorMessage: string = '';
+  userid: string | null = null;
+  assureId: number = 0;
+  scrappingReussi: boolean = false;
 
 
-  constructor() {
-    this.loadVehicles();
+
+  ngOnInit(): void {
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
+
+    if (this.userid) {
+      this.assureService.getAssurerID(this.userid).subscribe({
+        next: (data: any) => {
+          this.assureId = data.id; // adapte selon ta réponse
+          this.loadVehicles(this.assureId);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération de l’assure  ID :', err);
+        }
+      });
+    }
   }
   // Dans ta classe
-  loadVehicles() {
-    this.vehiculeService.getAllVehiculesPost().subscribe({
+  loadVehicles(assureId: number): void {
+    this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         this.vehicles = data;
+        console.log('Véhicules reçus :', this.vehicles);
       },
       error: (err) => {
         console.error('Erreur lors de l’appel API :', err);
@@ -59,12 +80,13 @@ export class VehiculesComponent {
 
     this.loadingScrap = true;
     this.scrapErrorMessage = '';
+    this.scrappingReussi = false; // réinitialise à false à chaque tentative
 
     // Déclenche le timeout de 5s
     const timeout = setTimeout(() => {
       if (this.loadingScrap) {
         this.loadingScrap = false;
-        this.scrapErrorMessage = 'Les données sont introuvables, veuillez renseigner manuellement.';
+        this.scrapErrorMessage = 'Les données sont introuvables.';
       }
     }, 5000);
 
@@ -78,75 +100,117 @@ export class VehiculesComponent {
         this.newVehicle.carteGrise = data.AWN_date_cg || '';
         this.newVehicle.contratAssurance = data.AWN_version || '';
         this.newVehicle.dateMiseEnCirculation = data.AWN_date_mise_en_circulation_us || '';
-        this.newVehicle.imageUrl = data.AWN_model_image || '';
-
+        this.newVehicle.imgUrl = data.AWN_model_image || '';
         clearTimeout(timeout); // Annule le timeout si ça répond à temps
         this.loadingScrap = false;
+        this.scrappingReussi = true;
       },
       error: (err) => {
         console.error('Erreur lors du scrapping :', err);
         clearTimeout(timeout);
         this.loadingScrap = false;
-        this.scrapErrorMessage = 'Les données sont introuvables, veuillez renseigner manuellement.';
+        this.scrapErrorMessage = 'Les données sont introuvables.';
       }
     });
   }
 
 
-  addVehicle() {
+  submitVehicle() {
     const payload = {
       immatriculation: this.newVehicle.immatriculation,
       marque: this.newVehicle.marque,
       modele: this.newVehicle.modele,
       cylindree: this.newVehicle.cylindree,
+      dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
+
       carteGrise: this.newVehicle.carteGrise,
       contratAssurance: this.newVehicle.contratAssurance,
-      dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
-      assure: 4,
+      assure: this.assureId,
+
+      imgUrl: Array.isArray(this.newVehicle.imgUrl) && this.newVehicle.imgUrl.length > 0
+        ? this.newVehicle.imgUrl
+        : (this.newVehicle.imgUrl && this.newVehicle.imgUrl.trim() ? [this.newVehicle.imgUrl] : [])
+
     };
-    this.vehiculeService.addVehiculesPost(payload).subscribe({
-      next: (data) => {
-        console.log('Véhicule ajouté avec succès :', data);
-        this.loadVehicles();
-        this.cancelAdd();
-      },
-      error: (err) => {
-        console.error('Erreur lors de l’ajout du véhicule :', err);
-      }
-    });
+
+    if (this.isEditMode && this.newVehicle.id) {
+      console.log(this.newVehicle.imgUrl);      // Mode édition
+      this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
+        next: (data) => {
+          console.log('Véhicule mis à jour avec succès :', data);
+          this.loadVehicles(this.assureId);
+          this.cancelAdd();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la mise à jour du véhicule :', err.error.message);
+          if (err.error && err.error.message) {
+            console.error('Message d\'erreur détaillé :', err.error.message);
+          }
+          this.scrapErrorMessage = 'Une erreur s\'est produite. Veuillez réessayer.';
+        }
+
+      });
+    } else {
+      // Mode ajout
+      this.vehiculeService.addVehiculesPost(payload).subscribe({
+        next: (data) => {
+          this.loadVehicles(this.assureId);
+          this.cancelAdd();
+        },
+        error: (err) => {
+          console.error('Erreur lors de l’ajout du véhicule :', err);
+        }
+      });
+    }
   }
-  updateVehicle() {
-    const payload = {
-      immatriculation: this.newVehicle.immatriculation,
-      marque: this.newVehicle.marque,
-      modele: this.newVehicle.modele,
-      cylindree: this.newVehicle.cylindree,
-      carteGrise: this.newVehicle.carteGrise,
-      contratAssurance: this.newVehicle.contratAssurance,
-      dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
-      assure: 4,
+
+  updateVehicle(vehicle: Vehicle) {
+    this.isEditMode = true;
+    this.showAddForm = true;
+
+    // Clone l'objet pour ne pas lier directement au tableau principal
+    this.newVehicle = {
+      ...vehicle,
+      dateMiseEnCirculation: vehicle.dateMiseEnCirculation
+        ? new Date(vehicle.dateMiseEnCirculation).toISOString().split('T')[0]
+        : '',
     };
-    this.vehiculeService.addVehiculesPost(payload).subscribe({
-      next: (data) => {
-        console.log('Véhicule ajouté avec succès :', data);
-        this.loadVehicles();
-        this.cancelAdd();
-      },
-      error: (err) => {
-        console.error('Erreur lors de l’ajout du véhicule :', err);
-      }
-    });
   }
 
 
   cancelAdd() {
     this.showAddForm = false;
-    this.newVehicle = {};
+    this.newVehicle = {
+      immatriculation: '',
+      marque: '',
+      modele: '',
+      cylindree: '',
+      carteGrise: '',
+      contratAssurance: '',
+      dateMiseEnCirculation: '',
+      imgUrl: '',
+      assure: null
+    };
+    this.isEditMode = false;
+    this.scrapErrorMessage = '';
   }
 
   deleteVehicle(id: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
-      console.log('Deleting vehicle:', id);
+      // Suppression optimiste - on retire immédiatement le véhicule de la liste
+      const index = this.vehicles.findIndex(v => v.id === id);
+      if (index !== -1) {
+        this.vehicles.splice(index, 1);
+      } this.vehiculeService.deleteVehiculesPost(parseInt(id)).subscribe({
+        next: (data) => {
+          console.log('Véhicule supprimé avec succès :', data);
+          this.loadVehicles(this.assureId);
+          this.cancelAdd();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression du véhicule :', err);
+        }
+      });
     }
   }
 }

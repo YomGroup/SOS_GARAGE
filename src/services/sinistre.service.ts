@@ -22,7 +22,7 @@ export class SinistreService {
     }
 
     getsinistreGet(id: number) {
-        return this.http.get(`${this.apiUrl}/${id}`);
+        return this.http.get(`${this.apiUrl}/assure/${id}`);
     }
 
 }

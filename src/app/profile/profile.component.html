@@ -1,82 +1,112 @@
-<div class="content-section" id="profile">
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Informations principales -->
-            <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Informations personnelles</h5>
-                        <div>
-                            <button *ngIf="!isEditing" class="btn btn-primary-custom edit-profile-btn" (click)="editProfile()">
-                                <i class="fas fa-edit me-2"></i>Modifier
-                            </button>
-                            <button *ngIf="isEditing" class="btn btn-success save-profile-btn" (click)="saveProfile()">
-                                <i class="fas fa-save me-2"></i>Enregistrer
-                            </button>
-                            <button *ngIf="isEditing" class="btn btn-secondary cancel-profile-btn" (click)="cancelEdit()">
-                                <i class="fas fa-times me-2"></i>Annuler
+<div class="container-fluid py-4" id="profile">
+    <div class="row g-4">
+        <!-- Colonne principale -->
+<div class="col-12">
+            <div class="card shadow-sm bg-light">
+                <div class="card-header bg-light d-flex  justify-content-between align-items-center py-3">
+                    <h5 class="mb-0">
+                        <i class="bi bi-person me-2"></i>Informations personnelles
+                    </h5>
+                    <div>
+                        <button *ngIf="!isEditing" class="btn btn-sm text-white"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);" (click)="editProfile()">
+                            <i class="bi bi-pencil me-2"></i>Modifier
+                        </button>
+                        <button *ngIf="isEditing" class="btn btn-success btn-sm me-2" (click)="saveProfile()">
+                            <i class="bi bi-check me-2"></i>Enregistrer
+                        </button>
+                        <button *ngIf="isEditing" class="btn btn-secondary btn-sm" (click)="cancelEdit()">
+                            <i class="bi bi-x me-2"></i>Annuler
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Photo de profil intégrée -->
+                    <div class="border-top pt-4 mt-4 d-none">
+                        <h6 class="mb-3 text-muted"><i class="bi bi-camera me-2"></i>Photo de profil</h6>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-primary bg-gradient rounded-circle d-flex align-items-center justify-content-center me-4" 
+                                 style="width: 80px; height: 80px;">
+                                <i class="bi bi-person text-white display-5"></i>
+                            </div>
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-upload me-2"></i>Changer la photo
                             </button>
                         </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
+                    <!-- Section Informations personnelles -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 text-muted"><i class="bi bi-info-circle me-2"></i>Données personnelles</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Prénom</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.prenom" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.prenom" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Nom</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.nom" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.nom" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" [(ngModel)]="userData.email" [readonly]="!isEditing">
+                                <input type="email" class="form-control" [(ngModel)]="userData.email" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Téléphone</label>
-                                <input type="tel" class="form-control" [(ngModel)]="userData.telephone" [readonly]="!isEditing">
+                                <input type="tel" class="form-control" [(ngModel)]="userData.telephone" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Date de naissance</label>
-                                <input type="date" class="form-control" [(ngModel)]="userData.dateNaissance" [readonly]="!isEditing">
+                                <input type="date" class="form-control" [(ngModel)]="userData.dateNaissance" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Sexe</label>
-                                <select class="form-control" [(ngModel)]="userData.sexe" [disabled]="!isEditing">
+                                <select class="form-select" [(ngModel)]="userData.sexe" [disabled]="!isEditing">
                                     <option value="M">Masculin</option>
                                     <option value="F">Féminin</option>
                                 </select>
                             </div>
-                            <div class="col-md-6 mb-3">
+                        </div>
+                    </div>
+
+                    <!-- Section Permis -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 text-muted"><i class="bi bi-card-text me-2"></i>Permis de conduire</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Numéro de permis</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.numeroPermis" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.numeroPermis" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Adresse -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0"><i class="fas fa-map-marker-alt me-2"></i>Adresse</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-12 mb-3">
+                    <!-- Section Adresse -->
+                    <div class="mb-4">
+                        <h6 class="mb-3 text-muted"><i class="bi bi-geo-alt me-2"></i>Adresse</h6>
+                        <div class="row g-3">
+                            <div class="col-12">
                                 <label class="form-label">Adresse</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.adresse" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.adresse" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4">
                                 <label class="form-label">Code postal</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.codePostal" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.codePostal" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4">
                                 <label class="form-label">Ville</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.ville" [readonly]="!isEditing">
+                                <input type="text" class="form-control" [(ngModel)]="userData.ville" 
+                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-4">
                                 <label class="form-label">Pays</label>
-                                <select class="form-control" [(ngModel)]="userData.pays" [disabled]="!isEditing">
+                                <select class="form-select" [(ngModel)]="userData.pays" [disabled]="!isEditing">
                                     <option value="FR">France</option>
                                     <option value="BE">Belgique</option>
                                     <option value="CH">Suisse</option>
@@ -84,71 +114,12 @@
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- Panel latéral -->
-            <div class="col-lg-4">
-                <!-- Photo de profil -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-camera me-2"></i>Photo de profil</h6>
-                    </div>
-                    <div class="card-body text-center">
-                        <div class="profile-avatar-large mb-3">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <button class="btn btn-outline-custom">
-                            <i class="fas fa-upload me-2"></i>Changer la photo
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Statistiques du compte -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h6 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Statistiques</h6>
-                    </div>
-                    <div class="card-body">
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-car text-primary"></i>
-                            </div>
-                            <div class="stat-info">
-                                <span class="stat-number">3</span>
-                                <span class="stat-label">Véhicules assurés</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-file-alt text-warning"></i>
-                            </div>
-                            <div class="stat-info">
-                                <span class="stat-number">2</span>
-                                <span class="stat-label">Sinistres déclarés</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-check-circle text-success"></i>
-                            </div>
-                            <div class="stat-info">
-                                <span class="stat-number">1</span>
-                                <span class="stat-label">Sinistre clos</span>
-                            </div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-calendar text-info"></i>
-                            </div>
-                            <div class="stat-info">
-                                <span class="stat-number">2</span>
-                                <span class="stat-label">Années de fidélité</span>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
+
+       
     </div>
 </div>
