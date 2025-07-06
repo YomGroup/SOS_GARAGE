@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
+import { filter, takeUntil, distinctUntilChanged } from 'rxjs/operators';
+import { Subject, combineLatest } from 'rxjs';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission } from '../../../../../services/models-api.interface';
 import { AuthService } from '../../../../../services/auth.service';
@@ -51,7 +54,7 @@ interface RecentMission {
   templateUrl: './statistics.component.html',
   styleUrls: ['./statistics.component.css']
 })
-export class StatisticsComponent implements OnInit {
+export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   missionStats: MissionStats = {
     total: 0,
     completed: 0,
@@ -81,19 +84,101 @@ export class StatisticsComponent implements OnInit {
   selectedMission: Mission | null = null;
   missionViewEdition: boolean = false;
 
+  private destroy$ = new Subject<void>();
+  private currentRoute: string = '';
+  private isInitialized: boolean = false;
+  private hasLoadedData: boolean = false;
+
   constructor(
     private missionService: MissionService,
     private authService: AuthService,
     private reparateurService: ReparateurService,
-    private assureService: AssureService
+    private assureService: AssureService,
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Charger les données immédiatement
     this.loadStatistics();
+    this.isInitialized = true;
+    
+    // Écouter les changements de route avec une logique améliorée
+    combineLatest([
+      this.router.events.pipe(
+        filter(event => event instanceof NavigationEnd),
+        distinctUntilChanged()
+      ),
+      this.route.url
+    ]).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(([event, urlSegments]) => {
+      const currentUrl = this.router.url;
+      console.log('Navigation détectée:', currentUrl);
+      
+      // Vérifier si on est sur la page statistiques
+      if (currentUrl.includes('/garage/statistiques') || currentUrl.includes('/garage/statistics')) {
+        console.log('Page statistiques détectée, vérification des données...');
+        
+        // Si on n'a pas encore chargé de données ou si on revient sur la page
+        if (!this.hasLoadedData || this.reparateurMissions.length === 0) {
+          console.log('Rechargement des données...');
+          this.loadStatistics();
+        }
+      }
+    });
+
+    // Écouter les changements de paramètres de route
+    this.route.params.pipe(
+      takeUntil(this.destroy$)
+    ).subscribe(params => {
+      console.log('Paramètres de route changés:', params);
+      // Forcer le rechargement si on navigue vers ce composant
+      if (this.isInitialized) {
+        setTimeout(() => {
+          if (this.reparateurMissions.length === 0 && !this.loading) {
+            console.log('Rechargement après changement de paramètres...');
+            this.loadStatistics();
+          }
+        }, 100);
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Vérifier si les données sont chargées après l'initialisation de la vue
+    setTimeout(() => {
+      if (this.isInitialized && this.reparateurMissions.length === 0 && !this.loading) {
+        console.log('Aucune donnée trouvée après initialisation, rechargement...');
+        this.loadStatistics();
+      }
+    }, 200);
+
+    // Vérifier périodiquement si les données sont chargées
+    const checkDataInterval = setInterval(() => {
+      if (this.isInitialized && this.reparateurMissions.length === 0 && !this.loading) {
+        console.log('Vérification périodique: rechargement des données...');
+        this.loadStatistics();
+      } else if (this.reparateurMissions.length > 0) {
+        // Si on a des données, arrêter la vérification
+        clearInterval(checkDataInterval);
+      }
+    }, 1000);
+
+    // Nettoyer l'intervalle quand le composant est détruit
+    this.destroy$.subscribe(() => {
+      clearInterval(checkDataInterval);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // Méthode publique pour rafraîchir les statistiques
   refreshStatistics(): void {
+    console.log('Rafraîchissement manuel des statistiques...');
     this.loadStatistics();
   }
 
@@ -123,7 +208,10 @@ export class StatisticsComponent implements OnInit {
       console.log('Missions du réparateur connecté:', this.reparateurMissions.length);
       
       // Calculer les statistiques
-      this.calculateStatistics();
+      await this.calculateStatistics();
+      
+      this.hasLoadedData = true;
+      console.log('Statistiques chargées avec succès');
       
     } catch (error: any) {
       console.error('Erreur lors du chargement des statistiques:', error);
@@ -170,12 +258,14 @@ export class StatisticsComponent implements OnInit {
       averageFacture: missionsWithFacture.length > 0 ? totalFactures / missionsWithFacture.length : 0
     };
 
-    // Créer la liste des missions récentes avec les informations de l'assuré et du véhicule
+    // Optimisation : cache local pour éviter les appels multiples pour le même sinistre
+    const assureCache = new Map<number, any>();
+    const vehiculeCache = new Map<number, any>();
+
     const recentMissions = missions
       .sort((a, b) => new Date(b.dateCreation).getTime() - new Date(a.dateCreation).getTime())
       .slice(0, 10);
 
-    // Récupérer les informations de l'assuré et du véhicule pour chaque mission
     const missionsWithDetails = await Promise.all(
       recentMissions.map(async (mission) => {
         let assureName = 'N/A';
@@ -183,12 +273,23 @@ export class StatisticsComponent implements OnInit {
 
         if (mission.sinistre && mission.sinistre.id) {
           try {
-            const assure = await firstValueFrom(this.assureService.getAssureBySinistreId(mission.sinistre.id));
-            assureName = `${assure.name} ${assure.prenom}`;
-            
-            const vehicule = this.assureService.getVehiculeBySinistreId(assure, mission.sinistre.id);
-            if (vehicule) {
-              vehiculeInfo = `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
+            // Utiliser le cache local pour l'assuré
+            let assure = assureCache.get(mission.sinistre.id);
+            if (!assure) {
+              assure = await firstValueFrom(this.assureService.getAssureBySinistreId(mission.sinistre.id));
+              if (assure) assureCache.set(mission.sinistre.id, assure);
+            }
+            if (assure) {
+              assureName = `${assure.name} ${assure.prenom}`;
+              // Utiliser le cache local pour le véhicule
+              let vehicule = vehiculeCache.get(mission.sinistre.id);
+              if (!vehicule) {
+                vehicule = this.assureService.getVehiculeBySinistreId(assure, mission.sinistre.id);
+                if (vehicule) vehiculeCache.set(mission.sinistre.id, vehicule);
+              }
+              if (vehicule) {
+                vehiculeInfo = `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
+              }
             }
           } catch (error) {
             console.error(`Erreur lors de la récupération des détails pour la mission ${mission.id}:`, error);

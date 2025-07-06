@@ -4,6 +4,8 @@
   --gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
   --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  --card-height: 200px;
+  --stats-card-height: 140px;
 }
 
 .min-h-screen {
@@ -35,12 +37,33 @@
   color: var(--primary-blue);
 }
 
+/* Système de grille responsive amélioré */
+.row {
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.row > [class*="col-"] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* Cartes avec hauteur uniforme */
 .card {
   background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
   border-radius: 15px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
   border: none;
+  height: var(--card-height);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
 }
 
 .card-header {
@@ -50,6 +73,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .card-header h5 {
@@ -59,22 +83,124 @@
   margin: 0;
 }
 
-.stats-row {
+.card-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.list-group {
+  flex: 1;
+  overflow-y: auto;
+  max-height: calc(var(--card-height) - 80px);
+}
+
+.list-group-item {
+  border: none;
+  padding: 15px 20px;
+  background: transparent;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.list-group-item:last-child {
+  border-bottom: none;
+}
+
+.list-group-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+/* Cartes des listes récentes avec hauteur adaptative */
+.card.recent-list-card {
+  height: auto;
+  min-height: var(--card-height);
+}
+
+.card.recent-list-card .card-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.card.recent-list-card .list-group {
+  max-height: none;
+  overflow-y: visible;
+}
+
+/* Système de grille pour aligner les cartes */
+.row.equal-height-row {
   display: flex;
   flex-wrap: wrap;
 }
 
+.row.equal-height-row > [class*="col-"] {
+  display: flex;
+  flex-direction: column;
+}
+
+.row.equal-height-row .card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Gestion spéciale pour les cartes avec des contenus différents */
+.row.equal-height-row .card .card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.row.equal-height-row .card .list-group {
+  flex: 1;
+  overflow-y: auto;
+  max-height: none;
+}
+
+/* Assurer que les cartes dans une même ligne ont la même hauteur */
+.row.equal-height-row .col-xl-8 .card,
+.row.equal-height-row .col-xl-4 .card {
+  height: 100%;
+  min-height: 300px;
+}
+
+/* Cartes des listes récentes avec hauteur adaptative */
+.card.recent-list-card {
+  height: auto;
+  min-height: var(--card-height);
+}
+
+.card.recent-list-card .card-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.card.recent-list-card .list-group {
+  max-height: none;
+  overflow-y: visible;
+}
+
+/* Stats cards avec hauteur uniforme */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
 .stats-row > [class^='col-'] {
   display: flex;
+  margin-bottom: 1.5rem;
 }
 
 .stats-card {
-  flex: 1 1 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: 100%;
-  min-height: 140px;
+  height: var(--stats-card-height);
+  min-height: var(--stats-card-height);
   background: var(--gradient);
   border-radius: 15px;
   padding: 1.5rem;
@@ -135,6 +261,7 @@
 .graph-controls {
   display: flex;
   gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .graph-container {
@@ -373,41 +500,130 @@
   opacity: 0.75 !important;
 }
 
-@media (max-width: 992px) {
+/* Responsive Design - Large screens (1400px+) */
+@media (min-width: 1400px) {
+  .container-fluid {
+    max-width: 1600px;
+    margin: auto;
+  }
+  
+  :root {
+    --card-height: 250px;
+    --stats-card-height: 160px;
+  }
+  
+  .stats-number {
+    font-size: 2.5rem;
+  }
+  
+  .card-header h5 {
+    font-size: 22px;
+  }
+  
+  /* Hauteur uniforme pour les cartes activité et tâches */
+  .row.equal-height-row .col-xl-8 .card,
+  .row.equal-height-row .col-xl-4 .card {
+    min-height: 350px;
+  }
+}
+
+/* Responsive Design - Medium screens (992px - 1399px) */
+@media (max-width: 1399px) and (min-width: 992px) {
+  :root {
+    --card-height: 220px;
+    --stats-card-height: 150px;
+  }
+  
+  .stats-card {
+    padding: 1.25rem;
+  }
+  
+  .card-header {
+    padding: 18px 22px;
+  }
+  
+  .list-group-item {
+    padding: 12px 18px;
+  }
+  
+  .card.recent-list-card {
+    min-height: 200px;
+  }
+  
+  /* Hauteur uniforme pour les cartes activité et tâches */
+  .row.equal-height-row .col-xl-8 .card,
+  .row.equal-height-row .col-xl-4 .card {
+    min-height: 320px;
+  }
+}
+
+/* Responsive Design - Small screens (768px - 991px) */
+@media (max-width: 991px) and (min-width: 768px) {
+  :root {
+    --card-height: 200px;
+    --stats-card-height: 140px;
+  }
+  
   .card-header h5 {
     font-size: 18px;
   }
-
-  .claim-item, .sinistre-item, .notification-item {
-    padding: 15px;
-    margin: 0 15px 15px 15px;
+  
+  .stats-card {
+    padding: 1rem;
   }
-
+  
+  .stats-number {
+    font-size: 1.75rem;
+  }
+  
+  .stats-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+  
+  .card-header {
+    padding: 15px 20px;
+  }
+  
+  .list-group-item {
+    padding: 12px 15px;
+  }
+  
   .graph-controls .btn {
     padding: 6px 10px;
     font-size: 12px;
   }
+  
+  .card.recent-list-card {
+    min-height: 180px;
+  }
+  
+  /* Amélioration de l'alignement sur tablettes */
+  .equal-height-row > [class*="col-"] {
+    margin-bottom: 1rem;
+  }
+  
+  /* Hauteur uniforme pour les cartes activité et tâches */
+  .row.equal-height-row .col-xl-8 .card,
+  .row.equal-height-row .col-xl-4 .card {
+    min-height: 280px;
+  }
 }
 
-@media (max-width: 768px) {
+/* Responsive Design - Mobile screens (576px - 767px) */
+@media (max-width: 767px) and (min-width: 576px) {
+  :root {
+    --card-height: 180px;
+    --stats-card-height: 120px;
+  }
+  
   .card {
     margin-bottom: 20px;
-    padding: 15px;
   }
-
-  .sinistre-item, .claim-item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .btn-outline-primary {
-    padding: 8px 12px;
-    font-size: 14px;
-  }
-
+  
   .stats-card {
-    padding: 1rem;
+    padding: 0.75rem;
     text-align: center;
   }
   
@@ -415,80 +631,230 @@
     flex-direction: column;
     gap: 10px;
   }
-
+  
   .stats-number {
     font-size: 1.5rem;
   }
-
+  
+  .stats-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.1rem;
+  }
+  
+  .card-header {
+    padding: 12px 15px;
+  }
+  
+  .card-header h5 {
+    font-size: 16px;
+  }
+  
+  .list-group-item {
+    padding: 10px 12px;
+  }
+  
+  .btn-outline-primary {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
   .graph-controls {
     flex-wrap: wrap;
     gap: 0.5rem;
     justify-content: center;
   }
+  
+  .sinistre-item, .claim-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .card.recent-list-card {
+    min-height: 160px;
+  }
+  
+  /* Amélioration de l'alignement sur mobile */
+  .equal-height-row > [class*="col-"] {
+    margin-bottom: 1rem;
+  }
+  
+  .equal-height-row .card {
+    height: auto;
+    min-height: 150px;
+  }
+  
+  /* Hauteur uniforme pour les cartes activité et tâches */
+  .row.equal-height-row .col-xl-8 .card,
+  .row.equal-height-row .col-xl-4 .card {
+    min-height: 250px;
+  }
 }
 
-@media (min-width: 1400px) {
+/* Responsive Design - Extra small screens (up to 575px) */
+@media (max-width: 575px) {
+  :root {
+    --card-height: 160px;
+    --stats-card-height: 100px;
+  }
+  
   .container-fluid {
-    max-width: 1600px;
-    margin: auto;
+    padding-left: 10px;
+    padding-right: 10px;
   }
-}
-
-@media (max-width: 576px) {
+  
+  .row {
+    margin-left: -10px;
+    margin-right: -10px;
+  }
+  
+  .row > [class*="col-"] {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .card {
+    margin-bottom: 15px;
+  }
+  
+  .card-header {
+    padding: 10px 12px;
+  }
+  
   .card-header h5 {
-    font-size: 16px;
+    font-size: 14px;
   }
-
-  .claim-item, .sinistre-item, .notification-item {
+  
+  .stats-card {
+    padding: 0.5rem;
+    text-align: center;
+    min-height: var(--stats-card-height);
+  }
+  
+  .stats-card .d-flex {
+    flex-direction: column !important;
+    gap: 8px;
+  }
+  
+  .stats-title {
+    font-size: 0.9rem;
+  }
+  
+  .stats-number {
+    font-size: 1.25rem;
+  }
+  
+  .stats-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+  
+  .list-group-item {
+    padding: 8px 10px;
+    font-size: 14px;
+  }
+  
+  .btn-outline-primary {
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+  
+  .graph-container {
+    min-height: 200px;
+    padding: 0.5rem;
+  }
+  
+  .sinistre-item, .claim-item, .notification-item {
     padding: 10px;
     margin: 0 5px 10px 5px;
     flex-direction: column !important;
     align-items: flex-start !important;
     gap: 8px;
   }
-
-  .stats-card {
-    padding: 0.5rem;
-    text-align: center;
-    min-height: 100px;
-  }
-
-  .stats-card .d-flex {
-    flex-direction: column !important;
-    gap: 8px;
-  }
-
-  .graph-container {
-    min-height: 200px;
-    padding: 0.5rem;
-  }
-
-  .btn-outline-primary {
-    padding: 6px 8px;
-    font-size: 12px;
-  }
-
-  .card {
-    margin-bottom: 10px;
-    padding: 8px;
-  }
-
-  .recent-claims, .notification-item, .sinistre-item {
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  .sinistre-details span, .claim-item strong, .sinistre-id {
-    word-break: break-word;
-  }
-
+  
   .sinistre-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
   }
+  
   .status-badge {
     width: 100%;
     max-width: none;
+    text-align: center;
   }
+  
+  .sinistre-details span, .claim-item strong, .sinistre-id {
+    word-break: break-word;
+  }
+  
+  .graph-controls {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .graph-controls .btn {
+    width: 100%;
+    margin: 0;
+  }
+  
+  .card.recent-list-card {
+    min-height: 140px;
+  }
+  
+  /* Amélioration de l'alignement sur très petits écrans */
+  .equal-height-row > [class*="col-"] {
+    margin-bottom: 0.75rem;
+  }
+  
+  .equal-height-row .card {
+    height: auto;
+    min-height: 120px;
+  }
+  
+  .equal-height-row .card .list-group {
+    max-height: none;
+  }
+  
+  /* Hauteur uniforme pour les cartes activité et tâches */
+  .row.equal-height-row .col-xl-8 .card,
+  .row.equal-height-row .col-xl-4 .card {
+    min-height: 200px;
+  }
+}
+
+/* Améliorations pour les cartes avec contenu dynamique */
+.card.equal-height {
+  height: var(--card-height);
+}
+
+.card.equal-height .card-body {
+  flex: 1;
+  overflow: hidden;
+}
+
+.card.equal-height .list-group {
+  max-height: calc(var(--card-height) - 80px);
+  overflow-y: auto;
+}
+
+/* Scrollbar personnalisée pour les listes */
+.list-group::-webkit-scrollbar {
+  width: 6px;
+}
+
+.list-group::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 3px;
+}
+
+.list-group::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.list-group::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
 } 

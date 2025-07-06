@@ -16,7 +16,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
-import { Mission } from '../../../../../services/models-api.interface';
+import { Mission, Vehicule } from '../../../../../services/models-api.interface';
 import { Dossier } from '../../../../../services/dossiers.service';
 
 // Étend l'interface Dossier pour l'affichage local
@@ -57,6 +57,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
   dossierAffichageSelectionne: DossierAffichage | null = null;
   sinistreSelectionne: any = null;
   sinistreDuDossier: DossierAffichage | null = null;
+  vehiculeSelectionne: Vehicule | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -64,9 +65,50 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
 
   // Statistiques dossiers
   totalDossiers = 0;
-  dossiersNonTraites = 0;
+  nbDossiersNonTraites = 0;
   dossiersTraites = 0;
   dossiersCommissionPayee = 0;
+
+  suppressionEnCours: boolean = false;
+
+  onglet: 'nouveaux' | 'nonTraites' | 'termines' = 'nouveaux';
+  filtreActuel: 'nouveaux' | 'nonTraites' | 'termines' | 'tous' = 'tous';
+
+  get dossiersNouveaux() {
+    const today = new Date().toISOString().slice(0, 10);
+    return this.dataSource.data.filter(d => {
+      const date = (d.dateCreation instanceof Date ? d.dateCreation : new Date(d.dateCreation)).toISOString().slice(0, 10);
+      return date === today;
+    });
+  }
+
+  get dossiersNonTraites() {
+    // Dossiers sans mission associée
+    return this.dataSource.data.filter(dossier => 
+      !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)
+    );
+  }
+
+  get dossiersTermines() {
+    // Dossiers avec mission statut "terminé"
+    return this.dataSource.data.filter(dossier => {
+      const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
+      return mission && mission.statut === 'terminé';
+    });
+  }
+
+  get dossiersFiltres() {
+    switch (this.filtreActuel) {
+      case 'nouveaux':
+        return this.dossiersNouveaux;
+      case 'nonTraites':
+        return this.dossiersNonTraites;
+      case 'termines':
+        return this.dossiersTermines;
+      default:
+        return this.dataSource.data;
+    }
+  }
 
   constructor(
     private dossiersService: DossiersService, 
@@ -86,24 +128,81 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
       this.isMobile = window.innerWidth <= 768;
     });
     this.loadData();
+    this.detecterFiltreActuel();
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
         this.loadData();
+        this.detecterFiltreActuel();
       }
     });
+  }
+
+  private detecterFiltreActuel() {
+    const url = this.router.url;
+    if (url.includes('/nouveaux')) {
+      this.filtreActuel = 'nouveaux';
+    } else if (url.includes('/non-traites')) {
+      this.filtreActuel = 'nonTraites';
+    } else if (url.includes('/termines')) {
+      this.filtreActuel = 'termines';
+    } else {
+      this.filtreActuel = 'tous';
+    }
+  }
+
+  getTitreFiltre(): string {
+    switch (this.filtreActuel) {
+      case 'nouveaux':
+        return 'Nouveaux dossiers';
+      case 'nonTraites':
+        return 'Dossiers non traités';
+      case 'termines':
+        return 'Dossiers terminés';
+      default:
+        return 'Tous les dossiers';
+    }
+  }
+
+  getDescriptionFiltre(): string {
+    switch (this.filtreActuel) {
+      case 'nouveaux':
+        return 'Dossiers créés aujourd\'hui';
+      case 'nonTraites':
+        return 'Dossiers sans mission associée';
+      case 'termines':
+        return 'Dossiers avec mission statut "terminé"';
+      default:
+        return 'Tous les dossiers disponibles';
+    }
+  }
+
+  getMessageAucunDossier(): string {
+    switch (this.filtreActuel) {
+      case 'nouveaux':
+        return 'Aucun nouveau dossier aujourd\'hui.';
+      case 'nonTraites':
+        return 'Aucun dossier non traité.';
+      case 'termines':
+        return 'Aucun dossier terminé.';
+      default:
+        return 'Aucun dossier disponible.';
+    }
   }
 
   private loadData() {
     this.dossiersService.getDossiers().subscribe(apiDossiers => {
       this.dataSource.data = apiDossiers.map(d => ({
         ...d,
-        numero: d.id.toString(),
+        numero: d.id?.toString() || 'N/A',
         dateCreation: (d as any).dateCreation ? new Date((d as any).dateCreation) : new Date(),
         statut: d.statut ?? (d.conditionsAcceptees ? 'VALIDÉ' : 'EN_ATTENTE'),
+        vehicule: d.vehicule || {},
+        type: d.type || 'Non spécifié',
+        assurance: d.assurance || 'Non spécifiée'
       }));
       this.totalDossiers = apiDossiers.length;
       // Dossiers non traités : pas de mission associée
-      this.dossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
+      this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
       // Dossiers traités : au moins une mission associée
       this.dossiersTraites = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
       // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
@@ -199,7 +298,10 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/admin/dossiers/view', dossier.id]);
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | undefined | null): string {
+    if (!date) {
+      return 'Date non disponible';
+    }
     return date.toLocaleDateString('fr-FR');
   }
   
@@ -209,15 +311,55 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
     // TODO: Implémenter l'attribution à un sinistre
   }
 
-  supprimerDossier(dossier: Dossier): void {
-    console.log('Suppression du dossier:', dossier);
-    // TODO: Implémenter la suppression du dossier
-    this.dataSource.data = this.dataSource.data.filter(d => d.id !== dossier.id);
-    this.dataSource._updateChangeSubscription();
+  supprimerDossier(dossier: DossierAffichage): void {
+    if (this.suppressionEnCours) return; // Éviter les clics multiples
+    
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le dossier N°${dossier.numero} ?`)) {
+      this.suppressionEnCours = true;
+      
+      this.dossiersService.deleteDossier(dossier.id).subscribe({
+        next: () => {
+          console.log('Dossier supprimé avec succès');
+          this.dataSource.data = this.dataSource.data.filter(d => d.id !== dossier.id);
+          this.dataSource._updateChangeSubscription();
+          this.totalDossiers--;
+          this.suppressionEnCours = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression:', error);
+          alert('Erreur lors de la suppression du dossier');
+          this.suppressionEnCours = false;
+        }
+      });
+    }
   }
 
   setCardView(isCard: boolean) {
     this.isCardView = isCard;
+  }
+
+  getVehicule(sinistreId: number): void {
+    console.log('Récupération du véhicule pour le sinistre:', sinistreId);
+    
+    this.dossiersService.getVehiculeFromSinistreId(sinistreId).subscribe({
+      next: (vehicule: Vehicule | null) => {
+        if (vehicule) {
+          this.vehiculeSelectionne = vehicule;
+          console.log('Véhicule trouvé:', vehicule);
+          console.log('Marque:', vehicule.marque);
+          console.log('Modèle:', vehicule.modele);
+          console.log('Immatriculation:', vehicule.immatriculation);
+        } else {
+          console.warn('Aucun véhicule trouvé pour ce sinistre');
+          this.vehiculeSelectionne = null;
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération du véhicule:', error);
+        this.vehiculeSelectionne = null;
+      }
+    });
   }
 
   
@@ -235,6 +377,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
       this.dossierAffichageSelectionne = dossier;
       this.sinistreDuDossier = dossier;
     }
+    this.getVehicule(dossier.id);
   }
 
   fermerDossierView() {

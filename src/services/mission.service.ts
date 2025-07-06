@@ -1,11 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, of, forkJoin } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, forkJoin, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
-import { Mission, Assure, Vehicule , Sinistre, Reparateur, DocumentsSinistre, Notification, Avantage, Reparation, Message} from './models-api.interface';
-
-
-
+import { Mission, Assure, Vehicule , Sinistre, Reparateur, DocumentsSinistre, Notification, Avantage, Reparation, Message, MissionUpdate} from './models-api.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -14,8 +11,6 @@ export class MissionService {
   private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api';
 
   constructor(private http: HttpClient) { }
-
-  
 
   getAllMissions(): Observable<Mission[]> {
     return this.http.get<Mission[]>(`${this.apiUrl}/missions`);
@@ -37,12 +32,10 @@ export class MissionService {
     return this.http.patch<Mission>(`${this.apiUrl}/${id}/statut`, { statut });
   }
 
-  // Nouvelle méthode pour récupérer l'assuré par l'ID du sinistre
   getAssureBySinistreId(sinistreId: number): Observable<Assure> {
     return this.http.get<Assure>(`${this.apiUrl}/assure/assure/${sinistreId}`);
   }
 
-  // Méthode pour récupérer le nom de l'assureur à partir d'une mission (version optimisée)
   getAssureurNameFromMission(mission: Mission): Observable<string> {
     if (!mission.sinistre || mission.sinistre.id == null) {
       return of('Nom de l\'assureur non disponible');
@@ -54,13 +47,14 @@ export class MissionService {
     );
   }
 
-  // Méthode pour créer une nouvelle mission
   createMission(mission: Omit<Mission, 'id' | 'createdAt' | 'updatedAt'>): Observable<Mission> {
     return this.http.post<Mission>(`${this.apiUrl}/missions`, mission);
   }
 
-  updateMission(id: number, mission: Partial<Mission>) {
-    return this.http.put<Mission>(`${this.apiUrl}/missions/${id}`, mission);
+  updateMission(id: number, mission: MissionUpdate): Observable<Mission> {
+    return this.http.patch<Mission>(`${this.apiUrl}/missions/${id}`, mission).pipe(
+      catchError(this.handleError)
+    );
   }
 
   getVehiculeByMissionId(missionId: number): Observable<Vehicule> {
@@ -73,5 +67,37 @@ export class MissionService {
 
   updateMissionPartial(id: number, data: Partial<Mission>) {
     return this.http.patch<Mission>(`${this.apiUrl}/missions/${id}`, data);
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    console.error('Erreur API:', error);
+    
+    let errorMessage = 'Une erreur est survenue';
+    
+    if (error.error instanceof ErrorEvent) {
+      errorMessage = `Erreur: ${error.error.message}`;
+    } else {
+      switch (error.status) {
+        case 400:
+          errorMessage = 'Données invalides';
+          break;
+        case 401:
+          errorMessage = 'Non autorisé';
+          break;
+        case 403:
+          errorMessage = 'Accès interdit';
+          break;
+        case 404:
+          errorMessage = 'Mission non trouvée';
+          break;
+        case 500:
+          errorMessage = 'Erreur serveur';
+          break;
+        default:
+          errorMessage = `Erreur ${error.status}: ${error.message}`;
+      }
+    }
+    
+    return throwError(() => new Error(errorMessage));
   }
 } 

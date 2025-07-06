@@ -150,3 +150,13 @@ export interface Vehicule {
     vehicules: Vehicule[];
     messages: Message[];
   }
+
+// Interface pour les mises à jour de mission
+export interface MissionUpdate {
+  devis?: number;
+  factureFinale?: number;
+  pretVehicule?: boolean;
+  statut?: string;
+  documentsAssurance?: string[];
+  declareCommeEpave?: boolean;
+}

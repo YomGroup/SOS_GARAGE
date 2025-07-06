@@ -28,6 +28,18 @@ const routes: Routes = [
       { path: 'view/:id', component: DossierViewComponent }
     ]
   },
+  {
+    path: 'dossiers/nouveaux',
+    component: DossierManagementComponent
+  },
+  {
+    path: 'dossiers/non-traites',
+    component: DossierManagementComponent
+  },
+  {
+    path: 'dossiers/termines',
+    component: DossierManagementComponent
+  },
   /*
   {
     path: 'garages/nouveau',

@@ -32,59 +32,89 @@
   <div *ngIf="!isLoading && !error">
     <!-- Cartes KPI Financières -->
     <div class="row mb-4">
-      <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-purple">
-          <div class="stats-title">Total Devis</div>
-          <div class="stats-number">{{ totalDevis | number:'1.2-2' }} €</div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total Devis</h3>
+              <div class="stats-number">{{ totalDevis | number:'1.2-2' }} €</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-success">
-          <div class="stats-title">Total Factures</div>
-          <div class="stats-number">{{ totalFactures | number:'1.2-2' }} €</div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total Factures</h3>
+              <div class="stats-number">{{ totalFactures | number:'1.2-2' }} €</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-info">
-          <div class="stats-title">Total Commissions</div>
-          <div class="stats-number">{{ totalCommissions | number:'1.2-2' }} €</div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total Commissions</h3>
+              <div class="stats-number">{{ totalCommissions | number:'1.2-2' }} €</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card bg-gradient-warning">
-          <div class="stats-title">Solde Net</div>
-          <div class="stats-number">{{ netBalance | number:'1.2-2' }} €</div>
+      <div class="col-xl-3 col-md-6 mb-3">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Solde Net</h3>
+              <div class="stats-number">{{ netBalance | number:'1.2-2' }} €</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Filtres (sous les stats, collés au tableau) -->
-    <form class="filters-simple mb-3">
-      <div class="row g-2 align-items-end">
-        <div class="col-md-2">
-          <input class="form-control" type="text" [(ngModel)]="filterNom" name="filterNom" placeholder="Client...">
+    <!-- Filtres modernes -->
+    <div class="filters-modern">
+      <div class="filter-title">Filtres de recherche</div>
+      <form class="filters-form">
+        <div class="row g-3 align-items-end">
+          <div class="col-xl-2 col-md-4 col-sm-6">
+            <label class="form-label small text-muted mb-1">Client</label>
+            <input class="form-control" type="text" [(ngModel)]="filterNom" name="filterNom" placeholder="Nom du client...">
+          </div>
+          <div class="col-xl-2 col-md-4 col-sm-6">
+            <label class="form-label small text-muted mb-1">Statut</label>
+            <select class="form-select" [(ngModel)]="filterStatut" name="filterStatut">
+              <option value="">Tous les statuts</option>
+              <option value="payée">Payée</option>
+              <option value="non payée">Non payée</option>
+            </select>
+          </div>
+          <div class="col-xl-1 col-md-3 col-sm-6">
+            <label class="form-label small text-muted mb-1">Devis min</label>
+            <input class="form-control" type="number" [(ngModel)]="filterDevisMin" name="filterDevisMin" placeholder="Min">
+          </div>
+          <div class="col-xl-1 col-md-3 col-sm-6">
+            <label class="form-label small text-muted mb-1">Devis max</label>
+            <input class="form-control" type="number" [(ngModel)]="filterDevisMax" name="filterDevisMax" placeholder="Max">
+          </div>
+          <div class="col-xl-1 col-md-3 col-sm-6">
+            <label class="form-label small text-muted mb-1">Facture min</label>
+            <input class="form-control" type="number" [(ngModel)]="filterFactureMin" name="filterFactureMin" placeholder="Min">
+          </div>
+          <div class="col-xl-1 col-md-3 col-sm-6">
+            <label class="form-label small text-muted mb-1">Facture max</label>
+            <input class="form-control" type="number" [(ngModel)]="filterFactureMax" name="filterFactureMax" placeholder="Max">
+          </div>
+          <div class="col-xl-2 col-md-4 col-sm-6">
+            <button type="button" class="btn btn-reset-filters w-100" (click)="resetFilters()">
+              Réinitialiser
+            </button>
+          </div>
         </div>
-        <div class="col-md-2">
-          <select class="form-select" [(ngModel)]="filterStatut" name="filterStatut">
-            <option value="">Tous statuts</option>
-            <option value="payée">Payée</option>
-            <option value="non payée">Non payée</option>
-          </select>
-        </div>
-        <div class="col-md-2">
-          <input class="form-control" type="number" [(ngModel)]="filterDevisMin" name="filterDevisMin" placeholder="Devis min">
-        </div>
-        <div class="col-md-2">
-          <input class="form-control" type="number" [(ngModel)]="filterDevisMax" name="filterDevisMax" placeholder="Devis max">
-        </div>
-        <div class="col-md-2">
-          <input class="form-control" type="number" [(ngModel)]="filterFactureMin" name="filterFactureMin" placeholder="Facture min">
-        </div>
-        <div class="col-md-2">
-          <input class="form-control" type="number" [(ngModel)]="filterFactureMax" name="filterFactureMax" placeholder="Facture max">
-        </div>
-      </div>
-    </form>
+      </form>
+    </div>
 
     <!-- Tableau des missions -->
     <div class="finance-section">
@@ -104,7 +134,11 @@
           <tbody>
             <tr *ngFor="let mission of paginatedMissions" class="mission-row">
               <td>{{ mission.id }}</td>
-              <td>{{ mission.assureName }}</td>
+              <td>
+                <div class="assure-info">
+                  <span class="assure-name">{{ mission.assureName }}</span>
+                </div>
+              </td>
               <td>{{ mission.devis | number:'1.2-2' }} €</td>
               <td>{{ mission.factureFinale | number:'1.2-2' }} €</td>
               <td>{{ getCommission(mission) | number:'1.2-2' }} €</td>
@@ -122,24 +156,38 @@
           </tbody>
         </table>
       </div>
+      
+      <!-- Message état vide -->
       <div *ngIf="!filteredMissions.length" class="empty-state text-center py-5">
-        <p class="text-muted">Aucune mission trouvée</p>
+        <div class="mb-3">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted">
+            <path d="M9 12l2 2 4-4"></path>
+            <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"></path>
+          </svg>
+        </div>
+        <h5 class="text-muted mb-2">Aucune mission trouvée</h5>
+        <p class="text-muted small">Essayez de modifier vos critères de recherche</p>
       </div>
-      <!-- Pagination -->
-      <nav *ngIf="filteredMissions.length > pageSize" class="mt-3">
+      
+      <!-- Pagination moderne -->
+      <nav *ngIf="filteredMissions.length > pageSize" class="mt-4">
         <ul class="pagination justify-content-center">
           <li class="page-item" [class.disabled]="page === 1">
-            <button class="page-link" (click)="page = page - 1" [disabled]="page === 1">Précédent</button>
+            <button class="page-link" (click)="page = page - 1" [disabled]="page === 1">
+              ← Précédent
+            </button>
           </li>
           <ng-container *ngIf="filteredMissions.length > 0">
             <ng-container *ngFor="let p of [].constructor(totalPages); let i = index">
-              <li class="page-item" [class.active]="page === i + 1">
+              <li class="page-item" [class.active]="page === i + 1" *ngIf="shouldShowPage(i + 1)">
                 <button class="page-link" (click)="page = i + 1">{{ i + 1 }}</button>
               </li>
             </ng-container>
           </ng-container>
           <li class="page-item" [class.disabled]="page === totalPages">
-            <button class="page-link" (click)="page = page + 1" [disabled]="page === totalPages">Suivant</button>
+            <button class="page-link" (click)="page = page + 1" [disabled]="page === totalPages">
+              Suivant →
+            </button>
           </li>
         </ul>
       </nav>

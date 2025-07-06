@@ -136,22 +136,23 @@
       <div class="form-section">
         <h3><i class="fas fa-file-alt me-2"></i>Documents</h3>
         <div class="documents-list">
-          <a *ngIf="mission?.constatAccident" [href]="mission?.constatAccident" target="_blank" class="document-item">
-            <i class="fas fa-file-pdf me-2"></i>Constat accident
-            <i class="fas fa-download ms-auto"></i>
-          </a>
-          <a *ngFor="let doc of mission?.documentsAssurance" [href]="doc" target="_blank" class="document-item">
-            <i class="fas fa-file-pdf me-2"></i>Assurance
-            <i class="fas fa-download ms-auto"></i>
-          </a>
-          <a *ngIf="mission?.cessionCreance" [href]="mission?.cessionCreance" target="_blank" class="document-item">
-            <i class="fas fa-file-pdf me-2"></i>Cession de créance
-            <i class="fas fa-download ms-auto"></i>
-          </a>
-          <a *ngIf="mission?.ordreReparation" [href]="mission?.ordreReparation" target="_blank" class="document-item">
-            <i class="fas fa-file-pdf me-2"></i>Ordre de réparation
-            <i class="fas fa-download ms-auto"></i>
-          </a>
+          <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDoc">
+            <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
+              <i class="fas fa-file-pdf me-2"></i>
+              {{ getFileNameFromUrl(doc) }}
+              <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+              <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)" *ngIf="editionEnCours">Supprimer</button>
+            </div>
+          </ng-container>
+          <ng-template #noDoc>
+            <span>Aucun document ajouté.</span>
+          </ng-template>
+          <div class="mt-2 d-flex gap-2" *ngIf="editionEnCours">
+            <button class="btn btn-outline-secondary" type="button" (click)="ouvrirUploadDirect()" [disabled]="uploadingFiles">
+              <i class="fas fa-upload me-2"></i>
+              {{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des PDF' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>

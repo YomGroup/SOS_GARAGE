@@ -1,195 +1,262 @@
 <!-- Gestion des Dossiers -->
 <div class="content-section" id="dossiers">
-<div class="container-fluid">
+  <div class="container-fluid">
+    <!-- Titre dynamique selon le filtre -->
+    <div class="mb-4">
+      <h2 class="section-title">
+        <i class="fas fa-folder me-2"></i>
+        {{ getTitreFiltre() }}
+      </h2>
+      <p class="text-muted">{{ getDescriptionFiltre() }}</p>
+    </div>
+
     <!-- Statistiques dossiers -->
     <div class="row mb-4">
-        <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="stats-title opacity-90">Total dossiers</h3>
-                        <div class="stats-number">{{ totalDossiers }}</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="fas fa-folder"></i>
-                    </div>
-                </div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Total dossiers</h3>
+              <div class="stats-number">{{ totalDossiers }}</div>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="stats-title opacity-90">Non traités</h3>
-                        <div class="stats-number">{{ dossiersNonTraites }}</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="fas fa-hourglass-start"></i>
-                    </div>
-                </div>
+            <div class="stats-icon">
+              <i class="fas fa-folder"></i>
             </div>
+          </div>
         </div>
-        <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="stats-title opacity-90">Traités</h3>
-                        <div class="stats-number">{{ dossiersTraites }}</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Non traités</h3>
+              <div class="stats-number">{{ nbDossiersNonTraites }}</div>
             </div>
-        </div>
-        <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h3 class="stats-title opacity-90">Commission payée</h3>
-                        <div class="stats-number">{{ dossiersCommissionPayee }}</div>
-                    </div>
-                    <div class="stats-icon">
-                        <i class="fas fa-euro-sign"></i>
-                    </div>
-                </div>
+            <div class="stats-icon">
+              <i class="fas fa-hourglass-start"></i>
             </div>
+          </div>
         </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Traités</h3>
+              <div class="stats-number">{{ dossiersTraites }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-sm-6 col-lg-3 mb-4">
+        <div class="stats-card">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title opacity-90">Commission payée</h3>
+              <div class="stats-number">{{ dossiersCommissionPayee }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-euro-sign"></i>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Filtres -->
     <div class="card mb-4">
-        <div class="card-body">
-            <div class="row align-items-center">
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Tous les statuts</option>
-                            <option value="en_cours">En cours</option>
-                            <option value="termine">Terminé</option>
-                            <option value="en_attente">En attente</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Tous les clients</option>
-                            <option value="1">Jean Dupont</option>
-                            <option value="2">Marie Martin</option>
-                            <option value="3">Pierre Durand</option>
-                        </select>
-                </div>
-                <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="Rechercher un dossier...">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary-custom w-100">
-                            <i class="fas fa-plus me-2"></i>Nouveau
-                        </button>
-                </div>
-                </div>
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <select class="form-select">
+              <option value="">Tous les statuts</option>
+              <option value="en_cours">En cours</option>
+              <option value="termine">Terminé</option>
+              <option value="en_attente">En attente</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select">
+              <option value="">Tous les clients</option>
+              <option value="1">Jean Dupont</option>
+              <option value="2">Marie Martin</option>
+              <option value="3">Pierre Durand</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"
+                ><i class="fas fa-search"></i
+              ></span>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Rechercher un dossier..."
+              />
             </div>
-        </div>
-
-        <!-- Boutons de vue -->
-        <div class="view-toggle mb-4" *ngIf="!isMobile">
-            <button class="btn btn-outline-custom" [class.active]="isCardView" (click)="setCardView(true)">
-                <i class="fas fa-th-large me-2"></i>Vue cartes
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary-custom w-100">
+              <i class="fas fa-plus me-2"></i>Nouveau
             </button>
-            <button class="btn btn-outline-custom" [class.active]="!isCardView" (click)="setCardView(false)">
-                <i class="fas fa-table me-2"></i>Vue tableau
-            </button>
+          </div>
         </div>
-
-        <!-- Vue en cartes -->
-        <div class="row" *ngIf="isMobile || isCardView" id="cardViewContainer">
-            <ng-container *ngIf="dataSource.data.length; else noDossier">
-                <div class="col-md-6 col-lg-4 mb-4" *ngFor="let dossier of dataSource.data" style="cursor:pointer;">
-                <div class="document-card">
-                    <div class="document-icon reports">
-                        <i class="fas fa-folder-open"></i>
-                    </div>
-                    <div class="document-info">
-                            <h6>Dossier #{{ dossier.numero }}</h6>
-                            <p class="text-muted">Type : {{ dossier.type }}</p>
-                            <small class="text-muted">Statut : {{ dossier.statut }}</small>
-                    </div>
-                    <div class="document-actions">
-                            <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                            <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            </ng-container>
-            <ng-template #noDossier>
-                <div class="col-12 text-center text-muted">Aucun dossier trouvé.</div>
-            </ng-template>
-        </div>
-
-        <!-- Vue en tableau (desktop uniquement) -->
-        <div class="table-responsive" *ngIf="!isMobile && !isCardView" id="tableViewContainer">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>N° Dossier</th>
-                        <th>Type</th>
-                        <th>Statut</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <ng-container *ngIf="dataSource.data.length; else noDossierTable">
-                        <tr *ngFor="let dossier of dataSource.data">
-                            <td>#{{ dossier.numero }}</td>
-                            <td>{{ dossier.type }}</td>
-                            <td><span class="badge" [ngClass]="getStatutClass(dossier.statut ?? '')">{{ dossier.statut }}</span></td>
-                            <td>{{ formatDate(dossier.dateCreation) }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="ouvrirDossierView(dossier, false)">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                                <button class="btn btn-sm btn-outline-success" title="Modifier" (click)="ouvrirDossierView(dossier, true)">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    </ng-container>
-                    <ng-template #noDossierTable>
-                        <tr>
-                            <td colspan="5" class="text-center text-muted">Aucun dossier trouvé.</td>
-                    </tr>
-                    </ng-template>
-                </tbody>
-        </table>
-        </div>
-
-        <!-- Pagination -->
-        <nav aria-label="Navigation des dossiers">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Suivant</a>
-                </li>
-            </ul>
-        </nav>
+      </div>
     </div>
+
+    <!-- Boutons de vue -->
+    <div class="view-toggle mb-4" *ngIf="!isMobile">
+      <button
+        class="btn btn-outline-custom"
+        [class.active]="isCardView"
+        (click)="setCardView(true)"
+      >
+        <i class="fas fa-th-large me-2"></i>Vue cartes
+      </button>
+      <button
+        class="btn btn-outline-custom"
+        [class.active]="!isCardView"
+        (click)="setCardView(false)"
+      >
+        <i class="fas fa-table me-2"></i>Vue tableau
+      </button>
+    </div>
+
+    <!-- Affichage des dossiers filtrés -->
+    <div *ngIf="dossiersFiltres.length; else aucunDossier">
+      <div class="row" id="cardViewContainer">
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer">
+          <div class="dossier-card-modern">
+            <!-- En-tête avec dégradé -->
+            <div class="dossier-header">
+              <div class="dossier-header-content">
+                <div class="dossier-brand">
+                  <h5 class="dossier-marque">{{ dossier.vehicule?.marque || 'Marque' }}</h5>
+                  <div class="dossier-transmission">{{ dossier.vehicule?.modele || 'Modèle' }}</div>
+                  <div class="dossier-annee">{{ dossier.vehicule?.dateMiseEnCirculation?.substring(0, 4) || '2016' }}</div>
+                </div>
+                <div class="dossier-numero-badge">
+                  <span class="numero-text">N {{ dossier.numero }}</span>
+                </div>
+              </div>
+              <div class="dossier-statut-badge">
+                <span class="statut-text" [ngClass]="getStatutClass(dossier.statut ?? '')">{{ dossier.statut || 'En attente' }}</span>
+              </div>
+            </div>
+
+            <!-- Corps de la carte -->
+            <div class="dossier-body">
+              <div class="dossier-info-row">
+                <div class="info-item">
+                  <span class="info-label">Type :</span>
+                  <span class="info-value">{{ dossier.type || 'Roulant' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Assurance :</span>
+                  <span class="info-value">{{ dossier.assurance || 'Axa' }}</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="dossier-actions">
+                <button class="btn-action btn-voir" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)"><span class="btn-text">Voir</span></button>
+                <button class="btn-action btn-modifier" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)"><span class="btn-text">Modifier</span></button>
+                <button class="btn-action btn-supprimer" title="Supprimer" (click)="$event.stopPropagation(); supprimerDossier(dossier)"><i class="fas fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #aucunDossier>
+      <div class="alert alert-info">
+        {{ getMessageAucunDossier() }}
+      </div>
+    </ng-template>
+
+    <!-- Vue en tableau (desktop uniquement) -->
+    <div
+      class="table-responsive"
+      *ngIf="!isMobile && !isCardView"
+      id="tableViewContainer"
+    >
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>N° Dossier</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="dossiersFiltres.length; else noDossierTable">
+            <tr *ngFor="let dossier of dossiersFiltres">
+              <td>#{{ dossier.numero || 'N/A' }}</td>
+              <td>{{ dossier.type || 'Non spécifié' }}</td>
+              <td>
+                <span
+                  class="badge"
+                  [ngClass]="getStatutClass(dossier.statut ?? '')"
+                  >{{ dossier.statut || 'En attente' }}</span
+                >
+              </td>
+              <td>{{ formatDate(dossier.dateCreation) }}</td>
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  title="Voir"
+                  (click)="ouvrirDossierView(dossier, false)"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  title="Modifier"
+                  (click)="ouvrirDossierView(dossier, true)"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-danger"
+                  title="Supprimer"
+                  (click)="supprimerDossier(dossier)"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #noDossierTable>
+            <tr>
+              <td colspan="5" class="text-center text-muted">
+                {{ getMessageAucunDossier() }}
+              </td>
+            </tr>
+          </ng-template>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <nav aria-label="Navigation des dossiers">
+      <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">Précédent</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item"><a class="page-link" href="#">2</a></li>
+        <li class="page-item"><a class="page-link" href="#">3</a></li>
+        <li class="page-item">
+          <a class="page-link" href="#">Suivant</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>
 
 <!-- Modale dossier-view -->
@@ -201,7 +268,8 @@
   [loading]="false"
   [edition]="dossierEnEdition"
   (closed)="fermerDossierView()"
-  (missionUpdated)="onMissionUpdated($event)">
+  (missionUpdated)="onMissionUpdated($event)"
+>
 </app-dossier-view>
 
 <router-outlet></router-outlet>

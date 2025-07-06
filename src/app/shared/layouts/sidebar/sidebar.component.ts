@@ -2,6 +2,7 @@ import { Component, Input, OnInit, inject, ChangeDetectorRef, Output, EventEmitt
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
+import { Router } from '@angular/router';
 
 interface MenuItem {
   title: string;
@@ -33,6 +34,7 @@ export class SidebarComponent implements OnInit {
   
   private keycloakService = inject(KeycloakService);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   username: string = 'Visiteur';
   userRoles: string[] = [];
@@ -53,7 +55,17 @@ export class SidebarComponent implements OnInit {
 
   adminMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/admin/dashboard', badge: '3' },
-    { title: 'Dossiers', icon: 'bi bi-folder', route: '/admin/dossiers' },
+    {
+      title: 'Dossiers',
+      icon: 'bi bi-folder',
+      route: '/admin/dossiers',
+      expanded: false,
+      children: [
+        { title: 'Nouveaux dossiers', icon: 'bi bi-calendar-day', route: '/admin/dossiers/nouveaux' },
+        { title: 'Dossiers non traités', icon: 'bi bi-clock-history', route: '/admin/dossiers/non-traites' },
+        { title: 'Dossiers terminés', icon: 'bi bi-check-circle', route: '/admin/dossiers/termines' }
+      ]
+    },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
    // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
@@ -64,7 +76,7 @@ export class SidebarComponent implements OnInit {
 
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
-    { title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
+    //{ title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
     { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/garage/finance' },
     { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
@@ -115,6 +127,12 @@ export class SidebarComponent implements OnInit {
   
   toggleSubmenu(item: MenuItem) {
     item.expanded = !item.expanded;
+  }
+
+  isParentActive(item: MenuItem): boolean {
+    if (!item.route) return false;
+    const currentUrl = this.router.url;
+    return currentUrl === item.route || currentUrl.startsWith(item.route + '/');
   }
 
   onLogoClick() {

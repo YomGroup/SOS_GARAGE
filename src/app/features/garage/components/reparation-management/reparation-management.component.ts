@@ -193,5 +193,39 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // Nouvelles méthodes pour le style et la gestion des statuts
+  getStatutClass(statut: string): string {
+    switch (statut.toLowerCase()) {
+      case 'assigné':
+      case 'en attente':
+        return 'statut-attente';
+      case 'en cours':
+        return 'statut-cours';
+      case 'terminée':
+        return 'statut-valide';
+      case 'épave':
+        return 'statut-rejete';
+      default:
+        return 'statut-attente';
+    }
+  }
+
+  getGarageStatutLabel(statut: string | undefined): string {
+    if (!statut) return 'En attente';
+    switch (statut.toLowerCase()) {
+      case 'assignée':
+      case 'en attente':
+        return 'En attente';
+      case 'en cours':
+        return 'En cours';
+      case 'terminée':
+        return 'Terminée';
+      case 'épave':
+        return 'Épave';
+      default:
+        return statut;
+    }
+  }
+
   // Les méthodes d'édition ont été déplacées dans le composant mission-view
 } 

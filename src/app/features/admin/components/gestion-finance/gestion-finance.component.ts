@@ -236,6 +236,32 @@ export class GestionFinanceComponent implements OnInit {
     this.loadFinancialData();
   }
 
+  resetFilters(): void {
+    this.filterStatut = '';
+    this.filterNom = '';
+    this.filterDevisMin = null;
+    this.filterDevisMax = null;
+    this.filterFactureMin = null;
+    this.filterFactureMax = null;
+    this.filterReparateur = '';
+    this.page = 1;
+    this._clearCache();
+    this.cdr.detectChanges();
+  }
+
+  shouldShowPage(pageNumber: number): boolean {
+    const totalPages = this.totalPages;
+    const currentPage = this.page;
+    
+    // Toujours afficher la première et dernière page
+    if (pageNumber === 1 || pageNumber === totalPages) {
+      return true;
+    }
+    
+    // Afficher les pages autour de la page courante (±2)
+    return pageNumber >= currentPage - 2 && pageNumber <= currentPage + 2;
+  }
+
   formatCurrency(value: number): string {
     return value.toFixed(2).replace('.', ',') + ' €';
   }

@@ -98,7 +98,7 @@
 
       <!-- Liste des garages -->
       <div class="garage-list">
-        <!-- Garages en attente -->
+        <!-- Tous les garages avec leurs statuts -->
         <div class="garage-card" *ngFor="let reparateur of tousLesGarages">
           <div class="garage-header">
             <div class="garage-title">
@@ -108,75 +108,29 @@
               <span class="badge rejected" *ngIf="reparateur.isvalids === 'rejetée'">Rejeté</span>
             </div>
             <div class="garage-actions">
-              <button class="btn btn-sm btn-success" title="Valider" (click)="validerReparateur(reparateur)">
+              <!-- Actions pour garages en attente -->
+              <button class="btn btn-sm btn-success" title="Valider" 
+                      (click)="validerReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'en attente'">
                 <i class="fas fa-check"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Rejeter" (click)="rejeterReparateur(reparateur)">
+              <button class="btn btn-sm btn-danger" title="Rejeter" 
+                      (click)="rejeterReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'en attente'">
                 <i class="fas fa-times"></i>
               </button>
-              <button class="btn btn-sm btn-info" title="Modifier la commission" (click)="openCommissionPrompt(reparateur)">
-                <i class="fas fa-percent"></i>
-              </button>
-            </div>
-          </div>
-          <div class="garage-content">
-            <div class="garage-info">
-              <div class="info-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>{{ reparateur.adresse }}</span>
-              </div>
-              <div class="info-item">
-                <i class="fas fa-phone"></i>
-                <span>{{ reparateur.telephone }}</span>
-              </div>
-              <div class="info-item">
-                <i class="fas fa-envelope"></i>
-                <span>{{ reparateur.email }}</span>
-              </div>
-            </div>
-            <div class="garage-details">
-              <div class="detail-item">
-                <span class="label">SIRET</span>
-                <span class="value">{{ reparateur.siret }}</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Commission</span>
-                <span class="value" *ngIf="editedCommissionId !== reparateur.id">{{ reparateur.commission }}%
-                  <button class="btn btn-link btn-sm p-0 ms-2" (click)="startEditCommission(reparateur)" title="Modifier">
-                    <i class="fas fa-pen"></i>
-                  </button>
-                </span>
-                <span *ngIf="editedCommissionId === reparateur.id">
-                  <input type="number" min="0" max="100" [(ngModel)]="editedCommissionValue" style="width:60px;display:inline-block;" /> %
-                  <button class="btn btn-success btn-sm ms-1" (click)="saveEditCommission(reparateur)" title="Valider"><i class="fas fa-check"></i></button>
-                  <button class="btn btn-secondary btn-sm ms-1" (click)="cancelEditCommission()" title="Annuler"><i class="fas fa-times"></i></button>
-                </span>
-              </div>
-            </div>
-          </div>
-          <div class="garage-footer">
-            <button class="btn btn-outline-primary" (click)="viewDetails(reparateur)">
-              <i class="fas fa-eye me-2"></i>Voir détails
-            </button>
-          </div>
-        </div>
-
-        <!-- Garages actifs -->
-        <div class="garage-card active" *ngFor="let reparateur of reparateursActifs">
-          <div class="garage-header">
-            <div class="garage-title">
-              <h4>{{ reparateur.nomDuGarage }}</h4>
-              <span class="badge pending" *ngIf="reparateur.isvalids === 'en attente'">En attente</span>
-              <span class="badge active" *ngIf="reparateur.isvalids === 'valide'">Valide</span>
-              <span class="badge rejected" *ngIf="reparateur.isvalids === 'rejetée'">Rejeté</span>
-            </div>
-            <div class="garage-actions">
-              <button class="btn btn-sm btn-warning" title="Suspendre">
+              
+              <!-- Actions pour garages validés -->
+              <button class="btn btn-sm btn-warning" title="Suspendre"
+                      *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-pause"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Désactiver">
+              <button class="btn btn-sm btn-danger" title="Désactiver"
+                      *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-ban"></i>
               </button>
+              
+              <!-- Action commune pour modifier la commission -->
               <button class="btn btn-sm btn-info" title="Modifier la commission" (click)="openCommissionPrompt(reparateur)">
                 <i class="fas fa-percent"></i>
               </button>

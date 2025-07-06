@@ -375,6 +375,321 @@
     }
 }
 
+/* Variables de couleurs harmonisées avec la charte graphique */
+:root {
+  --primary-blue: #1e4db8;
+  --primary-purple: #8b2eb8;
+  --gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Styles pour les nouvelles cartes de dossiers harmonisés */
+.dossier-card-modern {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: none;
+}
+
+.dossier-card-modern:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+/* En-tête avec dégradé harmonisé */
+.dossier-header {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #5a6ac8 100%);
+    color: white;
+    padding: 1.5rem;
+    position: relative;
+}
+
+.dossier-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.dossier-brand h5.dossier-marque {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem 0;
+    color: white;
+}
+
+.dossier-annee {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 0.25rem;
+}
+
+.dossier-transmission {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.dossier-numero-badge {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+}
+
+.numero-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+}
+
+.dossier-statut-badge {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.statut-text {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Classes pour les différents statuts harmonisées */
+.statut-text.statut-valide,
+.statut-text.badge-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.statut-text.statut-attente,
+.statut-text.badge-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.statut-text.statut-rejete,
+.statut-text.badge-danger {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+}
+
+.statut-text.statut-cours,
+.statut-text.badge-info {
+    background: linear-gradient(135deg, var(--primary-blue), #5a6ac8);
+}
+
+/* Corps de la carte */
+.dossier-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.dossier-info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.info-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.info-value {
+    font-size: 1rem;
+    color: #333;
+    font-weight: 600;
+}
+
+/* Actions */
+.dossier-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 45px;
+}
+
+.btn-voir {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-voir:hover {
+    background: linear-gradient(135deg, #138496, #117a8b);
+    transform: translateY(-2px);
+}
+
+.btn-modifier {
+    background: linear-gradient(135deg, var(--primary-blue), #5a6ac8);
+    color: white;
+}
+
+.btn-modifier:hover {
+    background: linear-gradient(135deg, #1a3f8f, #4a5ab8);
+    transform: translateY(-2px);
+}
+
+.btn-supprimer {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    flex: 0 0 45px;
+}
+
+.btn-supprimer:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-2px);
+}
+
+.btn-text {
+    font-size: 0.9rem;
+}
+
+/* Responsivité */
+@media (max-width: 1200px) {
+    .dossier-header {
+        padding: 1.25rem;
+    }
+    
+    .dossier-body {
+        padding: 1.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dossier-header {
+        padding: 1rem;
+    }
+    
+    .dossier-body {
+        padding: 1rem;
+    }
+    
+    .dossier-brand h5.dossier-marque {
+        font-size: 1.2rem;
+    }
+    
+    .dossier-annee {
+        font-size: 1rem;
+    }
+    
+    .dossier-transmission {
+        font-size: 0.85rem;
+    }
+    
+    .dossier-info-row {
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .info-item {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .dossier-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn-action {
+        width: 100%;
+    }
+}
+
+@media (max-width: 576px) {
+    .dossier-header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .dossier-numero-badge {
+        align-self: flex-start;
+    }
+    
+    .dossier-brand h5.dossier-marque {
+        font-size: 1.1rem;
+    }
+    
+    .dossier-annee {
+        font-size: 0.95rem;
+    }
+    
+    .dossier-transmission {
+        font-size: 0.8rem;
+    }
+    
+    .btn-action {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+        min-height: 40px;
+    }
+}
+
+/* Animation au chargement */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dossier-card-modern {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* Adaptations pour le mode sombre */
+:host-context(.dark) .dossier-card-modern {
+    background: #2d2d2d;
+    color: white;
+}
+
+:host-context(.dark) .info-label {
+    color: #ccc;
+}
+
+:host-context(.dark) .info-value {
+    color: #fff;
+}
+
 /* Media queries pour la responsivité */
 @media (max-width: 768px) {
     .container-fluid {

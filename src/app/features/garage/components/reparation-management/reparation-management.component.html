@@ -20,103 +20,142 @@
               <input type="text" class="form-control" placeholder="Rechercher une réparation..." (input)="applyFilter($event)">
             </div>
           </div>
-          <div class="col-md-2">
-            <button class="btn btn-primary-custom w-100">
-              <i class="fas fa-plus me-2"></i>Nouvelle réparation
-            </button>
-          </div>
         </div>
       </div>
     </div>
 
     <!-- Boutons de vue -->
     <div class="view-toggle mb-4">
-      <button class="btn btn-outline-custom active" id="cardView" (click)="isCardView = true">
+      <button class="btn btn-outline-custom" [class.active]="isCardView" (click)="isCardView = true">
         <i class="fas fa-th-large me-2"></i>Vue cartes
       </button>
-      <button class="btn btn-outline-custom" id="tableView" (click)="isCardView = false">
+      <button class="btn btn-outline-custom" [class.active]="!isCardView" (click)="isCardView = false">
         <i class="fas fa-table me-2"></i>Vue tableau
       </button>
     </div>
 
     <!-- Vue en cartes -->
-    <div class="row" id="cardViewContainer" *ngIf="isCardView">
-      <div class="col-md-6 col-lg-4 mb-4" *ngFor="let rep of dataSource.filteredData">
-        <div class="document-card">
-          <div class="document-icon reports">
-            <i class="fas fa-tools"></i>
-          </div>
-          <div class="document-info">
-            <h6>{{ vehicule?.immatriculation }}</h6>
-            <p class="text-muted">Statut : {{ rep.statut }}</p>
-            <small class="text-muted">Reçue le {{ formatDate(rep.dateCreation) }}</small>
-          </div>
-          <div class="document-actions">
-            <button class="btn btn-sm btn-outline-primary" title="Voir détails" (click)="ouvrirMissionView(rep)">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-warning" title="Modifier" (click)="ouvrirMissionView(rep, true)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(rep)">
-              <i class="fas fa-check"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(rep)">
-              <i class="fas fa-car-crash"></i>
-            </button>
+    <div class="row" *ngIf="isCardView" id="cardViewContainer">
+      <ng-container *ngIf="dataSource.data.length; else noMission">
+        <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let mission of dataSource.data">
+          <div class="dossier-card-modern">
+            <!-- En-tête avec dégradé -->
+            <div class="dossier-header">
+              <div class="dossier-header-content">
+                <div class="dossier-brand">
+                  <h5 class="dossier-marque">
+                    {{ mission.sinistre?.vehicule?.marque || "Marque" }}
+                  </h5>
+                  <div class="dossier-transmission">
+                    {{ mission.sinistre?.vehicule?.modele || "Modèle" }}
+                  </div>
+                  <div class="dossier-annee">
+                    {{ mission.sinistre?.vehicule?.immatriculation || "Immat" }}
+                  </div>    
+                </div>
+                <div class="dossier-numero-badge">
+                  <span class="numero-text">M {{ mission.id }}</span>
+                </div>
+              </div>
+              <div class="dossier-statut-badge">
+                <span class="statut-text" [ngClass]="getStatutClass(mission.statut ?? '')">
+                  {{ getGarageStatutLabel(mission.statut) }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Corps de la carte -->
+            <div class="dossier-body">
+              <div class="dossier-info-row">
+                <div class="info-item">
+                  <span class="info-label">Devis :</span>
+                  <span class="info-value">{{ mission.devis || 0 }} €</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Facture :</span>
+                  <span class="info-value">{{ mission.factureFinale || 0 }} €</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Date :</span>
+                  <span class="info-value">{{ formatDate(mission.dateCreation) }}</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="dossier-actions">
+                <button class="btn-action btn-voir" title="Voir" (click)="ouvrirMissionView(mission)">
+                  <span class="btn-text">Voir</span>
+                </button>
+                <button class="btn-action btn-modifier" title="Modifier" (click)="ouvrirMissionView(mission, true)">
+                  <span class="btn-text">Modifier</span>
+                </button>
+                <button class="btn-action btn-success" title="Valider facture" (click)="validerFacture(mission)">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-action btn-supprimer" title="Déclarer épave" (click)="declarerEpave(mission)">
+                  <i class="fas fa-car-crash"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </ng-container>
+      <ng-template #noMission>
+        <div class="col-12 text-center text-muted">Aucune mission trouvée.</div>
+      </ng-template>
     </div>
 
     <!-- Vue en tableau -->
-    <div class="table-responsive" id="tableViewContainer" *ngIf="!isCardView">
-      <table mat-table [dataSource]="dataSource" matSort class="table table-hover">
-        <ng-container matColumnDef="vehicule">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Véhicule</th>
-          <td mat-cell *matCellDef="let rep">{{ rep.vehicule }}</td>
-        </ng-container>
-        <ng-container matColumnDef="statut">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Statut</th>
-          <td mat-cell *matCellDef="let rep">{{ rep.statut }}</td>
-        </ng-container>
-        <ng-container matColumnDef="dateReception">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Date réception</th>
-          <td mat-cell *matCellDef="let rep">{{ formatDate(rep.dateReception) }}</td>
-        </ng-container>
-        <ng-container matColumnDef="montantDevis">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Devis (€)</th>
-          <td mat-cell *matCellDef="let rep">{{ rep.montantDevis }}</td>
-        </ng-container>
-        <ng-container matColumnDef="montantFacture">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Facture (€)</th>
-          <td mat-cell *matCellDef="let rep">{{ rep.montantFacture }}</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let rep">
-            <button class="btn btn-sm btn-outline-primary" title="Voir détails" (click)="ouvrirMissionView(rep)">
-              <i class="fas fa-eye"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-warning" title="Modifier" (click)="ouvrirMissionView(rep, true)">
-              <i class="fas fa-edit"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(rep)">
-              <i class="fas fa-check"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(rep)">
-              <i class="fas fa-car-crash"></i>
-            </button>
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    <div class="table-responsive" *ngIf="!isCardView" id="tableViewContainer">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>Véhicule</th>
+            <th>Statut</th>
+            <th>Date réception</th>
+            <th>Devis (€)</th>
+            <th>Facture (€)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngIf="dataSource.data.length; else noMissionTable">
+            <tr *ngFor="let mission of dataSource.data">
+              <td>{{ mission.sinistre?.vehicule?.immatriculation || 'N/A' }}</td>
+              <td>
+                <span class="badge" [ngClass]="getStatutClass(mission.statut ?? '')">
+                  {{ getGarageStatutLabel(mission.statut) }}
+                </span>
+              </td>
+              <td>{{ formatDate(mission.dateCreation) }}</td>
+              <td>{{ mission.devis || 0 }} €</td>
+              <td>{{ mission.factureFinale || 0 }} €</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary" title="Voir détails" (click)="ouvrirMissionView(mission)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-warning" title="Modifier" (click)="ouvrirMissionView(mission, true)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(mission)">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(mission)">
+                  <i class="fas fa-car-crash"></i>
+                </button>
+              </td>
+            </tr>
+          </ng-container>
+          <ng-template #noMissionTable>
+            <tr>
+              <td colspan="6" class="text-center text-muted">Aucune mission trouvée.</td>
+            </tr>
+          </ng-template>
+        </tbody>
       </table>
       <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
     </div>
   </div>
-
-  <!-- Le panneau latéral a été supprimé pour utiliser uniquement la modale mission-view -->
 
   <!-- En dehors de la grille, pour l'affichage du composant -->
   <app-mission-view 
