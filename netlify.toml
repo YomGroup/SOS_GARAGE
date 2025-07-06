@@ -1,6 +1,6 @@
 [build]
   publish = "dist/sos-garage/browser"
-  command = "npm run build:prod"
+  command = "npm run build:netlify"
 
 [[redirects]]
   from = "/*"
