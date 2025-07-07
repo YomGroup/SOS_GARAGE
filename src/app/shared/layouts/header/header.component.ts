@@ -10,6 +10,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../../services/auth.service';
 import { Notification, NotificationType } from '../../models/notification.model';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -62,7 +63,8 @@ export class HeaderComponent implements OnInit {
 
   constructor(
     themeService: ThemeService,
-    private authService: AuthService
+    private authService: AuthService,
+    private notificationService: NotificationService
   ) {
     this.themeService = themeService;
     this.isDarkMode = this.themeService.isDarkMode;
@@ -70,6 +72,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserInfo();
+    this.loadNotifications();
   }
 
   private loadUserInfo(): void {
@@ -84,6 +87,18 @@ export class HeaderComponent implements OnInit {
       this.userName.set('Utilisateur');
       this.userEmail.set('');
     }
+  }
+
+  private loadNotifications(): void {
+    this.notificationService.getUserNotifications().subscribe((notifications: any[]) => {
+      const mappedNotifications = notifications.map(n => ({
+        type: n.type,
+        message: n.message,
+        time: n.timestamp ? new Date(n.timestamp) : new Date()
+      }));
+      this.notifications.set(mappedNotifications);
+      this.notificationCount.set(mappedNotifications.length);
+    });
   }
 
   toggleTheme(): void {
