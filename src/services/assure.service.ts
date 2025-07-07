@@ -35,9 +35,13 @@ export interface ASSURE {
     providedIn: 'root'
 })
 export class AssureService {
+    private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/assure/{id}';
+    private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/assure';
     private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/assure/assure';
 
     private http = inject(HttpClient);
+
+
 
     addAssurerGet(id: number) {
         return this.http.get<ASSURE>(`${this.apiUrl}/${id}`);

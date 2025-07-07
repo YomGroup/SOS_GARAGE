@@ -1,122 +1,164 @@
-
-<div class="dashboard-wrapper">
-    <button class="sidebar-toggle" (click)="toggleSidebar()" [class.collapsed]="!isMobile && sidebarCollapsed">
-        <i class="bi bi-list"></i>
-    </button>
-    
-    <header class="header" id="header" [class.collapsed]="!isMobile && sidebarCollapsed">
-        <div class="header-content">
-          <div>
-        <h1 *ngIf="!pageTitle">Hello {{ userData.nom }}</h1>
-        <h2 *ngIf="pageTitle">{{ pageTitle }}</h2>
-
-        <div class="date">{{currentDate}}</div>
-        </div>
-
-            <div class="user-info">
-                <span class="icon-envelope">
-                    <i class="bi bi-envelope-fill"></i>
-                </span>
-                <span class="icon-bell">
-                    <i class="bi bi-bell-fill"></i>
-                    <span class="notification-badge">+3</span>
-                </span>
-                <a routerLink="/clientDashboard/profiles" 
-                    routerLinkActive="active" class="user-avatar text-decoration-none
-">
-                    <span class="user-avatar">{{ userData.prenom.charAt(0) }}</span>
-                </a>
+<div class="d-flex flex-column min-vh-100 bg-light">
+    <!-- En-tête compact -->
+<header class="bg-white shadow-sm sticky-top z-3 py-2 border-bottom">
+        <div class="container-fluid d-flex align-items-center px-3">
+            <!-- Logo + Bouton côte à côte -->
+            <div class="d-flex align-items-center me-3">
+               
+                <img src="assets/logo_sos.png" alt="Logo" 
+                     [style.width.px]="sidebarCollapsed ? 40 : 180"
+                     style="height: auto; transition: all 0.3s ease;">
+                      <button class="btn btn-link p-1 me-2" (click)="toggleSidebar()">
+                    <i class="bi bi-list fs-3"></i>
+                </button>
+            </div>
+            
+            <!-- Titre proche du bouton -->
+            <div class="flex-grow-1">
+<h1 *ngIf="!pageTitle" class="mb-0 fw-bold fs-5 fs-md-4 d-none d-sm-block">Hello {{ userData.name }}</h1>
+                <h2 *ngIf="pageTitle"  class="mb-0 fw-bold fs-5 fs-md-4 d-none d-sm-block">{{ pageTitle }}</h2>
+            </div>
+            
+            <!-- Partie droite -->
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small me-2 d-none d-sm-block">{{currentDate}}</span>
+                <button class="btn btn-light position-relative p-2 rounded-circle">
+                    <i class="bi bi-envelope-fill text-muted"></i>
+                </button>
+                <button class="btn btn-light position-relative p-2 rounded-circle">
+                    <i class="bi bi-bell-fill text-muted"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">3</span>
+                </button>
+                <div class="dropdown d-none d-sm-block">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
+                       id="dropdownUser" data-bs-toggle="dropdown">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px;">
+                            {{ userData.prenom.charAt(0) }}
+                            <span class="position-absolute top-0 end-0 translate-middle p-1 bg-success border border-light rounded-circle"></span>
+                        </div>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow ">
+                        <li><a class="dropdown-item" routerLink="/clientDashboard/profiles">Mon profil</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" (click)="logout()">Déconnexion</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </header>
 
-<div class="dashboard" [class.initialized]="angularReady">
-        <div class="sidebar" id="sidebar" [class.show]="sidebarVisible" [class.collapsed]="!isMobile && sidebarCollapsed">
-            <img src="assets/logo_sos.png" alt="Logo">
-            
-            <nav class="nav-menu">
-                <a routerLink="/clientDashboard" 
-                   routerLinkActive="active" 
-                   [routerLinkActiveOptions]="{exact: true}"
-                   class="nav-item" 
-                   data-tooltip="Tableau de bord">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Tableau de bord</span>
-                </a>
-                                <a routerLink="/clientDashboard/vehicules" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Mes Véhicules">
-                        <i class="bi bi-car-front-fill"></i>
-                        <span>Mes Véhicules</span>
-                    </a>
-                    <a routerLink="/clientDashboard/declarations" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Déclarer un sinistre">
-                        <i class="bi bi-flag-fill"></i>
-                        <span>Déclarer un sinistre</span>
-                    </a>
-                    <a routerLink="/clientDashboard/sinistre" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Mes Sinistres">
-                        <i class="bi bi-journal-medical"></i>
-                        <span>Mes Sinistres</span>
-                    </a>
-                    <a routerLink="/clientDashboard/document" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Mes Documents">
-                        <i class="bi bi-file-earmark-text"></i>
-                        <span>Mes Documents</span>
-                    </a>
-                    <a routerLink="/clientDashboard/message" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Message">
-                        <i class="bi bi-chat-dots-fill"></i>
-                        <span>Message</span>
-                    </a>
-                    <a routerLink="/clientDashboard/profiles" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Mon Profil">
-                        <i class="bi bi-person-circle"></i>
-                        <span>Mon Profil</span>
-                    </a>
-                    
-                <!--
-                    <a routerLink="/assistance" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Assistance">
-                        <i class="bi bi-question-circle-fill"></i>
-                        <span>Assistance</span>
-                    </a>
-                -->
-                    <a routerLink="/clientDashboard/support" 
-                    routerLinkActive="active"
-                    class="nav-item" 
-                    data-tooltip="Support">
-                        <i class="bi bi-headset"></i>
-                        <span>Support</span>
-                    </a>
-                
-                    
-                    <a (click)="logout()" 
-                    class="nav-item" 
-                    data-tooltip="Déconnexion">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Déconnexion</span>
-                    </a>
-                                <!-- Vos autres liens de navigation ici -->
-                                
-             </nav>
-        </div>
+    <!-- Contenu principal -->
+    <div class="d-flex flex-grow-1  ">
+        <!-- Sidebar avec items parfaitement alignés -->
+        <aside
+                class="bg-white shadow-sm position-fixed start-0 h-100 overflow-y-auto"
+                [ngClass]="{
+                    'd-none': isMobile && sidebarCollapsed,   
+                    'd-block': isMobile && !sidebarCollapsed, 
+                    'd-md-block': !isMobile                    
+                }"
+                [style.width.px]="
+                    !isMobile ? (sidebarCollapsed ? 70 : 250) : 250
+                "
+                [style.top.px]="75"
+                style="transition: width 0.3s ease; z-index: 1050;"
+                >
+                            
+            <nav class="nav flex-column px-2 pt-4 pb-3 h-100 d-flex flex-column">
+                <!-- Groupe d'items principaux -->
+            <div class="flex-grow-1 d-flex flex-column gap-3  mt-2 px-1">
+                            <a routerLink="/clientDashboard" 
+            routerLinkActive="active" 
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+            [class.justify-content-center]="sidebarCollapsed"
+            style="gap: 12px; transition: all 0.3s ease;">
+            <i class="bi bi-speedometer2 fs-5"></i>
+            <span [class.d-none]="sidebarCollapsed">Tableau de bord</span>
+            </a>
 
-        <div class="main-content" id="mainContent"  [class.collapsed]="!isMobile && sidebarCollapsed">
+                    
+                    <a routerLink="/clientDashboard/vehicules" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-car-front-fill fs-5 " ></i>
+                        <span [class.d-none]="sidebarCollapsed">Mes Véhicules</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/declarations" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-flag-fill fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Déclarer un sinistre</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/sinistre" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-journal-medical fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Mes Sinistres</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/document" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-file-earmark-text fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Mes Documents</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/message" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-chat-dots-fill fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Message</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/profiles" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-person-circle fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Mon Profil</span>
+                    </a>
+                    
+                    <a routerLink="/clientDashboard/support" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-headset fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Support</span>
+                    </a>
+                     <a (click)="logout()" 
+                       class="nav-link d-flex align-items-center py-2 px-3 rounded-3 text-danger"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="; transition: all 0.3s ease;">
+                        <i class="bi bi-box-arrow-right fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Déconnexion</span>
+                    </a>
+                </div>
+               
+                
+            </nav>
+        </aside>
+
+        <!-- Contenu principal -->
+        <main class="flex-grow-1 p-4 overflow-auto"
+              [style.marginLeft.px]="sidebarCollapsed ? 70 : 250"
+              style="transition: margin-left 0.3s ease;">
             <router-outlet></router-outlet>
-        </div>
+        </main>
     </div>
 </div>

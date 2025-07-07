@@ -4,11 +4,10 @@ import { HttpClient } from '@angular/common/http';
 
 export interface Vehicle {
     id: string;
-    name: string;
-    modele: string;
-    year: number;
-    plateNumber: string;
-    status: 'active' | 'inactive';
+    name?: string;
+    modele?: string;
+    year?: number;
+    plateNumber?: string;
     immatriculation?: string;
     dateMiseEnCirculation?: string;
     marque?: string;
@@ -16,18 +15,9 @@ export interface Vehicle {
     carteGrise?: string;
     contratAssurance?: string;
     assure?: number;
-    imageUrl?: string;
+    imgUrl?: string;
 }
 
-export interface Claim {
-    id: string;
-    vehicleId: string;
-    vehicleName: string;
-    date: string;
-    status: 'pending' | 'in-progress' | 'closed';
-    description: string;
-    timeline: TimelineEvent[];
-}
 
 export interface TimelineEvent {
     time: string;
@@ -43,51 +33,7 @@ export class VehicleService {
     private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
     private apiUrlData = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
     private http = inject(HttpClient);
-    private vehiclesSubject = new BehaviorSubject<Vehicle[]>([
-        {
-            id: '1',
-            name: 'Mercedes AMG',
-            modele: 'AMG GT',
-            year: 2020,
-            plateNumber: 'ABC-123',
-            status: 'active'
-        }
-    ]);
 
-    private claimsSubject = new BehaviorSubject<Claim[]>([
-        {
-            id: 'SIN-001',
-            vehicleId: '1',
-            vehicleName: 'Mercedes AMG - 15 Mai 2020',
-            date: '15 Mai 2020',
-            status: 'closed',
-            description: 'Accident de circulation',
-            timeline: [
-                { time: 'Il y\'a 30 mn', message: 'Le sinistre-001 à été traité avec succès' },
-                { time: 'Il y\'a 39 mn', message: 'Documents a signé pour le sinistre-001' }
-            ]
-        }
-    ]);
-
-    vehicles$ = this.vehiclesSubject.asObservable();
-    claims$ = this.claimsSubject.asObservable();
-
-    getVehicles() {
-        return this.vehiclesSubject.value;
-    }
-
-    getClaims() {
-        return this.claimsSubject.value;
-    }
-
-    addClaim(claim: Omit<Claim, 'id'>) {
-        const claims = this.claimsSubject.value;
-        const newClaim: Claim = {
-            ...claim,
-            id: `SIN-${String(claims.length + 1).padStart(3, '0')}`
-        };
-        this.claimsSubject.next([...claims, newClaim]);
-    }
     getAllVehiculesPost(body: any = {}) {
         return this.http.get(this.apiUrl, body);
     }
@@ -95,7 +41,9 @@ export class VehicleService {
         const url = `${this.apiUrlData}/scraper/${encodeURIComponent(immatriculation)}`;
         return this.http.get(url);
     }
-
+    getVehiculesDataById(id: number) {
+        return this.http.get(`${this.apiUrlAdd}/assure/${id}`);
+    }
 
     addVehiculesPost(body: any = {}) {
         return this.http.post(this.apiUrlAdd, body);
@@ -105,7 +53,8 @@ export class VehicleService {
     }
 
     deleteVehiculesPost(id: number) {
-        return this.http.delete(`${this.apiUrlAdd}/${id}`);
+        return this.http.delete(`${this.apiUrlAdd}?id=${id}`);
     }
+
 
 }

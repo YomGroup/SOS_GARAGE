@@ -44,31 +44,13 @@
       <h2>Sinistre déclaré</h2>
       <span class="status-filter">Etat</span>
     </div>
-    
-    <div class="recent-claims">
-      <div class="claim-item">
-        <div class="claim-info">
-          <div class="claim-id">SIN-001</div>
-          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
-        </div>
-        <span class="claim-status closed">Clôturé</span>
-      </div>
-      
-      <div class="claim-item">
-        <div class="claim-info">
-          <div class="claim-id">SIN-001</div>
-          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
-        </div>
-        <span class="claim-status closed">Clôturé</span>
-      </div>
-      
-      <div class="claim-item">
-        <div class="claim-info">
-          <div class="claim-id">SIN-001</div>
-          <div class="claim-details">Mercedes AMG - 15 Mai 20205</div>
-        </div>
-        <span class="claim-status closed">Clôturé</span>
-      </div>
+    <div *ngFor="let sinistre of sinistreDataLimited " class="claim-item">
+      <div class="claim-info">
+        <div class="claim-id">{{ sinistre.type }}</div>
+        <div class="claim-details">
+      {{ sinistre.conditionsAcceptees }} - {{ sinistre.lienConstat }}
+       </div>
+  </div>
     </div>
   </div>
 

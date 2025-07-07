@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
+import { AssureService } from '../../services/assure.service';
 
 interface Notification {
   message: string;
@@ -20,89 +22,114 @@ interface Sinistre {
 
 @Component({
   selector: 'app-sinistre',
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './sinistre.component.html',
-  styleUrl: './sinistre.component.css'
+  styleUrls: ['./sinistre.component.css']
 })
 export class SinistreComponent implements OnInit {
-
   selectedSinistre: Sinistre | null = null;
   sinistres: Sinistre[] = [];
+  userid: string | null = null;
+  assureId: number = 0;
 
-  constructor() { }
+  private authService = inject(AuthService);
+  private assureService = inject(AssureService);
 
   ngOnInit(): void {
-    this.loadSinistres();
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
+    if (this.userid) {
+      this.assureService.getAssurerID(this.userid).subscribe({
+        next: (data: any) => {
+          this.assureId = data.id;
+          this.loadSinistres();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération de l\'assure ID :', err);
+        }
+      });
+    }
   }
 
   loadSinistres(): void {
-    // Données de test basées sur votre maquette
-    this.sinistres = [
+    this.assureService.addAssurerGet(this.assureId).subscribe({
+      next: (data: any) => {
+        this.sinistres = this.transformApiDataToSinistres(data);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des sinistres:', err);
+      }
+    });
+  }
+
+  private transformApiDataToSinistres(apiData: any): Sinistre[] {
+    const sinistres: Sinistre[] = [];
+
+    apiData.vehicules?.forEach((vehicule: any) => {
+      vehicule.sinistres?.forEach((sinistreApi: any) => {
+        const sinistre: Sinistre = {
+          id: sinistreApi.id.toString(),
+          vehicule: `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`,
+          date: this.formatDate(sinistreApi.createdAt),
+          statut: sinistreApi.isvalid ? 'Clôturé' : 'En cours',
+          typeVehicule: sinistreApi.type === 'ROULANT' ? 'roulant' : 'non roulant',
+          notifications: this.generateNotifications(sinistreApi),
+          documents: sinistreApi.documents?.map((doc: any) => doc.fichier) || [],
+          photos: sinistreApi.imgUrl || [],
+          constat: sinistreApi.lienConstat || 'Aucun constat'
+        };
+        sinistres.push(sinistre);
+      });
+    });
+
+    return sinistres.sort((a, b) =>
+      new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }
+
+  private generateNotifications(sinistreApi: any): Notification[] {
+    // Exemple de notifications générées automatiquement
+    return [
       {
-        id: 'SIN-001',
-        vehicule: 'Mercedes AMG',
-        date: '15 Mai 2025',
-        statut: 'Clôturé',
-        typeVehicule: 'roulant',
-        notifications: [
-          { message: 'Le sinistre-001 à été traité avec succès', temps: 'Il y\'a 30 mn' },
-          { message: 'Documents à signer pour le sinistre-001', temps: 'Il y\'a 39 mn' }
-        ],
-        documents: ['Document 1', 'Document 2', 'Document 3'],
-        photos: ['Photo avant', 'Photo arrière', 'Photo côté'],
-        constat: 'Constat électronique disponible'
+        message: `Sinistre ${sinistreApi.isvalid ? 'clôturé' : 'en cours de traitement'}`,
+        temps: this.formatTimeAgo(sinistreApi.updatedAt || sinistreApi.createdAt)
       },
       {
-        id: 'SIN-002',
-        vehicule: 'Peugeot 308',
-        date: '08 Janvier 2025',
-        statut: 'En cours',
-        typeVehicule: 'non roulant',
-        notifications: [
-          { message: 'Expertise programmée pour demain', temps: 'Il y\'a 2 h' },
-          { message: 'Dossier en cours de traitement', temps: 'Il y\'a 1 jour' }
-        ],
-        documents: ['Document 1', 'Document 2'],
-        photos: ['Photo dégâts', 'Photo immatriculation'],
-        constat: 'Constat papier reçu'
-      },
-      {
-        id: 'SIN-003',
-        vehicule: 'Renault Clio',
-        date: '20 Décembre 2024',
-        statut: 'Clôturé',
-        typeVehicule: 'roulant',
-        notifications: [
-          { message: 'Indemnisation versée', temps: 'Il y\'a 3 semaines' },
-          { message: 'Expertise terminée', temps: 'Il y\'a 1 mois' }
-        ],
-        documents: ['Document 1', 'Document 2', 'Document 3'],
-        photos: ['Photo rayure', 'Photo pare-choc'],
-        constat: 'Constat électronique'
+        message: 'Dossier transmis à l\'expert',
+        temps: this.formatTimeAgo(sinistreApi.createdAt)
       }
     ];
   }
 
+  private formatDate(dateString: string | null): string {
+    if (!dateString) return 'Date inconnue';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR');
+  }
+
+  private formatTimeAgo(dateString: string | null): string {
+    if (!dateString) return 'Récemment';
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) return "Aujourd'hui";
+    if (days === 1) return "Hier";
+    if (days < 7) return `Il y a ${days} jours`;
+    if (days < 30) return `Il y a ${Math.floor(days / 7)} semaines`;
+    return `Il y a ${Math.floor(days / 30)} mois`;
+  }
+
+  // Méthodes d'affichage
   getStatutClass(statut: string): string {
-    switch (statut) {
-      case 'Clôturé':
-        return 'badge-success';
-      case 'En cours':
-        return 'badge-warning';
-      default:
-        return 'badge-secondary';
-    }
+    return statut === 'Clôturé' ? 'badge-success' :
+      statut === 'En cours' ? 'badge-warning' : 'badge-secondary';
   }
 
   getStatutIcon(statut: string): string {
-    switch (statut) {
-      case 'Clôturé':
-        return 'fas fa-check-circle';
-      case 'En cours':
-        return 'fas fa-clock';
-      default:
-        return 'fas fa-exclamation-circle';
-    }
+    return statut === 'Clôturé' ? 'fas fa-check-circle' :
+      statut === 'En cours' ? 'fas fa-clock' : 'fas fa-exclamation-circle';
   }
 
   selectSinistre(sinistre: Sinistre): void {
@@ -111,20 +138,20 @@ export class SinistreComponent implements OnInit {
 
   viewDocument(document: string): void {
     console.log('Viewing document:', document);
-    // Logique pour afficher le document
+    // Implémentez la logique d'affichage du document
   }
 
   viewPhoto(photo: string): void {
     console.log('Viewing photo:', photo);
-    // Logique pour afficher la photo
+    // Implémentez la logique d'affichage de la photo
   }
 
   contactAssistance(): void {
     console.log('Contacting assistance...');
-    // Logique pour contacter l'assistance
+    // Implémentez la logique de contact
   }
 
-  // Méthodes pour calculer les statistiques
+  // Statistiques
   getSinistresEnCours(): number {
     return this.sinistres.filter(s => s.statut === 'En cours').length;
   }
@@ -134,6 +161,6 @@ export class SinistreComponent implements OnInit {
   }
 
   getTotalVehicules(): number {
-    return this.sinistres.length;
+    return new Set(this.sinistres.map(s => s.vehicule)).size;
   }
 }

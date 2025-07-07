@@ -1,209 +1,94 @@
 <!-- Mes Documents -->
 <div class="content-section" id="documents">
-   
-    <div class="container-fluid">
-        <!-- Filtres -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Tous les types</option>
-                            <option value="insurance">Lettres d'assurance</option>
-                            <option value="photos">Captures/Photos</option>
-                            <option value="reports">Rapports</option>
-                            <option value="contracts">Contrats</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <select class="form-select">
-                            <option value="">Tous les véhicules</option>
-                            <option value="1">Peugeot 308</option>
-                            <option value="2">Renault Clio</option>
-                            <option value="3">Citroën C3</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-search"></i></span>
-                            <input type="text" class="form-control" placeholder="Rechercher un document...">
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button class="btn btn-primary-custom w-100">
-                            <i class="fas fa-upload me-2"></i>Ajouter
-                        </button>
-                    </div>
-                </div>
+  <div class="container-fluid">
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="row align-items-center">
+          <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="typeFilter" (change)="applyFilters()">
+              <option value="">Tous les types</option>
+              <option value="constat">Constat</option>
+              <option value="mandat">Mandat</option>
+              <option value="cession">Cession</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="vehicleFilter" (change)="applyFilters()">
+              <option value="">Tous les véhicules</option>
+              <option *ngFor="let v of vehicles" [value]="v.id">
+                {{ v.marque }} {{ v.modele }} ({{ v.immatriculation }})
+              </option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fas fa-search"></i></span>
+              <input type="text" class="form-control" placeholder="Rechercher un document..." 
+                     [(ngModel)]="searchText" (input)="applyFilters()">
             </div>
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-secondary w-100" (click)="resetFilters()">
+              <i class="fas fa-filter-circle-xmark me-2"></i>Réinitialiser
+            </button>
+          </div>
         </div>
-
-        <!-- Liste des documents -->
-        <div class="row">
-            <!-- Lettres d'assurance -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon insurance">
-                        <i class="fas fa-file-contract"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Lettre d'assurance</h6>
-                        <p class="text-muted">Peugeot 308 - AB-123-CD</p>
-                        <small class="text-muted">Ajouté le 15/03/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photos de sinistre -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon photos">
-                        <i class="fas fa-images"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Photos du sinistre</h6>
-                        <p class="text-muted">Accident du 10/03/2025</p>
-                        <small class="text-muted">5 photos</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Rapport d'expertise -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon reports">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Rapport d'expertise</h6>
-                        <p class="text-muted">Sinistre #2025-001</p>
-                        <small class="text-muted">Ajouté le 12/03/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Contrat d'assurance -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon contracts">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Contrat d'assurance</h6>
-                        <p class="text-muted">Police n° 123456789</p>
-                        <small class="text-muted">Valide jusqu'au 31/12/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Captures d'écran -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon photos">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Captures d'écran</h6>
-                        <p class="text-muted">Constat amiable digital</p>
-                        <small class="text-muted">Ajouté le 08/03/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Carte d'assurance -->
-            <div class="col-md-6 col-lg-4 mb-4">
-                <div class="document-card">
-                    <div class="document-icon insurance">
-                        <i class="fas fa-id-card"></i>
-                    </div>
-                    <div class="document-info">
-                        <h6>Carte verte</h6>
-                        <p class="text-muted">Renault Clio - EF-456-GH</p>
-                        <small class="text-muted">Expire le 30/06/2025</small>
-                    </div>
-                    <div class="document-actions">
-                        <button class="btn btn-sm btn-outline-primary" title="Voir">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-success" title="Télécharger">
-                            <i class="fas fa-download"></i>
-                        </button>
-                        <button class="btn btn-sm btn-outline-danger" title="Supprimer">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <nav aria-label="Navigation des documents">
-            <ul class="pagination justify-content-center">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">Précédent</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">Suivant</a>
-                </li>
-            </ul>
-        </nav>
+      </div>
     </div>
+
+    <!-- Liste des documents -->
+    <div class="row">
+      <div *ngFor="let item of filteredDocuments" class="col-md-6 col-lg-4 mb-4">
+        <div class="document-card">
+          <div class="document-icon">
+            <i [class]="getDocumentIconClass(item.doc.type)"></i>
+          </div>
+          <div class="document-info">
+            <h6>{{ getDocumentTitle(item.doc.type) }}</h6>
+            <p class="text-muted">
+              {{ item.vehicle.marque }} {{ item.vehicle.modele }} - {{ item.vehicle.immatriculation }}
+            </p>
+            <small class="text-muted">Ajouté le {{ getDocumentDate(item.doc.createdAt) }}</small>
+            <div class="mt-2">
+              <span class="badge bg-light text-dark">{{ item.doc.fichier }}</span>
+            </div>
+          </div>
+          <div class="document-actions">
+            <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="onView(item.doc)">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-success" title="Télécharger" (click)="onDownload(item.doc)">
+              <i class="fas fa-download"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" title="Supprimer" (click)="onDelete(item.doc)">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="filteredDocuments.length === 0" class="col-12 text-center py-5">
+        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+        <h5 class="text-muted">Aucun document trouvé</h5>
+        <p *ngIf="typeFilter || vehicleFilter || searchText" class="text-muted">
+          Essayez de modifier vos critères de recherche
+        </p>
+      </div>
+    </div>
+
+    <!-- Pagination (optionnelle) -->
+    <nav *ngIf="filteredDocuments.length > 0" aria-label="Navigation des documents" class="mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item disabled">
+          <a class="page-link" href="#" tabindex="-1">Précédent</a>
+        </li>
+        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+        <li class="page-item">
+          <a class="page-link" href="#">Suivant</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
 </div>

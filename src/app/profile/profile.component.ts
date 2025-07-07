@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { AssureService } from '../../services/assure.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -29,30 +30,46 @@ export class ProfileComponent {
 
   isEditing = false;
   originalData: any = {};
+  userid: string | null = null;
+  assureId: number = 0;
+  private authService = inject(AuthService);
 
-  constructor() {
-    this.loadUserData();
-  }
 
-  private loadUserData(): void {
-    const userId = 8; // À remplacer par l'ID réel de l'utilisateur
-    if (userId) {
-      this.assureService.addAssurerGet(userId).subscribe({
+  ngOnInit(): void {
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
+
+    if (this.userid) {
+      this.assureService.getAssurerID(this.userid).subscribe({
         next: (data: any) => {
-          this.userData = {
-            ...this.userData,
-            ...data,
-            // Formatage des données si nécessaire
-            telephone: this.formatPhoneNumber(data.telephone),
-            dateNaissance: this.formatDate(data.dateNaissance)
-          };
-          this.originalData = { ...this.userData };
+          this.assureId = data.id; // adapte selon ta réponse
+          this.loadUserData();
+
         },
         error: (err) => {
-          console.error('Erreur lors du chargement des données utilisateur', err);
+          console.error('Erreur lors de la récupération de l’assure  ID :', err);
         }
       });
     }
+  }
+
+  private loadUserData(): void {
+
+    this.assureService.addAssurerGet(this.assureId).subscribe({
+      next: (data: any) => {
+        this.userData = {
+          ...this.userData,
+          ...data,
+          // Formatage des données si nécessaire
+          telephone: this.formatPhoneNumber(data.telephone),
+          dateNaissance: this.formatDate(data.dateNaissance)
+        };
+        this.originalData = { ...this.userData };
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des données utilisateur', err);
+      }
+    });
+
   }
 
   private formatPhoneNumber(phone: string): string {

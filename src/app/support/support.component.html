@@ -1,167 +1,42 @@
-<script src="https://cdn.tailwindcss.com"></script>
-
-<div class="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-100">
- 
-
-  <div class="container mx-auto px-6 py-8">
-    <!-- Hero Section -->
-    <div class="text-center mb-12">
-    
-    <!-- Boutons d'action rapide -->
-     <!-- Contact Information -->
-    <div class=" backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-      <div class="text-center mb-8">
-        <h3 class="text-3xl font-bold text-slate-800 mb-4">Besoin d'aide personnalisée ?</h3>
-        <p class="text-slate-600">Notre équipe est là pour vous accompagner</p>
+<div class="min-vh-100 bg-light">
+  <div class="container py-5">
+    <!-- Contact Information -->
+    <div class="bg-white bg-opacity-75 rounded-3xl p-5 border mb-5">
+      <div class="text-center mb-5">
+        <h3 class="display-5 fw-bold text-dark mb-3">Besoin d'aide personnalisée ?</h3>
+        <p class="text-muted">Notre équipe est là pour vous accompagner</p>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
+      <div class="row g-4">
+        <!-- Email -->
+        <div class="col-md-4 text-center">
+          <div class="bg-primary bg-gradient rounded-3 p-3 d-inline-flex align-items-center justify-content-center mb-3">
+            <i class="bi bi-envelope text-white fs-4"></i>
           </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Email</h4>
-          <p class="text-slate-600">supportvotresite.com</p>
+          <h4 class="h5 fw-bold text-dark mb-2">Email</h4>
+          <p class="text-muted">supportvotresite.com</p>
         </div>
         
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
-            </svg>
+        <!-- Téléphone -->
+        <div class="col-md-4 text-center">
+          <div class="bg-success bg-gradient rounded-3 p-3 d-inline-flex align-items-center justify-content-center mb-3">
+            <i class="bi bi-telephone text-white fs-4"></i>
           </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Téléphone</h4>
-          <p class="text-slate-600">+33 1 23 45 67 89</p>
+          <h4 class="h5 fw-bold text-dark mb-2">Téléphone</h4>
+          <p class="text-muted">+33 1 23 45 67 89</p>
         </div>
         
-        <div class="text-center">
-          <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-            </svg>
-          </div>
-          <h4 class="text-lg font-bold text-slate-800 mb-2">Adresse</h4>
-          <p class="text-slate-600">123 Rue de la Tech<br>75001 Paris</p>
-        </div>
-      </div>
-    </div>
-  </div>
+        <!-- Adresse -->
+        <div class="col-md-4 text-center">
+         <div class="bg-danger bg-gradient rounded-3 p-3 d-inline-flex align-items-center justify-content-center mb-3">
+  <i class="bi bi-geo-alt text-white fs-4"></i>
 </div>
 
-
-    <!-- FAQ Section -->
-    <div class="mb-12">
-      <h3 class="text-3xl font-bold text-slate-800 text-center mb-8">Questions Fréquentes</h3>
-      <div class="max-w-4xl mx-auto space-y-4">
-        <!-- FAQ Item 1 -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-          <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/30 transition-colors" onclick="toggleFAQ(this)">
-            <span class="text-lg font-semibold text-slate-800">Comment ajouter un nouveau véhicule ?</span>
-            <svg class="w-5 h-5 text-slate-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div class="px-6 pb-4 hidden">
-            <p class="text-slate-600">Pour ajouter un nouveau véhicule, cliquez sur le bouton "Ajouter un véhicule" en haut à droite de la page de gestion. Remplissez ensuite tous les champs requis comme la marque, le modèle, l'immatriculation, etc.</p>
-          </div>
-        </div>
-
-        <!-- FAQ Item 2 -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-          <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/30 transition-colors" onclick="toggleFAQ(this)">
-            <span class="text-lg font-semibold text-slate-800">Comment modifier les informations d'un véhicule ?</span>
-            <svg class="w-5 h-5 text-slate-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div class="px-6 pb-4 hidden">
-            <p class="text-slate-600">Cliquez sur l'icône de modification (crayon) dans la carte du véhicule ou dans la section Actions. Une fenêtre s'ouvrira vous permettant de modifier toutes les informations du véhicule.</p>
-          </div>
-        </div>
-
-        <!-- FAQ Item 3 -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-          <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/30 transition-colors" onclick="toggleFAQ(this)">
-            <span class="text-lg font-semibold text-slate-800">Comment filtrer les véhicules par statut ?</span>
-            <svg class="w-5 h-5 text-slate-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div class="px-6 pb-4 hidden">
-            <p class="text-slate-600">Utilisez le menu déroulant "Statut" dans la section de filtrage en haut de la page. Vous pouvez choisir entre Actif, En réparation, Hors service ou voir tous les véhicules.</p>
-          </div>
-        </div>
-
-        <!-- FAQ Item 4 -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-          <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/30 transition-colors" onclick="toggleFAQ(this)">
-            <span class="text-lg font-semibold text-slate-800">Que faire si je ne trouve pas mon véhicule ?</span>
-            <svg class="w-5 h-5 text-slate-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div class="px-6 pb-4 hidden">
-            <p class="text-slate-600">Vérifiez d'abord vos filtres de recherche. Essayez de rechercher par immatriculation, marque ou modèle. Si le problème persiste, contactez notre support technique.</p>
-          </div>
-        </div>
-
-        <!-- FAQ Item 5 -->
-        <div class="bg-white/70 backdrop-blur-sm rounded-xl border border-white/20 overflow-hidden">
-          <button class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-white/30 transition-colors" onclick="toggleFAQ(this)">
-            <span class="text-lg font-semibold text-slate-800">Comment supprimer un véhicule ?</span>
-            <svg class="w-5 h-5 text-slate-600 transform transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-          <div class="px-6 pb-4 hidden">
-            <p class="text-slate-600">Cliquez sur l'icône de suppression (poubelle) dans la carte du véhicule. Une confirmation vous sera demandée avant la suppression définitive. Attention, cette action est irréversible.</p>
-          </div>
+          <h4 class="h5 fw-bold text-dark mb-2">Adresse</h4>
+          <p class="text-muted">123 Rue de la Tech<br>75001 Paris</p>
         </div>
       </div>
     </div>
 
- 
-   
-<script>
-function toggleFAQ(button) {
-  const content = button.nextElementSibling;
-  const icon = button.querySelector('svg');
-  
-  if (content.classList.contains('hidden')) {
-    content.classList.remove('hidden');
-    icon.style.transform = 'rotate(180deg)';
-  } else {
-    content.classList.add('hidden');
-    icon.style.transform = 'rotate(0deg)';
-  }
-}
-
-// Animation d'apparition des éléments
-document.addEventListener('DOMContentLoaded', function() {
-  const elements = document.querySelectorAll('.group, .bg-white\\/70');
-  elements.forEach((element, index) => {
-    element.style.opacity = '0';
-    element.style.transform = 'translateY(20px)';
-    setTimeout(() => {
-      element.style.transition = 'all 0.6s ease';
-      element.style.opacity = '1';
-      element.style.transform = 'translateY(0)';
-    }, index * 100);
-  });
-
-  // Effet de recherche
-  const searchInput = document.querySelector('input[type="text"]');
-  if (searchInput) {
-    searchInput.addEventListener('focus', function() {
-      this.parentElement.classList.add('scale-105');
-    });
-    
-    searchInput.addEventListener('blur', function() {
-      this.parentElement.classList.remove('scale-105');
-    });
-  }
-});
-</script>
+  </div>
+</div>

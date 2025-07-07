@@ -1,4 +1,4 @@
-import { Component, Inject, inject, OnDestroy } from '@angular/core';
+import { Component, Inject, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { VehicleService } from '../../services/vehicle.service';
@@ -7,7 +7,7 @@ import { PdfViewerModule } from 'ng2-pdf-viewer';
 import { RouterModule } from '@angular/router';
 import { DOCUMENT } from '@angular/common';
 import { AssureService } from '../../services/assure.service';
-
+import { DocumentService } from '../../services/document.service';
 import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
 
@@ -30,12 +30,13 @@ interface Document {
   templateUrl: './declarations.component.html',
   styleUrls: ['./declarations.component.css']
 })
-export class DeclarationsComponent implements OnDestroy {
+export class DeclarationsComponent implements OnDestroy, OnInit {
   documents: Document[] = [
     {
       id: 1,
       nom: 'Mandat de gestion de sinistre',
       fichier: 'assets/documents/Mandat_Gestion_Sinistre_SOS_Mon_Garage.pdf',
+
       modifiedBlobUrl: null
     },
     {
@@ -73,15 +74,34 @@ export class DeclarationsComponent implements OnDestroy {
   constatPreviewUrl: string | null = null;
   showPdfViewer = false;
   signatureImage: string | null = null;
+  userid: string | null = null;
+  assureId: number = 0;
+
   // Services
   private vehiculeService = inject(VehicleService);
   private authService = inject(AuthService);
   private assureService = inject(AssureService);
   private sinistreService = inject(SinistreService);
+  private documentService = inject(DocumentService);
   constructor(@Inject(DOCUMENT) private document: Document) {
-    this.loadUserData();
-    this.loadVehicles();
-    this.email = this.authService.getToken()?.name || '';
+
+  }
+  ngOnInit(): void {
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
+
+    if (this.userid) {
+      this.assureService.getAssurerID(this.userid).subscribe({
+        next: (data: any) => {
+          this.assureId = data.id; // adapte selon ta réponse
+          this.loadVehicles(this.assureId);
+          this.loadUserData();
+          this.email = this.authService.getToken()?.name || '';
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération de l’assure  ID :', err);
+        }
+      });
+    }
   }
 
   ngOnDestroy() {
@@ -100,18 +120,17 @@ export class DeclarationsComponent implements OnDestroy {
   }
 
   private loadUserData(): void {
-    const userId = 8; // Remplacer par this.authService.getToken()?.id
-    if (userId) {
-      this.assureService.addAssurerGet(userId).subscribe({
-        next: (data: any) => {
-          this.userData = data;
-          this.prepareDocumentTemplates();
-        },
-        error: (err) => {
-          console.error('Erreur lors du chargement des données utilisateur', err);
-        }
-      });
-    }
+
+    this.assureService.addAssurerGet(this.assureId).subscribe({
+      next: (data: any) => {
+        this.userData = data;
+        //this.prepareDocumentTemplates();
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des données utilisateur', err);
+      }
+    });
+
   }
 
   private async prepareDocumentTemplates(): Promise<void> {
@@ -125,47 +144,43 @@ export class DeclarationsComponent implements OnDestroy {
       }
     }
   }
-
   private async modifyPdfWithUserData(pdfPath: string): Promise<Blob> {
     const response = await fetch(pdfPath);
     const pdfBytes = await response.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
+    const lastPage = pages[pages.length - 1]; // 👈 page 2 (index 1)
 
-    // Données utilisateur
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
-
-    // Données véhicule (trouver le véhicule sélectionné)
     const vehicule = this.vehiclesAll.find(v => v.marque === this.selectedVehicle);
-    console.log('Véhicule sélectionné:', vehicule);
 
     const textOptions = { size: 11, color: rgb(0, 0, 0) };
 
-    // Remplir les champs communs
-    firstPage.drawText(`${nom} ${prenom}`, { x: 150, y: 680, ...textOptions });
-    firstPage.drawText(adressePostale, { x: 150, y: 660, ...textOptions });
-    firstPage.drawText(telephone, { x: 150, y: 640, ...textOptions });
-    firstPage.drawText(email, { x: 150, y: 620, ...textOptions });
+    // Page 1
+    firstPage.drawText(` ${prenom ?? ''}`, { x: 200, y: 680, ...textOptions });
+    firstPage.drawText(telephone ?? '', { x: 200, y: 640, ...textOptions });
+    firstPage.drawText(email ?? '', { x: 200, y: 620, ...textOptions });
 
-    // Remplir les infos véhicule si disponibles
     if (vehicule) {
-      firstPage.drawText(vehicule.immatriculation, { x: 150, y: 600, ...textOptions });
-      firstPage.drawText(`${vehicule.marque} ${vehicule.modele}`, { x: 150, y: 580, ...textOptions });
-      firstPage.drawText(vehicule.cylindree, { x: 150, y: 560, ...textOptions });
-
-      // Formater la date
-      const dateCirculation = new Date(vehicule.dateMiseEnCirculation).toLocaleDateString('fr-FR');
-      firstPage.drawText(dateCirculation, { x: 150, y: 540, ...textOptions });
+      firstPage.drawText(vehicule.immatriculation ?? '', { x: 200, y: 600, ...textOptions });
+      firstPage.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, { x: 200, y: 580, ...textOptions });
     }
 
-    // Date du jour
+    // Page 2 : bas du document
+    const city = 'Casablanca';
     const today = new Date().toLocaleDateString('fr-FR');
-    firstPage.drawText(today, { x: 450, y: 680, ...textOptions });
+
+    lastPage.drawText(`Fait à ${city}, le ${today}`, {
+      x: 150,
+      y: 100, // ajuste ici si besoin
+      ...textOptions
+    });
 
     const modifiedPdfBytes = await pdfDoc.save();
     return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
   }
+
 
   getPdfPath(filename: string): string {
     const doc = this.documents.find(d => d.fichier === filename);
@@ -174,14 +189,16 @@ export class DeclarationsComponent implements OnDestroy {
   }
 
 
-  private loadVehicles(): void {
-    this.vehiculeService.getAllVehiculesPost().subscribe({
+  private loadVehicles(assureId: number): void {
+
+    this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data;
         this.vehicles = data.map((vehicule: any) => vehicule.marque);
+
       },
       error: (err) => {
-        console.error('Erreur lors du chargement des véhicules :', err);
+        console.error('Erreur lors de l’appel API :', err);
       }
     });
   }
@@ -250,6 +267,9 @@ export class DeclarationsComponent implements OnDestroy {
   selectVehicle(vehicle: string): void {
     this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
+    if (this.userData) {
+      this.prepareDocumentTemplates();
+    }
   }
 
   toggleDropdown(): void {
@@ -332,64 +352,117 @@ export class DeclarationsComponent implements OnDestroy {
   // Soumission du sinistre
   async submitSinistre(): Promise<void> {
     try {
-      // 1. Traitement du constat (s'il existe)
-      const constatDoc = this.constatFile
-        ? await this.processFile(this.constatFile, 'CONSTAT')
-        : null;
+      const savedFiles = await this.saveFilesToAssets();
 
-      // 2. Traitement des photos
-      const photosDocs = await Promise.all(
-        this.photosFiles.map(file => this.processFile(file, 'PHOTO'))
-      );
-
-      // 3-5. Traitement des documents signés
-      const signedDocs = await Promise.all(
-        Array.from(this.signedDocuments).map(async docId => {
-          const doc = this.documents.find(d => d.id === docId);
-          if (!doc) return null;
-
-          const response = await fetch(doc.modifiedBlobUrl || doc.fichier);
-          const pdfBytes = await response.arrayBuffer();
-
-          return {
-            type: doc.nom.toUpperCase().replace(/ /g, '_'),
-            fichier: await this.arrayBufferToBase64(pdfBytes),
-            signatureElectronique: ['signature_validee']
-          };
-        })
-      );
-
-      // Construction FINALE du payload avec TOUS les documents
+      // 2. Construire le payload avec les noms de fichiers
       const sinistrePayload = {
         type: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
         contactAssistance: this.email,
-        lienConstat: constatDoc?.fichier || '', // Base64 du constat
+        lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
-        documents: [
-          ...(constatDoc ? [constatDoc] : []),  // Ajout du constat
-          ...photosDocs,                        // Ajout des photos
-          ...signedDocs.filter(Boolean)         // Ajout des 3 documents signés
-        ],
+        documents: [], // tableau vide comme demandé
+        imgUrl: savedFiles.photosNames,
         idVehicule: this.vehiclesAll.find(v => v.marque === this.selectedVehicle)?.id || 0
       };
+      console.log('Payload envoyé:', sinistrePayload);
 
-      console.log('Payload COMPLET:', sinistrePayload);
-      // this.sinistreService.declarerSinistre(sinistrePayload).subscribe(...);
-      // Appel au service pour soumettre le sinistre
+      // 1. Envoyer d'abord le sinistre (comme avant)
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
-        next: (response) => {
-          console.log('Sinistre soumis avec succès:', response);
-          // Vous pouvez ajouter ici une redirection ou un message de succès
-          this.currentStep = 5; // Passer à l'étape de confirmation
+        next: async (sinistreResponse: any) => {
+          const sinistreId = sinistreResponse.id; // Adaptez selon la réponse
+
+          // 2. Envoyer les documents avec juste le nom du fichier
+          await this.sendSignedDocuments(sinistreId);
+
+          this.currentStep = 5;
         },
         error: (error) => {
-          console.error('Erreur lors de la soumission du sinistre:', error);
-          // Gérer l'erreur (afficher un message à l'utilisateur, etc.)
+          console.error('Erreur création sinistre:', error);
         }
       });
     } catch (error) {
-      console.error('Erreur soumission:', error);
+      console.error('Erreur:', error);
     }
+  }
+
+  private async sendSignedDocuments(sinistreId: number): Promise<void> {
+    for (const docId of this.signedDocuments) {
+      const doc = this.documents.find(d => d.id === docId);
+      if (!doc) continue;
+
+      // Extraire juste le nom du fichier (ex: "Mandat_Gestion_Sinistre.pdf")
+      const fileName = doc.fichier.split('/').pop() || doc.nom + '.pdf';
+
+      const documentPayload = {
+        type: this.getDocumentType(doc.nom), // "constat", "mandat" etc.
+        fichier: fileName, // Juste le nom du fichier
+        signatureElectronique: [],
+        idsinistre: sinistreId
+      };
+
+      console.log('Envoi document:', documentPayload);
+
+      await this.documentService.addDocumentPost(documentPayload).subscribe({
+        next: () => console.log(`Document ${fileName} envoyé`),
+        error: (err) => console.error(`Erreur document ${fileName}:`, err)
+      });
+    }
+  }
+
+  // Helper pour déterminer le type de document
+  private getDocumentType(nomDocument: string): string {
+    return nomDocument.includes('Mandat') ? 'mandat' :
+      nomDocument.includes('Ordre') ? 'ordre_reparation' :
+        nomDocument.includes('Cession') ? 'cession' : 'autre';
+  }
+  private async saveFilesToAssets(): Promise<{ photosNames: string[] }> {
+    const photosNames: string[] = [];
+
+    // Créer le répertoire si inexistant (à adapter selon votre environnement)
+    const declarationDir = 'src/assets/declaration/';
+
+    // Sauvegarder le constat
+    if (this.constatFile) {
+      await this.saveFileToDisk(this.constatFile, declarationDir);
+    }
+
+    // Sauvegarder les photos
+    for (const file of this.photosFiles) {
+      await this.saveFileToDisk(file, declarationDir);
+      photosNames.push(file.name);
+    }
+
+    return { photosNames };
+  }
+
+  private saveFileToDisk(file: File, directory: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const content = event.target?.result;
+          // Solution temporaire - à remplacer par une vraie sauvegarde
+          console.log(`Simulation: Sauvegarde de ${file.name} dans ${directory}`);
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    });
+  }
+
+  // Méthode utilitaire pour la conversion en base64
+  private readFileAsBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        // Retourne le DataURL complet (ex: "data:image/png;base64,XXXX")
+        resolve(reader.result as string);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
   // Méthode utilitaire pour convertir ArrayBuffer en Base64
@@ -416,12 +489,5 @@ export class DeclarationsComponent implements OnDestroy {
     };
   }
 
-  private readFileAsBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+
 }
