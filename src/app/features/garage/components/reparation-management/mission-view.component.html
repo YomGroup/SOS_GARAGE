@@ -136,23 +136,40 @@
       <div class="form-section">
         <h3><i class="fas fa-file-alt me-2"></i>Documents</h3>
         <div class="documents-list">
-          <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDoc">
-            <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
-              <i class="fas fa-file-pdf me-2"></i>
-              {{ getFileNameFromUrl(doc) }}
-              <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
-              <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)" *ngIf="editionEnCours">Supprimer</button>
+          <!-- En mode édition, utiliser missionEdit -->
+          <ng-container *ngIf="editionEnCours">
+            <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDocEdit">
+              <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
+                <i class="fas fa-file-pdf me-2"></i>
+                {{ getFileNameFromUrl(doc) }}
+                <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+                <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
+              </div>
+            </ng-container>
+            <ng-template #noDocEdit>
+              <span>Aucun document ajouté.</span>
+            </ng-template>
+            <div class="mt-2 d-flex gap-2">
+              <button class="btn btn-outline-secondary" type="button" (click)="ouvrirUploadDirect()" [disabled]="uploadingFiles">
+                <i class="fas fa-upload me-2"></i>
+                {{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des PDF' }}
+              </button>
             </div>
           </ng-container>
-          <ng-template #noDoc>
-            <span>Aucun document ajouté.</span>
-          </ng-template>
-          <div class="mt-2 d-flex gap-2" *ngIf="editionEnCours">
-            <button class="btn btn-outline-secondary" type="button" (click)="ouvrirUploadDirect()" [disabled]="uploadingFiles">
-              <i class="fas fa-upload me-2"></i>
-              {{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des PDF' }}
-            </button>
-          </div>
+          
+          <!-- En mode lecture seule, utiliser mission -->
+          <ng-container *ngIf="!editionEnCours">
+            <ng-container *ngIf="mission && mission.documentsAssurance && mission.documentsAssurance.length > 0; else noDocRead">
+              <div *ngFor="let doc of mission.documentsAssurance; let i = index" class="document-item">
+                <i class="fas fa-file-pdf me-2"></i>
+                {{ getFileNameFromUrl(doc) }}
+                <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+              </div>
+            </ng-container>
+            <ng-template #noDocRead>
+              <span>Aucun document disponible.</span>
+            </ng-template>
+          </ng-container>
         </div>
       </div>
     </div>

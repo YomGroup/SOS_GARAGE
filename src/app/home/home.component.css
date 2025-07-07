@@ -358,4 +358,75 @@
     .two-columns {
         order: 3;
     }
+
+    .main-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .welcome-section {
+        padding: 0 4px;
+    }
+
+    .btn-primary, .btn-danger {
+        width: 100%;
+        font-size: 12px;
+        padding: 8px 0;
+    }
+
+    .stat-card svg,
+    .notifications-header svg {
+        width: 28px !important;
+        height: 18px !important;
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+}
+
+:host ::ng-deep .main-title {
+  font-size: 28px !important;
+  font-weight: bold !important;
+  color: #1e4db8 !important;
+  margin-bottom: 18px !important;
+  text-align: center !important;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+:host ::ng-deep .highlight {
+  color: #ffb300 !important;
+  font-weight: bold !important;
+}
+
+:host ::ng-deep .btn-primary,
+:host ::ng-deep .btn-danger {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  border-radius: 25px !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 576px) {
+  :host ::ng-deep .main-title {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+    text-align: center !important;
+  }
+  :host ::ng-deep .welcome-section {
+    padding: 0 4px !important;
+  }
+  :host ::ng-deep .btn-primary, :host ::ng-deep .btn-danger {
+    width: 100% !important;
+    font-size: 12px !important;
+    padding: 8px 0 !important;
+  }
+  :host ::ng-deep .stat-card svg,
+  :host ::ng-deep .notifications-header svg {
+    width: 28px !important;
+    height: 18px !important;
+    bottom: 8px !important;
+    right: 8px !important;
+  }
 }

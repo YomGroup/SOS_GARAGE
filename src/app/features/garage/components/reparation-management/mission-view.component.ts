@@ -89,7 +89,7 @@ export class MissionViewComponent implements OnChanges {
     }
 
     // Inclure les documents d'assurance (URLs Firebase)
-    if (this.missionEdit.documentsAssurance && this.missionEdit.documentsAssurance.length > 0) {
+    if (this.missionEdit.documentsAssurance) {
       missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance;
     }
 
@@ -99,7 +99,7 @@ export class MissionViewComponent implements OnChanges {
       next: (updatedMission) => {
         console.log('Mission mise à jour avec succès:', updatedMission);
         this.editionEnCours = false;
-        this.missionEdit = {};
+        this.missionEdit = { documentsAssurance: [] };
         this.missionUpdated.emit(updatedMission);
       },
       error: (error) => {

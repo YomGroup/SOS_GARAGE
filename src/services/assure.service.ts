@@ -15,6 +15,18 @@ export interface Vehicule {
   sinistres: any[];
 }
 
+// Cette interface décrit un assureur avec ses informations de base
+// export interface ASSURE {
+//     "id": 8, // Identifiant unique de l'assureur
+//     "nom": "daniel", // Nom de l'assureur
+//     "prenom": "dan", // Prénom de l'assureur
+//     "email": "d@gmail.com", // Email de l'assureur
+//     "telephone": "0761841819", // Numéro de téléphone de l'assureur
+//     "adressePostale": "d", // Adresse postale de l'assureur
+//     "numeroPermis": "dk,", // Numéro du permis de conduire de l'assureur
+//     "adresse": "d", // Adresse de l'assureur
+// }
+
 export interface ASSURE {
   id: number;
   createdAt: string | null;
@@ -37,10 +49,8 @@ export interface ASSURE {
 export class AssureService {
     private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/assure/{id}';
     private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/assure';
-    private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/assure/assure';
 
     private http = inject(HttpClient);
-
 
 
     addAssurerGet(id: number) {
@@ -62,5 +72,8 @@ export class AssureService {
             }
         }
         return null;
+    }
+    getAssurerID(id: string) {
+        return this.http.get(`https://sosmongarage-production.up.railway.app/V1/api/assure/keycloak/${id}`);
     }
 }

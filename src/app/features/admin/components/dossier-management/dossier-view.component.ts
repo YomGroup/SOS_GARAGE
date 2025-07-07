@@ -4,9 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
 import { Dossier, DossiersService } from '../../../../../services/dossiers.service';
 import { ReparateurService } from '../../../../../services/reparateur.service';
-import { Mission, Reparateur, Assure } from '../../../../../services/models-api.interface';
+import { Mission, Reparateur, Assure, MissionUpdate } from '../../../../../services/models-api.interface';
 import { DocumentCreationModalComponent } from './document-creation-modal.component';
 import { AssureService } from '../../../../../services/assure.service';
+import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-dossier-view',
@@ -56,11 +58,14 @@ export class DossierViewComponent implements OnChanges, OnInit {
   currentImages: string[] = [];
   currentImageIndex = 0;
 
+  uploadingFiles: boolean = false;
+
   constructor(
     private missionService: MissionService, 
     private reparateurService: ReparateurService, 
     private assureService: AssureService,
     private dossiersService: DossiersService,
+    private firebaseService: FirebaseStorageService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -106,18 +111,55 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   annulerEdition() {
     this.editionEnCours = false;
-    this.missionEdit = {};
+    this.missionEdit = { documentsAssurance: [] };
   }
 
   enregistrerModification() {
     if (!this.mission) return;
-    this.missionService.updateMission(this.mission.id ?? 0, this.missionEdit).subscribe({
+    
+    const missionUpdate: MissionUpdate = {};
+    
+    // Validation et conversion des données
+    if (this.missionEdit.devis !== undefined && this.missionEdit.devis !== null) {
+      const devis = Number(this.missionEdit.devis);
+      if (!isNaN(devis) && devis >= 0) {
+        missionUpdate.devis = devis;
+      }
+    }
+    
+    if (this.missionEdit.factureFinale !== undefined && this.missionEdit.factureFinale !== null) {
+      const facture = Number(this.missionEdit.factureFinale);
+      if (!isNaN(facture) && facture >= 0) {
+        missionUpdate.factureFinale = facture;
+      }
+    }
+    
+    if (this.missionEdit.pretVehicule !== undefined) {
+      missionUpdate.pretVehicule = Boolean(this.missionEdit.pretVehicule);
+    }
+    
+    if (this.missionEdit.statut && ['en attente', 'en cours', 'terminée'].includes(this.missionEdit.statut)) {
+      missionUpdate.statut = this.missionEdit.statut;
+    }
+
+    // Inclure les documents d'assurance (URLs Firebase)
+    if (this.missionEdit.documentsAssurance) {
+      missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance;
+    }
+
+    console.log('Données à envoyer:', missionUpdate);
+
+    this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
       next: (updatedMission) => {
+        console.log('Mission mise à jour avec succès:', updatedMission);
         this.editionEnCours = false;
-        this.missionEdit = {};
+        this.missionEdit = { documentsAssurance: [] };
         this.missionUpdated.emit(updatedMission);
       },
-      error: () => alert('Erreur lors de la modification du dossier')
+      error: (error) => {
+        console.error('Erreur lors de la modification:', error);
+        alert(`Erreur: ${error.message}`);
+      }
     });
   }
 
@@ -189,36 +231,148 @@ export class DossierViewComponent implements OnChanges, OnInit {
     });
   }
 
-
-
+  // Nouvelles méthodes pour la gestion des documents Firebase
   ouvrirUploadDirect() {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/pdf';
+    input.multiple = true;
     input.onchange = (event: any) => {
-      const file = event.target.files[0];
-      if (file) {
-        this.ajouterDocumentLocal(file);
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderDocumentsFirebase(Array.from(files));
       }
     };
     input.click();
   }
 
-  ajouterDocumentLocal(file: File) {
-    if (!this.missionEdit.documentsAssurance) {
-      this.missionEdit.documentsAssurance = [];
+  uploaderDocumentsFirebase(files: File[]) {
+    if (!this.mission || !this.mission.id) {
+      alert('Mission non trouvée');
+      return;
     }
-    this.missionEdit.documentsAssurance = [
-      ...this.missionEdit.documentsAssurance,
-      file
-    ];
-    this.cdr.detectChanges();
+
+    this.uploadingFiles = true;
+    const uploadPromises: Promise<string>[] = [];
+
+    files.forEach(file => {
+      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
+      uploadPromises.push(uploadPromise);
+    });
+
+    // Vérifier qu'il y a des promesses à traiter
+    if (uploadPromises.length === 0) {
+      this.uploadingFiles = false;
+      return;
+    }
+
+    Promise.all(uploadPromises)
+      .then((downloadURLs: string[]) => {
+        console.log('Documents uploadés:', downloadURLs);
+        
+        // Ajouter les URLs aux documents existants
+        if (!this.missionEdit.documentsAssurance) {
+          this.missionEdit.documentsAssurance = [];
+        }
+        
+        this.missionEdit.documentsAssurance = [
+          ...this.missionEdit.documentsAssurance,
+          ...downloadURLs
+        ];
+        
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        console.log('Documents ajoutés avec succès');
+      })
+      .catch(error => {
+        console.error('Erreur lors de l\'upload:', error);
+        this.uploadingFiles = false;
+        alert(`Erreur lors de l'upload: ${error.message}`);
+      });
   }
 
   supprimerDocument(index: number) {
     if (!this.missionEdit.documentsAssurance) return;
+    
+    const documentUrl = this.missionEdit.documentsAssurance[index];
+    
+    // Supprimer de Firebase si c'est une URL Firebase
+    if (documentUrl && documentUrl.includes('firebasestorage.googleapis.com')) {
+      this.firebaseService.deletePdfFile(documentUrl).subscribe({
+        next: () => {
+          console.log('Document supprimé de Firebase');
+          this.supprimerDocumentLocal(index);
+        },
+        error: (error) => {
+          console.error('Erreur lors de la suppression de Firebase:', error);
+          // Supprimer localement même si Firebase échoue
+          this.supprimerDocumentLocal(index);
+        }
+      });
+    } else {
+      // Supprimer directement si ce n'est pas une URL Firebase
+      this.supprimerDocumentLocal(index);
+    }
+  }
+
+  private supprimerDocumentLocal(index: number) {
+    if (!this.missionEdit.documentsAssurance) return;
     this.missionEdit.documentsAssurance = this.missionEdit.documentsAssurance.filter((_: any, i: number) => i !== index);
     this.cdr.detectChanges();
+  }
+
+  telechargerDocument(docUrl: string) {
+    // Si c'est une URL Firebase, télécharger via le service
+    if (docUrl.includes('firebasestorage.googleapis.com')) {
+      this.firebaseService.downloadPdfFile(docUrl).subscribe({
+        next: (blob: Blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = this.getFileNameFromUrl(docUrl);
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }, 0);
+        },
+        error: (error) => {
+          console.error('Erreur lors du téléchargement:', error);
+          alert(`Erreur lors du téléchargement: ${error.message}`);
+        }
+      });
+    } else {
+      // Téléchargement direct si ce n'est pas Firebase
+      const a = document.createElement('a');
+      a.href = docUrl;
+      a.download = this.getFileNameFromUrl(docUrl);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  public getFileNameFromUrl(url: string): string {
+    try {
+      // Si c'est une URL Firebase, extraire le nom du fichier du chemin
+      if (url.includes('firebasestorage.googleapis.com')) {
+        // Décoder l'URL et extraire le nom du fichier
+        const decodedUrl = decodeURIComponent(url);
+        const fileNameMatch = decodedUrl.match(/mission_\d+_\d+_(.+\.pdf)/);
+        if (fileNameMatch) {
+          return fileNameMatch[1];
+        }
+      }
+      
+      // Fallback pour les autres URLs
+      const urlObj = new URL(url);
+      const pathname = urlObj.pathname;
+      const fileName = pathname.split('/').pop() || 'document.pdf';
+      return fileName;
+    } catch {
+      return 'document.pdf';
+    }
   }
 
   ouvrirModalCreationDocument() {
@@ -230,7 +384,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   onDocumentCreated(file: File) {
-    this.ajouterDocumentLocal(file);
+    // Upload the created document to Firebase
+    this.uploaderDocumentsFirebase([file]);
   }
 
   changerReparateur() {
@@ -260,19 +415,6 @@ export class DossierViewComponent implements OnChanges, OnInit {
         this.attributionMessage = 'Échec du changement';
       }
     });
-  }
-
-  telechargerDocument(doc: File) {
-    const url = window.URL.createObjectURL(doc);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = doc.name || 'document.pdf';
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    }, 0);
   }
 
   saveCommissionStatut() {
