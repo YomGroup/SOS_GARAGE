@@ -787,4 +787,15 @@
     flex-direction: column !important;
     gap: 8px;
   }
+}
+
+/* Styles pour l'indicateur de chargement */
+.loading-indicator {
+    color: #6c757d;
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+.loading-indicator i {
+    color: var(--primary-blue);
 } 

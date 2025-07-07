@@ -132,6 +132,8 @@ export interface Vehicule {
     contratAssurance: string;
     imgUrl: string[];
     sinistres: Sinistre[];
+    nomAssurence: string;
+    
   }
 
   // Interface Assure

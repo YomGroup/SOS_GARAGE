@@ -98,11 +98,6 @@
               />
             </div>
           </div>
-          <div class="col-md-2">
-            <button class="btn btn-primary-custom w-100">
-              <i class="fas fa-plus me-2"></i>Nouveau
-            </button>
-          </div>
         </div>
       </div>
     </div>
@@ -127,16 +122,31 @@
 
     <!-- Affichage des dossiers filtrés -->
     <div *ngIf="dossiersFiltres.length; else aucunDossier">
-      <div class="row" id="cardViewContainer">
+      <div class="row" id="cardViewContainer" *ngIf="isCardView">
         <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer">
           <div class="dossier-card-modern">
             <!-- En-tête avec dégradé -->
             <div class="dossier-header">
               <div class="dossier-header-content">
                 <div class="dossier-brand">
-                  <h5 class="dossier-marque">{{ dossier.vehicule?.marque || 'Marque' }}</h5>
-                  <div class="dossier-transmission">{{ dossier.vehicule?.modele || 'Modèle' }}</div>
-                  <div class="dossier-annee">{{ dossier.vehicule?.dateMiseEnCirculation?.substring(0, 4) || '2016' }}</div>
+                  <h5 class="dossier-marque">
+                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                    </span>
+                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).marque }}</span>
+                  </h5>
+                  <div class="dossier-transmission">
+                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                    </span>
+                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).modele }}</span>
+                  </div>
+                  <div class="dossier-annee">
+                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                    </span>
+                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).annee }}</span>
+                  </div>
                 </div>
                 <div class="dossier-numero-badge">
                   <span class="numero-text">N {{ dossier.numero }}</span>
@@ -156,7 +166,12 @@
                 </div>
                 <div class="info-item">
                   <span class="info-label">Assurance :</span>
-                  <span class="info-value">{{ dossier.assurance || 'Axa' }}</span>
+                  <span class="info-value">
+                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                    </span>
+                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).assurance }}</span>
+                  </span>
                 </div>
               </div>
 
@@ -171,16 +186,11 @@
         </div>
       </div>
     </div>
-    <ng-template #aucunDossier>
-      <div class="alert alert-info">
-        {{ getMessageAucunDossier() }}
-      </div>
-    </ng-template>
-
+    
     <!-- Vue en tableau (desktop uniquement) -->
     <div
       class="table-responsive"
-      *ngIf="!isMobile && !isCardView"
+      *ngIf="!isMobile && !isCardView && dossiersFiltres.length"
       id="tableViewContainer"
     >
       <table class="table table-hover">
@@ -241,6 +251,22 @@
         </tbody>
       </table>
     </div>
+    
+    <!-- Message aucun dossier pour la vue carte -->
+    <div *ngIf="isCardView && !dossiersFiltres.length" class="alert alert-info">
+      {{ getMessageAucunDossier() }}
+    </div>
+    
+    <!-- Message aucun dossier pour la vue tableau mobile -->
+    <div *ngIf="isMobile && !isCardView && !dossiersFiltres.length" class="alert alert-info">
+      {{ getMessageAucunDossier() }}
+    </div>
+    
+    <ng-template #aucunDossier>
+      <div class="alert alert-info">
+        {{ getMessageAucunDossier() }}
+      </div>
+    </ng-template>
 
     <!-- Pagination -->
     <nav aria-label="Navigation des dossiers">

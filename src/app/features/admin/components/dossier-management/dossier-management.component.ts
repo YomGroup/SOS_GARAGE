@@ -70,6 +70,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
   dossiersCommissionPayee = 0;
 
   suppressionEnCours: boolean = false;
+  vehiculesEnChargement: Set<number> = new Set();
 
   onglet: 'nouveaux' | 'nonTraites' | 'termines' = 'nouveaux';
   filtreActuel: 'nouveaux' | 'nonTraites' | 'termines' | 'tous' = 'tous';
@@ -191,7 +192,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
 
   private loadData() {
     this.dossiersService.getDossiers().subscribe(apiDossiers => {
-      this.dataSource.data = apiDossiers.map(d => ({
+      // Traiter chaque dossier pour récupérer les informations de véhicule
+      const dossiersAvecVehicules = apiDossiers.map(d => ({
         ...d,
         numero: d.id?.toString() || 'N/A',
         dateCreation: (d as any).dateCreation ? new Date((d as any).dateCreation) : new Date(),
@@ -200,13 +202,39 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
         type: d.type || 'Non spécifié',
         assurance: d.assurance || 'Non spécifiée'
       }));
+
+      // Initialiser les données avec les informations de véhicule disponibles
+      this.dataSource.data = dossiersAvecVehicules;
       this.totalDossiers = apiDossiers.length;
+      
       // Dossiers non traités : pas de mission associée
       this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
       // Dossiers traités : au moins une mission associée
       this.dossiersTraites = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
       // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
       this.dossiersCommissionPayee = apiDossiers.filter(dossier => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
+      
+      // Récupérer les informations de véhicule pour les dossiers qui n'en ont pas
+      dossiersAvecVehicules.forEach(dossier => {
+        if (dossier.id && (!dossier.vehicule || !dossier.vehicule.marque)) {
+          this.vehiculesEnChargement.add(dossier.id);
+          this.dossiersService.getVehiculeFromSinistreId(dossier.id).subscribe({
+            next: (vehicule) => {
+              if (vehicule) {
+                dossier.vehicule = vehicule;
+              }
+              this.vehiculesEnChargement.delete(dossier.id);
+              this.cdr.detectChanges();
+            },
+            error: (error) => {
+              console.error(`Erreur lors du chargement du véhicule pour le dossier ${dossier.id}:`, error);
+              this.vehiculesEnChargement.delete(dossier.id);
+              this.cdr.detectChanges();
+            }
+          });
+        }
+      });
+      
       this.cdr.detectChanges();
     });
     this.missionService.getAllMissions().subscribe(missions => {
@@ -393,5 +421,40 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
       this.missions[idx] = updated;
     }
     this.dossierSelectionne = updated;
+  }
+
+  // Méthode pour obtenir les informations de véhicule formatées
+  getVehiculeInfo(dossier: DossierAffichage): any {
+    if (!dossier.vehicule) {
+      return {
+        marque: 'Marque non spécifiée',
+        modele: 'Modèle non spécifié',
+        annee: 'Année non spécifiée',
+        immatriculation: 'Immatriculation non spécifiée',
+        assurance: 'Assurance non spécifiée'
+      };
+    }
+
+    return {
+      marque: dossier.vehicule.marque || 'Marque non spécifiée',
+      modele: dossier.vehicule.modele || 'Modèle non spécifié',
+      annee: dossier.vehicule.dateMiseEnCirculation ? 
+        dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+      immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
+      assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+    };
+  }
+
+  // Méthode pour vérifier si un véhicule a des informations complètes
+  hasVehiculeInfo(dossier: DossierAffichage): boolean {
+    return !!(dossier.vehicule && 
+      dossier.vehicule.marque && 
+      dossier.vehicule.modele && 
+      dossier.vehicule.dateMiseEnCirculation);
+  }
+
+  // Méthode pour vérifier si un véhicule est en cours de chargement
+  isVehiculeLoading(dossierId: number): boolean {
+    return this.vehiculesEnChargement.has(dossierId);
   }
 }
