@@ -275,7 +275,10 @@ export class GestionFinanceComponent implements OnInit {
       (this.filterDevisMax === null || (m.devis || 0) <= this.filterDevisMax) &&
       (this.filterFactureMin === null || (m.factureFinale || 0) >= this.filterFactureMin) &&
       (this.filterFactureMax === null || (m.factureFinale || 0) <= this.filterFactureMax) &&
-      (!this.filterReparateur || (m.reparateur?.name?.toLowerCase().includes(this.filterReparateur.toLowerCase())))
+      (!this.filterReparateur || (
+        (m.reparateur?.name?.toLowerCase().includes(this.filterReparateur.toLowerCase())) ||
+        (m.reparateur?.prenom?.toLowerCase().includes(this.filterReparateur.toLowerCase()))
+      ))
     );
   }
 

@@ -13,6 +13,7 @@ interface MenuItem {
   expanded?: boolean;
   badge?: string;
   isNew?: boolean;
+  filter?: string;
 }
 
 @Component({
@@ -31,6 +32,7 @@ export class SidebarComponent implements OnInit {
   @Input() isOpen: boolean = false;
   @Output() closeSidebar = new EventEmitter<void>();
   @Output() openSidebar = new EventEmitter<void>();
+  @Output() dossierFilterChange = new EventEmitter<string>();
   
   private keycloakService = inject(KeycloakService);
   private cdr = inject(ChangeDetectorRef);
@@ -51,6 +53,9 @@ export class SidebarComponent implements OnInit {
         console.error('Erreur lors du chargement du profil utilisateur', error);
       }
     }
+    
+    // Auto-expandre les sous-menus actifs
+    this.expandActiveSubmenus();
   }
 
   adminMenuItems: MenuItem[] = [
@@ -61,9 +66,9 @@ export class SidebarComponent implements OnInit {
       route: '/admin/dossiers',
       expanded: false,
       children: [
-        { title: 'Nouveaux dossiers', icon: 'bi bi-calendar-day', route: '/admin/dossiers/nouveaux' },
-        { title: 'Dossiers non traités', icon: 'bi bi-clock-history', route: '/admin/dossiers/non-traites' },
-        { title: 'Dossiers terminés', icon: 'bi bi-check-circle', route: '/admin/dossiers/termines' }
+        { title: 'Nouveaux dossiers', icon: 'bi bi-calendar-day', filter: 'nouveaux' },
+        { title: 'Dossiers non traités', icon: 'bi bi-clock-history', filter: 'nonTraites' },
+        { title: 'Dossiers terminés', icon: 'bi bi-check-circle', filter: 'termines' }
       ]
     },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
@@ -126,13 +131,52 @@ export class SidebarComponent implements OnInit {
   }
   
   toggleSubmenu(item: MenuItem) {
+    // Toggle le sous-menu ET navigue si route
+    item.expanded = !item.expanded;
+    if (item.route) {
+      this.router.navigate([item.route]);
+    }
+  }
+
+  toggleSubmenuOnly(event: MouseEvent, item: MenuItem) {
+    // Empêche la navigation, toggle seulement
+    event.preventDefault();
+    event.stopPropagation();
     item.expanded = !item.expanded;
   }
 
   isParentActive(item: MenuItem): boolean {
     if (!item.route) return false;
     const currentUrl = this.router.url;
-    return currentUrl === item.route || currentUrl.startsWith(item.route + '/');
+    
+    // Vérifier si la route parente est active
+    const isParentRouteActive = currentUrl === item.route || currentUrl.startsWith(item.route + '/');
+    
+    // Si l'élément a des enfants, vérifier aussi si un des enfants est actif
+    if (item.children && item.children.length > 0) {
+      const hasActiveChild = item.children.some(child => {
+        if (!child.route) return false;
+        return currentUrl === child.route || currentUrl.startsWith(child.route + '/');
+      });
+      return isParentRouteActive || hasActiveChild;
+    }
+    
+    return isParentRouteActive;
+  }
+
+
+
+  onChildClick(event: MouseEvent, child: MenuItem) {
+    // Empêcher la propagation pour éviter les conflits
+    event.stopPropagation();
+    // Naviguer si une route est définie
+    if (child.route) {
+      this.router.navigate([child.route]);
+    }
+    // Fermer le sous-menu sur mobile après clic
+    if (this.isMobile) {
+      this.closeSidebar.emit();
+    }
   }
 
   onLogoClick() {
@@ -147,7 +191,31 @@ export class SidebarComponent implements OnInit {
     }
   }
 
+  expandActiveSubmenus() {
+    const currentUrl = this.router.url;
+    
+    // Parcourir tous les éléments du menu pour trouver les sous-menus actifs
+    this.menuItems.forEach(item => {
+      if (item.children && item.children.length > 0) {
+        const hasActiveChild = item.children.some(child => {
+          if (!child.route) return false;
+          return currentUrl === child.route || currentUrl.startsWith(child.route + '/');
+        });
+        
+        if (hasActiveChild) {
+          item.expanded = true;
+        }
+      }
+    });
+  }
+
   logout() {
     this.keycloakService.logout(window.location.origin);
+  }
+
+  onDossierFilterClick(event: MouseEvent, filter: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dossierFilterChange.emit(filter);
   }
 }

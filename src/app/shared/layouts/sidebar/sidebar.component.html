@@ -19,22 +19,30 @@
     <ng-container *ngFor="let item of menuItems">
       <div *ngIf="item.children; else simpleLinkRef" class="nav-item nav-item-parent" [class.expanded]="item.expanded">
         <div class="nav-link-parent">
-          <div class="nav-link-title" 
-               [routerLink]="item.route" 
-               routerLinkActive="active" 
-               [routerLinkActiveOptions]="{exact: false}">
+          <a *ngIf="item.route"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: false}"
+             [class.active]="isParentActive(item)"
+             class="nav-link-title"
+             (click)="toggleSubmenu(item)">
             <i [ngClass]="item.icon"></i>
             <span>{{ item.title }}</span>
-          </div>
-          <div class="nav-link-toggle" (click)="toggleSubmenu(item)">
-            <i class="bi" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
+          </a>
+          <div *ngIf="!item.route"
+               class="nav-link-title"
+               [class.active]="isParentActive(item)"
+               (click)="toggleSubmenu(item)">
+            <i [ngClass]="item.icon"></i>
+            <span>{{ item.title }}</span>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
           </div>
         </div>
+      
         <div class="nav-submenu" *ngIf="item.expanded">
           <a *ngFor="let child of item.children"
-             [routerLink]="child.route"
-             routerLinkActive="active"
-             [routerLinkActiveOptions]="{exact: true}"
+             (click)="onDossierFilterClick($event, child.filter || '')"
              class="nav-item-child"
              [attr.data-tooltip]="child.title">
             <i [ngClass]="child.icon"></i>
@@ -42,6 +50,7 @@
           </a>
         </div>
       </div>
+      
       <ng-template #simpleLinkRef>
         <a [routerLink]="item.route"
            (click)="onItemClick($event, item)"

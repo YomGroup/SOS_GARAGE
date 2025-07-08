@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
 import { filter, takeUntil, distinctUntilChanged } from 'rxjs/operators';
@@ -10,6 +10,7 @@ import { ReparateurService } from '../../../../../services/reparateur.service';
 import { AssureService, ASSURE, Vehicule } from '../../../../../services/assure.service';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { MissionViewComponent } from '../reparation-management/mission-view.component';
+import { Reparateur } from '../../../../../services/models-api.interface';
 
 interface MissionStats {
   total: number;
@@ -42,6 +43,8 @@ interface RecentMission {
   typeSinistre: string;
   assureName: string;
   vehiculeInfo: string;
+  assureInfo: any;
+  vehicule: any;
 }
 
 @Component({
@@ -52,7 +55,8 @@ interface RecentMission {
     MissionViewComponent
   ],
   templateUrl: './statistics.component.html',
-  styleUrls: ['./statistics.component.css']
+  styleUrls: ['./statistics.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   missionStats: MissionStats = {
@@ -88,6 +92,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   private currentRoute: string = '';
   private isInitialized: boolean = false;
   private hasLoadedData: boolean = false;
+  private cdr: ChangeDetectorRef;
 
   constructor(
     private missionService: MissionService,
@@ -95,8 +100,11 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     private reparateurService: ReparateurService,
     private assureService: AssureService,
     private router: Router,
-    private route: ActivatedRoute
-  ) {}
+    private route: ActivatedRoute,
+    cdr: ChangeDetectorRef
+  ) {
+    this.cdr = cdr;
+  }
 
   ngOnInit(): void {
     // Charger les données immédiatement
@@ -180,12 +188,14 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   refreshStatistics(): void {
     console.log('Rafraîchissement manuel des statistiques...');
     this.loadStatistics();
+    this.cdr.detectChanges();
   }
 
   private async loadStatistics(): Promise<void> {
     try {
       this.loading = true;
       this.error = null;
+      this.cdr.detectChanges();
 
       console.log('Début du chargement des statistiques...');
 
@@ -211,6 +221,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.calculateStatistics();
       
       this.hasLoadedData = true;
+      this.cdr.detectChanges();
       console.log('Statistiques chargées avec succès');
       
     } catch (error: any) {
@@ -221,8 +232,10 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this.error = 'Erreur lors du chargement des statistiques. Veuillez réessayer.';
       }
+      this.cdr.detectChanges();
     } finally {
       this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -243,12 +256,13 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     // Calculer les statistiques financières
     const missionsWithDevis = missions.filter(m => m.devis && m.devis > 0);
     const missionsWithFacture = missions.filter(m => m.factureFinale && m.factureFinale > 0);
-    
     const totalDevis = missions.reduce((sum, mission) => sum + (mission.devis || 0), 0);
     const totalFactures = missions.reduce((sum, mission) => sum + (mission.factureFinale || 0), 0);
-    const commissionRate = 0.15; // 15% de commission
-    const totalCommissions = totalFactures * commissionRate;
-
+    // Utiliser la commission réelle du réparateur pour chaque mission
+    const totalCommissions = missions.reduce((sum, mission) => {
+      const taux = mission.reparateur?.commission ?? 0.15; // fallback 15% si non défini
+      return sum + ((mission.factureFinale || 0) * (taux / 100));
+    }, 0);
     this.financialStats = {
       totalDevis: totalDevis,
       totalFactures: totalFactures,
@@ -270,7 +284,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       recentMissions.map(async (mission) => {
         let assureName = 'N/A';
         let vehiculeInfo = 'N/A';
-
+        let assureObj: any = null;
+        let vehiculeObj: any = null;
         if (mission.sinistre && mission.sinistre.id) {
           try {
             // Utiliser le cache local pour l'assuré
@@ -280,7 +295,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
               if (assure) assureCache.set(mission.sinistre.id, assure);
             }
             if (assure) {
-              assureName = `${assure.name} ${assure.prenom}`;
+              assureObj = assure;
+              assureName = (assure.nom && assure.prenom) ? `${assure.nom} ${assure.prenom}` : (assure.name && assure.prenom) ? `${assure.name} ${assure.prenom}` : assure.name || assure.nom || 'N/A';
               // Utiliser le cache local pour le véhicule
               let vehicule = vehiculeCache.get(mission.sinistre.id);
               if (!vehicule) {
@@ -288,6 +304,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
                 if (vehicule) vehiculeCache.set(mission.sinistre.id, vehicule);
               }
               if (vehicule) {
+                vehiculeObj = vehicule;
                 vehiculeInfo = `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
               }
             }
@@ -295,7 +312,6 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
             console.error(`Erreur lors de la récupération des détails pour la mission ${mission.id}:`, error);
           }
         }
-
         return {
           id: mission.id || 0,
           title: `Mission #${mission.id}`,
@@ -307,12 +323,14 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
           facture: mission.factureFinale || 0,
           typeSinistre: mission.sinistre?.type || 'N/A',
           assureName: assureName,
-          vehiculeInfo: vehiculeInfo
+          vehiculeInfo: vehiculeInfo,
+          assureInfo: assureObj,
+          vehicule: vehiculeObj
         };
       })
     );
-
     this.recentMissions = missionsWithDetails;
+    this.cdr.detectChanges();
   }
 
   getStatusColor(status: string): string {
@@ -364,6 +382,20 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     return total > 0 ? Math.round((value / total) * 100) : 0;
   }
 
+  getCommissionLabel(): string {
+    const commissions = this.reparateurMissions
+      .map(m => m.reparateur?.commission)
+      .filter((c): c is number => c !== undefined && c !== null);
+    if (commissions.length === 0) {
+      return '15%';
+    }
+    const unique = Array.from(new Set(commissions));
+    if (unique.length === 1) {
+      return unique[0] + '%';
+    }
+    return 'Variable';
+  }
+
   // Méthode pour ouvrir la modale de visualisation d'une mission
   openMissionView(missionId: number): void {
     const mission = this.reparateurMissions.find(m => m.id === missionId);
@@ -399,5 +431,6 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       // Recalculer les statistiques
       this.calculateStatistics();
     }
+    this.cdr.detectChanges();
   }
 } 

@@ -12,7 +12,7 @@
     <div *ngIf="error && !loading" class="alert alert-danger m-3" role="alert">
         <i class="fas fa-exclamation-triangle me-2"></i>
         {{ error }}
-        <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadGarageProfile()">
+        <button class="btn btn-sm btn-outline-danger ms-3" (click)="refreshData()">
             <i class="fas fa-redo me-1"></i>Réessayer
         </button>
     </div>
@@ -20,8 +20,24 @@
     <!-- Main content -->
     <div *ngIf="!loading && !error && reparateur" class="container-fluid">
         <div class="row">
+            <!-- Statut du garage -->
+            <div class="col-12 mb-3">
+                <span class="badge"
+                      [ngClass]="{
+                        'bg-success': reparateur.isvalids === 'valide',
+                        'bg-warning text-dark': reparateur.isvalids === 'en attente',
+                        'bg-danger': reparateur.isvalids === 'rejetée'
+                      }">
+                  {{
+                    reparateur.isvalids === 'valide' ? 'Valide' :
+                    reparateur.isvalids === 'en attente' ? 'En attente' :
+                    reparateur.isvalids === 'rejetée' ? 'Rejeté' :
+                    reparateur.isvalids
+                  }}
+                </span>
+            </div>
             <!-- Informations principales du garage -->
-            <div class="col-lg-8">
+            <div class="col-12 col-md-8">
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-warehouse me-2"></i>Informations du garage</h5>
@@ -114,13 +130,13 @@
                         </div>
                         <div *ngIf="isEditing">
                             <label class="form-label">Liste des services (séparés par une virgule)</label>
-                            <textarea class="form-control" [(ngModel)]="reparateur.serviceProposeString" rows="2" placeholder="Ex: Réparation mécanique, Carrosserie, ..."></textarea>
+                            <textarea class="form-control" [(ngModel)]="reparateur.servicePropose" rows="2" placeholder="Ex: Réparation mécanique, Carrosserie, ..."></textarea>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- Panel latéral -->
-            <div class="col-lg-4">
+            <div class="col-12 col-md-4">
                 <!-- Logo du garage -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -200,6 +216,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+<!-- Galerie images réparations tout en bas -->
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="fas fa-images me-2"></i>Images de réparations</h6>
+        </div>
+        <div class="card-body">
+            <ng-container *ngIf="reparateur?.imagesReparations?.length; else aucuneImage">
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    <img *ngFor="let img of reparateur?.imagesReparations" [src]="img" alt="Image réparation" style="max-width:70px;max-height:70px;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+                </div>
+            </ng-container>
+            <ng-template #aucuneImage><span class="text-muted">Aucune image</span></ng-template>
         </div>
     </div>
 </div> 

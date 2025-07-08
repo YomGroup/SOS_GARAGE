@@ -10,118 +10,88 @@
   </div>
 
   <mat-dialog-content class="dialog-content">
+    <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 18px;">
+      <img *ngIf="reparateur.logo" [src]="reparateur.logo" alt="Logo du garage" style="max-width:110px;max-height:110px;border-radius:10px;box-shadow:0 2px 8px #0001; margin-bottom: 8px;" />
+      <div *ngIf="!reparateur.logo" class="text-muted" style="font-size: 1.2em;">Aucun logo</div>
+    </div>
     <div class="reparateur-info">
-      <!-- Informations personnelles -->
       <div class="info-section">
         <h3><i class="fas fa-user me-2"></i>Responsable</h3>
         <div class="info-grid">
-          <div class="info-item"><span class="label">Nom du responsable :</span><span class="value">{{ reparateur.name }} {{ reparateur.prenom }}</span></div>
+          <div class="info-item"><span class="label">Nom :</span><span class="value">{{ reparateur.name }} {{ reparateur.prenom }}</span></div>
           <div class="info-item"><span class="label">Email :</span><span class="value">{{ reparateur.email }}</span></div>
           <div class="info-item"><span class="label">Téléphone :</span><span class="value">{{ reparateur.telephone }}</span></div>
+        </div>
+      </div>
+      <hr />
+      <div class="info-section">
+        <h3><i class="fas fa-warehouse me-2"></i>Garage</h3>
+        <div class="info-grid">
           <div class="info-item"><span class="label">Adresse :</span><span class="value">{{ reparateur.adresse }}</span></div>
           <div class="info-item"><span class="label">Ville :</span><span class="value">{{ reparateur.ville || '—' }}</span></div>
           <div class="info-item"><span class="label">Code postal :</span><span class="value">{{ reparateur.codePostal || '—' }}</span></div>
-        </div>
-      </div>
-      <div class="info-section">
-        <h3><i class="fas fa-warehouse me-2"></i>Informations sur le garage</h3>
-        <div class="info-grid">
-          <div class="info-item"><span class="label">Nom du garage :</span><span class="value">{{ reparateur.nomDuGarage || '—' }}</span></div>
           <div class="info-item"><span class="label">SIRET :</span><span class="value">{{ reparateur.siret || '—' }}</span></div>
-          <div class="info-item"><span class="label">Commission :</span><span class="value">{{ reparateur.commission !== null && reparateur.commission !== undefined ? reparateur.commission : '—' }}%</span></div>
-        </div>
-        <div class="info-item"><span class="label">Services proposés :</span>
-          <ng-container *ngIf="reparateur.servicePropose?.length; else noServices">
-            <mat-chip-listbox>
-              <mat-chip-option *ngFor="let service of reparateur.servicePropose">{{ service }}</mat-chip-option>
-            </mat-chip-listbox>
-          </ng-container>
-          <ng-template #noServices><span class="value">—</span></ng-template>
-        </div>
-      </div>
-      <div class="info-section">
-        <h3><i class="fas fa-info-circle me-2"></i>Statut & Dates</h3>
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="label">Statut :</span>
-            <span class="value">
-              <mat-chip [ngClass]="{
-                'status-active': reparateur.isvalids === 'valide',
-                'status-suspended': reparateur.isvalids === 'suspendu',
-                'status-rejected': reparateur.isvalids === 'rejetée',
-                'status-pending': reparateur.isvalids === 'en_attente'
-              }">
-                {{
-                  reparateur.isvalids === 'valide' ? 'Validé' :
-                  reparateur.isvalids === 'suspendu' ? 'Suspendu' :
-                  reparateur.isvalids === 'rejetée' ? 'Rejeté' :
-                  'En attente'
-                }}
-              </mat-chip>
+          <div class="info-item"><span class="label">Commission :</span>
+            <span class="value" *ngIf="!editCommissionMode">{{ reparateur.commission !== null && reparateur.commission !== undefined ? reparateur.commission : '—' }}%
+              <button mat-icon-button (click)="editCommissionMode = true" [disabled]="loading" style="margin-left:6px;">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </span>
+            <span class="value" *ngIf="editCommissionMode">
+              <input type="number" min="0" max="100" [(ngModel)]="commissionInput" style="width:70px;display:inline-block;" [disabled]="loading" /> %
+              <button mat-icon-button color="primary" (click)="saveCommission()" [disabled]="loading">
+                <mat-icon>check</mat-icon>
+              </button>
+              <button mat-icon-button (click)="editCommissionMode = false" [disabled]="loading">
+                <mat-icon>close</mat-icon>
+              </button>
             </span>
           </div>
-          <div class="info-item"><span class="label">Créé le :</span><span class="value">{{ reparateur.createdAt || '—' }}</span></div>
-          <div class="info-item"><span class="label">Mis à jour le :</span><span class="value">{{ reparateur.updatedAt || '—' }}</span></div>
+          <div class="info-item"><span class="label">Année(s) d'expérience :</span><span class="value">{{ reparateur.anneeExperience }}</span></div>
+          <div class="info-item"><span class="label">Véhicules réparés :</span><span class="value">{{ reparateur.nombreVehiculeReparee }}</span></div>
+          <div class="info-item"><span class="label">Employés :</span><span class="value">{{ reparateur.nombreEmployes }}</span></div>
         </div>
       </div>
-
-      <!-- Documents -->
-      <!-- <div class="info-section">
-        <h3><i class="fas fa-file-alt me-2"></i>Documents</h3>
-        <div class="documents-grid">
-          <div class="document-item">
-            <i class="fas fa-file-contract"></i>
-            <span>SIRET</span>
-            <mat-chip [class]="reparateur.documents?.siret ? 'valid' : 'missing'">
-              {{ reparateur.documents?.siret ? 'Présent' : 'Manquant' }}
-            </mat-chip>
-          </div>
-          <div class="document-item">
-            <i class="fas fa-shield-alt"></i>
-            <span>Assurance</span>
-            <mat-chip [class]="reparateur.documents?.assurance ? 'valid' : 'missing'">
-              {{ reparateur.documents?.assurance ? 'Présent' : 'Manquant' }}
-            </mat-chip>
-          </div>
-          <div class="document-item">
-            <i class="fas fa-certificate"></i>
-            <span>Certification</span>
-            <mat-chip [class]="reparateur.documents?.certification ? 'valid' : 'missing'">
-              {{ reparateur.documents?.certification ? 'Présent' : 'Manquant' }}
-            </mat-chip>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- Actions rapides -->
+      <hr />
       <div class="info-section">
-        <h3><i class="fas fa-cogs me-2"></i>Actions</h3>
-        <div class="actions-grid">
-          <button mat-raised-button color="primary" (click)="modifierCommission()" [disabled]="loading">
-            <i class="fas fa-edit me-2"></i>Modifier la commission
-          </button>
-          <button mat-raised-button color="accent" (click)="envoyerMessage()" [disabled]="loading">
-            <i class="fas fa-envelope me-2"></i>Envoyer un message
-          </button>
-          <button mat-raised-button color="warn" (click)="suspendreCompte()" [disabled]="loading">
-            <i class="fas fa-pause me-2"></i>Suspendre le compte
-          </button>
+        <h3><i class="fas fa-images me-2"></i>Images de réparations</h3>
+        <div>
+          <ng-container *ngIf="reparateur.imagesReparations?.length; else aucuneImage">
+            <div class="mini-gallery" style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <img *ngFor="let img of reparateur.imagesReparations" [src]="img" alt="Image réparation" style="max-width:70px;max-height:70px;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+            </div>
+          </ng-container>
+          <ng-template #aucuneImage><span class="text-muted">Aucune image</span></ng-template>
         </div>
+      </div>
+      <hr />
+      <div class="info-section">
+        <h3><i class="fas fa-tools me-2"></i>Services proposés</h3>
+        <ng-container *ngIf="reparateur.servicePropose?.length; else noServices">
+          <mat-chip-listbox>
+            <mat-chip-option *ngFor="let service of reparateur.servicePropose">{{ service }}</mat-chip-option>
+          </mat-chip-listbox>
+        </ng-container>
+        <ng-template #noServices><span class="value">—</span></ng-template>
       </div>
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="close()" [disabled]="loading">Fermer</button>
-    <button mat-raised-button color="warn" (click)="rejeterReparateur()" [disabled]="loading" *ngIf="!reparateur.isvalids">
+    <button mat-raised-button color="warn" (click)="rejeterReparateur()" [disabled]="loading" *ngIf="reparateur.isvalids !== 'rejetée' && reparateur.isvalids !== 'valide'">
       <i class="fas fa-times me-2"></i>Rejeter
     </button>
-    <button mat-raised-button color="primary" (click)="validerReparateur()" [disabled]="loading" *ngIf="!reparateur.isvalids">
+    <button mat-raised-button color="primary" (click)="validerReparateur()" [disabled]="loading" *ngIf="reparateur.isvalids !== 'valide'">
       <i class="fas fa-check me-2"></i>Valider
+    </button>
+    <button mat-raised-button color="accent" (click)="envoyerMessage()" [disabled]="loading">
+      <i class="fas fa-envelope me-2"></i>Envoyer un message
+    </button>
+    <button mat-raised-button color="warn" (click)="suspendreCompte()" [disabled]="loading" *ngIf="reparateur.isvalids === 'valide'">
+      <i class="fas fa-pause me-2"></i>Suspendre le compte
     </button>
   </mat-dialog-actions>
 
-  <!-- Indicateur de chargement -->
   <div class="loading-overlay" *ngIf="loading">
     <div class="loading-spinner">
       <i class="fas fa-spinner fa-spin"></i>

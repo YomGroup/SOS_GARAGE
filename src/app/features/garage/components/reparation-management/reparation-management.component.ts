@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -33,7 +33,8 @@ import { MissionViewComponent } from './mission-view.component';
     MatButtonModule,
     MatSelectModule,
     MissionViewComponent
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ReparationManagementComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['vehicule', 'statut', 'dateReception', 'montantDevis', 'montantFacture', 'actions'];
@@ -44,9 +45,11 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   missionSelectionnee: Mission | null = null;
   missionEnEdition: boolean = false;
   loading: boolean = false;
+  error: string | null = null;
   vehicule: Vehicule | null = null;
   private keycloakService = inject(KeycloakService);
   private missionService = inject(MissionService);
+  private cdr = inject(ChangeDetectorRef);
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -67,16 +70,41 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   }
 
   async ngOnInit(): Promise<void> {
-    const isLoggedIn = await this.keycloakService.isLoggedIn();
-    if (isLoggedIn) {
-      const token = await this.keycloakService.getToken();
-      const payload: any = JSON.parse(atob(token.split('.')[1]));
-      const keycloakId = payload.sub;
-      this.missionService.getAllMissions().subscribe((missions: Mission[]) => {
-        this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId && m.statut === 'assigné');
-        // Adapter pour la table
-        this.dataSource.data = this.missions;
-      });
+    await this.refreshData();
+  }
+
+  async refreshData(): Promise<void> {
+    this.loading = true;
+    this.error = null;
+    this.cdr.detectChanges();
+    try {
+      const isLoggedIn = await this.keycloakService.isLoggedIn();
+      if (isLoggedIn) {
+        const token = await this.keycloakService.getToken();
+        const payload: any = JSON.parse(atob(token.split('.')[1]));
+        const keycloakId = payload.sub;
+        this.missionService.getAllMissions().subscribe({
+          next: (missions: Mission[]) => {
+            this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId && m.statut === 'assigné');
+            this.dataSource.data = this.missions;
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            this.error = 'Erreur lors du chargement des missions';
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
+      } else {
+        this.error = 'Utilisateur non connecté';
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    } catch (err: any) {
+      this.error = 'Erreur lors du chargement des missions';
+      this.loading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -108,8 +136,12 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         next: (updatedMission) => {
           mission.statut = nouveauStatut as any;
           this.dataSource._updateChangeSubscription();
+          this.cdr.detectChanges();
         },
-        error: () => alert('Erreur lors de la mise à jour du statut')
+        error: () => {
+          this.error = 'Erreur lors de la mise à jour du statut';
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -125,8 +157,12 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
           mission.factureFinale = mission.devis;
           mission.statut = 'TERMINEE';
           this.dataSource._updateChangeSubscription();
+          this.cdr.detectChanges();
         },
-        error: () => alert('Erreur lors de la validation de la facture')
+        error: () => {
+          this.error = 'Erreur lors de la validation de la facture';
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -141,8 +177,12 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         next: (updatedMission) => {
           mission.statut = 'EPAVE';
           this.dataSource._updateChangeSubscription();
+          this.cdr.detectChanges();
         },
-        error: () => alert('Erreur lors de la déclaration d\'épave')
+        error: () => {
+          this.error = 'Erreur lors de la déclaration d\'épave';
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -161,12 +201,14 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     if (mission) {
       this.missionSelectionnee = { ...mission };
       this.missionEnEdition = edition;
+      this.cdr.detectChanges();
     }
   }
 
   fermerMissionView(): void {
     this.missionSelectionnee = null;
     this.missionEnEdition = false;
+    this.cdr.detectChanges();
   }
 
   onMissionUpdated(updatedMission: Mission): void {
@@ -176,6 +218,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     }
     this.missionSelectionnee = updatedMission;
     this.dataSource._updateChangeSubscription();
+    this.cdr.detectChanges();
   }
 
   modifierMission(reparation: Reparation): void {

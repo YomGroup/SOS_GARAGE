@@ -87,7 +87,7 @@ export interface Reparateur {
   isvalids?: string;
   isValids?: string;
   codePostal: string;
-  Ville: string;
+  ville: string;
   commission: number;
   siret: string;
   nomDuGarage: string;
@@ -99,7 +99,11 @@ export interface Reparateur {
   logo: string;
   useridKeycloak: string;
   imagesReparations: string[];
-
+  documents?: {
+    siret: boolean;
+    assurance: boolean;
+    certification: boolean;
+  };
 }
 
 // Interface Sinistre

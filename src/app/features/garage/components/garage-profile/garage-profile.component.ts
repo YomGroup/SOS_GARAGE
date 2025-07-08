@@ -1,24 +1,26 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../../services/auth.service';
 import { ReparateurService } from '../../../../../services/reparateur.service';
-import { firstValueFrom } from 'rxjs';
 import { Reparateur } from '../../../../../services/models-api.interface';
+import { Router, NavigationEnd } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-garage-profile',
   templateUrl: './garage-profile.component.html',
   styleUrls: ['./garage-profile.component.css'],
   standalone: true,
-  imports: [CommonModule, FormsModule]
+  imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GarageProfileComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
-  reparateur: any = null;
+  reparateur: Reparateur | null = null;
   isEditing: boolean = false;
-  originalReparateur: any = null;
+  originalReparateur: Reparateur | null = null;
   serviceProposeString: string = '';
 
   stats = {
@@ -29,175 +31,161 @@ export class GarageProfileComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private reparateurService: ReparateurService
+    private reparateurService: ReparateurService,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {}
 
-  async ngOnInit() {
-    await this.loadGarageProfile();
+  ngOnInit(): void {
+    this.loadGarageProfile();
+    
+    // Recharger les données si la route change
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.loadGarageProfile();
+      }
+    });
   }
 
-  async loadGarageProfile() {
+  refreshData(): void {
+    this.loadGarageProfile();
+  }
+
+  loadGarageProfile(): void {
     this.loading = true;
     this.error = null;
+    this.cdr.detectChanges();
     
-    try {
-      // Attendre que l'authentification soit initialisée
-      await this.waitForAuth();
-
-      // Récupérer l'ID Keycloak (UUID) du réparateur connecté
-      const keycloakId = this.authService.getKeycloakId();
-      console.log('KeycloakId récupéré:', keycloakId);
-      
-      if (!keycloakId) {
-        throw new Error('Identifiant Keycloak non trouvé');
-      }
-
-      console.log('Recherche du réparateur pour keycloakId:', keycloakId);
-      const reparateurId = await this.getReparateurIdByKeycloakId(keycloakId);
-      console.log('ID du réparateur trouvé:', reparateurId);
-      
-      if (reparateurId) {
-        // Récupérer le réparateur complet depuis la liste
-        const allReparateurs = await firstValueFrom(this.reparateurService.getAllReparateurs());
-        const reparateur = allReparateurs.find(r => r.id === reparateurId);
-        
-        if (reparateur) {
-          this.reparateur = reparateur;
-          this.originalReparateur = { ...reparateur };
-          // Synchroniser le textarea avec le tableau servicePropose
-          this.reparateur.serviceProposeString = (reparateur.servicePropose || []).join(', ');
-          
-          // Calculer les statistiques
-          this.loadStats();
-        } else {
-          throw new Error('Aucun réparateur trouvé pour cet utilisateur');
-        }
-      } else {
-        throw new Error('Aucun réparateur trouvé pour cet utilisateur');
-      }
-    } catch (err) {
-      console.error('Erreur lors du chargement du profil:', err);
-      this.error = err instanceof Error ? err.message : 'Une erreur est survenue';
-    } finally {
+    const keycloakId = this.authService.getKeycloakId();
+    if (!keycloakId) {
+      this.error = 'Identifiant Keycloak non trouvé';
       this.loading = false;
+      this.cdr.detectChanges();
+      return;
     }
-  }
 
-  private async waitForAuth(): Promise<void> {
-    // Attendre que l'authentification soit initialisée
-    let attempts = 0;
-    const maxAttempts = 10;
-    
-    while (attempts < maxAttempts) {
-      const token = this.authService.getToken();
-      if (token) {
-        console.log('Authentification initialisée après', attempts + 1, 'tentatives');
-        return;
-      }
-      
-      console.log('Attente de l\'initialisation de l\'authentification...', attempts + 1);
-      await new Promise(resolve => setTimeout(resolve, 500));
-      attempts++;
-    }
-    
-    throw new Error('Timeout: Authentification non initialisée');
-  }
-
-  private async getReparateurIdByKeycloakId(keycloakId: string): Promise<number | null> {
-    try {
-      console.log('Recherche du réparateur par Keycloak ID:', keycloakId);
-      const reparateur = await firstValueFrom(
-        this.reparateurService.getReparateurByKeycloakId(keycloakId)
-      );
-      console.log('Réparateur trouvé:', reparateur);
-      return reparateur ? reparateur.id ?? 0 : null;
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération du réparateur:', error);
-      // Fallback: essayer avec tous les réparateurs si l'endpoint spécifique échoue
-      if (error.status === 404) {
-        console.log('Endpoint réparateur par Keycloak ID non trouvé, tentative avec tous les réparateurs...');
-        try {
-          const allReparateurs = await firstValueFrom(
-            this.reparateurService.getAllReparateurs()
-          );
-          const reparateur = allReparateurs.find(r => r.useridKeycloak === keycloakId);
-          console.log('Réparateur trouvé dans la liste complète:', reparateur);
-          return reparateur ? reparateur.id ?? 0 : null;
-        } catch (fallbackError) {
-          console.error('Erreur lors de la récupération de tous les réparateurs:', fallbackError);
-          return null;
+    this.reparateurService.getReparateurByKeycloakId(keycloakId).subscribe({
+      next: (reparateur) => {
+        if (!reparateur) {
+          this.error = 'Aucun réparateur trouvé pour cet utilisateur';
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
         }
+        
+        this.reparateur = reparateur;
+        this.originalReparateur = { ...reparateur };
+        this.serviceProposeString = (reparateur.servicePropose || []).join(', ');
+        this.loadStats();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        // Fallback si l'endpoint spécifique échoue
+        this.loadAllReparateursFallback(keycloakId);
       }
-      return null;
-    }
+    });
   }
 
-  loadStats() {
-    // Ici vous pouvez ajouter la logique pour récupérer les vraies statistiques
-    // Pour l'exemple, on utilise des valeurs par défaut
+  private loadAllReparateursFallback(keycloakId: string): void {
+    this.reparateurService.getAllReparateurs().subscribe({
+      next: (reparateurs) => {
+        const reparateur = reparateurs.find(r => r.useridKeycloak === keycloakId);
+        
+        if (!reparateur) {
+          this.error = 'Aucun réparateur trouvé pour cet utilisateur';
+          this.loading = false;
+          this.cdr.detectChanges();
+          return;
+        }
+        
+        this.reparateur = reparateur;
+        this.originalReparateur = { ...reparateur };
+        this.serviceProposeString = (reparateur.servicePropose || []).join(', ');
+        this.loadStats();
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erreur:', err);
+        this.error = err.message;
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private loadStats(): void {
+    if (!this.reparateur) return;
+    
     this.stats = {
-      vehiculesRepares: this.reparateur.missions?.length || 0,
-      employes: this.reparateur.nombreEmployes || 1,
+      vehiculesRepares: this.reparateur.nombreVehiculeReparee || 0,
+      employes: this.reparateur.nombreEmployes || 0,
       anneesActivite: this.calculateYearsActivity()
     };
+    this.cdr.detectChanges();
   }
 
-  calculateYearsActivity(): number {
-    if (!this.reparateur.dateCreation) return 1;
+  private calculateYearsActivity(): number {
+    if (!this.reparateur?.createdAt) return 1;
     
-    const creationDate = new Date(this.reparateur.dateCreation);
+    const creationDate = new Date(this.reparateur.createdAt);
     const currentDate = new Date();
     return currentDate.getFullYear() - creationDate.getFullYear() || 1;
   }
 
-  getFullName(): string {
-    return `${this.reparateur?.prenom || ''} ${this.reparateur?.name || ''}`.trim();
-  }
-
-  startEditing() {
+  startEditing(): void {
     this.isEditing = true;
-    this.originalReparateur = {...this.reparateur};
-    // Synchroniser le textarea avec le tableau servicePropose
-    this.reparateur.serviceProposeString = (this.reparateur.servicePropose || []).join(', ');
+    this.originalReparateur = this.reparateur ? {...this.reparateur} : null;
+    this.serviceProposeString = (this.reparateur?.servicePropose || []).join(', ');
+    this.cdr.detectChanges();
   }
 
-  cancelEditing() {
+  cancelEditing(): void {
     this.isEditing = false;
-    this.reparateur = {...this.originalReparateur};
-    // Synchroniser le textarea avec le tableau servicePropose
-    this.reparateur.serviceProposeString = (this.reparateur.servicePropose || []).join(', ');
+    this.reparateur = this.originalReparateur ? {...this.originalReparateur} : null;
+    this.serviceProposeString = (this.reparateur?.servicePropose || []).join(', ');
+    this.cdr.detectChanges();
   }
 
-  async saveProfile() {
-    try {
-      this.loading = true;
-      // Synchroniser le tableau servicePropose avec le textarea avant sauvegarde
-      this.reparateur.servicePropose = (this.reparateur.serviceProposeString || '').split(',').map((s: string) => s.trim()).filter((s: string) => s);
-      // Mettre à jour le réparateur via l'API
-      const updatedReparateur = await firstValueFrom(
-        this.reparateurService.updateReparateur(
-          this.reparateur.id, 
-          this.reparateur
-        )
-      );
-      this.reparateur = updatedReparateur;
-      this.isEditing = false;
-      // Synchroniser le textarea avec le tableau servicePropose après sauvegarde
-      this.reparateur.serviceProposeString = (this.reparateur.servicePropose || []).join(', ');
-    } catch (err) {
-      console.error('Erreur lors de la mise à jour:', err);
-      this.error = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
-    } finally {
-      this.loading = false;
-    }
+  saveProfile(): void {
+    if (!this.reparateur?.id) return;
+    
+    this.loading = true;
+    this.cdr.detectChanges();
+    
+    // Préparer les données
+    const updatedReparateur = {
+      ...this.reparateur,
+      servicePropose: this.serviceProposeString.split(',').map(s => s.trim()).filter(s => s),
+      isValids: this.reparateur.isvalids
+    };
+
+    this.reparateurService.updateReparateur(this.reparateur.id, updatedReparateur).subscribe({
+      next: (response) => {
+        this.reparateur = response;
+        this.isEditing = false;
+        this.snackBar.open('Profil mis à jour avec succès', 'Fermer', { duration: 3000 });
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erreur:', err);
+        this.error = err.message;
+        this.snackBar.open('Erreur lors de la mise à jour du profil', 'Fermer', { duration: 3000 });
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  changeLogo() {
+  changeLogo(): void {
     console.log('Changement de logo');
     // Implémentation à compléter
   }
 
-  changePassword() {
+  changePassword(): void {
     console.log('Changement de mot de passe');
     // Implémentation à compléter
   }

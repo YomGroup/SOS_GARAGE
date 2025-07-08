@@ -51,6 +51,11 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
     total: 0
   };
 
+  selectedStatus: string = '';
+  selectedVille: string = '';
+  searchNom: string = '';
+  villesDisponibles: string[] = [];
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -84,8 +89,23 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
   loadData(): void {
     this.reparateurService.getAllReparateurs().subscribe({
       next: (reparateurs) => {
-        this.dataSource.data = reparateurs;
-        this.calculateStats(reparateurs);
+        // Récupérer toutes les villes distinctes
+        this.villesDisponibles = Array.from(new Set(reparateurs.map(r => r.ville).filter(Boolean)));
+        // Appliquer les filtres
+        let filtered = reparateurs;
+        if (this.selectedStatus) {
+          if (this.selectedStatus === 'pending') filtered = filtered.filter(r => r.isvalids === 'en attente');
+          else if (this.selectedStatus === 'active') filtered = filtered.filter(r => r.isvalids === 'valide');
+          else if (this.selectedStatus === 'rejected') filtered = filtered.filter(r => r.isvalids === 'rejetée');
+        }
+        if (this.selectedVille) {
+          filtered = filtered.filter(r => r.ville === this.selectedVille);
+        }
+        if (this.searchNom) {
+          filtered = filtered.filter(r => (r.nomDuGarage || '').toLowerCase().includes(this.searchNom.toLowerCase()));
+        }
+        this.dataSource.data = filtered;
+        this.calculateStats(reparateurs); // stats sur tous les garages
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -176,8 +196,8 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
             console.log('Message envoyé à:', result.reparateur.name);
             break;
           case 'suspend':
-            // Compte suspendu (à implémenter selon vos besoins)
-            console.log('Compte suspendu:', result.reparateur.name);
+            // Compte suspendu, recharger les données
+            this.loadData();
             break;
         }
       }
@@ -244,6 +264,35 @@ export class GarageValidationComponent implements OnInit, AfterViewInit {
     });
     this.editedCommissionId = null;
     this.editedCommissionValue = null;
+  }
+
+  suspendreReparateur(reparateur: Reparateur): void {
+    const updated = { ...reparateur, isvalids: 'rejetée', isValids: 'rejetée' };
+    this.reparateurService.updateReparateur(reparateur.id ?? 0, updated).subscribe({
+      next: () => {
+        this.snackBar.open('Garage suspendu avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors de la suspension.', 'Fermer', { duration: 3000 });
+        console.error('Erreur lors de la suspension:', error);
+      }
+    });
+  }
+
+  supprimerReparateur(reparateur: Reparateur): void {
+    if (confirm('Voulez-vous vraiment supprimer ce garage ?')) {
+      this.reparateurService.deleteReparateur(reparateur.id ?? 0).subscribe({
+        next: () => {
+          this.snackBar.open('Garage supprimé avec succès.', 'Fermer', { duration: 3000 });
+          this.loadData();
+        },
+        error: (error) => {
+          this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { duration: 3000 });
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
+    }
   }
 
   get tousLesGarages(): Reparateur[] {

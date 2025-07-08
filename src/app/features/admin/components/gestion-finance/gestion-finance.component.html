@@ -122,12 +122,13 @@
   <div *ngIf="!isLoading && !error">
     <!-- Tableau des missions -->
     <div class="finance-section">
-      <div class="table-container">
+      <div class="table-container" *ngIf="filteredMissions.length > 0">
         <table class="missions-table">
           <thead>
             <tr>
               <th>ID Mission</th>
               <th>Client</th>
+              <th>Réparateur</th>
               <th>Devis</th>
               <th>Facture finale</th>
               <th>Commission</th>
@@ -141,6 +142,13 @@
               <td>
                 <div class="assure-info">
                   <span class="assure-name">{{ mission.assureName }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="reparateur-info">
+                  <span class="reparateur-name">
+                    {{ mission.reparateur?.name }} {{ mission.reparateur?.prenom }}
+                  </span>
                 </div>
               </td>
               <td>{{ mission.devis | number:'1.2-2' }} €</td>
@@ -160,9 +168,8 @@
           </tbody>
         </table>
       </div>
-      
       <!-- Message état vide -->
-      <div *ngIf="!filteredMissions.length" class="empty-state text-center py-5">
+      <div *ngIf="filteredMissions.length === 0" class="empty-state text-center py-5">
         <div class="mb-3">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted">
             <path d="M9 12l2 2 4-4"></path>

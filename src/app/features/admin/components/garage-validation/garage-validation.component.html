@@ -66,31 +66,24 @@
         <div class="card-body">
           <div class="row align-items-center">
             <div class="col-md-3">
-              <select class="form-select">
+              <select class="form-select" [(ngModel)]="selectedStatus" (change)="loadData()">
                 <option value="">Tous les statuts</option>
                 <option value="pending">En attente</option>
-                <option value="active">Actif</option>
+                <option value="active">Valide</option>
                 <option value="rejected">Rejeté</option>
               </select>
             </div>
             <div class="col-md-3">
-              <select class="form-select">
-                <option value="">Toutes les régions</option>
-                <option value="idf">Île-de-France</option>
-                <option value="paca">Provence-Alpes-Côte d'Azur</option>
-                <option value="occitanie">Occitanie</option>
+              <select class="form-select" [(ngModel)]="selectedVille" (change)="loadData()">
+                <option value="">Toutes les villes</option>
+                <option *ngFor="let ville of villesDisponibles" [value]="ville">{{ ville }}</option>
               </select>
             </div>
             <div class="col-md-4">
               <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Rechercher un garage...">
+                <input type="text" class="form-control" placeholder="Rechercher un garage..." [(ngModel)]="searchNom" (input)="loadData()">
                 </div>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-primary-custom w-100" (click)="ajouterGarage()">
-                <i class="fas fa-plus me-2"></i>Nouveau
-              </button>
             </div>
           </div>
         </div>
@@ -121,11 +114,11 @@
               </button>
               
               <!-- Actions pour garages validés -->
-              <button class="btn btn-sm btn-warning" title="Suspendre"
+              <button class="btn btn-sm btn-warning" title="Suspendre" (click)="suspendreReparateur(reparateur)"
                       *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-pause"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Désactiver"
+              <button class="btn btn-sm btn-danger" title="Supprimer" (click)="supprimerReparateur(reparateur)"
                       *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-ban"></i>
               </button>

@@ -1,5 +1,5 @@
 // dossier-management.component.ts
-import { Component, OnInit, ViewChild, AfterViewInit, ViewContainerRef, ComponentRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, ViewChild, ViewContainerRef, ComponentRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
@@ -46,7 +46,7 @@ export interface DossierAffichage extends Dossier {
     RouterModule,
   ]
 })
-export class DossierManagementComponent implements OnInit, AfterViewInit {
+export class DossierManagementComponent implements OnInit, AfterViewInit, OnChanges {
   displayedColumns: string[] = ['numero', 'type', 'statut', 'dateCreation', 'documents', 'actions'];
   dataSource: MatTableDataSource<DossierAffichage>;
   isCardView: boolean = true;
@@ -58,6 +58,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
   sinistreSelectionne: any = null;
   sinistreDuDossier: DossierAffichage | null = null;
   vehiculeSelectionne: Vehicule | null = null;
+
+  @Input() filtreSelectionne: 'nouveaux' | 'nonTraites' | 'termines' | 'tous' = 'tous';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -136,6 +138,12 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
         this.detecterFiltreActuel();
       }
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filtreSelectionne'] && changes['filtreSelectionne'].currentValue) {
+      this.filtreActuel = changes['filtreSelectionne'].currentValue;
+    }
   }
 
   private detecterFiltreActuel() {
@@ -456,5 +464,10 @@ export class DossierManagementComponent implements OnInit, AfterViewInit {
   // Méthode pour vérifier si un véhicule est en cours de chargement
   isVehiculeLoading(dossierId: number): boolean {
     return this.vehiculesEnChargement.has(dossierId);
+  }
+
+  // Méthode publique pour changer le filtre depuis l'extérieur (sidebar ou parent)
+  setFiltre(filtre: 'nouveaux' | 'nonTraites' | 'termines' | 'tous') {
+    this.filtreActuel = filtre;
   }
 }
