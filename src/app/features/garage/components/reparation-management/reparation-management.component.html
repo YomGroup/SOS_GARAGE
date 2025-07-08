@@ -59,13 +59,13 @@
               <div class="dossier-header-content">
                 <div class="dossier-brand">
                   <h5 class="dossier-marque">
-                    {{ mission.sinistre?.vehicule?.marque || "Marque" }}
+                    {{ getVehiculeForMission(mission)?.marque || "Marque" }}
                   </h5>
                   <div class="dossier-transmission">
-                    {{ mission.sinistre?.vehicule?.modele || "Modèle" }}
+                    {{ getVehiculeForMission(mission)?.modele || "Modèle" }}
                   </div>
                   <div class="dossier-annee">
-                    {{ mission.sinistre?.vehicule?.immatriculation || "Immat" }}
+                    {{ getVehiculeForMission(mission)?.immatriculation || "Immat" }}
                   </div>    
                 </div>
                 <div class="dossier-numero-badge">
@@ -136,7 +136,7 @@
         <tbody>
           <ng-container *ngIf="dataSource.data.length; else noMissionTable">
             <tr *ngFor="let mission of dataSource.data">
-              <td>{{ mission.sinistre?.vehicule?.immatriculation || 'N/A' }}</td>
+              <td>{{ getVehiculeForMission(mission)?.immatriculation || 'N/A' }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatutClass(mission.statut ?? '')">
                   {{ getGarageStatutLabel(mission.statut) }}

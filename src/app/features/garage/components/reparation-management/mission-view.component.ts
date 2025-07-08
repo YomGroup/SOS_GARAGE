@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, Chang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
-import { Mission, MissionUpdate } from '../../../../../services/models-api.interface';
+import { Mission, MissionUpdate, Assure, Vehicule } from '../../../../../services/models-api.interface';
 import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -23,6 +23,8 @@ export class MissionViewComponent implements OnChanges {
   editionEnCours: boolean = false;
   missionEdit: any = { documentsAssurance: [] };
   uploadingFiles: boolean = false;
+  assureInfo: Assure | null = null;
+  vehiculeInfo: Vehicule | null = null;
 
   constructor(
     private missionService: MissionService, 
@@ -34,6 +36,45 @@ export class MissionViewComponent implements OnChanges {
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();
     }
+    // Ajout : charger infos client/véhicule si mission change
+    if (changes['mission'] && this.mission) {
+      this.chargerInformationsAssureEtVehicule();
+    }
+  }
+
+  ngOnInit(): void {
+    if (this.mission) {
+      this.chargerInformationsAssureEtVehicule();
+    }
+  }
+
+  // Ajout : méthode pour charger infos client et véhicule
+  chargerInformationsAssureEtVehicule() {
+    if (!this.mission || !this.mission.sinistre || !this.mission.sinistre.id) {
+      this.assureInfo = null;
+      this.vehiculeInfo = null;
+      return;
+    }
+    // Récupérer l'assuré
+    this.missionService.getAssureBySinistreId(this.mission.sinistre.id).subscribe({
+      next: (assure) => {
+        this.assureInfo = assure;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.assureInfo = null;
+      }
+    });
+    // Récupérer le véhicule
+    this.missionService.getVehiculeByMissionId(this.mission.id!).subscribe({
+      next: (vehicule) => {
+        this.vehiculeInfo = vehicule;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.vehiculeInfo = null;
+      }
+    });
   }
 
   close() {

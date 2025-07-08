@@ -10,6 +10,78 @@
       </button>
     </div>
     <div class="dialog-content">
+      <!-- Informations du client -->
+      <div class="form-section">
+        <h3><i class="fas fa-user me-2"></i>Informations du client</h3>
+        <div *ngIf="assureInfo" class="form-grid">
+          <div class="form-group">
+            <label>Nom complet</label>
+            <div class="readonly-field">{{ assureInfo.name }} {{ assureInfo.prenom }}</div>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <div class="readonly-field">{{ assureInfo.email }}</div>
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <div class="readonly-field">{{ assureInfo.telephone }}</div>
+          </div>
+          <div class="form-group">
+            <label>Adresse</label>
+            <div class="readonly-field">{{ assureInfo.adresse }}</div>
+          </div>
+          <div class="form-group">
+            <label>Numéro de permis</label>
+            <div class="readonly-field">{{ assureInfo.numeroPermis || 'Non renseigné' }}</div>
+          </div>
+        </div>
+        <div *ngIf="!assureInfo" class="text-center">
+          <p class="text-muted">Aucune information client disponible.</p>
+        </div>
+      </div>
+      <!-- Informations du véhicule -->
+      <div class="form-section">
+        <h3><i class="fas fa-car me-2"></i>Informations du véhicule</h3>
+        <div *ngIf="vehiculeInfo" class="form-grid">
+          <div class="form-group">
+            <label>Marque</label>
+            <div class="readonly-field">{{ vehiculeInfo.marque }}</div>
+          </div>
+          <div class="form-group">
+            <label>Modèle</label>
+            <div class="readonly-field">{{ vehiculeInfo.modele }}</div>
+          </div>
+          <div class="form-group">
+            <label>Immatriculation</label>
+            <div class="readonly-field">{{ vehiculeInfo.immatriculation }}</div>
+          </div>
+          <div class="form-group">
+            <label>Cylindrée</label>
+            <div class="readonly-field">{{ vehiculeInfo.cylindree || 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Date de mise en circulation</label>
+            <div class="readonly-field">{{ vehiculeInfo.dateMiseEnCirculation ? (vehiculeInfo.dateMiseEnCirculation | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Carte grise</label>
+            <div class="readonly-field">{{ vehiculeInfo.carteGrise || 'Non renseigné' }}</div>
+          </div>
+        </div>
+        <div *ngIf="!vehiculeInfo" class="text-center">
+          <p class="text-muted">Aucune information véhicule disponible.</p>
+        </div>
+      </div>
+      <!-- Image du véhicule -->
+      <div class="form-section" *ngIf="vehiculeInfo">
+        <h4><i class="fas fa-image me-2"></i>Photo du véhicule</h4>
+        <div *ngIf="vehiculeInfo.imgUrl && vehiculeInfo.imgUrl.length > 0; else noVehiculeImg">
+          <img [src]="vehiculeInfo.imgUrl[0]" alt="Image véhicule" class="vehicle-image" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 1px solid #ccc;" />
+        </div>
+        <ng-template #noVehiculeImg>
+          <span class="text-muted">Aucune image disponible pour ce véhicule.</span>
+        </ng-template>
+      </div>
       <div class="info-section">
         <h3><i class="fas fa-info-circle me-2"></i>Informations générales</h3>
         <p class="subtitle">Consultez ou modifiez les informations de la mission.</p>

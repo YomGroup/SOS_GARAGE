@@ -50,6 +50,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   private keycloakService = inject(KeycloakService);
   private missionService = inject(MissionService);
   private cdr = inject(ChangeDetectorRef);
+  vehiculesMap: Map<number, Vehicule> = new Map();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -85,8 +86,21 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         const keycloakId = payload.sub;
         this.missionService.getAllMissions().subscribe({
           next: (missions: Mission[]) => {
-            this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId && m.statut === 'assigné');
+            this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId);
             this.dataSource.data = this.missions;
+            // Charger les véhicules pour chaque mission
+            this.missions.forEach(mission => {
+              this.missionService.getVehiculeByMissionId(mission.id!).subscribe({
+                next: (vehicule) => {
+                  this.vehiculesMap.set(mission.id!, vehicule);
+                  this.cdr.detectChanges();
+                },
+                error: () => {
+                  this.vehiculesMap.set(mission.id!, null as any);
+                  this.cdr.detectChanges();
+                }
+              });
+            });
             this.loading = false;
             this.cdr.detectChanges();
           },
@@ -234,6 +248,10 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     this.missionService.getVehiculeByMissionId(missionId).subscribe((vehicule: Vehicule) => {
       this.vehicule = vehicule;
     });
+  }
+
+  getVehiculeForMission(mission: Mission): Vehicule | null {
+    return this.vehiculesMap.get(mission.id!) || null;
   }
 
   // Nouvelles méthodes pour le style et la gestion des statuts
