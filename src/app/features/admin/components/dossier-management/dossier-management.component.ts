@@ -18,6 +18,7 @@ import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, Vehicule } from '../../../../../services/models-api.interface';
 import { Dossier } from '../../../../../services/dossiers.service';
+import { DossierFilterService } from './dossier-filter.service';
 
 // Étend l'interface Dossier pour l'affichage local
 export interface DossierAffichage extends Dossier {
@@ -59,7 +60,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   sinistreDuDossier: DossierAffichage | null = null;
   vehiculeSelectionne: Vehicule | null = null;
 
-  @Input() filtreSelectionne: 'nouveaux' | 'nonTraites' | 'termines' | 'tous' = 'tous';
+  @Input() filtreSelectionne: 'nouveaux' | 'nonTraites' | 'enCours' | 'termines' | 'tous' = 'tous';
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -75,37 +76,45 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   vehiculesEnChargement: Set<number> = new Set();
 
   onglet: 'nouveaux' | 'nonTraites' | 'termines' = 'nouveaux';
-  filtreActuel: 'nouveaux' | 'nonTraites' | 'termines' | 'tous' = 'tous';
+  filtreActuel: 'nouveaux' | 'nonTraites' | 'enCours' | 'termines' | 'tous' = 'tous';
 
+  // Dossiers nouveaux : ceux qui n'ont pas encore de mission
   get dossiersNouveaux() {
-    const today = new Date().toISOString().slice(0, 10);
-    return this.dataSource.data.filter(d => {
-      const date = (d.dateCreation instanceof Date ? d.dateCreation : new Date(d.dateCreation)).toISOString().slice(0, 10);
-      return date === today;
-    });
-  }
-
-  get dossiersNonTraites() {
-    // Dossiers sans mission associée
-    return this.dataSource.data.filter(dossier => 
+    return this.dataSource.data.filter(dossier =>
       !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)
     );
   }
 
-  get dossiersTermines() {
-    // Dossiers avec mission statut "terminé"
+  // Dossiers en cours : au moins une mission, aucune mission terminée (peu importe la casse ou le genre)
+  get dossiersEnCours() {
     return this.dataSource.data.filter(dossier => {
-      const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
-      return mission && mission.statut === 'terminé';
+      const missionsAssociees = this.missions.filter(m => m.sinistre && m.sinistre.id === dossier.id);
+      return (
+        missionsAssociees.length > 0 &&
+        !missionsAssociees.some(m =>
+          m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase())
+        )
+      );
     });
+  }
+
+  // Dossiers terminés : au moins une mission avec statut terminé (peu importe la casse ou le genre)
+  get dossiersTermines() {
+    return this.dataSource.data.filter(dossier =>
+      this.missions.some(m =>
+        m.sinistre && m.sinistre.id === dossier.id &&
+        m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase())
+      )
+    );
   }
 
   get dossiersFiltres() {
     switch (this.filtreActuel) {
       case 'nouveaux':
         return this.dossiersNouveaux;
-      case 'nonTraites':
-        return this.dossiersNonTraites;
+      case 'nonTraites': // on va remplacer par dossiersEnCours dans le reste du code
+      case 'enCours':
+        return this.dossiersEnCours;
       case 'termines':
         return this.dossiersTermines;
       default:
@@ -120,7 +129,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     private router: Router, 
     private route: ActivatedRoute,
     private viewContainerRef: ViewContainerRef,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dossierFilterService: DossierFilterService
   ) {
     this.dataSource = new MatTableDataSource();
   }
@@ -137,6 +147,10 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
         this.loadData();
         this.detecterFiltreActuel();
       }
+    });
+    this.dossierFilterService.filtre$.subscribe(filtre => {
+      this.filtreActuel = filtre;
+      this.cdr.detectChanges();
     });
   }
 
@@ -163,8 +177,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     switch (this.filtreActuel) {
       case 'nouveaux':
         return 'Nouveaux dossiers';
-      case 'nonTraites':
-        return 'Dossiers non traités';
+      case 'enCours':
+        return 'Dossiers en cours';
       case 'termines':
         return 'Dossiers terminés';
       default:
@@ -175,11 +189,11 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   getDescriptionFiltre(): string {
     switch (this.filtreActuel) {
       case 'nouveaux':
-        return 'Dossiers créés aujourd\'hui';
-      case 'nonTraites':
-        return 'Dossiers sans mission associée';
+        return 'Dossiers qui n\'ont pas encore de mission';
+      case 'enCours':
+        return 'Dossiers avec mission(s) en cours (aucune mission terminée)';
       case 'termines':
-        return 'Dossiers avec mission statut "terminé"';
+        return 'Dossiers avec au moins une mission terminée';
       default:
         return 'Tous les dossiers disponibles';
     }
@@ -188,9 +202,9 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   getMessageAucunDossier(): string {
     switch (this.filtreActuel) {
       case 'nouveaux':
-        return 'Aucun nouveau dossier aujourd\'hui.';
-      case 'nonTraites':
-        return 'Aucun dossier non traité.';
+        return 'Aucun nouveau dossier.';
+      case 'enCours':
+        return 'Aucun dossier en cours.';
       case 'termines':
         return 'Aucun dossier terminé.';
       default:
@@ -267,14 +281,12 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
   getStatutClass(statut: string): string {
     switch (statut) {
-      case 'VALIDÉ':
-        return 'statut-valide';
-      case 'EN_ATTENTE':
-        return 'statut-attente';
-      case 'REJETÉ':
-        return 'statut-rejete';
-      case 'EN_COURS':
-        return 'statut-cours';
+      case 'Terminé':
+        return 'statut-valide'; // vert
+      case 'En cours':
+        return 'statut-cours'; // bleu/orange
+      case 'Non traité':
+        return 'statut-attente'; // gris/jaune
       default:
         return 'statut-defaut';
     }
@@ -464,6 +476,25 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   // Méthode pour vérifier si un véhicule est en cours de chargement
   isVehiculeLoading(dossierId: number): boolean {
     return this.vehiculesEnChargement.has(dossierId);
+  }
+
+  /**
+   * Retourne le statut d'affichage pour la carte :
+   * - 'Non traité' si le dossier est nouveau
+   * - 'En cours' si le dossier est en cours
+   * - 'Terminé' si le dossier est terminé
+   */
+  getStatutAffichage(dossier: DossierAffichage): string {
+    // Nouveau : aucune mission
+    if (!this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)) {
+      return 'Non traité';
+    }
+    // Terminé : au moins une mission terminée
+    if (this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id && m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase()))) {
+      return 'Terminé';
+    }
+    // Sinon, en cours
+    return 'En cours';
   }
 
   // Méthode publique pour changer le filtre depuis l'extérieur (sidebar ou parent)

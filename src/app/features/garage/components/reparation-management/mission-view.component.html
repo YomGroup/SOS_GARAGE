@@ -10,6 +10,113 @@
       </button>
     </div>
     <div class="dialog-content">
+      <!-- Détails de la mission - EN HAUT -->
+      <div class="form-section mission-details-section">
+        <h3><i class="fas fa-edit me-2"></i>Détails de la mission</h3>
+        
+        <form *ngIf="editionEnCours; else lectureSeule" (ngSubmit)="enregistrerModification()" #editForm="ngForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Devis (€)</label>
+              <input type="number" class="form-control" [(ngModel)]="missionEdit.devis" name="devis" required>
+            </div>
+            <div class="form-group">
+              <label>Facture finale (€)</label>
+              <input type="number" class="form-control" [(ngModel)]="missionEdit.factureFinale" name="factureFinale">
+            </div>
+            <div class="form-group">
+              <label>Prêt de véhicule</label>
+              <select class="form-select" [(ngModel)]="missionEdit.pretVehicule" name="pretVehicule">
+                <option [ngValue]="true">Oui</option>
+                <option [ngValue]="false">Non</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Statut</label>
+              <select class="form-select" [(ngModel)]="missionEdit.statut" name="statut">
+                <option value="assigné">Assigné</option>
+                <option value="en cours">En cours</option>
+                <option value="terminée">Terminée</option>
+                <option value="épave">Épave</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Boutons d'upload pour les documents -->
+          <div class="upload-section">
+            <h4><i class="fas fa-upload me-2"></i>Ajouter des documents</h4>
+            <div class="upload-buttons">
+              <button type="button" class="btn btn-outline-primary upload-btn" (click)="uploadDevis()" [disabled]="uploadingFiles">
+                <i class="fas fa-file-invoice me-2"></i>
+                {{ uploadingFiles ? 'Upload en cours...' : 'Upload Devis' }}
+              </button>
+              <button type="button" class="btn btn-outline-success upload-btn" (click)="uploadFacture()" [disabled]="uploadingFiles">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
+                {{ uploadingFiles ? 'Upload en cours...' : 'Upload Facture' }}
+              </button>
+              <button type="button" class="btn btn-outline-info upload-btn" (click)="uploadImages()" [disabled]="uploadingFiles">
+                <i class="fas fa-images me-2"></i>
+                {{ uploadingFiles ? 'Upload en cours...' : 'Upload Images' }}
+              </button>
+            </div>
+          </div>
+          
+          <div class="actions-grid">
+            <button type="button" class="btn btn-secondary" (click)="annulerEdition()">Annuler</button>
+            <button type="submit" class="btn btn-success">Enregistrer</button>
+          </div>
+        </form>
+
+        <ng-template #lectureSeule>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Devis (€)</label>
+              <div class="readonly-field">{{ mission?.devis }}</div>
+            </div>
+            <div class="form-group">
+              <label>Facture finale (€)</label>
+              <div class="readonly-field">{{ mission?.factureFinale }}</div>
+            </div>
+            <div class="form-group">
+              <label>Prêt de véhicule</label>
+              <div class="readonly-field">{{ mission?.pretVehicule ? 'Oui' : 'Non' }}</div>
+            </div>
+            <div class="form-group">
+              <label>Statut</label>
+              <div class="readonly-field">{{ getGarageStatutLabel(mission?.statut) }}</div>
+            </div>
+            <div class="form-group">
+              <label>Statut commission</label>
+              <div class="readonly-field">{{ mission?.commissionStatut }}</div>
+            </div>
+          </div>
+          
+          <!-- Boutons d'upload en mode lecture (pour passer en édition) -->
+          <div class="upload-section">
+            <h4><i class="fas fa-upload me-2"></i>Ajouter des documents</h4>
+            <div class="upload-buttons">
+              <button type="button" class="btn btn-outline-primary upload-btn" (click)="lancerEdition()">
+                <i class="fas fa-file-invoice me-2"></i>
+                Upload Devis
+              </button>
+              <button type="button" class="btn btn-outline-success upload-btn" (click)="lancerEdition()">
+                <i class="fas fa-file-invoice-dollar me-2"></i>
+                Upload Facture
+              </button>
+              <button type="button" class="btn btn-outline-info upload-btn" (click)="lancerEdition()">
+                <i class="fas fa-images me-2"></i>
+                Upload Images
+              </button>
+            </div>
+          </div>
+          
+          <div class="actions-grid">
+            <button type="button" class="btn btn-secondary" (click)="close()">Fermer</button>
+            <button type="button" class="btn btn-primary" (click)="lancerEdition()">Modifier la mission</button>
+          </div>
+        </ng-template>
+      </div>
+
       <!-- Informations du client -->
       <div class="form-section">
         <h3><i class="fas fa-user me-2"></i>Informations du client</h3>
@@ -39,6 +146,7 @@
           <p class="text-muted">Aucune information client disponible.</p>
         </div>
       </div>
+
       <!-- Informations du véhicule -->
       <div class="form-section">
         <h3><i class="fas fa-car me-2"></i>Informations du véhicule</h3>
@@ -72,6 +180,7 @@
           <p class="text-muted">Aucune information véhicule disponible.</p>
         </div>
       </div>
+
       <!-- Image du véhicule -->
       <div class="form-section" *ngIf="vehiculeInfo">
         <h4><i class="fas fa-image me-2"></i>Photo du véhicule</h4>
@@ -82,76 +191,12 @@
           <span class="text-muted">Aucune image disponible pour ce véhicule.</span>
         </ng-template>
       </div>
+
       <div class="info-section">
         <h3><i class="fas fa-info-circle me-2"></i>Informations générales</h3>
         <p class="subtitle">Consultez ou modifiez les informations de la mission.</p>
       </div>
-      <form *ngIf="editionEnCours; else lectureSeule" (ngSubmit)="enregistrerModification()" #editForm="ngForm">
-        <div class="form-section">
-          <h3><i class="fas fa-edit me-2"></i>Détails de la mission</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Devis (€)</label>
-              <input type="number" class="form-control" [(ngModel)]="missionEdit.devis" name="devis" required>
-            </div>
-            <div class="form-group">
-              <label>Facture finale (€)</label>
-              <input type="number" class="form-control" [(ngModel)]="missionEdit.factureFinale" name="factureFinale">
-            </div>
-            <div class="form-group">
-              <label>Prêt de véhicule</label>
-              <select class="form-select" [(ngModel)]="missionEdit.pretVehicule" name="pretVehicule">
-                <option [ngValue]="true">Oui</option>
-                <option [ngValue]="false">Non</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Statut</label>
-              <select class="form-select" [(ngModel)]="missionEdit.statut" name="statut">
-                <option value="assigné">Assigné</option>
-                <option value="en cours">En cours</option>
-                <option value="terminée">Terminée</option>
-                <option value="épave">Épave</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="actions-grid">
-          <button type="button" class="btn btn-secondary" (click)="annulerEdition()">Annuler</button>
-          <button type="submit" class="btn btn-success">Enregistrer</button>
-        </div>
-      </form>
-      <ng-template #lectureSeule>
-        <div class="form-section">
-          <h3><i class="fas fa-edit me-2"></i>Détails de la mission</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Devis (€)</label>
-              <div class="readonly-field">{{ mission?.devis }}</div>
-            </div>
-            <div class="form-group">
-              <label>Facture finale (€)</label>
-              <div class="readonly-field">{{ mission?.factureFinale }}</div>
-            </div>
-            <div class="form-group">
-              <label>Prêt de véhicule</label>
-              <div class="readonly-field">{{ mission?.pretVehicule ? 'Oui' : 'Non' }}</div>
-            </div>
-            <div class="form-group">
-              <label>Statut</label>
-              <div class="readonly-field">{{ getGarageStatutLabel(mission?.statut) }}</div>
-            </div>
-            <div class="form-group">
-              <label>Statut commission</label>
-              <div class="readonly-field">{{ mission?.commissionStatut }}</div>
-            </div>
-          </div>
-        </div>
-        <div class="actions-grid">
-          <button type="button" class="btn btn-secondary" (click)="close()">Fermer</button>
-          <button type="button" class="btn btn-primary" (click)="lancerEdition()">Modifier la mission</button>
-        </div>
-      </ng-template>
+
       <!-- Détails du sinistre -->
       <div class="form-section" *ngIf="mission?.sinistre">
         <h3><i class="fas fa-car-crash me-2"></i>Détails du sinistre</h3>

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
 import { Router } from '@angular/router';
+import { DossierFilterService } from '../../../features/admin/components/dossier-management/dossier-filter.service';
+import { MissionFilterService } from '../../../features/garage/components/reparation-management/mission-filter.service';
 
 interface MenuItem {
   title: string;
@@ -37,6 +39,8 @@ export class SidebarComponent implements OnInit {
   private keycloakService = inject(KeycloakService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
+  private dossierFilterService = inject(DossierFilterService);
+  private missionFilterService = inject(MissionFilterService);
 
   username: string = 'Visiteur';
   userRoles: string[] = [];
@@ -67,7 +71,7 @@ export class SidebarComponent implements OnInit {
       expanded: false,
       children: [
         { title: 'Nouveaux dossiers', icon: 'bi bi-calendar-day', filter: 'nouveaux' },
-        { title: 'Dossiers non traités', icon: 'bi bi-clock-history', filter: 'nonTraites' },
+        { title: 'Dossiers en cours', icon: 'bi bi-clock-history', filter: 'enCours' },
         { title: 'Dossiers terminés', icon: 'bi bi-check-circle', filter: 'termines' }
       ]
     },
@@ -81,8 +85,17 @@ export class SidebarComponent implements OnInit {
 
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
-    //{ title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
-    { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
+    {
+      title: 'Gestion des réparations',
+      icon: 'bi bi-tools',
+      route: '/garage/reparations',
+      expanded: false,
+      children: [
+        { title: 'Nouvelles missions', icon: 'bi bi-calendar-day', filter: 'nouvelles' },
+        { title: 'Missions en cours', icon: 'bi bi-clock-history', filter: 'enCours' },
+        { title: 'Missions terminées', icon: 'bi bi-check-circle', filter: 'terminees' }
+      ]
+    },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/garage/finance' },
     { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
   ];
@@ -216,6 +229,12 @@ export class SidebarComponent implements OnInit {
   onDossierFilterClick(event: MouseEvent, filter: string) {
     event.preventDefault();
     event.stopPropagation();
-    this.dossierFilterChange.emit(filter);
+    this.dossierFilterService.setFiltre(filter as any);
+  }
+
+  onMissionFilterClick(event: MouseEvent, filter: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.missionFilterService.setFiltre(filter as any);
   }
 }

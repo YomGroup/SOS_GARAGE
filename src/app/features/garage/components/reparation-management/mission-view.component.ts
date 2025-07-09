@@ -150,7 +150,50 @@ export class MissionViewComponent implements OnChanges {
     });
   }
 
-  // Nouvelles méthodes pour la gestion des documents Firebase
+  // Nouvelles méthodes pour les uploads spécifiques
+  uploadDevis() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*';
+    input.multiple = false;
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderDocumentsFirebase(Array.from(files), 'devis');
+      }
+    };
+    input.click();
+  }
+
+  uploadFacture() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*';
+    input.multiple = false;
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderDocumentsFirebase(Array.from(files), 'facture');
+      }
+    };
+    input.click();
+  }
+
+  uploadImages() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderImagesFirebase(Array.from(files));
+      }
+    };
+    input.click();
+  }
+
+  // Méthode pour upload direct (utilisée dans la section Documents)
   ouvrirUploadDirect() {
     const input = document.createElement('input');
     input.type = 'file';
@@ -165,7 +208,8 @@ export class MissionViewComponent implements OnChanges {
     input.click();
   }
 
-  uploaderDocumentsFirebase(files: File[]) {
+  // Méthode modifiée pour supporter les types de documents
+  uploaderDocumentsFirebase(files: File[], type?: string) {
     if (!this.mission || !this.mission.id) {
       alert('Mission non trouvée');
       return;
@@ -175,7 +219,17 @@ export class MissionViewComponent implements OnChanges {
     const uploadPromises: Promise<string>[] = [];
 
     files.forEach(file => {
-      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
+      let uploadPromise: Promise<string>;
+      
+      // Utiliser le bon service selon le type
+      if (type === 'devis') {
+        uploadPromise = firstValueFrom(this.firebaseService.uploadDevisFile(file, this.mission!.id!));
+      } else if (type === 'facture') {
+        uploadPromise = firstValueFrom(this.firebaseService.uploadFactureFile(file, this.mission!.id!));
+      } else {
+        uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
+      }
+      
       uploadPromises.push(uploadPromise);
     });
 
@@ -198,15 +252,66 @@ export class MissionViewComponent implements OnChanges {
           ...this.missionEdit.documentsAssurance,
           ...downloadURLs
         ];
-        
+
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        console.log('Documents ajoutés avec succès');
+        
+        // Afficher un message de succès
+        const typeLabel = type ? ` (${type})` : '';
+        alert(`Document${typeLabel} uploadé avec succès !`);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('Erreur lors de l\'upload:', error);
         this.uploadingFiles = false;
+        this.cdr.detectChanges();
         alert(`Erreur lors de l'upload: ${error.message}`);
+      });
+  }
+
+  // Nouvelle méthode pour uploader des images
+  uploaderImagesFirebase(files: File[]) {
+    if (!this.mission || !this.mission.id) {
+      alert('Mission non trouvée');
+      return;
+    }
+
+    this.uploadingFiles = true;
+    const uploadPromises: Promise<string>[] = [];
+
+    files.forEach(file => {
+      const uploadPromise = firstValueFrom(this.firebaseService.uploadImageFile(file, this.mission!.id!));
+      uploadPromises.push(uploadPromise);
+    });
+
+    if (uploadPromises.length === 0) {
+      this.uploadingFiles = false;
+      return;
+    }
+
+    Promise.all(uploadPromises)
+      .then((downloadURLs: string[]) => {
+        console.log('Images uploadées:', downloadURLs);
+        
+        // Ajouter les URLs aux photos existantes
+        if (!this.missionEdit.photosVehicule) {
+          this.missionEdit.photosVehicule = [];
+        }
+        
+        this.missionEdit.photosVehicule = [
+          ...this.missionEdit.photosVehicule,
+          ...downloadURLs
+        ];
+
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        
+        alert(`Images uploadées avec succès !`);
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'upload des images:', error);
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        alert(`Erreur lors de l'upload des images: ${error.message}`);
       });
   }
 
@@ -276,9 +381,18 @@ export class MissionViewComponent implements OnChanges {
     try {
       // Si c'est une URL Firebase, extraire le nom du fichier du chemin
       if (url.includes('firebasestorage.googleapis.com')) {
-        // Décoder l'URL et extraire le nom du fichier
+        // Décoder l'URL complète
         const decodedUrl = decodeURIComponent(url);
-        const fileNameMatch = decodedUrl.match(/mission_\d+_\d+_(.+\.pdf)/);
+        
+        // Extraire le nom du fichier depuis le chemin
+        // Format attendu: missions/3/documents/facture3.bkgr-strategy-mai-2025.pdf
+        const pathMatch = decodedUrl.match(/missions\/\d+\/documents\/(.+\.(pdf|png|jpg|jpeg|gif))/);
+        if (pathMatch) {
+          return pathMatch[1];
+        }
+        
+        // Fallback: chercher le nom après le dernier slash
+        const fileNameMatch = decodedUrl.match(/\/([^\/]+\.(pdf|png|jpg|jpeg|gif))(\?|$)/);
         if (fileNameMatch) {
           return fileNameMatch[1];
         }
@@ -288,7 +402,7 @@ export class MissionViewComponent implements OnChanges {
       const urlObj = new URL(url);
       const pathname = urlObj.pathname;
       const fileName = pathname.split('/').pop() || 'document.pdf';
-      return fileName;
+      return decodeURIComponent(fileName);
     } catch {
       return 'document.pdf';
     }

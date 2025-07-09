@@ -13,7 +13,7 @@ import { MissionService } from '../../../../../services/mission.service';
 import { Mission, Reparation, Vehicule} from '../../../../../services/models-api.interface';
 import { KeycloakService } from 'keycloak-angular';
 import { MissionViewComponent } from './mission-view.component';
-
+import { MissionFilterService } from './mission-filter.service';
 
 
 @Component({
@@ -50,7 +50,40 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   private keycloakService = inject(KeycloakService);
   private missionService = inject(MissionService);
   private cdr = inject(ChangeDetectorRef);
+  private missionFilterService = inject(MissionFilterService);
   vehiculesMap: Map<number, Vehicule> = new Map();
+  filtreActuel: 'nouvelles' | 'enCours' | 'terminees' | 'toutes' = 'toutes';
+
+  get missionsNouvelles() {
+    return this.missions.filter(m => m.statut && m.statut.toUpperCase() === 'ASSIGNEE');
+  }
+
+  get missionsEnCours() {
+    return this.missions.filter(m => m.statut && m.statut.toUpperCase() === 'EN_COURS');
+  }
+
+  get missionsTerminees() {
+    return this.missions.filter(m => m.statut && ['TERMINEE', 'TERMINÉE', 'terminée'].includes(m.statut.toUpperCase()));
+  }
+
+  get missionsFiltres() {
+    switch (this.filtreActuel) {
+      case 'nouvelles':
+        return this.missionsNouvelles;
+      case 'enCours':
+        return this.missionsEnCours;
+      case 'terminees':
+        return this.missionsTerminees;
+      default:
+        return this.missions;
+    }
+  }
+
+  setFiltreMission(filtre: 'nouvelles' | 'enCours' | 'terminees' | 'toutes') {
+    this.filtreActuel = filtre;
+    this.dataSource.data = this.missionsFiltres;
+    this.cdr.detectChanges();
+  }
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -72,6 +105,11 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
 
   async ngOnInit(): Promise<void> {
     await this.refreshData();
+    this.missionFilterService.filtre$.subscribe(filtre => {
+      this.filtreActuel = filtre;
+      this.dataSource.data = this.missionsFiltres;
+      this.cdr.detectChanges();
+    });
   }
 
   async refreshData(): Promise<void> {
@@ -87,7 +125,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         this.missionService.getAllMissions().subscribe({
           next: (missions: Mission[]) => {
             this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId);
-            this.dataSource.data = this.missions;
+            this.dataSource.data = this.missionsFiltres;
             // Charger les véhicules pour chaque mission
             this.missions.forEach(mission => {
               this.missionService.getVehiculeByMissionId(mission.id!).subscribe({
@@ -128,19 +166,37 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    // On filtre sur missionsFiltres (déjà filtré par le sidebar)
+    const filtered = this.missionsFiltres.filter(mission => {
+      const matchText =
+        mission.sinistre?.vehicule.immatriculation?.toLowerCase().includes(filterValue) ||
+        mission.statut?.toLowerCase().includes(filterValue) ||
+        mission.devis?.toString().includes(filterValue) ||
+        mission.factureFinale?.toString().includes(filterValue);
+      // On applique aussi le filtre statut si présent
+      const matchStatut = this.filtreStatut ? mission.statut === this.filtreStatut : true;
+      return matchStatut && matchText;
+    });
+    this.dataSource.data = filtered;
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+    this.cdr.detectChanges();
   }
 
   // Appelé lors du changement de statut dans le select
   onStatutChange(): void {
-    this.dataSource.filter = '' + Math.random(); // force le refresh du filtre
+    // On applique le filtre statut sur missionsFiltres
+    const filtered = this.missionsFiltres.filter(mission => {
+      const matchStatut = this.filtreStatut ? mission.statut === this.filtreStatut : true;
+      return matchStatut;
+    });
+    this.dataSource.data = filtered;
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
+    this.cdr.detectChanges();
   }
 
   changerStatut(reparation: Reparation, nouveauStatut: string): void {

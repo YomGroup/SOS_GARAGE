@@ -42,7 +42,7 @@
       
         <div class="nav-submenu" *ngIf="item.expanded">
           <a *ngFor="let child of item.children"
-             (click)="onDossierFilterClick($event, child.filter || '')"
+             (click)="item.title === 'Gestion des réparations' ? onMissionFilterClick($event, child.filter || '') : onDossierFilterClick($event, child.filter || '')"
              class="nav-item-child"
              [attr.data-tooltip]="child.title">
             <i [ngClass]="child.icon"></i>

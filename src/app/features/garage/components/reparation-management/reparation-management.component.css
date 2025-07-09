@@ -444,3 +444,32 @@
     padding: 0.75rem 0.5rem;
   }
 }
+
+.card-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1.5rem;
+}
+
+.dossier-card-modern {
+  min-width: 320px;
+  max-width: 350px;
+  min-height: 370px;
+  margin-bottom: 1rem;
+  flex: 1 1 320px;
+}
+
+@media (max-width: 768px) {
+  .card-flex-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .dossier-card-modern {
+    min-width: 100%;
+    max-width: 100%;
+    min-height: unset;
+  }
+}

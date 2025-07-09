@@ -50,73 +50,71 @@
     </div>
 
     <!-- Vue en cartes -->
-    <div class="row" *ngIf="isCardView" id="cardViewContainer">
-      <ng-container *ngIf="dataSource.data.length; else noMission">
-        <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let mission of dataSource.data">
-          <div class="dossier-card-modern">
-            <!-- En-tête avec dégradé -->
-            <div class="dossier-header">
-              <div class="dossier-header-content">
-                <div class="dossier-brand">
-                  <h5 class="dossier-marque">
-                    {{ getVehiculeForMission(mission)?.marque || "Marque" }}
-                  </h5>
-                  <div class="dossier-transmission">
-                    {{ getVehiculeForMission(mission)?.modele || "Modèle" }}
-                  </div>
-                  <div class="dossier-annee">
-                    {{ getVehiculeForMission(mission)?.immatriculation || "Immat" }}
-                  </div>    
+    <div class="card-flex-container" *ngIf="isCardView" id="cardViewContainer">
+      <ng-container *ngIf="missionsFiltres.length; else noMission">
+        <div class="dossier-card-modern" *ngFor="let mission of missionsFiltres">
+          <!-- En-tête avec dégradé -->
+          <div class="dossier-header">
+            <div class="dossier-header-content">
+              <div class="dossier-brand">
+                <h5 class="dossier-marque">
+                  {{ getVehiculeForMission(mission)?.marque || "Marque" }}
+                </h5>
+                <div class="dossier-transmission">
+                  {{ getVehiculeForMission(mission)?.modele || "Modèle" }}
                 </div>
-                <div class="dossier-numero-badge">
-                  <span class="numero-text">M {{ mission.id }}</span>
-                </div>
+                <div class="dossier-annee">
+                  {{ getVehiculeForMission(mission)?.immatriculation || "Immat" }}
+                </div>    
               </div>
-              <div class="dossier-statut-badge">
-                <span class="statut-text" [ngClass]="getStatutClass(mission.statut ?? '')">
-                  {{ getGarageStatutLabel(mission.statut) }}
-                </span>
+              <div class="dossier-numero-badge">
+                <span class="numero-text">M {{ mission.id }}</span>
+              </div>
+            </div>
+            <div class="dossier-statut-badge">
+              <span class="statut-text" [ngClass]="getStatutClass(mission.statut ?? '')">
+                {{ getGarageStatutLabel(mission.statut) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Corps de la carte -->
+          <div class="dossier-body">
+            <div class="dossier-info-row">
+              <div class="info-item">
+                <span class="info-label">Devis :</span>
+                <span class="info-value">{{ mission.devis || 0 }} €</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Facture :</span>
+                <span class="info-value">{{ mission.factureFinale || 0 }} €</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Date :</span>
+                <span class="info-value">{{ formatDate(mission.dateCreation) }}</span>
               </div>
             </div>
 
-            <!-- Corps de la carte -->
-            <div class="dossier-body">
-              <div class="dossier-info-row">
-                <div class="info-item">
-                  <span class="info-label">Devis :</span>
-                  <span class="info-value">{{ mission.devis || 0 }} €</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Facture :</span>
-                  <span class="info-value">{{ mission.factureFinale || 0 }} €</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Date :</span>
-                  <span class="info-value">{{ formatDate(mission.dateCreation) }}</span>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="dossier-actions">
-                <button class="btn-action btn-voir" title="Voir" (click)="ouvrirMissionView(mission)">
-                  <span class="btn-text">Voir</span>
-                </button>
-                <button class="btn-action btn-modifier" title="Modifier" (click)="ouvrirMissionView(mission, true)">
-                  <span class="btn-text">Modifier</span>
-                </button>
-                <button class="btn-action btn-success" title="Valider facture" (click)="validerFacture(mission)">
-                  <i class="fas fa-check"></i>
-                </button>
-                <button class="btn-action btn-supprimer" title="Déclarer épave" (click)="declarerEpave(mission)">
-                  <i class="fas fa-car-crash"></i>
-                </button>
-              </div>
+            <!-- Actions -->
+            <div class="dossier-actions">
+              <button class="btn-action btn-voir" title="Voir" (click)="ouvrirMissionView(mission)">
+                <span class="btn-text">Voir</span>
+              </button>
+              <button class="btn-action btn-modifier" title="Modifier" (click)="ouvrirMissionView(mission, true)">
+                <span class="btn-text">Modifier</span>
+              </button>
+              <button class="btn-action btn-success" title="Valider facture" (click)="validerFacture(mission)">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="btn-action btn-supprimer" title="Déclarer épave" (click)="declarerEpave(mission)">
+                <i class="fas fa-car-crash"></i>
+              </button>
             </div>
           </div>
         </div>
       </ng-container>
       <ng-template #noMission>
-        <div class="col-12 text-center text-muted">Aucune mission trouvée.</div>
+        <div class="text-center text-muted">Aucune mission trouvée.</div>
       </ng-template>
     </div>
 
@@ -134,8 +132,8 @@
           </tr>
         </thead>
         <tbody>
-          <ng-container *ngIf="dataSource.data.length; else noMissionTable">
-            <tr *ngFor="let mission of dataSource.data">
+          <ng-container *ngIf="missionsFiltres.length; else noMissionTable">
+            <tr *ngFor="let mission of missionsFiltres">
               <td>{{ getVehiculeForMission(mission)?.immatriculation || 'N/A' }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatutClass(mission.statut ?? '')">

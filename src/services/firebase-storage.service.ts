@@ -19,14 +19,47 @@ export class FirebaseStorageService {
 
   // Uploader un fichier PDF vers Firebase Storage
   uploadPdfFile(file: File, missionId: number): Observable<string> {
-    return from(this.uploadToFirebase(file, missionId));
+    return from(this.uploadToFirebase(file, missionId, 'document'));
+  }
+
+  // Uploader une image vers Firebase Storage
+  uploadImageFile(file: File, missionId: number): Observable<string> {
+    return from(this.uploadToFirebase(file, missionId, 'image'));
+  }
+
+  // Uploader un devis vers Firebase Storage
+  uploadDevisFile(file: File, missionId: number): Observable<string> {
+    return from(this.uploadToFirebase(file, missionId, 'devis'));
+  }
+
+  // Uploader une facture vers Firebase Storage
+  uploadFactureFile(file: File, missionId: number): Observable<string> {
+    return from(this.uploadToFirebase(file, missionId, 'facture'));
   }
 
   // Méthode privée pour upload vers Firebase
-  private async uploadToFirebase(file: File, missionId: number): Promise<string> {
+  private async uploadToFirebase(file: File, missionId: number, type: string = 'document'): Promise<string> {
     try {
-      // Simulation d'upload Firebase (remplacez par votre implémentation Firebase)
-      const fileName = `mission_${missionId}_${Date.now()}_${file.name}`;
+      // Générer le nom de fichier selon le type
+      const originalName = file.name;
+      const fileExtension = originalName.split('.').pop() || '';
+      const baseName = originalName.replace(`.${fileExtension}`, '');
+      
+      let fileName: string;
+      switch (type) {
+        case 'image':
+          fileName = `image${missionId}.${baseName}.${fileExtension}`;
+          break;
+        case 'devis':
+          fileName = `devis${missionId}.${baseName}.${fileExtension}`;
+          break;
+        case 'facture':
+          fileName = `facture${missionId}.${baseName}.${fileExtension}`;
+          break;
+        default:
+          fileName = `mission_${missionId}_${Date.now()}_${originalName}`;
+      }
+      
       const filePath = `missions/${missionId}/documents/${fileName}`;
       
       // Ici vous utiliseriez Firebase Storage

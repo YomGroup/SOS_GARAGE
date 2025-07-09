@@ -122,145 +122,137 @@
 
     <!-- Affichage des dossiers filtrés -->
     <div *ngIf="dossiersFiltres.length; else aucunDossier">
-      <div class="row" id="cardViewContainer" *ngIf="isCardView">
-        <div class="col-12 col-sm-6 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer">
-          <div class="dossier-card-modern">
-            <!-- En-tête avec dégradé -->
-            <div class="dossier-header">
-              <div class="dossier-header-content">
-                <div class="dossier-brand">
-                  <h5 class="dossier-marque">
-                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
-                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
-                    </span>
-                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).marque }}</span>
-                  </h5>
-                  <div class="dossier-transmission">
-                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
-                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
-                    </span>
-                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).modele }}</span>
-                  </div>
-                  <div class="dossier-annee">
-                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
-                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
-                    </span>
-                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).annee }}</span>
-                  </div>
+      <div class="card-flex-container" id="cardViewContainer" *ngIf="isCardView">
+        <div class="dossier-card-modern" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer">
+          <!-- En-tête avec dégradé -->
+          <div class="dossier-header">
+            <div class="dossier-header-content">
+              <div class="dossier-brand">
+                <h5 class="dossier-marque">
+                  <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                  </span>
+                  <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).marque }}</span>
+                </h5>
+                <div class="dossier-transmission">
+                  <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                  </span>
+                  <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).modele }}</span>
                 </div>
-                <div class="dossier-numero-badge">
-                  <span class="numero-text">N {{ dossier.numero }}</span>
+                <div class="dossier-annee">
+                  <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                  </span>
+                  <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).annee }}</span>
                 </div>
               </div>
-              <div class="dossier-statut-badge">
-                <span class="statut-text" [ngClass]="getStatutClass(dossier.statut ?? '')">{{ dossier.statut || 'En attente' }}</span>
+              <div class="dossier-numero-badge">
+                <span class="numero-text">N {{ dossier.numero }}</span>
+              </div>
+            </div>
+            <div class="dossier-statut-badge">
+              <span class="statut-text" [ngClass]="getStatutClass(getStatutAffichage(dossier))">{{ getStatutAffichage(dossier) }}</span>
+            </div>
+          </div>
+
+          <!-- Corps de la carte -->
+          <div class="dossier-body">
+            <div class="dossier-info-row">
+              <div class="info-item">
+                <span class="info-label">Type :</span>
+                <span class="info-value">{{ dossier.type || 'Roulant' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Assurance :</span>
+                <span class="info-value">
+                  <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                  </span>
+                  <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).assurance }}</span>
+                </span>
               </div>
             </div>
 
-            <!-- Corps de la carte -->
-            <div class="dossier-body">
-              <div class="dossier-info-row">
-                <div class="info-item">
-                  <span class="info-label">Type :</span>
-                  <span class="info-value">{{ dossier.type || 'Roulant' }}</span>
-                </div>
-                <div class="info-item">
-                  <span class="info-label">Assurance :</span>
-                  <span class="info-value">
-                    <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
-                      <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
-                    </span>
-                    <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).assurance }}</span>
-                  </span>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="dossier-actions">
-                <button class="btn-action btn-voir" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)"><span class="btn-text">Voir</span></button>
-                <button class="btn-action btn-modifier" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)"><span class="btn-text">Modifier</span></button>
-                <button class="btn-action btn-supprimer" title="Supprimer" (click)="$event.stopPropagation(); supprimerDossier(dossier)"><i class="fas fa-trash"></i></button>
-              </div>
+            <!-- Actions -->
+            <div class="dossier-actions">
+              <button class="btn-action btn-voir" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)"><span class="btn-text">Voir</span></button>
+              <button class="btn-action btn-modifier" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)"><span class="btn-text">Modifier</span></button>
+              <button class="btn-action btn-supprimer" title="Supprimer" (click)="$event.stopPropagation(); supprimerDossier(dossier)"><i class="fas fa-trash"></i></button>
             </div>
           </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Vue en tableau (desktop uniquement) -->
-    <div
-      class="table-responsive"
-      *ngIf="!isMobile && !isCardView && dossiersFiltres.length"
-      id="tableViewContainer"
-    >
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th>N° Dossier</th>
-            <th>Type</th>
-            <th>Statut</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <ng-container *ngIf="dossiersFiltres.length; else noDossierTable">
-            <tr *ngFor="let dossier of dossiersFiltres">
-              <td>#{{ dossier.numero || 'N/A' }}</td>
-              <td>{{ dossier.type || 'Non spécifié' }}</td>
-              <td>
-                <span
-                  class="badge"
-                  [ngClass]="getStatutClass(dossier.statut ?? '')"
-                  >{{ dossier.statut || 'En attente' }}</span
-                >
-              </td>
-              <td>{{ formatDate(dossier.dateCreation) }}</td>
-              <td>
-                <button
-                  class="btn btn-sm btn-outline-primary"
-                  title="Voir"
-                  (click)="ouvrirDossierView(dossier, false)"
-                >
-                  <i class="fas fa-eye"></i>
-                </button>
-                <button
-                  class="btn btn-sm btn-outline-secondary"
-                  title="Modifier"
-                  (click)="ouvrirDossierView(dossier, true)"
-                >
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  class="btn btn-sm btn-outline-danger"
-                  title="Supprimer"
-                  (click)="supprimerDossier(dossier)"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </ng-container>
-          <ng-template #noDossierTable>
+      <div
+        class="table-responsive"
+        *ngIf="!isMobile && !isCardView && dossiersFiltres.length"
+        id="tableViewContainer"
+      >
+        <table class="table table-hover">
+          <thead>
             <tr>
-              <td colspan="5" class="text-center text-muted">
-                {{ getMessageAucunDossier() }}
-              </td>
+              <th>N° Dossier</th>
+              <th>Type</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th>Actions</th>
             </tr>
-          </ng-template>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <ng-container *ngIf="dossiersFiltres.length; else noDossierTable">
+              <tr *ngFor="let dossier of dossiersFiltres">
+                <td>#{{ dossier.numero || 'N/A' }}</td>
+                <td>{{ dossier.type || 'Non spécifié' }}</td>
+                <td>
+                  <span
+                    class="badge"
+                    [ngClass]="getStatutClass(getStatutAffichage(dossier))"
+                    >{{ getStatutAffichage(dossier) }}</span
+                  >
+                </td>
+                <td>{{ formatDate(dossier.dateCreation) }}</td>
+                <td>
+                  <button
+                    class="btn btn-sm btn-outline-primary"
+                    title="Voir"
+                    (click)="ouvrirDossierView(dossier, false)"
+                  >
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-secondary"
+                    title="Modifier"
+                    (click)="ouvrirDossierView(dossier, true)"
+                  >
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    title="Supprimer"
+                    (click)="supprimerDossier(dossier)"
+                  >
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </ng-container>
+            <ng-template #noDossierTable>
+              <tr>
+                <td colspan="5" class="text-center text-muted">
+                  {{ getMessageAucunDossier() }}
+                </td>
+              </tr>
+            </ng-template>
+          </tbody>
+        </table>
+      </div>
     </div>
     
     <!-- Message aucun dossier pour la vue carte -->
-    <div *ngIf="isCardView && !dossiersFiltres.length" class="alert alert-info">
-      {{ getMessageAucunDossier() }}
-    </div>
+    <!-- SUPPRIMÉ: <div *ngIf="isCardView && !dossiersFiltres.length" class="alert alert-info">{{ getMessageAucunDossier() }}</div> -->
     
     <!-- Message aucun dossier pour la vue tableau mobile -->
-    <div *ngIf="isMobile && !isCardView && !dossiersFiltres.length" class="alert alert-info">
-      {{ getMessageAucunDossier() }}
-    </div>
+    <!-- SUPPRIMÉ: <div *ngIf="isMobile && !isCardView && !dossiersFiltres.length" class="alert alert-info">{{ getMessageAucunDossier() }}</div> -->
     
     <ng-template #aucunDossier>
       <div class="alert alert-info">
