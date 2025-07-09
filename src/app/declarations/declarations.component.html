@@ -33,6 +33,7 @@
         </div>
 
        <!-- Step 2: Vehicle Selection -->
+<!-- Step 2: Vehicle Selection -->
 <div class="step-content" *ngIf="currentStep === 2">
   <h2>Choisissez votre véhicule accidenté</h2>
 
@@ -49,6 +50,28 @@
         {{ vehicle }}
       </li>
     </ul>
+  </div>
+
+  <!-- Assurance selection (only shown for non-rolling vehicles) -->
+  <div class="assurance-selection" *ngIf="showAssuranceStep && selectedVehicle">
+    <h2>Sélectionnez votre assurance</h2>
+    
+    <div class="vehicle-dropdown" 
+         [class.open]="isAssuranceDropdownOpen"
+         (click)="toggleAssuranceDropdown()">
+      <span>{{ selectedAssurance || 'Sélectionner une assurance' }}</span>
+    </div>
+
+    <ul class="dropdown-list" *ngIf="isAssuranceDropdownOpen">
+      <li *ngFor="let assurance of assurances" 
+          (click)="selectAssurance(assurance)">
+        {{ assurance }}
+      </li>
+    </ul>
+    
+    <div *ngIf="assurances.length === 0" class="no-assurances">
+      <p>Aucune assurance disponible pour ce véhicule</p>
+    </div>
   </div>
 </div>
         <!-- Step 3: Constat -->
@@ -154,7 +177,7 @@
 </label>
 
 
-    <button class="btn  btn-sign"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"
+    <button class="btn  btn-sign text-white"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"
             (click)="signDocument()" 
             [disabled]="!isChecked || isCurrentDocumentSigned || isSigning">
       <span *ngIf="!isSigning">Signer le document</span>
@@ -170,11 +193,16 @@
   <div class="success-message" *ngIf="allDocumentsSigned">
     <h2>Votre demande a été prise en compte</h2>
     <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
-    <button class="btn-contact" routerLink="/assistance">
+    <button class="btn-contact" routerLink="/assistance" *ngIf="vehicleStatus === 'rolling'">
       Contactez l'assistance
     </button>
+     <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
+    <p>contactez l'Assurance :</p>
+    <a href="tel:0761841419" class="assistance-number">07 61 84 14 19</a>
+  </div>
   </div>
 </div>
+
 
         <!-- Navigation Buttons -->
         <div class="navigation-buttons" *ngIf="!allDocumentsSigned">
