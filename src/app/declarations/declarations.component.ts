@@ -76,7 +76,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   signatureImage: string | null = null;
   userid: string | null = null;
   assureId: number = 0;
-
+  // Add this to your component class properties
+  assurances: any[] = [];
+  selectedAssurance: any = null;
+  showAssuranceStep = false;
   // Services
   private vehiculeService = inject(VehicleService);
   private authService = inject(AuthService);
@@ -132,7 +135,18 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
 
   }
-
+  // Add this new method to load assurances
+  private loadAssurances(): void {
+    this.vehiculeService.listAssuranceVehicules().subscribe({
+      next: (data: any) => {
+        this.assurances = data;
+        console.log('Assurances chargées:', this.assurances);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des assurances', err);
+      }
+    });
+  }
   private async prepareDocumentTemplates(): Promise<void> {
     for (const doc of this.documents) {
       try {
@@ -252,21 +266,45 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     }, 1000);
   }
+  // Ajoutez à vos propriétés
+  isAssuranceDropdownOpen = false;
 
+  // Ajoutez ces nouvelles méthodes
+  toggleAssuranceDropdown(): void {
+    this.isAssuranceDropdownOpen = !this.isAssuranceDropdownOpen;
+  }
+
+  selectAssurance(assurance: any): void {
+    this.selectedAssurance = assurance;
+    this.isAssuranceDropdownOpen = false;
+  }
   // Autres méthodes utilitaires
   canProceed(): boolean {
     switch (this.currentStep) {
       case 1: return !!this.vehicleStatus;
-      case 2: return !!this.selectedVehicle;
+      case 2:
+        if (this.vehicleStatus === 'not-rolling') {
+          return !!this.selectedVehicle && !!this.selectedAssurance;
+        }
+        return !!this.selectedVehicle;
       case 3: case 4: return true;
       case 5: return false;
       default: return false;
     }
   }
-
   selectVehicle(vehicle: string): void {
     this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
+    this.loadAssurances();
+    console.log('Véhicule sélectionné:', this.vehicleStatus);
+
+    // Check if vehicle is non-rolling and show assurance step
+    if (this.vehicleStatus === 'not-rolling') {
+      this.showAssuranceStep = true;
+      this.loadAssurances();
+    } else {
+      this.showAssuranceStep = false;
+    }
     if (this.userData) {
       this.prepareDocumentTemplates();
     }

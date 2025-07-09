@@ -51,7 +51,9 @@ export class VehicleService {
     updateVehiculesPost(id: number, body: any) {
         return this.http.put(`${this.apiUrlAdd}/${id}`, body);
     }
-
+    listAssuranceVehicules(body: any = {}) {
+        return this.http.get(`${this.apiUrlAdd}/listeAssurance`);
+    }
     deleteVehiculesPost(id: number) {
         return this.http.delete(`${this.apiUrlAdd}?id=${id}`);
     }

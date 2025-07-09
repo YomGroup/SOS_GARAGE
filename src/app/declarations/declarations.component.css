@@ -1009,3 +1009,104 @@ body {
         font-size: 14px;
     }
 }
+
+/* Add to your CSS file */
+.assurance-selection {
+    margin-top: 2rem;
+}
+
+.assurance-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.assurance-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.assurance-card:hover {
+    border-color: #1e4db8;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.assurance-card.selected {
+    border: 2px solid #1e4db8;
+    background-color: rgba(30, 77, 184, 0.05);
+}
+
+.no-assurances {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* Ajoutez à votre fichier CSS */
+.assurance-selection {
+    margin-top: 2rem;
+}
+
+.assurance-dropdown {
+    position: relative;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    cursor: pointer;
+    margin-top: 8px;
+    background-color: white;
+}
+
+.assurance-dropdown.open {
+    border-color: #1e4db8;
+}
+
+.assurance-dropdown span {
+    display: block;
+}
+
+.assurance-dropdown::after {
+    content: '▼';
+    float: right;
+    font-size: 12px;
+    color: #666;
+}
+
+.assurance-dropdown.open::after {
+    content: '▲';
+}
+
+.no-assurances {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+}
+
+/* Utilisez les mêmes styles que pour le dropdown de véhicule */
+.dropdown-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    position: absolute;
+    width: 100%;
+    z-index: 1000;
+    background-color: white;
+}
+
+.dropdown-list li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.dropdown-list li:hover {
+    background-color: #f5f5f5;
+}
