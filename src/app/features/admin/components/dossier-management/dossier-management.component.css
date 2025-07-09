@@ -765,28 +765,97 @@
   justify-content: center;
   font-size: 1.5rem;
 }
+
+/* Améliorations pour mobile - Cartes de statistiques compactes */
 @media (max-width: 768px) {
   .stats-card {
     padding: 1rem;
-    text-align: center;
+    min-height: 100px;
+    margin-bottom: 0.75rem;
   }
   .stats-card .d-flex {
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .stats-title {
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
   }
   .stats-number {
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    margin-bottom: 0;
+  }
+  .stats-icon {
+    width: 45px;
+    height: 45px;
+    font-size: 1.2rem;
+    flex-shrink: 0;
   }
 }
+
 @media (max-width: 576px) {
   .stats-card {
-    padding: 0.5rem;
-    text-align: center;
-    min-height: 100px;
+    padding: 0.75rem;
+    min-height: 80px;
+    margin-bottom: 0.5rem;
   }
   .stats-card .d-flex {
-    flex-direction: column !important;
-    gap: 8px;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .stats-title {
+    font-size: 0.75rem;
+    margin-bottom: 0.2rem;
+    line-height: 1.2;
+  }
+  .stats-number {
+    font-size: 1.2rem;
+    margin-bottom: 0;
+  }
+  .stats-icon {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+/* Version ultra-compacte pour très petits écrans */
+@media (max-width: 480px) {
+  .stats-card {
+    padding: 0.6rem;
+    min-height: 70px;
+  }
+  .stats-card .d-flex {
+    gap: 0.4rem;
+  }
+  .stats-title {
+    font-size: 0.7rem;
+  }
+  .stats-number {
+    font-size: 1.1rem;
+  }
+  .stats-icon {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Grille responsive pour les cartes de stats */
+@media (max-width: 768px) {
+  .row .col-12.col-sm-6.col-lg-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+}
+
+@media (max-width: 576px) {
+  .row .col-12.col-sm-6.col-lg-3 {
+    flex: 0 0 100%;
+    max-width: 100%;
   }
 }
 

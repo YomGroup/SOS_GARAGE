@@ -200,7 +200,6 @@
 .btn-supprimer {
   background: linear-gradient(135deg, #dc3545, #e83e8c);
   color: white;
-  flex: 0 0 45px;
 }
 
 .btn-supprimer:hover {
@@ -209,7 +208,7 @@
 }
 
 .btn-text {
-  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 /* Tableau amélioré */
@@ -471,5 +470,93 @@
     min-width: 100%;
     max-width: 100%;
     min-height: unset;
+  }
+}
+
+/* Améliorations pour mobile - Cartes de réparation */
+@media (max-width: 768px) {
+  .dossier-header {
+    padding: 1rem;
+  }
+  .dossier-body {
+    padding: 1rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.2rem;
+  }
+  .dossier-annee {
+    font-size: 1rem;
+  }
+  .dossier-transmission {
+    font-size: 0.85rem;
+  }
+  .dossier-info-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+  }
+  .dossier-actions {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .btn-action {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dossier-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .dossier-numero-badge {
+    padding: 0.3rem 0.8rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.1rem;
+  }
+  .dossier-annee {
+    font-size: 0.9rem;
+  }
+  .dossier-transmission {
+    font-size: 0.8rem;
+  }
+  .btn-action {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 35px;
+  }
+}
+
+/* Version ultra-compacte pour très petits écrans */
+@media (max-width: 480px) {
+  .dossier-header {
+    padding: 0.8rem;
+  }
+  .dossier-body {
+    padding: 0.8rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1rem;
+  }
+  .dossier-annee {
+    font-size: 0.85rem;
+  }
+  .dossier-transmission {
+    font-size: 0.75rem;
+  }
+  .btn-action {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    min-height: 32px;
   }
 }

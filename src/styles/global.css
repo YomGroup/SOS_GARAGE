@@ -148,4 +148,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--color-white) !important;
   font-family: 'Poppins', sans-serif !important;
   font-weight: 500 !important;
-} 
+}
+
+/* Import des optimisations mobiles */
+@import './mobile-optimizations.css'; 
