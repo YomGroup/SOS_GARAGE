@@ -560,3 +560,22 @@
     min-height: 32px;
   }
 }
+
+/* Style pour les dossiers non-traités */
+.dossier-non-traite {
+  border: 2px dashed #ffc107;
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+}
+
+.dossier-non-traite .dossier-header {
+  background: linear-gradient(135deg, #ffc107, #f39c12);
+}
+
+.dossier-non-traite .dossier-header-content .dossier-brand h5 {
+  color: #856404;
+}
+
+.dossier-non-traite .statut-text {
+  background: #856404;
+  color: white;
+}

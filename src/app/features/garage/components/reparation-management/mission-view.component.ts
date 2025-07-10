@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, MissionUpdate, Assure, Vehicule } from '../../../../../services/models-api.interface';
 import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
+import { DossiersService } from '../../../../../services/dossiers.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -15,6 +16,7 @@ import { firstValueFrom } from 'rxjs';
 })
 export class MissionViewComponent implements OnChanges {
   @Input() mission: Mission | null = null;
+  @Input() dossier: any = null; // Ajout pour les dossiers non-traités
   @Input() loading: boolean = false;
   @Input() edition: boolean = false;
   @Output() closed = new EventEmitter<void>();
@@ -29,34 +31,38 @@ export class MissionViewComponent implements OnChanges {
   constructor(
     private missionService: MissionService, 
     private cdr: ChangeDetectorRef,
-    private firebaseService: FirebaseStorageService
+    private firebaseService: FirebaseStorageService,
+    private dossiersService: DossiersService
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();
     }
-    // Ajout : charger infos client/véhicule si mission change
-    if (changes['mission'] && this.mission) {
+    // Charger infos client/véhicule si mission ou dossier change
+    if (changes['mission'] || changes['dossier']) {
       this.chargerInformationsAssureEtVehicule();
     }
   }
 
   ngOnInit(): void {
-    if (this.mission) {
-      this.chargerInformationsAssureEtVehicule();
-    }
+    this.chargerInformationsAssureEtVehicule();
   }
 
   // Ajout : méthode pour charger infos client et véhicule
   chargerInformationsAssureEtVehicule() {
-    if (!this.mission || !this.mission.sinistre || !this.mission.sinistre.id) {
+    // Récupérer l'ID du sinistre depuis la mission ou le dossier
+    const sinistreId = this.mission?.sinistre?.id || this.dossier?.id;
+    
+    if (!sinistreId) {
+      console.log('Aucun ID de sinistre disponible pour récupérer les informations');
       this.assureInfo = null;
       this.vehiculeInfo = null;
       return;
     }
+    
     // Récupérer l'assuré
-    this.missionService.getAssureBySinistreId(this.mission.sinistre.id).subscribe({
+    this.missionService.getAssureBySinistreId(sinistreId).subscribe({
       next: (assure) => {
         this.assureInfo = assure;
         this.cdr.detectChanges();
@@ -65,8 +71,9 @@ export class MissionViewComponent implements OnChanges {
         this.assureInfo = null;
       }
     });
+    
     // Récupérer le véhicule
-    this.missionService.getVehiculeByMissionId(this.mission.id!).subscribe({
+    this.missionService.getVehiculeBySinistreId(sinistreId).subscribe({
       next: (vehicule) => {
         this.vehiculeInfo = vehicule;
         this.cdr.detectChanges();

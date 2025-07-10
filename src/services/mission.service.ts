@@ -61,6 +61,10 @@ export class MissionService {
     return this.http.get<Vehicule>(`${this.apiUrl}/missions/${missionId}/vehicule`);
   }
 
+  getVehiculeBySinistreId(sinistreId: number): Observable<Vehicule> {
+    return this.http.get<Vehicule>(`${this.apiUrl}/sinistre/${sinistreId}/vehicule`);
+  }
+
   updateMissionReparateur(id: number, reparateur: Reparateur) {
     return this.http.patch<Mission>(`${this.apiUrl}/missions/${id}`, { reparateur: reparateur.id });
   }

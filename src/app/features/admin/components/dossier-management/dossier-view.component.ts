@@ -52,6 +52,10 @@ export class DossierViewComponent implements OnChanges, OnInit {
   assureInfo: Assure | null = null;
   loadingAssure = false;
 
+  // Propriété pour le véhicule du sinistre
+  vehiculeSinistre: any = null;
+  loadingVehicule = false;
+
   // Propriétés pour le modal d'images
   showImageModal = false;
   currentImageUrl = '';
@@ -80,6 +84,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     // Charger automatiquement les informations de l'assuré si la mission ou le dossier change
     if (changes['mission'] || changes['dossier']) {
       this.chargerInformationsAssure();
+      this.chargerVehiculeSinistre();
     }
   }
 
@@ -487,6 +492,34 @@ export class DossierViewComponent implements OnChanges, OnInit {
       error: (error) => {
         console.error('Erreur lors de la récupération des informations de l\'assuré:', error);
         this.assureInfo = null;
+      }
+    });
+  }
+
+  // Méthode pour charger le véhicule du sinistre
+  chargerVehiculeSinistre() {
+    // Récupérer l'ID du sinistre depuis la mission ou le dossier
+    const sinistreId = this.mission?.sinistre?.id || this.dossier?.id;
+    
+    if (!sinistreId) {
+      console.log('Aucun ID de sinistre disponible pour récupérer le véhicule');
+      return;
+    }
+
+    this.loadingVehicule = true;
+    
+    // Utiliser le service dossiers pour récupérer le véhicule par ID de sinistre
+    this.dossiersService.getVehiculeBySinistreId(sinistreId).subscribe({
+      next: (vehicule) => {
+        console.log('Véhicule du sinistre récupéré:', vehicule);
+        this.vehiculeSinistre = vehicule;
+        this.loadingVehicule = false;
+        this.cdr.detectChanges(); // Forcer la détection de changements
+      },
+      error: (error) => {
+        console.error('Erreur lors de la récupération du véhicule du sinistre:', error);
+        this.vehiculeSinistre = null;
+        this.loadingVehicule = false;
       }
     });
   }
