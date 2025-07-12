@@ -1,7 +1,9 @@
 // message.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ChatFirebaseService, MessageFirebase } from '../../services/messagerie.service';
+
 
 interface Message {
   id: string;
@@ -40,6 +42,7 @@ export class MessageComponent implements OnInit {
   searchTerm: string = '';
   filterType: string = 'tous';
   showNewMessageModal: boolean = false;
+  private chatService = inject(ChatFirebaseService);
 
   constructor() { }
 
@@ -150,25 +153,34 @@ export class MessageComponent implements OnInit {
     });
   }
 
-  sendMessage(): void {
+  async sendMessage(): Promise<void> {
     if (this.newMessage.trim() && this.selectedConversation) {
-      const newMsg: Message = {
-        id: 'MSG-' + Date.now(),
-        expediteur: 'Said',
+      const now = new Date();
+
+      const message: Omit<MessageFirebase, 'timestamp'> = {
+        conversationId: this.selectedConversation.id,
+        expediteur: 'Said', // à remplacer par un vrai utilisateur Keycloak si nécessaire
         objet: 'Re: ' + this.selectedConversation.sujet,
         contenu: this.newMessage,
-        dateEnvoi: new Date().toLocaleDateString('fr-FR'),
-        heureEnvoi: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        dateEnvoi: now.toLocaleDateString('fr-FR'),
+        heureEnvoi: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
         lu: true,
         type: 'envoye',
-        priorite: 'normale'
+        priorite: 'normale',
+        sinistresId: undefined,
+        pieceJointe: []
       };
 
-      this.selectedConversation.messages.push(newMsg);
-      this.selectedConversation.derniereActivite = 'À l\'instant';
-      this.newMessage = '';
+      try {
+        await this.chatService.sendMessage(this.selectedConversation.id, message);
+        this.newMessage = '';
+        this.selectedConversation.derniereActivite = 'À l\'instant';
+      } catch (error) {
+        console.error('Erreur d’envoi du message', error);
+      }
     }
   }
+
 
   getUnreadCount(): number {
     return this.conversations.reduce((total, conv) => {

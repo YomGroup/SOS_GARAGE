@@ -54,6 +54,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   ];
 
   // Variables d'état
+  incidentDescription: string = '';
+  hasChosenDeclarationMethod: boolean = false;
+  declarationMethod: 'describe' | 'upload' | null = null;
   currentStep = 1;
   vehicleStatus = '';
   selectedVehicle = '';
@@ -80,6 +83,14 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   assurances: any[] = [];
   selectedAssurance: any = null;
   showAssuranceStep = false;
+  currentPhotoStep: number = 1;
+  photoSteps: any = {
+    1: [], // Photos d'ensemble
+    2: [], // Plaque immatriculation
+    3: [], // Numéro de série
+    4: []  // Zones endommagées
+  };
+
   // Services
   private vehiculeService = inject(VehicleService);
   private authService = inject(AuthService);
@@ -208,7 +219,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data;
-        this.vehicles = data.map((vehicule: any) => vehicule.marque);
+        this.vehicles = data.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
 
       },
       error: (err) => {
@@ -216,7 +227,23 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     });
   }
+  // Nouvelles méthodes
+  selectDeclarationMethod(method: 'describe' | 'upload'): void {
+    this.declarationMethod = method;
+    this.hasChosenDeclarationMethod = true;
+  }
 
+  validateDescription(): void {
+    if (this.incidentDescription.trim().length > 10) { // Validation minimale
+      this.nextStep();
+    } else {
+      alert('Veuillez fournir une description plus détaillée');
+    }
+  }
+  resetDeclarationMethod(): void {
+    this.hasChosenDeclarationMethod = false;
+    this.declarationMethod = null;
+  }
   get currentPdf(): string {
     try {
       const doc = this.documents.find(d => d.id === this.currentDocument);
@@ -257,6 +284,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.signedDocuments.add(this.currentDocument);
       this.isSigning = false;
       this.isChecked = false;
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Pour un défilement doux
+      });
 
       if (this.signedDocuments.size === this.documents.length) {
         this.allDocumentsSigned = true;
@@ -281,12 +312,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Autres méthodes utilitaires
   canProceed(): boolean {
     switch (this.currentStep) {
-      case 1: return !!this.vehicleStatus;
-      case 2:
-        if (this.vehicleStatus === 'not-rolling') {
-          return !!this.selectedVehicle && !!this.selectedAssurance;
-        }
-        return !!this.selectedVehicle;
+      case 1:
+        return true;//!!this.selectedVehicle;
+      case 2: return true;//return !!this.vehicleStatus;
+
       case 3: case 4: return true;
       case 5: return false;
       default: return false;
@@ -308,8 +337,14 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     if (this.userData) {
       this.prepareDocumentTemplates();
     }
+    this.nextStep();
   }
+  onStatusChange() {
 
+    if (this.canProceed()) {
+      this.nextStep();
+    }
+  }
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
@@ -337,14 +372,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  onPhotoSelect(event: Event): void {
+  onPhotoSelect(event: Event, step: number): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      // Limite à 10 photos maximum
-      const remainingSlots = 10 - this.previewPhotos.length;
-      const filesToAdd = Array.from(input.files).slice(0, remainingSlots);
+      const files = Array.from(input.files);
 
-      filesToAdd.forEach(file => {
+      files.forEach(file => {
         if (!file.type.match('image.*')) {
           alert('Seules les images sont acceptées');
           return;
@@ -352,19 +385,51 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.previewPhotos.push({
+          this.photoSteps[step].push({
             url: e.target.result,
             file: file
           });
-          this.photosFiles.push(file); // Ajoute aussi au tableau principal
         };
         reader.readAsDataURL(file);
       });
 
-      if (input.files.length > remainingSlots) {
-        alert(`Vous avez atteint la limite de 10 photos. ${remainingSlots} photos ajoutées.`);
-      }
+      // Réinitialiser l'input pour permettre la sélection des mêmes fichiers
+      input.value = '';
     }
+  }
+  getCurrentStepPhotos() {
+    return this.photoSteps[this.currentPhotoStep];
+  }
+
+  setPhotoStep(step: number): void {
+    if (this.currentPhotoStep !== step) {
+      this.currentPhotoStep = step;
+    }
+  }
+
+  nextPhotoStep(): void {
+    if (this.currentPhotoStep < 4) {
+      this.currentPhotoStep++;
+    } else {
+      // Toutes les étapes photos sont complétées
+      this.nextStep(); // Passer à l'étape suivante du formulaire
+    }
+  }
+
+  prevPhotoStep(): void {
+    if (this.currentPhotoStep > 1) {
+      this.currentPhotoStep--;
+    }
+  }
+
+  canProceedPhotoStep(): boolean {
+    // Vérifie qu'au moins une photo a été ajoutée pour l'étape courante
+    return this.photoSteps[this.currentPhotoStep].length > 0;
+  }
+
+  removePhoto(index: number, step: number): void {
+    URL.revokeObjectURL(this.photoSteps[step][index].url);
+    this.photoSteps[step].splice(index, 1);
   }
   removeConstat(): void {
     if (this.constatPreviewUrl) {
@@ -374,11 +439,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.constatFile = undefined;
     this.showPdfViewer = false;
   }
+  /*
   removePhoto(index: number): void {
     URL.revokeObjectURL(this.previewPhotos[index].url);
     this.previewPhotos.splice(index, 1);
     this.photosFiles.splice(index, 1);
-  }
+  }*/
 
   get isCurrentDocumentSigned(): boolean {
     return this.signedDocuments.has(this.currentDocument);
@@ -400,7 +466,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         conditionsAcceptees: true,
         documents: [], // tableau vide comme demandé
         imgUrl: savedFiles.photosNames,
-        idVehicule: this.vehiclesAll.find(v => v.marque === this.selectedVehicle)?.id || 0
+        idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0
       };
       console.log('Payload envoyé:', sinistrePayload);
 

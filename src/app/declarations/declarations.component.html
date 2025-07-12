@@ -12,29 +12,31 @@
         </div>
 
         <!-- Step 1: Vehicle Status -->
-        <div class="step-content" *ngIf="currentStep === 1">
-          <h2>Information sur le véhicule</h2>
-          <div class="vehicle-status">
-            <div class="radio-group">
-              <input type="radio" id="rolling" name="vehicleStatus" value="rolling" [(ngModel)]="vehicleStatus">
-              <label for="rolling" class="radio-label">
-                <i class="icon-car-ok"></i>
-                Mon véhicule est roulant
-              </label>
-            </div>
-            <div class="radio-group">
-              <input type="radio" id="not-rolling" name="vehicleStatus" value="not-rolling" [(ngModel)]="vehicleStatus">
-              <label for="not-rolling" class="radio-label">
-                <i class="icon-car-damaged"></i>
-                Mon véhicule est Non roulant
-              </label>
-            </div>
-          </div>
-        </div>
+      <div class="step-content" *ngIf="currentStep === 2">
+  <h2>Information sur le véhicule</h2>
+  <div class="vehicle-status">
+    <div class="radio-group">
+      <input type="radio" id="rolling" name="vehicleStatus" value="rolling" 
+             [(ngModel)]="vehicleStatus" (change)="onStatusChange()">
+      <label for="rolling" class="radio-label">
+        <i class="icon-car-ok"></i>
+        Mon véhicule est roulant
+      </label>
+    </div>
+    <div class="radio-group">
+      <input type="radio" id="not-rolling" name="vehicleStatus" value="not-rolling" 
+             [(ngModel)]="vehicleStatus" (change)="onStatusChange()">
+      <label for="not-rolling" class="radio-label">
+        <i class="icon-car-damaged"></i>
+        Mon véhicule est Non roulant
+      </label>
+    </div>
+  </div>
+</div>
 
        <!-- Step 2: Vehicle Selection -->
 <!-- Step 2: Vehicle Selection -->
-<div class="step-content" *ngIf="currentStep === 2">
+<div class="step-content" *ngIf="currentStep === 1">
   <h2>Choisissez votre véhicule accidenté</h2>
 
   <div class="vehicle-selection">
@@ -76,77 +78,173 @@
 </div>
         <!-- Step 3: Constat -->
        <!-- Step 3: Constat -->
-<div class="step-content" *ngIf="currentStep === 3">
-  <h2>Constat</h2>
-  <div class="file-upload">
-    <div class="upload-area" (click)="fileInput.click()">
-      <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléverser votre constat</p>
-      <input #fileInput type="file" accept=".pdf,.jpg,.png" 
-             (change)="onFileSelect($event)" style="display: none;">
+     <div class="step-content" *ngIf="currentStep === 3">
+  <h2>Déclaration de l'incident</h2>
+
+  <!-- Choix initial -->
+  <div class="choice-container" *ngIf="!hasChosenDeclarationMethod">
+    <div class="choice-card" (click)="selectDeclarationMethod('describe')">
+      <i class="bi bi-text-paragraph"></i>
+      <h3>Décrire l'incident</h3>
+      <p>Racontez ce qui s'est passé en détail</p>
     </div>
     
-    <!-- Prévisualisation du constat -->
-    <div class="preview-container" *ngIf="constatPreviewUrl">
-      <h3>Prévisualisation :</h3>
-      
-      <!-- Affichage PDF -->
-      <div *ngIf="showPdfViewer" class="pdf-preview">
-        <pdf-viewer [src]="constatPreviewUrl" 
-                   [render-text]="true"
-                   style="width: 100%; height: 500px; border: 1px solid #ddd;">
-        </pdf-viewer>
-      </div>
-      
-      <!-- Affichage Image -->
-      <div *ngIf="!showPdfViewer" class="image-preview">
-        <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
-      </div>
-      
-      <button class="btn-remove" (click)="removeConstat()">
-        <i class="bi bi-trash"></i> Supprimer
+    <div class="choice-card" (click)="selectDeclarationMethod('upload')">
+      <i class="bi bi-file-earmark-arrow-up"></i>
+      <h3>Téléverser un constat</h3>
+      <p>Uploader votre constat amiable rempli</p>
+    </div>
+  </div>
+
+  <!-- Section description -->
+  <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
+    <div class="section-header">
+      <button class="btn-back" (click)="resetDeclarationMethod()">
+        <i class="bi bi-arrow-left"></i> Retour
       </button>
+      <h3><i class="bi bi-text-paragraph"></i> Description de l'incident</h3>
     </div>
     
-    <p class="help-text">
-      Vous n'avez pas de constat ? <br>
-      Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
-    </p>
+    <textarea class="form-control" rows="6" 
+              [(ngModel)]="incidentDescription" 
+              placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)"></textarea>
+    <p class="help-text">Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.</p>
+  </div>
+
+  <!-- Section upload -->
+  <div class="upload-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'upload'">
+    <div class="section-header">
+      <button class="btn-back" (click)="resetDeclarationMethod()">
+        <i class="bi bi-arrow-left"></i> Retour
+      </button>
+      <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
+    </div>
+    
+    <div class="file-upload">
+      <div class="upload-area" (click)="fileInput.click()">
+        <p><i class="bi bi-upload"></i> Téléverser votre constat</p>
+        <input #fileInput type="file" accept=".pdf,.jpg,.png" 
+               (change)="onFileSelect($event)" style="display: none;">
+      </div>
+      
+      <div class="preview-container" *ngIf="constatPreviewUrl">
+        <h4>Prévisualisation :</h4>
+        
+        <div *ngIf="showPdfViewer" class="pdf-preview">
+          <pdf-viewer [src]="constatPreviewUrl" 
+                     [render-text]="true"
+                     style="width: 100%; height: 500px; border: 1px solid #ddd;">
+          </pdf-viewer>
+        </div>
+        
+        <div *ngIf="!showPdfViewer" class="image-preview">
+          <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
+        </div>
+        
+        <button class="btn-remove" (click)="removeConstat()">
+          <i class="bi bi-trash"></i> Supprimer
+        </button>
+      </div>
+      
+      <p class="help-text">
+        Vous n'avez pas de constat ? <br>
+        Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
+      </p>
+    </div>
   </div>
 </div>
-
         <!-- Step 4: Photos -->
       <!-- Step 4: Photos -->
+<!-- Step 4: Photos -->
 <div class="step-content" *ngIf="currentStep === 4">
-  <h2>Images du Véhicule accidenté</h2>
+  <h2>Photos du véhicule accidenté</h2>
   
-  <div class="upload-instructions">
-    <p>Téléversez jusqu'à 10 photos du sinistre (formats JPG, PNG)</p>
-    <p class="photo-count">{{ previewPhotos.length }}/10 photos sélectionnées</p>
+  <!-- Étape en cours -->
+  <div class="photo-steps">
+    <div class="step" [class.active]="currentPhotoStep === 1" (click)="setPhotoStep(1)">
+      <span>1</span>
+      <p>Photo d'ensemble</p>
+    </div>
+    <div class="step" [class.active]="currentPhotoStep === 2" (click)="setPhotoStep(2)">
+      <span>2</span>
+      <p>Plaque d'immatriculation</p>
+    </div>
+    <div class="step" [class.active]="currentPhotoStep === 3" (click)="setPhotoStep(3)">
+      <span>3</span>
+      <p>Numéro de série</p>
+    </div>
+    <div class="step" [class.active]="currentPhotoStep === 4" (click)="setPhotoStep(4)">
+      <span>4</span>
+      <p>Dégâts</p>
+    </div>
   </div>
 
+  <!-- Instructions spécifiques -->
+  <div class="step-instructions">
+    <div *ngIf="currentPhotoStep === 1">
+      <h3><i class="bi bi-camera"></i> Photo d'ensemble du véhicule</h3>
+      <p>Prenez une photo montrant l'ensemble du véhicule et son environnement immédiat.</p>
+      <p class="help-text">Cette photo doit permettre d'identifier clairement le contexte de l'accident.</p>
+    </div>
+    
+    <div *ngIf="currentPhotoStep === 2">
+      <h3><i class="bi bi-123"></i> Plaque d'immatriculation</h3>
+      <p>Photographiez clairement la plaque d'immatriculation avant ou arrière.</p>
+      <p class="help-text">La plaque doit être lisible et non obstruée.</p>
+    </div>
+    
+    <div *ngIf="currentPhotoStep === 3">
+      <h3><i class="bi bi-upc-scan"></i> Numéro de série (VIN)</h3>
+      <p>Prenez en photo la plaque constructeur située au bas du pare-brise côté conducteur.</p>
+      <p class="help-text">Le numéro doit être clairement visible.</p>
+    </div>
+    
+    <div *ngIf="currentPhotoStep === 4">
+      <h3><i class="bi bi-exclamation-triangle"></i> Zones endommagées</h3>
+      <p>Photographiez chaque zone endommagée sous différents angles.</p>
+      <p class="help-text">Prenez au moins 2 photos par dégât (vue d'ensemble et détail).</p>
+    </div>
+  </div>
+
+  <!-- Zone d'upload -->
   <div class="photo-upload-area" (click)="photoInput.click()">
     <div class="upload-icon">
-                    <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Cliquez pour ajouter des photos</p>
-
-     
+      <i class="bi bi-camera"></i>
+      <p>Ajouter une photo pour cette étape</p>
+      <p class="photo-count">{{ getCurrentStepPhotos().length }} photo(s) ajoutée(s)</p>
     </div>
-    <input #photoInput type="file" accept="image/jpeg,image/png" multiple 
-           (change)="onPhotoSelect($event)" style="display: none;">
+    <input #photoInput type="file" accept="image/jpeg,image/png" 
+           (change)="onPhotoSelect($event, currentPhotoStep)" 
+           style="display: none;" 
+           [multiple]="currentPhotoStep === 4">
   </div>
 
   <!-- Gallery preview -->
-  <div class="photo-gallery" *ngIf="previewPhotos.length > 0">
-    <div class="photo-item" *ngFor="let photo of previewPhotos; let i = index">
-      <img [src]="photo.url" alt="Photo du sinistre">
-      <div class="photo-overlay">
-        <button class="btn-remove" (click)="removePhoto(i); $event.stopPropagation()">
-          <i class="bi bi-trash"></i>
-        </button>
+  <div class="photo-gallery" *ngIf="getCurrentStepPhotos().length > 0">
+    <div class="photo-grid">
+      <div class="photo-item" *ngFor="let photo of getCurrentStepPhotos(); let i = index">
+        <img [src]="photo.url" alt="Photo du sinistre">
+        <div class="photo-overlay">
+          <button class="btn-remove" (click)="removePhoto(i, currentPhotoStep); $event.stopPropagation()">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
+  <!-- Navigation entre étapes -->
+  <div class="step-navigation">
+    <button class="btn-back" (click)="prevPhotoStep()" [disabled]="currentPhotoStep === 1">
+      <i class="bi bi-chevron-left"></i> Étape précédente
+    </button>
+    
+    <button class="btn-next" (click)="nextPhotoStep()" [disabled]="!canProceedPhotoStep()">
+      {{ currentPhotoStep === 4 ? 'Terminer' : 'Étape suivante' }} 
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</div>
         <!-- Step 5: Document Signing -->
       <!-- Step 5: Document Signing -->
 <div class="step-content" *ngIf="currentStep === 5">
@@ -193,11 +291,9 @@
   <div class="success-message" *ngIf="allDocumentsSigned">
     <h2>Votre demande a été prise en compte</h2>
     <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
-    <button class="btn-contact" routerLink="/assistance" *ngIf="vehicleStatus === 'rolling'">
-      Contactez l'assistance
-    </button>
+   
      <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
-    <p>contactez l'Assurance :</p>
+    <p>contactez l'Assistance :</p>
     <a href="tel:0761841419" class="assistance-number">07 61 84 14 19</a>
   </div>
   </div>

@@ -7,6 +7,9 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withFetch, withInterceptorsFromDi
 
 import { routes } from './app.routes';
 import { KeycloakBearerInterceptor, KeycloakService } from 'keycloak-angular';
+import { environment, firebaseConfig } from '../environnement';
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideFirestore, getFirestore } from '@angular/fire/firestore';
 
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
@@ -28,7 +31,10 @@ export const appConfig: ApplicationConfig = {
     provideAnimations(),
     provideClientHydration(),
     provideStore(),
+    provideFirebaseApp(() => initializeApp(firebaseConfig)),
+    provideFirestore(() => getFirestore()),
     provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(),
     KeycloakService,
     {
       provide: APP_INITIALIZER,
@@ -43,3 +49,4 @@ export const appConfig: ApplicationConfig = {
     }
   ]
 };
+

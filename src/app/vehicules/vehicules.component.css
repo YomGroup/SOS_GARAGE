@@ -13,3 +13,331 @@
         transform: translateY(0);
     }
 }
+
+/* Animation d'apparition */
+.fade-in {
+    animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Conteneur principal */
+.assurance-selection-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 1;
+}
+
+/* Titre principal avec gradient */
+.main-title {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.01em;
+}
+
+/* Dropdown avec style moderne */
+.vehicle-dropdown {
+    position: relative;
+    padding: 0.75rem 1rem;
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+    color: white;
+    font-weight: 500;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(30, 77, 184, 0.2);
+    margin-bottom: 1rem;
+    z-index: 1000;
+}
+
+.vehicle-dropdown:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(30, 77, 184, 0.3);
+}
+
+.vehicle-dropdown.open {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.dropdown-icon {
+    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+}
+
+.vehicle-dropdown.open .dropdown-icon {
+    transform: rotate(180deg);
+}
+
+/* Liste dropdown */
+.dropdown-list {
+    position: absolute;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+    background: white;
+    border-radius: 8px;
+    margin-top: 2px;
+    z-index: 9999;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    list-style: none;
+    padding: 0;
+    left: 0;
+    top: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-list li {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.dropdown-list li:last-child {
+    border-bottom: none;
+}
+
+.dropdown-list li:hover {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+    color: #1e4db8;
+}
+
+/* Message d'absence d'assurances */
+.no-assurances {
+    padding: 2rem;
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin-top: 1rem;
+}
+
+/* Section formules */
+.formule-container {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 1.5rem;
+}
+
+.formule-title {
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.formule-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.formule-option {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.formule-option:hover {
+    background: #e9ecef;
+    border-color: #1e4db8;
+}
+
+/* Checkbox personnalisé moderne */
+.option-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    padding: 0.5rem 0.75rem;
+    min-height: 20px;
+    margin: 0;
+    width: 100%;
+    font-weight: 500;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.option-label input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    height: 18px;
+    width: 18px;
+    background-color: white;
+    border: 2px solid #dee2e6;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.option-label:hover input~.checkmark {
+    border-color: #1e4db8;
+}
+
+.option-label input:checked~.checkmark {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    border-color: #1e4db8;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 3px;
+    height: 7px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.option-label input:checked~.checkmark:after {
+    display: block;
+}
+
+.option-text {
+    margin-left: 2.25rem;
+    font-size: 0.95rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.option-label input:checked~.option-text {
+    color: #1e4db8;
+    font-weight: 600;
+}
+
+/* Champ contrat d'assurance */
+.col-12 {
+    margin-top: 1.5rem;
+}
+
+.form-label {
+    color: #2c3e50;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background: white;
+    color: #495057;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1e4db8;
+    box-shadow: 0 0 0 2px rgba(30, 77, 184, 0.1);
+}
+
+.form-control::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+
+    .assurance-selection-container,
+    .formule-container {
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .main-title {
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .vehicle-dropdown {
+        padding: 1rem 1.25rem;
+        font-size: 1rem;
+    }
+
+    .formule-title {
+        font-size: 1.25rem;
+    }
+
+    .option-text {
+        font-size: 1rem;
+    }
+}
+
+/* Animations pour les éléments */
+.formule-option {
+    animation: slideInUp 0.3s ease forwards;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Effet de focus amélioré */
+.vehicle-dropdown:focus-within {
+    box-shadow: 0 0 0 3px rgba(30, 77, 184, 0.2);
+}
+
+/* Style pour les états actifs */
+.formule-option:has(input:checked) {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+    border-color: #1e4db8;
+}
