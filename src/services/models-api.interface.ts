@@ -33,6 +33,16 @@ export enum TypeSinistre {
   // Ajoutez d'autres types si besoin
 }
 
+export enum StatutAvancementSinistre {
+  EN_ATTENTE_TRAITEMENT = 'EN_ATTENTE_TRAITEMENT',
+  EN_ATTENTE_EXPERTISE = 'EN_ATTENTE_EXPERTISE',
+  EN_ATTENTE_VALIDATION_ASSURANCE = 'EN_ATTENTE_VALIDATION_ASSURANCE',
+  VEHICULE_EPAVE = 'VEHICULE_EPAVE',
+  EN_COURS_REPARATION = 'EN_COURS_REPARATION',
+  REPARATION_TERMINEE = 'REPARATION_TERMINEE',
+  FACTURE = 'FACTURE'
+}
+
 export interface DocumentsSinistre {
   // À compléter selon vos besoins
   id?: number;
@@ -71,6 +81,9 @@ export interface Mission {
   dateDeclarationEpave: string; // LocalDate -> string (ISO)
   commissionStatut: string;
   assureName: string;
+  expert?: Expert;
+  expertise?: Expertise;
+  expertises?: any[];
 }
 
 // Interface Reparateur
@@ -119,7 +132,13 @@ export interface Sinistre {
   imgUrl: string[];
   mission: Mission;
   isvalid: boolean;
-  Statut: string;
+  statut: string;
+  statutAvancement?: StatutAvancementSinistre;
+  // Propriétés d'assurance ajoutées
+  compagnieAssurance?: string;
+  numeroContrat?: string;
+  numeroSinistre?: string;
+  dateDeclaration?: string;
 } 
 
 // Interface Vehicule
@@ -157,6 +176,36 @@ export interface Vehicule {
     messages: Message[];
   }
 
+// Interface Expert
+export interface Expert {
+  id: number;
+  nom: string;
+  prenom: string;
+  institution: string;
+  assurance: string;
+  specialite: string;
+  numeroTelephone: string;
+  email: string;
+  adresse: string;
+}
+
+// Interface Expertise
+export interface Expertise {
+  id?: number;
+  nomExpert?: string;
+  prenomExpert?: string;
+  institutionExpert?: string;
+  dateExpertisePrevue: string;
+  dateExpertiseEffective: string;
+  montantChiffrageHT: number;
+  montantChiffrageTTC: number;
+  franchiseApplicable: number;
+  rapportExpertise: string;
+  observationsExpert: string;
+  expertiseEffectuee: boolean;
+  rapportTelecharge: boolean;
+}
+
 // Interface pour les mises à jour de mission
 export interface MissionUpdate {
   devis?: number;
@@ -165,4 +214,7 @@ export interface MissionUpdate {
   statut?: string;
   documentsAssurance?: string[];
   declareCommeEpave?: boolean;
+  expert?: Expert;
+  expertise?: Expertise;
+  statutAvancement?: StatutAvancementSinistre;
 }

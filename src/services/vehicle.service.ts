@@ -58,5 +58,8 @@ export class VehicleService {
         return this.http.delete(`${this.apiUrlAdd}?id=${id}`);
     }
 
+    getVehiculesPage(page: number, limit: number) {
+        return this.http.get(`${this.apiUrl}?page=${page}&limit=${limit}`);
+    }
 
 }

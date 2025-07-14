@@ -1,5 +1,5 @@
-<div class="view-overlay" *ngIf="!loading">
-  <div class="view-modal">
+<div class="view-overlay" *ngIf="!loading" (click)="close()">
+  <div class="view-modal" (click)="$event.stopPropagation()">
     <div class="dialog-header">
       <h2>
         <i class="fas fa-tools me-2"></i>
@@ -10,7 +10,97 @@
       </button>
     </div>
     <div class="dialog-content">
-      <!-- Détails de la mission - EN HAUT -->
+      <!-- Statut d'avancement en vedette (tout en haut) -->
+      <div class="statut-avancement-section">
+        <h3><i class="fas fa-tasks me-2"></i>État d'avancement du traitement</h3>
+        <div class="statut-avancement-display">
+          <span class="badge-large" [ngClass]="getStatutAvancementClass(mission?.sinistre?.statut)">
+            {{ getStatutAvancementLabel(mission?.sinistre?.statut) }}
+          </span>
+        </div>
+        
+        <!-- Mode édition pour le statut -->
+        <form *ngIf="canEditMission() && editionEnCours; else statutLectureSeule" (ngSubmit)="enregistrerStatutAvancement()" class="statut-edit-form">
+          <div class="form-group">
+            <label>Statut d'avancement</label>
+            <select class="form-select" [(ngModel)]="statutAvancementEdit" name="statutAvancement">
+              <option [ngValue]="null">Sélectionner un statut</option>
+              <option value="EN_ATTENTE_TRAITEMENT">En attente de traitement</option>
+              <option value="EN_ATTENTE_EXPERTISE">En attente d'expertise</option>
+              <option value="EN_ATTENTE_VALIDATION_ASSURANCE">En attente de validation assurance</option>
+              <option value="VEHICULE_EPAVE">Véhicule épave</option>
+              <option value="EN_COURS_REPARATION">En cours de réparation</option>
+              <option value="REPARATION_TERMINEE">Réparation terminée</option>
+              <option value="FACTURE">Facturé</option>
+            </select>
+          </div>
+          <div class="statut-actions">
+            <button type="button" class="btn btn-secondary btn-sm" (click)="annulerStatutAvancement()">
+              <i class="fas fa-times me-2"></i>Annuler
+            </button>
+            <button type="submit" class="btn btn-success btn-sm">
+              <i class="fas fa-check me-2"></i>Enregistrer
+            </button>
+          </div>
+        </form>
+
+        <!-- Mode lecture seule pour le statut -->
+        <ng-template #statutLectureSeule>
+          <div class="statut-actions" *ngIf="canEditMission()">
+            <button type="button" class="btn btn-primary btn-sm" (click)="lancerEditionStatutAvancement()">
+              <i class="fas fa-edit me-2"></i>Modifier le statut
+            </button>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Informations principales (toujours visible, tout en haut) -->
+      <div class="form-section main-info-section">
+        <h3><i class="fas fa-info-circle me-2"></i>Informations principales</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Nom du client</label>
+            <div class="readonly-field">{{ assureInfo?.name }} {{ assureInfo?.prenom }}</div>
+          </div>
+          <div class="form-group">
+            <label>Immatriculation</label>
+            <div class="readonly-field">{{ getVehiculeForMission(mission!)?.immatriculation || 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Véhicule</label>
+            <div class="readonly-field">{{ getVehiculeForMission(mission!)?.marque }} {{ getVehiculeForMission(mission!)?.modele }}</div>
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <div class="readonly-field">{{ assureInfo?.telephone || 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <div class="readonly-field">{{ assureInfo?.email || 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Date de création</label>
+            <div class="readonly-field">{{ mission?.dateCreation ? (mission?.dateCreation | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Type de sinistre</label>
+            <div class="readonly-field">{{ mission?.sinistre?.type || 'Non renseigné' }}</div>
+          </div>
+          <div class="form-group">
+            <label>Statut de la mission</label>
+            <div class="readonly-field">{{ getGarageStatutLabel(mission?.statut) }}</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Détails de la mission -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showMissionDetails = !showMissionDetails">
+          <i class="fas fa-edit me-2"></i>Détails de la mission
+          <span class="chevron" [class.open]="showMissionDetails">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showMissionDetails">
       <div class="form-section mission-details-section">
         <h3><i class="fas fa-edit me-2"></i>Détails de la mission</h3>
         
@@ -92,7 +182,7 @@
           </div>
           
           <!-- Boutons d'upload en mode lecture (pour passer en édition) -->
-          <div class="upload-section">
+          <div class="upload-section" *ngIf="canEditMission()">
             <h4><i class="fas fa-upload me-2"></i>Ajouter des documents</h4>
             <div class="upload-buttons">
               <button type="button" class="btn btn-outline-primary upload-btn" (click)="lancerEdition()">
@@ -112,181 +202,350 @@
           
           <div class="actions-grid">
             <button type="button" class="btn btn-secondary" (click)="close()">Fermer</button>
-            <button type="button" class="btn btn-primary" (click)="lancerEdition()">Modifier la mission</button>
+            <button type="button" class="btn btn-primary" (click)="lancerEdition()" *ngIf="canEditMission()">Modifier la mission</button>
           </div>
         </ng-template>
+          </div>
+        </div>
       </div>
 
       <!-- Informations du client -->
-      <div class="form-section">
-        <h3><i class="fas fa-user me-2"></i>Informations du client</h3>
-        <div *ngIf="assureInfo" class="form-grid">
-          <div class="form-group">
-            <label>Nom complet</label>
-            <div class="readonly-field">{{ assureInfo.name }} {{ assureInfo.prenom }}</div>
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showClientInfo = !showClientInfo">
+          <i class="fas fa-user me-2"></i>Infos du client
+          <span class="chevron" [class.open]="showClientInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showClientInfo">
+          <div class="form-section">
+            <div *ngIf="assureInfo" class="form-grid">
+              <div class="form-group">
+                <label>Nom complet</label>
+                <div class="readonly-field">{{ assureInfo.name }} {{ assureInfo.prenom }}</div>
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <div class="readonly-field">{{ assureInfo.email }}</div>
+              </div>
+              <div class="form-group">
+                <label>Téléphone</label>
+                <div class="readonly-field">{{ assureInfo.telephone }}</div>
+              </div>
+              <div class="form-group">
+                <label>Adresse</label>
+                <div class="readonly-field">{{ assureInfo.adresse }}</div>
+              </div>
+              <div class="form-group">
+                <label>Numéro de permis</label>
+                <div class="readonly-field">{{ assureInfo.numeroPermis || 'Non renseigné' }}</div>
+              </div>
+            </div>
+            <div *ngIf="!assureInfo" class="text-center">
+              <p class="text-muted">Aucune information client disponible.</p>
+            </div>
           </div>
-          <div class="form-group">
-            <label>Email</label>
-            <div class="readonly-field">{{ assureInfo.email }}</div>
-          </div>
-          <div class="form-group">
-            <label>Téléphone</label>
-            <div class="readonly-field">{{ assureInfo.telephone }}</div>
-          </div>
-          <div class="form-group">
-            <label>Adresse</label>
-            <div class="readonly-field">{{ assureInfo.adresse }}</div>
-          </div>
-          <div class="form-group">
-            <label>Numéro de permis</label>
-            <div class="readonly-field">{{ assureInfo.numeroPermis || 'Non renseigné' }}</div>
-          </div>
-        </div>
-        <div *ngIf="!assureInfo" class="text-center">
-          <p class="text-muted">Aucune information client disponible.</p>
         </div>
       </div>
 
       <!-- Informations du véhicule -->
-      <div class="form-section">
-        <h3><i class="fas fa-car me-2"></i>Informations du véhicule</h3>
-        <div *ngIf="vehiculeInfo" class="form-grid">
-          <div class="form-group">
-            <label>Marque</label>
-            <div class="readonly-field">{{ vehiculeInfo.marque }}</div>
-          </div>
-          <div class="form-group">
-            <label>Modèle</label>
-            <div class="readonly-field">{{ vehiculeInfo.modele }}</div>
-          </div>
-          <div class="form-group">
-            <label>Immatriculation</label>
-            <div class="readonly-field">{{ vehiculeInfo.immatriculation }}</div>
-          </div>
-          <div class="form-group">
-            <label>Cylindrée</label>
-            <div class="readonly-field">{{ vehiculeInfo.cylindree || 'Non renseigné' }}</div>
-          </div>
-          <div class="form-group">
-            <label>Date de mise en circulation</label>
-            <div class="readonly-field">{{ vehiculeInfo.dateMiseEnCirculation ? (vehiculeInfo.dateMiseEnCirculation | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
-          </div>
-          <div class="form-group">
-            <label>Carte grise</label>
-            <div class="readonly-field">{{ vehiculeInfo.carteGrise || 'Non renseigné' }}</div>
-          </div>
-        </div>
-        <div *ngIf="!vehiculeInfo" class="text-center">
-          <p class="text-muted">Aucune information véhicule disponible.</p>
-        </div>
-      </div>
-
-      <!-- Image du véhicule -->
-      <div class="form-section" *ngIf="vehiculeInfo">
-        <h4><i class="fas fa-image me-2"></i>Photo du véhicule</h4>
-        <div *ngIf="vehiculeInfo.imgUrl && vehiculeInfo.imgUrl.length > 0; else noVehiculeImg">
-          <img [src]="vehiculeInfo.imgUrl[0]" alt="Image véhicule" class="vehicle-image" style="max-width: 300px; max-height: 200px; border-radius: 8px; border: 1px solid #ccc;" />
-        </div>
-        <ng-template #noVehiculeImg>
-          <span class="text-muted">Aucune image disponible pour ce véhicule.</span>
-        </ng-template>
-      </div>
-
-      <div class="info-section">
-        <h3><i class="fas fa-info-circle me-2"></i>Informations générales</h3>
-        <p class="subtitle">Consultez ou modifiez les informations de la mission.</p>
-      </div>
-
-      <!-- Détails du sinistre -->
-      <div class="form-section" *ngIf="mission?.sinistre">
-        <h3><i class="fas fa-car-crash me-2"></i>Détails du sinistre</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Type de sinistre</label>
-            <div class="readonly-field">{{ mission?.sinistre?.type }}</div>
-          </div>
-          <div class="form-group">
-            <label>Contact assistance</label>
-            <div class="readonly-field">{{ mission?.sinistre?.contactAssistance }}</div>
-          </div>
-          <div class="form-group">
-            <label>Lien constat</label>
-            <div class="readonly-field">{{ mission?.sinistre?.lienConstat || 'Non renseigné' }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Informations supplémentaires -->
-      <div class="form-section">
-        <h3><i class="fas fa-info-circle me-2"></i>Informations supplémentaires</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Date de création</label>
-            <div class="readonly-field">{{ getMissionDate(mission) }}</div>
-          </div>
-          <div class="form-group">
-            <label>Prêt de véhicule</label>
-            <div class="readonly-field">{{ mission?.pretVehicule ? 'Oui' : 'Non' }}</div>
-          </div>
-          <div class="form-group">
-            <label>Déclarée comme épave</label>
-            <div class="readonly-field">{{ mission?.declareCommeEpave ? 'Oui' : 'Non' }}</div>
-          </div>
-          <div class="form-group">
-            <label>Épave validée par admin</label>
-            <div class="readonly-field">{{ mission?.epaveValideeParAdmin ? 'Oui' : 'Non' }}</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Photos du véhicule -->
-      <div class="form-section" *ngIf="isPhotosArrayNonEmpty(mission)">
-        <h3><i class="fas fa-camera me-2"></i>Photos du véhicule</h3>
-        <div class="photos-grid">
-          <div class="photo-thumbnail" *ngFor="let photo of mission?.photosVehicule">
-            <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Documents -->
-      <div class="form-section">
-        <h3><i class="fas fa-file-alt me-2"></i>Documents</h3>
-        <div class="documents-list">
-          <!-- En mode édition, utiliser missionEdit -->
-          <ng-container *ngIf="editionEnCours">
-            <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDocEdit">
-              <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
-                <i class="fas fa-file-pdf me-2"></i>
-                {{ getFileNameFromUrl(doc) }}
-                <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
-                <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showVehicleInfo = !showVehicleInfo">
+          <i class="fas fa-car me-2"></i>Informations du véhicule
+          <span class="chevron" [class.open]="showVehicleInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showVehicleInfo">
+          <div class="form-section">
+            <div *ngIf="getVehiculeForMission(mission!)" class="form-grid">
+              <div class="form-group">
+                <label>Marque</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.marque || 'Non renseigné' }}</div>
               </div>
-            </ng-container>
-            <ng-template #noDocEdit>
-              <span>Aucun document ajouté.</span>
-            </ng-template>
-            <div class="mt-2 d-flex gap-2">
-              <button class="btn btn-outline-secondary" type="button" (click)="ouvrirUploadDirect()" [disabled]="uploadingFiles">
-                <i class="fas fa-upload me-2"></i>
-                {{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des PDF' }}
-              </button>
+              <div class="form-group">
+                <label>Modèle</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.modele || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Immatriculation</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.immatriculation || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Cylindrée</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.cylindree || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Date de mise en circulation</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.dateMiseEnCirculation ? (getVehiculeForMission(mission!)?.dateMiseEnCirculation | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Carte grise</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.carteGrise || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Contrat d'assurance</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.contratAssurance || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Nom de l'assurance</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.nomAssurence || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Date de création</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.createdAt ? (getVehiculeForMission(mission!)?.createdAt | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Dernière mise à jour</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.updatedAt ? (getVehiculeForMission(mission!)?.updatedAt | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+              </div>
             </div>
-          </ng-container>
-          
-          <!-- En mode lecture seule, utiliser mission -->
-          <ng-container *ngIf="!editionEnCours">
-            <ng-container *ngIf="mission && mission.documentsAssurance && mission.documentsAssurance.length > 0; else noDocRead">
-              <div *ngFor="let doc of mission.documentsAssurance; let i = index" class="document-item">
-                <i class="fas fa-file-pdf me-2"></i>
-                {{ getFileNameFromUrl(doc) }}
-                <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+            <div *ngIf="!getVehiculeForMission(mission!)" class="text-center">
+              <p class="text-muted">Aucune information véhicule disponible.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Informations assurance -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showAssuranceInfo = !showAssuranceInfo">
+          <i class="fas fa-shield-alt me-2"></i>Infos assurance
+          <span class="chevron" [class.open]="showAssuranceInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showAssuranceInfo">
+          <div class="form-section">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Compagnie d'assurance</label>
+                <div class="readonly-field">{{ mission?.sinistre?.compagnieAssurance || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Numéro de contrat</label>
+                <div class="readonly-field">{{ mission?.sinistre?.numeroContrat || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Numéro de sinistre</label>
+                <div class="readonly-field">{{ mission?.sinistre?.numeroSinistre || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Date de déclaration</label>
+                <div class="readonly-field">{{ mission?.sinistre?.dateDeclaration ? (mission?.sinistre?.dateDeclaration | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Contact assistance</label>
+                <div class="readonly-field">{{ mission?.sinistre?.contactAssistance || 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Lien constat</label>
+                <div class="readonly-field">{{ mission?.sinistre?.lienConstat || 'Non renseigné' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Informations sur l'expert (lecture seule) -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showExpertInfo = !showExpertInfo">
+          <i class="fas fa-user-tie me-2"></i>Informations sur l'expert
+          <span class="chevron" [class.open]="showExpertInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showExpertInfo">
+          <div class="form-section">
+            <ng-container *ngIf="expertiseCourante; else pasExpertAttribue">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Nom de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.nomExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Prénom de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.prenomExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Institution</label>
+                  <div class="readonly-field">{{ expertiseCourante?.institutionExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Date d'expertise prévue</label>
+                  <div class="readonly-field">{{ expertiseCourante?.dateExpertisePrevue ? (expertiseCourante?.dateExpertisePrevue | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+                </div>
               </div>
             </ng-container>
-            <ng-template #noDocRead>
-              <span>Aucun document disponible.</span>
+            <ng-template #pasExpertAttribue>
+              <div class="alert alert-warning text-center my-3">Pas d'expert encore attribué à cette mission.</div>
             </ng-template>
-          </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Détails de l'expertise (modifiables côté garage) -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showExpertiseInfo = !showExpertiseInfo">
+          <i class="fas fa-clipboard-list me-2"></i>Détails de l'expertise
+          <span class="chevron" [class.open]="showExpertiseInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showExpertiseInfo">
+          <div class="form-section">
+            <ng-container *ngIf="expertiseCourante; else pasExpertAttribueDetails">
+              <!-- Formulaire d'édition -->
+              <form *ngIf="canEditMission() && editionEnCours" (ngSubmit)="enregistrerExpertise()">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Date d'expertise effective</label>
+                  <input type="date" class="form-control" [(ngModel)]="expertiseEdit.dateExpertiseEffective" name="dateExpertiseEffective">
+                </div>
+                <div class="form-group">
+                    <label>Montant chiffrage HT (€)</label>
+                    <input type="number" class="form-control" [(ngModel)]="expertiseEdit.montantChiffrageHT" name="montantChiffrageHT">
+                </div>
+                <div class="form-group">
+                    <label>Montant chiffrage TTC (€)</label>
+                    <input type="number" class="form-control" [(ngModel)]="expertiseEdit.montantChiffrageTTC" name="montantChiffrageTTC">
+                </div>
+                <div class="form-group">
+                  <label>Franchise applicable (€)</label>
+                  <input type="number" class="form-control" [(ngModel)]="expertiseEdit.franchiseApplicable" name="franchiseApplicable">
+                </div>
+                <!-- Champ Expertise effectuée en readonly -->
+                <div class="form-group">
+                  <label>Expertise effectuée</label>
+                  <div class="readonly-field">
+                    {{ expertiseCourante?.expertiseEffectuee ? 'Oui' : 'Non' }}
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Rapport téléchargé</label>
+                  <select class="form-select" [(ngModel)]="expertiseEdit.rapportTelecharge" name="rapportTelecharge">
+                    <option [ngValue]="true">Oui</option>
+                    <option [ngValue]="false">Non</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Observations de l'expert</label>
+                  <textarea class="form-control" [(ngModel)]="expertiseEdit.observationsExpert" name="observationsExpert" rows="3"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label>Rapport d'expertise</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <button type="button" class="btn btn-outline-info" (click)="uploadRapportExpertise()" [disabled]="uploadingFiles">
+                        <i class="fas fa-upload me-2"></i>
+                        {{ uploadingFiles ? 'Upload en cours...' : 'Uploader le rapport' }}
+                      </button>
+                      <button *ngIf="expertiseEdit.rapportExpertise" type="button" class="btn btn-outline-primary" (click)="telechargerRapportExpertise()">
+                        <i class="fas fa-download me-2"></i>
+                        Télécharger
+                      </button>
+                    </div>
+                    <div *ngIf="expertiseEdit.rapportExpertise" class="mt-2 text-muted small">
+                      {{ getFileNameFromUrl(expertiseEdit.rapportExpertise) }}
+                </div>
+              </div>
+                </div>
+                <div class="actions-grid mt-3">
+                <button type="button" class="btn btn-secondary" (click)="annulerExpertise()">Annuler</button>
+                <button type="submit" class="btn btn-success">Enregistrer</button>
+              </div>
+            </form>
+              <!-- Lecture seule -->
+              <ng-container *ngIf="!editionEnCours">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Date d'expertise effective</label>
+                    <div class="readonly-field">
+                      {{ expertiseCourante?.dateExpertiseEffective ? (expertiseCourante?.dateExpertiseEffective | date:'dd/MM/yyyy') : 'Non renseigné' }}
+                </div>
+                </div>
+              <div class="form-group">
+                    <label>Montant chiffrage HT (€)</label>
+                    <div class="readonly-field">{{ expertiseCourante?.montantChiffrageHT ?? 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                    <label>Montant chiffrage TTC (€)</label>
+                    <div class="readonly-field">{{ expertiseCourante?.montantChiffrageTTC ?? 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                  <label>Franchise applicable (€)</label>
+                    <div class="readonly-field">{{ expertiseCourante?.franchiseApplicable ?? 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                  <label>Expertise effectuée</label>
+                    <div class="readonly-field">{{ expertiseCourante?.expertiseEffectuee ? 'Oui' : 'Non' }}</div>
+              </div>
+              <div class="form-group">
+                  <label>Observations de l'expert</label>
+                    <div class="readonly-field">{{ expertiseCourante?.observationsExpert ?? 'Non renseigné' }}</div>
+              </div>
+              <div class="form-group">
+                <label>Rapport d'expertise</label>
+                <div class="readonly-field">
+                      <button *ngIf="expertiseCourante?.rapportExpertise" class="btn btn-sm btn-primary" (click)="telechargerRapportExpertise()">
+                    <i class="fas fa-download me-2"></i>Télécharger rapport
+                  </button>
+                      <span *ngIf="!expertiseCourante?.rapportExpertise">Aucun rapport disponible</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="actions-grid mt-3" *ngIf="canEditMission() && expertiseCourante && !expertiseCourante.expertiseEffectuee">
+                  <button type="button" class="btn btn-success" (click)="confirmerPassageExpert()">
+                    <i class="fas fa-check me-2"></i>Confirmer le passage de l'expert
+                  </button>
+              </div>
+              <div class="actions-grid" *ngIf="canEditMission()">
+                  <button type="button" class="btn btn-primary" (click)="lancerEditionExpertise()">Modifier les détails</button>
+            </div>
+              </ng-container>
+            </ng-container>
+            <ng-template #pasExpertAttribueDetails>
+              <div class="alert alert-warning text-center my-3">Pas d'expert encore attribué à cette mission.</div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historique / documents téléversés -->
+      <div class="accordion-section">
+        <button class="accordion-toggle" (click)="showDocumentsInfo = !showDocumentsInfo">
+          <i class="fas fa-file-alt me-2"></i>Historique / documents téléversés
+          <span class="chevron" [class.open]="showDocumentsInfo">&#9660;</span>
+        </button>
+        <div class="accordion-content" *ngIf="showDocumentsInfo">
+          <div class="form-section">
+            <div class="documents-list">
+              <!-- En mode édition, utiliser missionEdit -->
+              <ng-container *ngIf="editionEnCours">
+                <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDocEdit">
+                  <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    {{ getFileNameFromUrl(doc) }}
+                    <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+                    <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
+                  </div>
+                </ng-container>
+                <ng-template #noDocEdit>
+                  <span>Aucun document ajouté.</span>
+                </ng-template>
+                <div class="mt-2 d-flex gap-2">
+                  <button class="btn btn-outline-secondary" type="button" (click)="ouvrirUploadDirect()" [disabled]="uploadingFiles">
+                    <i class="fas fa-upload me-2"></i>
+                    {{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des PDF' }}
+                  </button>
+                </div>
+              </ng-container>
+              
+              <!-- En mode lecture seule, utiliser mission -->
+              <ng-container *ngIf="!editionEnCours">
+                <ng-container *ngIf="mission && mission.documentsAssurance && mission.documentsAssurance.length > 0; else noDocRead">
+                  <div *ngFor="let doc of mission.documentsAssurance; let i = index" class="document-item">
+                    <i class="fas fa-file-pdf me-2"></i>
+                    {{ getFileNameFromUrl(doc) }}
+                    <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+                  </div>
+                </ng-container>
+                <ng-template #noDocRead>
+                  <span>Aucun document disponible.</span>
+                </ng-template>
+              </ng-container>
+            </div>
+          </div>
         </div>
       </div>
     </div>

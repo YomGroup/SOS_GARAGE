@@ -2,9 +2,11 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, Chang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
-import { Mission, MissionUpdate, Assure, Vehicule } from '../../../../../services/models-api.interface';
+import { Mission, MissionUpdate, Assure, Vehicule, StatutAvancementSinistre, Expert, Expertise } from '../../../../../services/models-api.interface';
 import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
 import { DossiersService } from '../../../../../services/dossiers.service';
+import { ExpertService } from '../../../../../services/expert.service';
+import { ExpertiseService } from '../../../../../services/expertise.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -24,15 +26,35 @@ export class MissionViewComponent implements OnChanges {
 
   editionEnCours: boolean = false;
   missionEdit: any = { documentsAssurance: [] };
+  expertEdit: any = {};
+  expertiseEdit: any = {};
   uploadingFiles: boolean = false;
   assureInfo: Assure | null = null;
   vehiculeInfo: Vehicule | null = null;
+  showExpertInfo: boolean = false;
+  showExpertiseInfo: boolean = false;
+  showClientInfo: boolean = false;
+  showVehicleInfo: boolean = false;
+  showSinistreInfo: boolean = false;
+  showAdditionalInfo: boolean = false;
+  showPhotosInfo: boolean = false;
+  showDocumentsInfo: boolean = false;
+  showAssuranceInfo: boolean = false;
+  showMissionDetails: boolean = false;
+  showStatutAvancement: boolean = false;
+  vehiculesMap: Map<number, Vehicule> = new Map();
+  statutAvancementEdit: string | null = null;
+
+  // Exposer l'enum pour le template
+  StatutAvancementSinistre = StatutAvancementSinistre;
 
   constructor(
     private missionService: MissionService, 
     private cdr: ChangeDetectorRef,
     private firebaseService: FirebaseStorageService,
-    private dossiersService: DossiersService
+    private dossiersService: DossiersService,
+    private expertService: ExpertService,
+    private expertiseService: ExpertiseService
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -42,11 +64,15 @@ export class MissionViewComponent implements OnChanges {
     // Charger infos client/véhicule si mission ou dossier change
     if (changes['mission'] || changes['dossier']) {
       this.chargerInformationsAssureEtVehicule();
+      this.chargerVehiculeParMission();
     }
   }
 
   ngOnInit(): void {
+    console.log('Mission côté garage :', this.mission);
+    console.log('Expertises côté garage :', this.mission?.expertises);
     this.chargerInformationsAssureEtVehicule();
+    this.chargerVehiculeParMission();
   }
 
   // Ajout : méthode pour charger infos client et véhicule
@@ -84,6 +110,22 @@ export class MissionViewComponent implements OnChanges {
     });
   }
 
+  // Méthode pour charger le véhicule par ID de mission
+  chargerVehiculeParMission() {
+    if (this.mission?.id) {
+      this.missionService.getVehiculeByMissionId(this.mission.id).subscribe({
+        next: (vehicule) => {
+          this.vehiculesMap.set(this.mission!.id!, vehicule);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.vehiculesMap.set(this.mission!.id!, null as any);
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
   close() {
     this.editionEnCours = false;
     this.missionEdit = {};
@@ -92,6 +134,12 @@ export class MissionViewComponent implements OnChanges {
   }
 
   lancerEdition() {
+    // Empêcher l'édition si la mission est terminée
+    if (this.mission && (this.mission.statut === 'terminée' || this.mission.statut === 'TERMINEE')) {
+      alert('Impossible de modifier une mission terminée.');
+      return;
+    }
+    
     if (this.mission) {
       this.editionEnCours = true;
       this.missionEdit = { ...this.mission };
@@ -384,35 +432,20 @@ export class MissionViewComponent implements OnChanges {
     }
   }
 
+  public isImageOrPdf(url: string): boolean {
+    return /\.(pdf|jpg|jpeg|png)$/i.test(url);
+  }
+
   public getFileNameFromUrl(url: string): string {
     try {
-      // Si c'est une URL Firebase, extraire le nom du fichier du chemin
-      if (url.includes('firebasestorage.googleapis.com')) {
-        // Décoder l'URL complète
-        const decodedUrl = decodeURIComponent(url);
-        
-        // Extraire le nom du fichier depuis le chemin
-        // Format attendu: missions/3/documents/facture3.bkgr-strategy-mai-2025.pdf
-        const pathMatch = decodedUrl.match(/missions\/\d+\/documents\/(.+\.(pdf|png|jpg|jpeg|gif))/);
-        if (pathMatch) {
-          return pathMatch[1];
-        }
-        
-        // Fallback: chercher le nom après le dernier slash
-        const fileNameMatch = decodedUrl.match(/\/([^\/]+\.(pdf|png|jpg|jpeg|gif))(\?|$)/);
-        if (fileNameMatch) {
-          return fileNameMatch[1];
-        }
-      }
-      
-      // Fallback pour les autres URLs
-      const urlObj = new URL(url);
-      const pathname = urlObj.pathname;
-      const fileName = pathname.split('/').pop() || 'document.pdf';
-      return decodeURIComponent(fileName);
+      return decodeURIComponent(url.split('/').pop() || '');
     } catch {
-      return 'document.pdf';
+      return url;
     }
+  }
+
+  getVehiculeForMission(mission: Mission): Vehicule | null {
+    return this.vehiculesMap.get(mission.id!) || null;
   }
 
   getMissionDate(mission: Mission | null): string {
@@ -440,5 +473,326 @@ export class MissionViewComponent implements OnChanges {
       default:
         return statut;
     }
+  }
+
+  getStatutAvancementLabel(statut: string | undefined): string {
+    if (!statut) return 'Non défini';
+    switch (statut) {
+      case 'EN_ATTENTE_TRAITEMENT':
+        return 'En attente de traitement';
+      case 'EN_ATTENTE_EXPERTISE':
+        return 'En attente d\'expertise';
+      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
+        return 'En attente de validation assurance';
+      case 'VEHICULE_EPAVE':
+        return 'Véhicule épave';
+      case 'EN_COURS_REPARATION':
+        return 'En cours de réparation';
+      case 'REPARATION_TERMINEE':
+        return 'Réparation terminée';
+      case 'FACTURE':
+        return 'Facturé';
+      default:
+        return statut;
+    }
+  }
+
+  getStatutAvancementClass(statut: string | undefined): string {
+    if (!statut) return 'statut-default';
+    switch (statut) {
+      case 'EN_ATTENTE_TRAITEMENT':
+      case 'EN_ATTENTE_EXPERTISE':
+      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
+        return 'statut-attente';
+      case 'VEHICULE_EPAVE':
+        return 'statut-epave';
+      case 'EN_COURS_REPARATION':
+        return 'statut-encours';
+      case 'REPARATION_TERMINEE':
+        return 'statut-terminee';
+      case 'FACTURE':
+        return 'statut-facture';
+      default:
+        return 'statut-default';
+    }
+  }
+
+  // Méthode pour vérifier si la mission peut être modifiée
+  canEditMission(): boolean {
+    return this.mission ? 
+      (this.mission.statut !== 'terminée' && this.mission.statut !== 'TERMINEE') : 
+      false;
+  }
+
+  // Méthodes pour l'édition du statut d'avancement
+  lancerEditionStatutAvancement() {
+    if (!this.canEditMission()) {
+      alert('Impossible de modifier une mission terminée.');
+      return;
+    }
+    this.statutAvancementEdit = this.mission?.sinistre?.statut || null;
+    this.editionEnCours = true;
+  }
+
+  annulerStatutAvancement() {
+    this.statutAvancementEdit = null;
+    this.editionEnCours = false;
+  }
+
+  enregistrerStatutAvancement() {
+    if (!this.mission?.sinistre?.id) return;
+    
+    // Envoyer seulement la valeur du statut, pas un objet
+    const statutValue = this.statutAvancementEdit || '';
+
+    // Utiliser le service dossiers pour mettre à jour le sinistre
+    this.dossiersService.updateStatutSinistre(this.mission.sinistre.id, statutValue).subscribe({
+      next: (updatedSinistre) => {
+        console.log('Statut mis à jour avec succès:', updatedSinistre);
+        this.statutAvancementEdit = null;
+        this.editionEnCours = false;
+        // Mettre à jour la mission avec les nouvelles données
+        if (this.mission) {
+          this.mission.sinistre = { ...this.mission.sinistre, statut: statutValue };
+          this.missionUpdated.emit(this.mission);
+        }
+      },
+      error: (error) => {
+        console.error('Erreur lors de la modification du statut:', error);
+        alert(`Erreur: ${error.message}`);
+      }
+    });
+  }
+
+  // Méthodes pour l'édition de l'expert
+  lancerEditionExpert() {
+    if (!this.canEditMission()) {
+      alert('Impossible de modifier une mission terminée.');
+      return;
+    }
+    this.expertEdit = { ...this.mission?.expert };
+    this.editionEnCours = true;
+  }
+
+  annulerExpert() {
+    this.expertEdit = {};
+    this.editionEnCours = false;
+  }
+
+  // Méthode pour enregistrer l'expert via le service dédié
+  enregistrerExpert() {
+    if (!this.expertEdit) return;
+    const expert: Expert = { ...this.expertEdit };
+    if (expert.id) {
+      this.expertService.updateExpert(expert).subscribe({
+        next: (updatedExpert) => {
+          this.mission!.expert = updatedExpert;
+          this.expertEdit = {};
+          this.editionEnCours = false;
+          this.missionUpdated.emit(this.mission!);
+        },
+        error: (error) => {
+          alert('Erreur lors de la mise à jour de l\'expert : ' + error.message);
+        }
+      });
+    } else {
+      this.expertService.createExpert(expert).subscribe({
+        next: (createdExpert) => {
+          this.mission!.expert = createdExpert;
+          this.expertEdit = {};
+          this.editionEnCours = false;
+          this.missionUpdated.emit(this.mission!);
+        },
+        error: (error) => {
+          alert('Erreur lors de la création de l\'expert : ' + error.message);
+        }
+      });
+    }
+  }
+
+  get expertiseCourante(): any {
+    return this.mission?.expertises && this.mission.expertises.length > 0 ? this.mission.expertises[0] : null;
+  }
+
+  lancerEditionExpertise() {
+    const exp = this.expertiseCourante;
+    this.expertiseEdit = exp ? {
+      id: exp.id,
+      nomExpert: exp.nomExpert,
+      prenomExpert: exp.prenomExpert,
+      institutionExpert: exp.institutionExpert,
+      dateExpertisePrevue: exp.dateExpertisePrevue,
+      dateExpertiseEffective: exp.dateExpertiseEffective,
+      montantChiffrageHT: exp.montantChiffrageHT,
+      montantChiffrageTTC: exp.montantChiffrageTTC,
+      franchiseApplicable: exp.franchiseApplicable,
+      rapportExpertise: exp.rapportExpertise,
+      observationsExpert: exp.observationsExpert,
+      expertiseEffectuee: exp.expertiseEffectuee,
+      rapportTelecharge: exp.rapportTelecharge
+    } : {};
+    this.editionEnCours = true;
+  }
+
+  annulerExpertise() {
+    this.expertiseEdit = {};
+    this.editionEnCours = false;
+  }
+
+  // Méthode pour enregistrer l'expertise via le service dédié
+  enregistrerExpertise() {
+    if (!this.expertiseEdit) return;
+    const patch = {
+      id: this.expertiseEdit.id,
+      nomExpert: this.expertiseEdit.nomExpert ?? '',
+      prenomExpert: this.expertiseEdit.prenomExpert ?? '',
+      institutionExpert: this.expertiseEdit.institutionExpert ?? '',
+      dateExpertisePrevue: this.expertiseEdit.dateExpertisePrevue ?? '',
+      dateExpertiseEffective: this.expertiseEdit.dateExpertiseEffective ?? '',
+      montantChiffrageHT: this.expertiseEdit.montantChiffrageHT ?? 0,
+      montantChiffrageTTC: this.expertiseEdit.montantChiffrageTTC ?? 0,
+      franchiseApplicable: this.expertiseEdit.franchiseApplicable ?? 0,
+      rapportExpertise: this.expertiseEdit.rapportExpertise ?? '',
+      observationsExpert: this.expertiseEdit.observationsExpert ?? '',
+      expertiseEffectuee: this.expertiseEdit.expertiseEffectuee ?? false,
+      rapportTelecharge: this.expertiseEdit.rapportTelecharge ?? false,
+      
+    };
+    this.expertiseService.updateExpertise(patch).subscribe({
+        next: (updatedExpertise) => {
+        if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
+          this.mission!.expertises[0] = updatedExpertise;
+        }
+          this.editionEnCours = false;
+        },
+      error: (err) => {
+        alert('Erreur lors de la mise à jour des détails de l\'expertise : ' + err.message);
+        }
+      });
+  }
+
+  // Méthode pour uploader le rapport d'expertise
+  uploadRapportExpertise() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf';
+    input.multiple = false;
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderRapportExpertiseFirebase(Array.from(files));
+      }
+    };
+    input.click();
+  }
+
+  uploaderRapportExpertiseFirebase(files: File[]) {
+    if (!this.mission || !this.mission.id) {
+      alert('Mission non trouvée');
+      return;
+    }
+
+    this.uploadingFiles = true;
+    const uploadPromises: Promise<string>[] = [];
+
+    files.forEach(file => {
+      // Utiliser la méthode uploadPdfFile existante
+      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
+      uploadPromises.push(uploadPromise);
+    });
+
+    if (uploadPromises.length === 0) {
+      this.uploadingFiles = false;
+      return;
+    }
+
+    Promise.all(uploadPromises)
+      .then((downloadURLs: string[]) => {
+        console.log('Rapport d\'expertise uploadé:', downloadURLs[0]);
+        
+        // Mettre à jour l'URL du rapport dans l'expertise
+        if (!this.expertiseEdit) {
+          this.expertiseEdit = {};
+        }
+        this.expertiseEdit.rapportExpertise = downloadURLs[0];
+
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        
+        alert('Rapport d\'expertise uploadé avec succès !');
+      })
+      .catch((error) => {
+        console.error('Erreur lors de l\'upload du rapport:', error);
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        alert(`Erreur lors de l'upload: ${error.message}`);
+      });
+  }
+
+  telechargerRapportExpertise() {
+    if (!this.mission?.expertise?.rapportExpertise) {
+      alert('Aucun rapport d\'expertise disponible');
+      return;
+    }
+
+    // Si c'est une URL Firebase, télécharger via le service
+    if (this.mission.expertise.rapportExpertise.includes('firebasestorage.googleapis.com')) {
+      this.firebaseService.downloadPdfFile(this.mission.expertise.rapportExpertise).subscribe({
+        next: (blob: Blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'rapport_expertise.pdf';
+          document.body.appendChild(a);
+          a.click();
+          setTimeout(() => {
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          }, 0);
+        },
+        error: (error) => {
+          console.error('Erreur lors du téléchargement du rapport:', error);
+          alert(`Erreur lors du téléchargement: ${error.message}`);
+        }
+      });
+    } else {
+      // Téléchargement direct si ce n'est pas Firebase
+      const a = document.createElement('a');
+      a.href = this.mission.expertise.rapportExpertise;
+      a.download = 'rapport_expertise.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  }
+
+  public confirmerPassageExpert() {
+    if (!this.expertiseCourante || !this.mission) return;
+
+    // 1. Mettre à jour l'expertise (expertiseEffectuee = true)
+    const expertiseMaj = { ...this.expertiseCourante, expertiseEffectuee: true };
+    this.expertiseService.updateExpertise(expertiseMaj).subscribe({
+      next: (updatedExpertise) => {
+        if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
+          this.mission.expertises[0] = updatedExpertise;
+        }
+        // 2. Mettre à jour le statut d'avancement du sinistre
+        const sinistreId = this.mission!.sinistre?.id;
+        if (sinistreId) {
+          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_VALIDATION_ASSURANCE').subscribe({
+            next: () => {
+              this.mission!.sinistre.statut = 'EN_ATTENTE_VALIDATION_ASSURANCE';
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              alert('Erreur lors de la mise à jour du statut du sinistre : ' + err.message);
+            }
+          });
+        }
+      },
+      error: (err) => {
+        alert('Erreur lors de la confirmation du passage de l\'expert : ' + err.message);
+      }
+    });
   }
 } 

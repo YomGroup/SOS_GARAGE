@@ -191,4 +191,51 @@ export class AdminDashboardComponent implements OnInit {
   showGraph(type: 'performance' | 'distribution' | 'evolution'): void {
     this.currentGraph = type;
   }
+
+  // Méthodes pour rendre les éléments cliquables
+  onStatsCardClick(type: string): void {
+    switch (type) {
+      case 'vehicules':
+        this.router.navigate(['/admin/vehicules']);
+        break;
+      case 'sinistres':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'missions':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'reparateurs':
+        this.router.navigate(['/admin/garages']);
+        break;
+      default:
+        break;
+    }
+  }
+
+  onRecentActivityClick(item: any): void {
+    // À adapter selon la structure de l'activité
+    console.log('Activité cliquée:', item);
+    // Exemple : navigation ou ouverture d'un détail
+  }
+
+  onTaskClick(type: string): void {
+    switch (type) {
+      case 'missions':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'reparateurs':
+        this.router.navigate(['/admin/garages']);
+        break;
+      case 'sinistres':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      default:
+        break;
+    }
+  }
+
+  onSinistreClick(sinistre: any): void {
+    // À adapter selon l'ID ou la route de détail sinistre
+    this.router.navigate(['/admin/dossiers', sinistre.id]);
+  }
 }

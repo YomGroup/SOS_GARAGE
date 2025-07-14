@@ -53,7 +53,7 @@
     <div class="card-flex-container" *ngIf="isCardView" id="cardViewContainer">
       <!-- Missions existantes -->
       <ng-container *ngIf="missionsFiltres.length; else noMission">
-        <div class="dossier-card-modern" *ngFor="let mission of missionsFiltres">
+        <div class="dossier-card-modern" *ngFor="let mission of missionsFiltres" (click)="ouvrirMissionView(mission)" style="cursor: pointer;">
           <!-- En-tête avec dégradé -->
           <div class="dossier-header">
             <div class="dossier-header-content">
@@ -97,78 +97,28 @@
             </div>
 
             <!-- Actions -->
-            <div class="dossier-actions">
+            <div class="dossier-actions" (click)="$event.stopPropagation()">
               <button class="btn-action btn-voir" title="Voir" (click)="ouvrirMissionView(mission)">
                 <span class="btn-text">Voir</span>
               </button>
-              <button class="btn-action btn-modifier" title="Modifier" (click)="ouvrirMissionView(mission, true)">
-                <span class="btn-text">Modifier</span>
-              </button>
-              <button class="btn-action btn-success" title="Valider facture" (click)="validerFacture(mission)">
-                <i class="fas fa-check"></i>
-              </button>
-              <button class="btn-action btn-supprimer" title="Déclarer épave" (click)="declarerEpave(mission)">
-                <i class="fas fa-car-crash"></i>
-              </button>
+              <!-- Boutons de modification masqués si mission terminée -->
+              <ng-container *ngIf="mission.statut !== 'terminée' && mission.statut !== 'TERMINEE'">
+                <button class="btn-action btn-modifier" title="Modifier" (click)="ouvrirMissionView(mission, true)">
+                  <span class="btn-text">Modifier</span>
+                </button>
+                <button class="btn-action btn-success" title="Valider facture" (click)="validerFacture(mission)">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-action btn-supprimer" title="Déclarer épave" (click)="declarerEpave(mission)">
+                  <i class="fas fa-car-crash"></i>
+                </button>
+              </ng-container>
             </div>
           </div>
         </div>
       </ng-container>
       
-      <!-- Dossiers non-traités -->
-      <ng-container *ngIf="dossiersNonTraites.length > 0">
-        <div class="dossier-card-modern dossier-non-traite" *ngFor="let dossier of dossiersNonTraites">
-          <!-- En-tête avec dégradé -->
-          <div class="dossier-header">
-            <div class="dossier-header-content">
-              <div class="dossier-brand">
-                <h5 class="dossier-marque">
-                  Dossier non-traité
-                </h5>
-                <div class="dossier-transmission">
-                  ID: {{ dossier.id }}
-                </div>
-                <div class="dossier-annee">
-                  {{ dossier.type || "Type non défini" }}
-                </div>    
-              </div>
-              <div class="dossier-numero-badge">
-                <span class="numero-text">D {{ dossier.id }}</span>
-              </div>
-            </div>
-            <div class="dossier-statut-badge">
-              <span class="statut-text statut-attente">
-                Non traité
-              </span>
-            </div>
-          </div>
-
-          <!-- Corps de la carte -->
-          <div class="dossier-body">
-            <div class="dossier-info-row">
-              <div class="info-item">
-                <span class="info-label">Type :</span>
-                <span class="info-value">{{ dossier.type || 'Non renseigné' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Contact :</span>
-                <span class="info-value">{{ dossier.contactAssistance || 'Non renseigné' }}</span>
-              </div>
-              <div class="info-item">
-                <span class="info-label">Date :</span>
-                <span class="info-value">{{ formatDate(dossier.dateCreation) }}</span>
-              </div>
-            </div>
-
-            <!-- Actions -->
-            <div class="dossier-actions">
-              <button class="btn-action btn-voir" title="Voir" (click)="ouvrirDossierView(dossier)">
-                <span class="btn-text">Voir</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </ng-container>
+      <!-- SUPPRESSION de la section dossiers non-traités -->
       
       <ng-template #noMission>
         <div class="text-center text-muted">Aucune mission trouvée.</div>
@@ -204,15 +154,18 @@
                 <button class="btn btn-sm btn-outline-primary" title="Voir détails" (click)="ouvrirMissionView(mission)">
                   <i class="fas fa-eye"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-warning" title="Modifier" (click)="ouvrirMissionView(mission, true)">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(mission)">
-                  <i class="fas fa-check"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(mission)">
-                  <i class="fas fa-car-crash"></i>
-                </button>
+                <!-- Boutons de modification masqués si mission terminée -->
+                <ng-container *ngIf="mission.statut !== 'terminée' && mission.statut !== 'TERMINEE'">
+                  <button class="btn btn-sm btn-outline-warning" title="Modifier" (click)="ouvrirMissionView(mission, true)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(mission)">
+                    <i class="fas fa-check"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(mission)">
+                    <i class="fas fa-car-crash"></i>
+                  </button>
+                </ng-container>
               </td>
             </tr>
           </ng-container>

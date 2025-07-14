@@ -9,7 +9,7 @@
         <!-- Statistics -->
         <div class="row mb-4 stats-row">
           <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
+            <div class="stats-card" (click)="onStatsCardClick('vehicules')" tabindex="0">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h3 class="stats-title opacity-90">Véhicules enregistrés</h3>
@@ -22,7 +22,7 @@
             </div>
           </div>
           <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
+            <div class="stats-card" (click)="onStatsCardClick('sinistres')" tabindex="0">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h3 class="stats-title opacity-90">Sinistres</h3>
@@ -35,7 +35,7 @@
             </div>
           </div>
           <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
+            <div class="stats-card" (click)="onStatsCardClick('missions')" tabindex="0">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h3 class="stats-title opacity-90">Missions</h3>
@@ -48,7 +48,7 @@
             </div>
           </div>
           <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card">
+            <div class="stats-card" (click)="onStatsCardClick('reparateurs')" tabindex="0">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <h3 class="stats-title opacity-90">Réparateurs</h3>
@@ -72,7 +72,7 @@
           </div>
           <div class="card-body p-0">
             <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let item of recentActivity">
+              <li class="list-group-item" *ngFor="let item of recentActivity" (click)="onRecentActivityClick(item)" tabindex="0">
                 <i [ngClass]="item.icon"></i>
                 <span class="ms-2">{{ item.label }}</span>
                 <small class="text-muted float-end">{{ item.date | date:'short' }}</small>
@@ -88,15 +88,15 @@
           </div>
           <div class="card-body p-0">
             <ul class="list-group list-group-flush">
-              <li class="list-group-item">
+              <li class="list-group-item" (click)="onTaskClick('missions')" tabindex="0">
                 <i class="fas fa-tasks text-info me-2"></i>
                 {{ pendingMissionsCount }} missions en attente
               </li>
-              <li class="list-group-item">
+              <li class="list-group-item" (click)="onTaskClick('reparateurs')" tabindex="0">
                 <i class="fas fa-user-cog text-warning me-2"></i>
                 {{ pendingReparateursCount }} réparateurs à valider
               </li>
-              <li class="list-group-item">
+              <li class="list-group-item" (click)="onTaskClick('sinistres')" tabindex="0">
                 <i class="fas fa-file-alt text-danger me-2"></i>
                 {{ pendingSinistresCount }} sinistres à traiter
               </li>
@@ -115,7 +115,7 @@
           </div>
           <div class="card-body p-0">
             <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let sinistre of recentSinistres">
+              <li class="list-group-item" *ngFor="let sinistre of recentSinistres" (click)="onSinistreClick(sinistre)" tabindex="0">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
                     <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>

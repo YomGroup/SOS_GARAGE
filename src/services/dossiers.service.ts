@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
-import { Vehicule, Assure } from './models-api.interface';
+import { Vehicule, Assure, Expert } from './models-api.interface';
 
 export interface Dossier {
   id: number;
@@ -21,6 +21,14 @@ export interface Dossier {
   isvalid: boolean;
   dateCreation: Date;
   assurance: "AXA";
+  dateSinistre: Date;
+  lieuSinistre: string;
+  contact: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  expert?: Expert;
 }
 
 
@@ -60,7 +68,11 @@ export class DossiersService {
   }
 
   updateStatutSinistre(id: number, statut: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, { statut });
+    return this.http.patch(`${this.apiUrl}/${id}`, { statut });
+  }
+
+  updateDossier(id: number, data: any): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/${id}`, data);
   }
 
   getVehiculeBySinistreId(sinistreId: number): Observable<Vehicule> {

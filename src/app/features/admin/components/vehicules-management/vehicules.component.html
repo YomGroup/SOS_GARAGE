@@ -1,0 +1,54 @@
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="input-group shadow-sm rounded-pill search-bar">
+        <span class="input-group-text bg-white border-0 rounded-start-pill">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control border-0 rounded-end-pill"
+          placeholder="Rechercher véhicule..."
+          [(ngModel)]="searchTerm"
+          style="box-shadow: none; background: #f8f9fa;"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let vehicle of filteredVehicles">
+      <div class="card h-100 shadow-sm border-0 overflow-hidden">
+        <div class="position-relative bg-light" style="height: 180px;">
+          <img *ngIf="vehicle.imgUrl; else defaultIcon" [src]="vehicle.imgUrl" class="h-100 w-100 object-fit-cover" alt="Image véhicule">
+          <ng-template #defaultIcon>
+            <div class="d-flex h-100 align-items-center justify-content-center">
+              <span class="display-4 opacity-50">🚗</span>
+            </div>
+          </ng-template>
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ vehicle.marque }} {{ vehicle.modele }}</h5>
+          <p class="text-muted">{{ vehicle.dateMiseEnCirculation | date:'yyyy' }}</p>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted">Immatriculation</span>
+              <span class="fw-bold">{{ vehicle.immatriculation }}</span>
+            </div>
+            <div class="d-flex justify-content-between py-2 border-bottom">
+              <span class="text-muted">Cylindrée</span>
+              <span class="fw-bold">{{ vehicle.cylindree }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Pagination -->
+  <div class="d-flex justify-content-center align-items-center mt-4" *ngIf="totalPages > 1">
+    <button class="btn btn-outline-primary rounded-pill mx-1" (click)="prevPage()" [disabled]="currentPage === 1">&laquo;</button>
+    <ng-container *ngFor="let page of [].constructor(totalPages); let i = index">
+      <button class="btn btn-sm mx-1" [ngClass]="{'btn-primary': currentPage === (i+1), 'btn-outline-primary': currentPage !== (i+1)}" (click)="goToPage(i+1)">{{ i+1 }}</button>
+    </ng-container>
+    <button class="btn btn-outline-primary rounded-pill mx-1" (click)="nextPage()" [disabled]="currentPage === totalPages">&raquo;</button>
+  </div>
+</div>

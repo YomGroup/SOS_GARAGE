@@ -139,6 +139,15 @@
   margin-top: 20px;
 }
 
+.actions-section {
+  border-top: 1px solid #e9ecef;
+  padding-top: 20px;
+  margin-top: 30px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 10px;
+  padding: 20px;
+}
+
 .btn {
   padding: 12px 25px;
   border: none;
@@ -670,4 +679,152 @@
   .main-image {
     max-height: 250px;
   }
+} 
+
+.main-info-section {
+  background: #f8f9fa;
+  border-left: 4px solid #007bff;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.main-info-section h3 {
+  color: #007bff;
+  margin-bottom: 1rem;
+}
+
+.main-info-section .form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.main-info-section .form-group {
+  margin-bottom: 0;
+}
+
+.main-info-section .readonly-field {
+  font-weight: 500;
+  color: #2c3e50;
+  background: #ffffff;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+} 
+
+.accordion-section {
+  margin-bottom: 1.2rem;
+}
+
+.accordion-toggle {
+  width: 100%;
+  background: #f1f3f6;
+  border: none;
+  outline: none;
+  padding: 0.9rem 1.2rem;
+  font-size: 1.08em;
+  font-weight: 500;
+  color: #2c3e50;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.2s;
+}
+
+.accordion-toggle:hover {
+  background: #e9ecef;
+}
+
+.chevron {
+  margin-left: 1em;
+  font-size: 1.1em;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  background: #fff;
+  border-radius: 0 0 6px 6px;
+  border: 1px solid #e9ecef;
+  border-top: none;
+  padding: 1.2rem 1.2rem 1.2rem 2.2rem;
+  margin-top: -0.5rem;
+  animation: fadeInAccordion 0.2s;
+}
+
+@keyframes fadeInAccordion {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+} 
+
+.statut-avancement-section-admin {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border-radius: 12px;
+  padding: 24px 30px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.10);
+  text-align: center;
+}
+
+.statut-avancement-section-admin h4 {
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 18px;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+}
+
+.statut-avancement-display-admin {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.badge-statut-admin {
+  padding: 12px 28px;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: inline-block;
+  min-width: 220px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.10);
+  background: #e9ecef;
+  color: #495057;
+  border: 2px solid #667eea;
+  transition: all 0.3s;
+}
+
+.badge-statut-admin.statut-attente {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffeaa7;
+}
+.badge-statut-admin.statut-encours {
+  background: #d1ecf1;
+  color: #0c5460;
+  border-color: #bee5eb;
+}
+.badge-statut-admin.statut-terminee {
+  background: #d4edda;
+  color: #155724;
+  border-color: #c3e6cb;
+}
+.badge-statut-admin.statut-epave {
+  background: #f8d7da;
+  color: #721c24;
+  border-color: #f5c6cb;
+}
+.badge-statut-admin.statut-default {
+  background: #e9ecef;
+  color: #495057;
+  border-color: #667eea;
 } 

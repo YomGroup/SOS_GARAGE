@@ -75,6 +75,7 @@ export class SidebarComponent implements OnInit {
         { title: 'Dossiers terminés', icon: 'bi bi-check-circle', filter: 'termines' }
       ]
     },
+    { title: 'Véhicules', icon: 'bi bi-car-front', route: '/admin/vehicules' },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
    // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
 import { Dossier, DossiersService } from '../../../../../services/dossiers.service';
 import { ReparateurService } from '../../../../../services/reparateur.service';
-import { Mission, Reparateur, Assure, MissionUpdate } from '../../../../../services/models-api.interface';
+import { Mission, Reparateur, Assure, MissionUpdate, Expertise } from '../../../../../services/models-api.interface';
 import { DocumentCreationModalComponent } from './document-creation-modal.component';
 import { AssureService } from '../../../../../services/assure.service';
 import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
 import { firstValueFrom } from 'rxjs';
+import { ExpertiseService } from '../../../../../services/expertise.service';
 
 @Component({
   selector: 'app-dossier-view',
@@ -64,16 +65,40 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   uploadingFiles: boolean = false;
 
+  // Propriétés pour l'affichage des sections déroulantes
+  showClientInfo: boolean = false;
+  showSinistreInfo: boolean = false;
+  showVehiculeSinistreInfo: boolean = false;
+  showFinancesInfo: boolean = false;
+  showDossierDetails: boolean = false;
+  showAdditionalInfo: boolean = false;
+  showVehiclePhotos: boolean = false;
+  showDocuments: boolean = false;
+  showGarageDetails: boolean = false;
+  showExpertInfo: boolean = false;
+  showAttributionSection: boolean = false;
+  showChangeReparateurSection: boolean = false;
+  showExpertDetails: boolean = false;
+  // Ajoute d'autres propriétés similaires pour les autres sections si besoin
+
+  editionExpertEnCours: boolean = false;
+  expertiseEdit: Partial<Expertise> = {};
+
   constructor(
     private missionService: MissionService, 
     private reparateurService: ReparateurService, 
     private assureService: AssureService,
     private dossiersService: DossiersService,
     private firebaseService: FirebaseStorageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private expertiseService: ExpertiseService
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
+    console.log('ngOnChanges triggered with changes:', changes);
+    console.log('Current dossier:', this.dossier);
+    console.log('Current mission:', this.mission);
+    
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();
     }
@@ -83,16 +108,26 @@ export class DossierViewComponent implements OnChanges, OnInit {
     
     // Charger automatiquement les informations de l'assuré si la mission ou le dossier change
     if (changes['mission'] || changes['dossier']) {
+      console.log('Mission or dossier changed, loading data...');
+      this.chargerInformationsAssure();
+      this.chargerVehiculeSinistre();
+    }
+    
+    // Si on a un dossier mais pas de mission, forcer le chargement des données
+    if (this.dossier && !this.mission) {
+      console.log('Dossier without mission detected, loading data...');
       this.chargerInformationsAssure();
       this.chargerVehiculeSinistre();
     }
   }
 
   ngOnInit(): void {
+    console.log('ngOnInit - Initializing component');
     this.chargerReparateursValides();
     this.commissionStatutEdit = this.mission?.commissionStatut || '';
     this.commissionStatutOriginal = this.mission?.commissionStatut || '';
     this.chargerInformationsAssure();
+    this.chargerVehiculeSinistre(); // Ajouter l'appel ici aussi
   }
 
   close() {
@@ -498,23 +533,67 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   // Méthode pour charger le véhicule du sinistre
   chargerVehiculeSinistre() {
-    // Récupérer l'ID du sinistre depuis la mission ou le dossier
-    const sinistreId = this.mission?.sinistre?.id || this.dossier?.id;
+    console.log('chargerVehiculeSinistre called. Current dossier:', this.dossier);
     
+    // Utiliser directement les données du véhicule depuis dossier.vehicule
+    if (this.dossier?.vehicule) {
+      console.log('Utilisation des données du véhicule depuis dossier.vehicule:', this.dossier.vehicule);
+      this.vehiculeSinistre = this.dossier.vehicule;
+      this.loadingVehicule = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Si pas de véhicule dans dossier, essayer de le récupérer via l'assuré
+    if (this.assureInfo?.vehicules && this.assureInfo.vehicules.length > 0) {
+      const vehiculeAssure = this.getVehiculeAssure();
+      if (vehiculeAssure) {
+        console.log('Utilisation des données du véhicule depuis assureInfo:', vehiculeAssure);
+        this.vehiculeSinistre = vehiculeAssure;
+        this.loadingVehicule = false;
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+
+    // Si on n'a pas de mission, essayer de récupérer le véhicule directement par l'ID du dossier
+    if (!this.mission && this.dossier?.id) {
+      this.loadingVehicule = true;
+      console.log('Appel API pour récupérer le véhicule pour dossierId:', this.dossier.id);
+      
+      this.dossiersService.getVehiculeBySinistreId(this.dossier.id).subscribe({
+        next: (vehicule) => {
+          console.log('Véhicule du dossier récupéré via API:', vehicule);
+          this.vehiculeSinistre = vehicule;
+          this.loadingVehicule = false;
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('Erreur lors de la récupération du véhicule du dossier:', error);
+          this.vehiculeSinistre = null;
+          this.loadingVehicule = false;
+        }
+      });
+      return;
+    }
+
+    // En dernier recours, faire un appel API avec l'ID du sinistre de la mission
+    const sinistreId = this.mission?.sinistre?.id;
     if (!sinistreId) {
       console.log('Aucun ID de sinistre disponible pour récupérer le véhicule');
+      this.loadingVehicule = false;
       return;
     }
 
     this.loadingVehicule = true;
+    console.log('Appel API pour récupérer le véhicule pour sinistreId:', sinistreId);
     
-    // Utiliser le service dossiers pour récupérer le véhicule par ID de sinistre
     this.dossiersService.getVehiculeBySinistreId(sinistreId).subscribe({
       next: (vehicule) => {
-        console.log('Véhicule du sinistre récupéré:', vehicule);
+        console.log('Véhicule du sinistre récupéré via API:', vehicule);
         this.vehiculeSinistre = vehicule;
         this.loadingVehicule = false;
-        this.cdr.detectChanges(); // Forcer la détection de changements
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erreur lors de la récupération du véhicule du sinistre:', error);
@@ -575,5 +654,170 @@ export class DossierViewComponent implements OnChanges, OnInit {
   selectImage(index: number) {
     this.currentImageIndex = index;
     this.currentImageUrl = this.currentImages[index];
+  }
+
+  // Méthode pour obtenir les informations de véhicule formatées (copiée du composant parent)
+  getVehiculeInfo(dossier: any): any {
+    console.log('getVehiculeInfo called with dossier:', dossier);
+    console.log('vehiculeSinistre:', this.vehiculeSinistre);
+    
+    // Si on a un véhicule dans le dossier, l'utiliser en priorité
+    if (dossier?.vehicule) {
+      console.log('Using dossier.vehicule:', dossier.vehicule);
+      return {
+        marque: dossier.vehicule.marque || 'Marque non spécifiée',
+        modele: dossier.vehicule.modele || 'Modèle non spécifié',
+        annee: dossier.vehicule.dateMiseEnCirculation ? 
+          dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+        immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
+        assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+      };
+    }
+    
+    // Si pas de véhicule dans le dossier mais qu'on a un véhiculeSinistre chargé
+    if (this.vehiculeSinistre) {
+      console.log('Using vehiculeSinistre:', this.vehiculeSinistre);
+      return {
+        marque: this.vehiculeSinistre.marque || 'Marque non spécifiée',
+        modele: this.vehiculeSinistre.modele || 'Modèle non spécifié',
+        annee: this.vehiculeSinistre.dateMiseEnCirculation ? 
+          this.vehiculeSinistre.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+        immatriculation: this.vehiculeSinistre.immatriculation || 'Immatriculation non spécifiée',
+        assurance: this.vehiculeSinistre.nomAssurence || 'Assurance non spécifiée'
+      };
+    }
+    
+    // Si on a un véhicule via l'assuré (quand il y a une mission)
+    const vehiculeAssure = this.getVehiculeAssure();
+    if (vehiculeAssure) {
+      console.log('Using vehiculeAssure:', vehiculeAssure);
+      return {
+        marque: vehiculeAssure.marque || 'Marque non spécifiée',
+        modele: vehiculeAssure.modele || 'Modèle non spécifié',
+        annee: vehiculeAssure.dateMiseEnCirculation ? 
+          vehiculeAssure.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+        immatriculation: vehiculeAssure.immatriculation || 'Immatriculation non spécifiée',
+        assurance: vehiculeAssure.nomAssurence || 'Assurance non spécifiée'
+      };
+    }
+    
+    console.log('Using default values');
+    // Valeurs par défaut si aucune source n'est disponible
+    return {
+      marque: 'Marque non spécifiée',
+      modele: 'Modèle non spécifié',
+      annee: 'Année non spécifiée',
+      immatriculation: 'Immatriculation non spécifiée',
+      assurance: 'Assurance non spécifiée'
+    };
+  }
+
+  public getStatutAvancementLabel(statut: string | undefined): string {
+    if (!statut) return 'Non défini';
+    switch (statut) {
+      case 'EN_ATTENTE_TRAITEMENT':
+        return 'En attente de traitement';
+      case 'EN_ATTENTE_EXPERTISE':
+        return 'En attente d\'expertise';
+      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
+        return 'En attente validation assurance';
+      case 'VEHICULE_EPAVE':
+        return 'Véhicule épave';
+      case 'EN_COURS_REPARATION':
+        return 'En cours de réparation';
+      case 'REPARATION_TERMINEE':
+        return 'Réparation terminée';
+      case 'FACTURE':
+        return 'Facturé';
+      default:
+        return statut;
+    }
+  }
+
+  public getStatutAvancementClass(statut: string | undefined): string {
+    if (!statut) return 'statut-default';
+    switch (statut) {
+      case 'EN_ATTENTE_TRAITEMENT':
+      case 'EN_ATTENTE_EXPERTISE':
+      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
+        return 'statut-attente';
+      case 'VEHICULE_EPAVE':
+        return 'statut-epave';
+      case 'EN_COURS_REPARATION':
+        return 'statut-encours';
+      case 'REPARATION_TERMINEE':
+        return 'statut-terminee';
+      case 'FACTURE':
+        return 'statut-default';
+      default:
+        return 'statut-default';
+    }
+  }
+
+  get dossierCourant() {
+    return this.dossier ?? this.mission;
+  }
+
+  get expertiseCourante(): any {
+    // On prend la première expertise du tableau si elle existe
+    return this.mission?.expertises && this.mission.expertises.length > 0 ? this.mission.expertises[0] : null;
+  }
+
+  lancerEditionExpert() {
+    // On ne permet d'éditer que la nomination
+    const exp = this.expertiseCourante;
+    this.expertiseEdit = exp ? {
+      id: exp.id,
+      nomExpert: exp.nomExpert,
+      prenomExpert: exp.prenomExpert,
+      institutionExpert: exp.institutionExpert,
+      dateExpertisePrevue: exp.dateExpertisePrevue
+    } : {};
+    this.editionExpertEnCours = true;
+  }
+  annulerExpert() {
+    this.editionExpertEnCours = false;
+  }
+  enregistrerExpert() {
+    // PATCH uniquement les champs nomination
+    if (!this.expertiseEdit) return;
+    const patch = {
+      nomExpert: this.expertiseEdit.nomExpert ?? '',
+      prenomExpert: this.expertiseEdit.prenomExpert ?? '',
+      institutionExpert: this.expertiseEdit.institutionExpert ?? '',
+      dateExpertisePrevue: this.expertiseEdit.dateExpertisePrevue ?? ''
+    };
+    if (this.expertiseEdit.id) {
+      this.expertiseService.updateExpertise({ id: this.expertiseEdit.id, ...patch } as any).subscribe({
+        next: (updatedExpertise) => {
+          // Met à jour la mission localement
+          if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
+            this.mission.expertises[0] = updatedExpertise;
+          }
+          this.editionExpertEnCours = false;
+        },
+        error: (err) => {
+          alert('Erreur lors de la mise à jour de la nomination de l\'expert : ' + err.message);
+        }
+      });
+    } else {
+      // Création d'une nouvelle expertise (nomination)
+      this.expertiseService.createExpertise(patch as any).subscribe({
+        next: (createdExpertise) => {
+          if (this.mission) {
+            if (!this.mission.expertises) this.mission.expertises = [];
+            this.mission.expertises.unshift(createdExpertise);
+          }
+          this.editionExpertEnCours = false;
+        },
+        error: (err) => {
+          alert('Erreur lors de la création de la nomination de l\'expert : ' + err.message);
+        }
+      });
+    }
+  }
+
+  isImageOrPdf(url: string): boolean {
+    return /\.(pdf|jpg|jpeg|png)$/i.test(url);
   }
 } 

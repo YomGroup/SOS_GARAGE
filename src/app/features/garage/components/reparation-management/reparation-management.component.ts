@@ -130,7 +130,12 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         // Charger les missions
         this.missionService.getAllMissions().subscribe({
           next: (missions: Mission[]) => {
-            this.missions = missions.filter((m: Mission) => m.reparateur && m.reparateur.useridKeycloak === keycloakId);
+            this.missions = missions.filter((m: Mission) =>
+              m.reparateur &&
+              typeof m.reparateur.useridKeycloak === 'string' &&
+              m.reparateur.useridKeycloak === keycloakId
+            );
+            console.log('missions après filtrage réparateur', this.missions);
             this.dataSource.data = this.missionsFiltres;
             // Charger les véhicules pour chaque mission
             this.missions.forEach(mission => {
@@ -278,8 +283,10 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     }
   }
 
-  formatDate(date: string | Date): string {
-    const d = typeof date === 'string' ? new Date(date) : date;
+  formatDate(date: string | Date | undefined | null): string {
+    if (!date) return 'Non renseigné';
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return 'Non renseigné';
     return d.toLocaleDateString('fr-FR');
   }
 

@@ -119,6 +119,7 @@
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
 }
 
+
 .document-icon {
     width: 60px;
     height: 60px;
@@ -1008,4 +1009,53 @@
     max-width: 100%;
     min-height: unset;
   }
+} 
+
+.dossier-immatriculation {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 1.15em;
+  color: #1565c0;
+  background: #e3f2fd;
+  border-radius: 16px;
+  padding: 0.18em 1.1em;
+  margin: 0.7rem 0 0.2rem 0;
+  box-shadow: 0 1px 4px rgba(21,101,192,0.07);
+  font-weight: 600;
+  letter-spacing: 1px;
+  min-width: 120px;
+  max-width: 220px;
+  width: fit-content;
+  align-self: flex-end;
+}
+
+.dossier-immatriculation .info-label {
+  color: #1976d2;
+  font-size: 0.98em;
+  font-weight: 500;
+  margin-right: 0.5em;
+  opacity: 0.95;
+}
+
+.dossier-immatriculation .info-value {
+  color: #0d47a1;
+  font-size: 1.18em;
+  font-family: 'Roboto Mono', monospace, Arial, sans-serif;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  font-weight: 700;
+} 
+
+.dossier-immatriculation-inline {
+  font-size: 0.95em;
+  color: #555;
+  margin-top: 0.1em;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  text-align: left;
+  line-height: 1.1;
+  white-space: nowrap;
+  opacity: 0.9;
 } 

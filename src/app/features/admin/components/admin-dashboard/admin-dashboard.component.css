@@ -207,6 +207,7 @@
   color: white;
   transition: transform 0.3s ease;
   box-shadow: var(--card-shadow);
+  cursor: pointer;
 }
 
 .stats-card:hover {

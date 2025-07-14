@@ -123,7 +123,7 @@
     <!-- Affichage des dossiers filtrés -->
     <div *ngIf="dossiersFiltres.length; else aucunDossier">
       <div class="card-flex-container" id="cardViewContainer" *ngIf="isCardView">
-        <div class="dossier-card-modern" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer">
+        <div class="dossier-card-modern" *ngFor="let dossier of dossiersFiltres" style="cursor: pointer" (click)="ouvrirDossierView(dossier)">
           <!-- En-tête avec dégradé -->
           <div class="dossier-header">
             <div class="dossier-header-content">
@@ -145,6 +145,12 @@
                     <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
                   </span>
                   <span *ngIf="!isVehiculeLoading(dossier.id)">{{ getVehiculeInfo(dossier).annee }}</span>
+                </div>
+                <div class="dossier-annee dossier-immatriculation-inline">
+                  <span *ngIf="isVehiculeLoading(dossier.id)" class="loading-indicator">
+                    <i class="fas fa-spinner fa-spin me-1"></i>Chargement...
+                  </span>
+                  <span *ngIf="!isVehiculeLoading(dossier.id)">{{ dossier.vehicule?.immatriculation || 'N/A' }}</span>
                 </div>
               </div>
               <div class="dossier-numero-badge">
@@ -173,7 +179,6 @@
                 </span>
               </div>
             </div>
-
             <!-- Actions -->
             <div class="dossier-actions">
               <button class="btn-action btn-voir" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)"><span class="btn-text">Voir</span></button>
