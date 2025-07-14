@@ -311,8 +311,7 @@
              class="alert alert-info mt-4 text-center border-0 shadow-sm">
           <i class="fas fa-info-circle me-2"></i>
           Cette mission a déjà été 
-          <strong>{{ missionSelectionnee.statut === 'assignée' ? 'assignée' : 
-                    missionSelectionnee.statut === 'en cours' ? 'mise en cours' : 
+          <strong>{{ missionSelectionnee.statut === 'en cours' ? 'en cours' : 
                     missionSelectionnee.statut === 'terminée' ? 'terminée' : 'traitée' }}</strong>
         </div>
       </div>

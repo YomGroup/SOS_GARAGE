@@ -145,7 +145,7 @@
       </div>
         
       <!-- Détails du garage en charge du sinistre -->
-      <div class="accordion-section" *ngIf="mission?.reparateur">
+      <div class="accordion-section" *ngIf="mission && mission.reparateur">
         <button class="accordion-toggle" (click)="showGarageDetails = !showGarageDetails">
           <i class="fas fa-warehouse me-2"></i>Détails du garage en charge du sinistre
           <span class="chevron" [class.open]="showGarageDetails">&#9660;</span>
@@ -155,34 +155,60 @@
             <div class="form-grid">
               <div class="form-group">
                 <label>Nom du garage</label>
-                <div class="readonly-field">{{ mission?.reparateur?.nomDuGarage || 'Non renseigné' }}</div>
+                <div class="readonly-field">{{ mission.reparateur.nomDuGarage || 'Non renseigné' }}</div>
               </div>
               <div class="form-group">
                 <label>Email</label>
-                <div class="readonly-field">{{ mission?.reparateur?.email }}</div>
+                <div class="readonly-field">{{ mission.reparateur.email }}</div>
               </div>
               <div class="form-group">
                 <label>Téléphone</label>
-                <div class="readonly-field">{{ mission?.reparateur?.telephone }}</div>
+                <div class="readonly-field">{{ mission.reparateur.telephone }}</div>
               </div>
               <div class="form-group">
                 <label>Nom du responsable</label>
-                <div class="readonly-field">{{ mission?.reparateur?.prenom }} {{ mission?.reparateur?.name }}</div>
+                <div class="readonly-field">{{ mission.reparateur.prenom }} {{ mission.reparateur.name }}</div>
               </div>
               <div class="form-group">
                 <label>Ville</label>
-                <div class="readonly-field">{{ mission?.reparateur?.ville || 'Non renseigné' }}</div>
+                <div class="readonly-field">{{ mission.reparateur.ville || 'Non renseigné' }}</div>
               </div>
               <div class="form-group">
                 <label>Services proposés</label>
                 <div class="readonly-field">
-                  <ng-container *ngIf="mission?.reparateur?.servicePropose?.length; else aucunService">
+                  <ng-container *ngIf="mission.reparateur.servicePropose?.length; else aucunService">
                     <ul style="margin:0; padding-left: 1.2em;">
-                      <li *ngFor="let service of mission?.reparateur?.servicePropose">{{ service }}</li>
+                      <li *ngFor="let service of mission.reparateur.servicePropose">{{ service }}</li>
                     </ul>
                   </ng-container>
                   <ng-template #aucunService>Aucun service renseigné</ng-template>
                 </div>
+              </div>
+            </div>
+            <div class="mt-4">
+              <button class="btn btn-warning" *ngIf="!changerReparateurEnCours" (click)="changerReparateurEnCours = true">
+                <i class="fas fa-exchange-alt me-2"></i>Changer de réparateur
+              </button>
+              <div *ngIf="changerReparateurEnCours">
+                <h5><i class="fas fa-exchange-alt me-2"></i>Changer de réparateur</h5>
+                <p>Ce dossier est actuellement attribué à un réparateur. Vous pouvez le réassigner à un autre réparateur si nécessaire.</p>
+                <div class="form-group">
+                  <label>Réparateur actuel :</label>
+                  <div class="readonly-field">{{ mission.reparateur.nomDuGarage }} ({{ mission.reparateur.name }} {{ mission.reparateur.prenom }})</div>
+                </div>
+                <label for="newReparateurSelect">Sélectionner un nouveau réparateur :</label>
+                <select id="newReparateurSelect" class="form-select" [(ngModel)]="selectedReparateurId">
+                  <option [ngValue]="null">-- Choisir --</option>
+                  <option *ngFor="let rep of reparateursValides" [ngValue]="rep.id" [disabled]="rep.id === mission.reparateur.id">
+                    {{ rep.nomDuGarage }} ({{ rep.name }} {{ rep.prenom }})
+                  </option>
+                </select>
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                  <button class="btn btn-success" (click)="changerReparateur()" [disabled]="!selectedReparateurId">Valider</button>
+                  <button class="btn btn-secondary ms-2" (click)="changerReparateurEnCours = false; selectedReparateurId = null">Annuler</button>
+                </div>
+                <div *ngIf="attributionSuccess" class="alert alert-success mt-2">{{ attributionMessage }}</div>
+                <div *ngIf="attributionError" class="alert alert-danger mt-2">{{ attributionMessage }}</div>
               </div>
             </div>
           </div>
@@ -251,6 +277,23 @@
         </div>
       </div>
 
+            <!-- Photos du véhicule -->
+            <div class="accordion-section">
+              <button class="accordion-toggle" (click)="showVehiclePhotos = !showVehiclePhotos">
+                <i class="fas fa-camera me-2"></i>Photos du l'incident
+                <span class="chevron" [class.open]="showVehiclePhotos">&#9660;</span>
+              </button>
+              <div class="accordion-content" *ngIf="showVehiclePhotos">
+            <div class="form-section" *ngIf="isPhotosArrayNonEmpty(mission)">
+              <div class="photos-grid">
+                <div class="photo-thumbnail" *ngFor="let photo of mission?.photosVehicule">
+                  <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
+                </div>
+              </div>
+            </div>
+              </div>
+            </div>
+
       <!-- Nomination de l'expert -->
       <div class="accordion-section">
         <button class="accordion-toggle" (click)="showExpertInfo = !showExpertInfo">
@@ -275,6 +318,14 @@
                   <input type="text" class="form-control" [(ngModel)]="expertiseEdit.institutionExpert" name="institutionExpert">
                 </div>
                 <div class="form-group">
+                  <label>Contact de l'expert</label>
+                  <input type="text" class="form-control" [(ngModel)]="expertiseEdit.contactExpert" name="contactExpert">
+                </div>
+                <div class="form-group">
+                  <label>Email de l'expert</label>
+                  <input type="email" class="form-control" [(ngModel)]="expertiseEdit.mailExpert" name="emailExpert">
+                </div>
+                <div class="form-group">
                   <label>Date d'expertise prévue</label>
                   <input type="date" class="form-control" [(ngModel)]="expertiseEdit.dateExpertisePrevue" name="dateExpertisePrevue">
                 </div>
@@ -294,6 +345,14 @@
                 <div class="form-group">
                   <label>Prénom de l'expert</label>
                   <div class="readonly-field">{{ expertiseCourante?.prenomExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Contact de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.contactExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Email de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.mailExpert || 'Non renseigné' }}</div>
                 </div>
                 <div class="form-group">
                   <label>Institution</label>
@@ -425,22 +484,7 @@
         </div>
       </div>
 
-      <!-- Photos du véhicule -->
-      <div class="accordion-section">
-        <button class="accordion-toggle" (click)="showVehiclePhotos = !showVehiclePhotos">
-          <i class="fas fa-camera me-2"></i>Photos du véhicule
-          <span class="chevron" [class.open]="showVehiclePhotos">&#9660;</span>
-        </button>
-        <div class="accordion-content" *ngIf="showVehiclePhotos">
-      <div class="form-section" *ngIf="isPhotosArrayNonEmpty(mission)">
-        <div class="photos-grid">
-          <div class="photo-thumbnail" *ngFor="let photo of mission?.photosVehicule">
-            <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
-          </div>
-        </div>
-      </div>
-        </div>
-      </div>
+
 
       <!-- Documents -->
       <div class="accordion-section">
@@ -513,42 +557,6 @@
               <div class="d-flex justify-content-center gap-2 mt-2">
                 <button class="btn btn-success" (click)="creerMissionPourDossier()" [disabled]="!selectedReparateurId">Valider</button>
                 <button class="btn btn-secondary ms-2" (click)="attributionEnCours = false">Annuler</button>
-              </div>
-              <div *ngIf="attributionSuccess" class="alert alert-success mt-2">{{ attributionMessage }}</div>
-              <div *ngIf="attributionError" class="alert alert-danger mt-2">{{ attributionMessage }}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Changement de réparateur (pour les missions existantes) -->
-      <div class="accordion-section" *ngIf="mission && mission.reparateur">
-        <button class="accordion-toggle" (click)="showChangeReparateurSection = !showChangeReparateurSection">
-          <i class="fas fa-exchange-alt me-2"></i>Changer de réparateur
-          <span class="chevron" [class.open]="showChangeReparateurSection">&#9660;</span>
-        </button>
-        <div class="accordion-content" *ngIf="showChangeReparateurSection">
-          <div class="form-section">
-            <h3><i class="fas fa-exchange-alt me-2"></i>Changer de réparateur</h3>
-            <p>Ce dossier est actuellement attribué à un réparateur. Vous pouvez le réassigner à un autre réparateur si nécessaire.</p>
-            <div class="form-group">
-              <label>Réparateur actuel :</label>
-              <div class="readonly-field">{{ mission.reparateur.nomDuGarage }} ({{ mission.reparateur.name }} {{ mission.reparateur.prenom }})</div>
-            </div>
-            <div *ngIf="!changerReparateurEnCours">
-              <button class="btn btn-warning mt-3" (click)="changerReparateurEnCours = true">Changer de réparateur</button>
-            </div>
-            <div *ngIf="changerReparateurEnCours">
-              <label for="newReparateurSelect">Sélectionner un nouveau réparateur :</label>
-              <select id="newReparateurSelect" class="form-select" [(ngModel)]="selectedReparateurId">
-                <option [ngValue]="null">-- Choisir --</option>
-                <option *ngFor="let rep of reparateursValides" [ngValue]="rep.id" [disabled]="rep.id === mission.reparateur.id">
-                  {{ rep.nomDuGarage }} ({{ rep.name }} {{ rep.prenom }})
-                </option>
-              </select>
-              <div class="d-flex justify-content-center gap-2 mt-2">
-                <button class="btn btn-success" (click)="changerReparateur()" [disabled]="!selectedReparateurId">Valider</button>
-                <button class="btn btn-secondary ms-2" (click)="changerReparateurEnCours = false; selectedReparateurId = null">Annuler</button>
               </div>
               <div *ngIf="attributionSuccess" class="alert alert-success mt-2">{{ attributionMessage }}</div>
               <div *ngIf="attributionError" class="alert alert-danger mt-2">{{ attributionMessage }}</div>

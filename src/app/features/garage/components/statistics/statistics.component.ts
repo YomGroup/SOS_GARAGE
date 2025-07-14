@@ -248,7 +248,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       completed: missions.filter(m => m.statut === 'terminée').length,
       inProgress: missions.filter(m => m.statut === 'en cours').length,
       pending: missions.filter(m => m.statut === 'en attente').length,
-      assigned: missions.filter(m => m.statut === 'assignée').length,
+      assigned: missions.filter(m => m.statut === 'en cours').length,
       refused: missions.filter(m => m.statut === 'non assignée').length,
       epave: missions.filter(m => m.statut === 'épave').length
     };
@@ -341,7 +341,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
         return 'warning';
       case 'en attente':
         return 'info';
-      case 'assignée':
+      case 'en cours':
         return 'primary';
       case 'non assignée':
         return 'secondary';
@@ -360,8 +360,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
         return 'En cours';
       case 'en attente':
         return 'En attente';
-      case 'assignée':
-        return 'Assignée';
+      case 'en cours':
+        return 'En cours';
       case 'non assignée':
         return 'Non assignée';
       case 'épave':

@@ -106,7 +106,7 @@ export class MissionReceptionComponent implements OnInit {
     
     try {
       const updatedMission = await firstValueFrom(
-        this.missionService.updateMission(mission.id ?? 0, { statut: 'assigné' })
+        this.missionService.updateMission(mission.id ?? 0, { statut: 'en cours' })
       );
       
       // Mettre à jour les deux tableaux

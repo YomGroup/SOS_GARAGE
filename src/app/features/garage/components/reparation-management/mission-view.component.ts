@@ -656,19 +656,19 @@ export class MissionViewComponent implements OnChanges {
       observationsExpert: this.expertiseEdit.observationsExpert ?? '',
       expertiseEffectuee: this.expertiseEdit.expertiseEffectuee ?? false,
       rapportTelecharge: this.expertiseEdit.rapportTelecharge ?? false,
-      
+      missionId: this.mission?.id // Ajouté pour correspondre à l'interface
     };
     this.expertiseService.updateExpertise(patch).subscribe({
-        next: (updatedExpertise) => {
+      next: (updatedExpertise) => {
         if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
           this.mission!.expertises[0] = updatedExpertise;
         }
-          this.editionEnCours = false;
-        },
+        this.editionEnCours = false;
+      },
       error: (err) => {
         alert('Erreur lors de la mise à jour des détails de l\'expertise : ' + err.message);
-        }
-      });
+      }
+    });
   }
 
   // Méthode pour uploader le rapport d'expertise

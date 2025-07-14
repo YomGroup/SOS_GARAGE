@@ -124,7 +124,7 @@
             <div class="form-group">
               <label>Statut</label>
               <select class="form-select" [(ngModel)]="missionEdit.statut" name="statut">
-                <option value="assigné">Assigné</option>
+                <option value="en cours">En cours</option>
                 <option value="en cours">En cours</option>
                 <option value="terminée">Terminée</option>
                 <option value="épave">Épave</option>
@@ -367,6 +367,14 @@
                 <div class="form-group">
                   <label>Date d'expertise prévue</label>
                   <div class="readonly-field">{{ expertiseCourante?.dateExpertisePrevue ? (expertiseCourante?.dateExpertisePrevue | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Contact de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.contactExpert || 'Non renseigné' }}</div>
+                </div>
+                <div class="form-group">
+                  <label>Email de l'expert</label>
+                  <div class="readonly-field">{{ expertiseCourante?.mailExpert || 'Non renseigné' }}</div>
                 </div>
               </div>
             </ng-container>

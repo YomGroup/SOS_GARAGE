@@ -345,7 +345,6 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   // Nouvelles méthodes pour le style et la gestion des statuts
   getStatutClass(statut: string): string {
     switch (statut.toLowerCase()) {
-      case 'assigné':
       case 'en attente':
         return 'statut-attente';
       case 'en cours':
@@ -362,7 +361,6 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   getGarageStatutLabel(statut: string | undefined): string {
     if (!statut) return 'En attente';
     switch (statut.toLowerCase()) {
-      case 'assignée':
       case 'en attente':
         return 'En attente';
       case 'en cours':

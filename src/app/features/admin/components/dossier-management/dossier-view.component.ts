@@ -243,7 +243,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     const nouvelleMission = {
       idSinistre: this.dossier.id,
       idReparateur: this.selectedReparateurId,
-      statut: 'assigné',
+      statut: 'en cours',
       dateCreation: new Date().toISOString(),
       photosVehicule: [],
       constatAccident: '',
@@ -771,6 +771,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
       nomExpert: exp.nomExpert,
       prenomExpert: exp.prenomExpert,
       institutionExpert: exp.institutionExpert,
+      contactExpert: exp.contactExpert, // Ajouté
+      mailExpert: exp.mailExpert,       // Ajouté
       dateExpertisePrevue: exp.dateExpertisePrevue
     } : {};
     this.editionExpertEnCours = true;
@@ -779,16 +781,15 @@ export class DossierViewComponent implements OnChanges, OnInit {
     this.editionExpertEnCours = false;
   }
   enregistrerExpert() {
-    // PATCH uniquement les champs nomination
+    // PATCH tous les champs nomination + garder les autres valeurs
     if (!this.expertiseEdit) return;
+    const exp = this.expertiseCourante;
     const patch = {
-      nomExpert: this.expertiseEdit.nomExpert ?? '',
-      prenomExpert: this.expertiseEdit.prenomExpert ?? '',
-      institutionExpert: this.expertiseEdit.institutionExpert ?? '',
-      dateExpertisePrevue: this.expertiseEdit.dateExpertisePrevue ?? ''
+      ...exp, // on part de l'existant
+      ...this.expertiseEdit // on écrase avec les modifs du formulaire
     };
     if (this.expertiseEdit.id) {
-      this.expertiseService.updateExpertise({ id: this.expertiseEdit.id, ...patch } as any).subscribe({
+      this.expertiseService.updateExpertise(patch as any).subscribe({
         next: (updatedExpertise) => {
           // Met à jour la mission localement
           if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
@@ -801,7 +802,16 @@ export class DossierViewComponent implements OnChanges, OnInit {
         }
       });
     } else {
-      // Création d'une nouvelle expertise (nomination)
+      // Création d'une nouvelle expertise (nomination) - version simplifiée comme avant
+      const patch = {
+        nomExpert: this.expertiseEdit.nomExpert ?? '',
+        prenomExpert: this.expertiseEdit.prenomExpert ?? '',
+        institutionExpert: this.expertiseEdit.institutionExpert ?? '',
+        contactExpert: this.expertiseEdit.contactExpert ?? '',
+        mailExpert: this.expertiseEdit.mailExpert ?? '',
+        dateExpertisePrevue: this.expertiseEdit.dateExpertisePrevue ?? '',
+        missionId: this.mission?.id // à adapter si le nom diffère
+      };
       this.expertiseService.createExpertise(patch as any).subscribe({
         next: (createdExpertise) => {
           if (this.mission) {

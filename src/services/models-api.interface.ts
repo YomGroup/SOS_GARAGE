@@ -195,6 +195,8 @@ export interface Expertise {
   nomExpert?: string;
   prenomExpert?: string;
   institutionExpert?: string;
+  contactExpert?: string; // Ajouté : contact de l'expert
+  mailExpert?: string;    // Ajouté : mail de l'expert
   dateExpertisePrevue: string;
   dateExpertiseEffective: string;
   montantChiffrageHT: number;
