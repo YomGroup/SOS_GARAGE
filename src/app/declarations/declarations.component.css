@@ -866,84 +866,244 @@ body {
     overflow-x: hidden;
 }
 
-/* Styles pour l'étape 4 - Upload des photos */
+/* Step 4 - Photos du véhicule - Style moderne */
 .step-content {
-    background: linear-gradient(135deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
-    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
     padding: 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     margin-bottom: 30px;
 }
 
-.upload-instructions {
+
+
+
+
+/* Photo Steps Navigation */
+.photo-steps {
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 0 40px;
+    position: relative;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.photo-steps::before {
+    content: '';
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
+    z-index: 1;
+}
+
+.photo-steps .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+    background: white;
+    padding: 0 15px;
+}
+
+.photo-steps .step span {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    color: #64748b;
+    margin-bottom: 12px;
+    border: 3px solid #e2e8f0;
+    transition: all 0.4s ease;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.photo-steps .step.active span {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.photo-steps .step p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #64748b;
     text-align: center;
-    margin-bottom: 25px;
+    transition: all 0.3s ease;
+    max-width: 80px;
+    line-height: 1.3;
 }
 
-.upload-instructions p {
-    color: #6b7280;
-    font-size: 16px;
-    margin: 5px 0;
+.photo-steps .step.active p {
+    color: #667eea;
+    transform: translateY(-2px);
 }
 
-.photo-count {
-    font-weight: bold;
-    color: #8b5cf6;
-    font-size: 18px;
+/* Step Instructions */
+.step-instructions {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 16px;
+    padding: 30px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
+.step-instructions::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.step-instructions h3 {
+    color: #1e293b;
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.step-instructions h3 i {
+    color: #667eea;
+    font-size: 1.5rem;
+}
+
+.step-instructions p {
+    color: #475569;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.step-instructions .help-text {
+    color: #64748b;
+    font-size: 0.9rem;
+    font-style: italic;
+    margin-top: 10px;
+}
+
+/* Photo Upload Area */
 .photo-upload-area {
-    border: 2px dashed #8b5cf6;
-    border-radius: 15px;
-    padding: 30px 20px;
+    border: 3px dashed #761ae7;
+    border-radius: 20px;
+    /*padding: 40px 20px;
+  */
     text-align: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    margin-bottom: 30px;
-    background-color: rgba(139, 92, 246, 0.05);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.photo-upload-area::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
 }
 
 .photo-upload-area:hover {
-    background-color: rgba(139, 92, 246, 0.1);
+    border-color: #6b1aa9;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
 }
 
 .upload-icon {
-    color: #8b5cf6;
-    font-size: 18px;
+    position: relative;
+    z-index: 2;
 }
 
 .upload-icon i {
-    font-size: 24px;
-    vertical-align: middle;
-    margin-right: 8px;
+    font-size: 3rem;
+    color: #68098a;
+    margin-bottom: 15px;
+    display: block;
 }
 
-/* Gallery styles */
+.upload-icon p {
+    font-size: 1.2rem;
+    color: #475569;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.photo-count {
+    font-size: 1rem;
+    color: #2e0522;
+    font-weight: 600;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 5px 15px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Photo Gallery */
 .photo-gallery {
+    margin-top: 30px;
+}
+
+.photo-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
-    margin-top: 30px;
 }
 
 .photo-item {
     position: relative;
-    border-radius: 12px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     aspect-ratio: 4/3;
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.5);
 }
 
 .photo-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .photo-item img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
 }
 
 .photo-overlay {
@@ -952,13 +1112,12 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
     opacity: 0;
     transition: opacity 0.3s ease;
     display: flex;
-    justify-content: flex-end;
-    align-items: flex-start;
-    padding: 10px;
+    align-items: center;
+    justify-content: center;
 }
 
 .photo-item:hover .photo-overlay {
@@ -966,47 +1125,145 @@ body {
 }
 
 .btn-remove {
-    background: rgba(255, 0, 0, 0.7);
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
     border: none;
     border-radius: 50%;
-    width: 32px;
-    height: 32px;
+    width: 45px;
+    height: 45px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
 }
 
 .btn-remove:hover {
-    background: rgba(255, 0, 0, 0.9);
     transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
 
-/* Responsive adjustments */
+/* Step Navigation */
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 40px;
+    gap: 20px;
+}
+
+.btn-backs,
+.btn-nexts {
+    padding: 15px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    min-width: 150px;
+    justify-content: center;
+}
+
+.btn-backs {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+}
+
+.btn-backs:hover:not(:disabled) {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #475569;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.btn-backs:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-nexts {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-nexts:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+}
+
+.btn-nexts:disabled {
+    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+    color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
     .step-content {
         padding: 25px;
     }
 
-    .photo-gallery {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    .step-content h2 {
+        font-size: 2rem;
+    }
+
+    .photo-steps {
+        flex-wrap: wrap;
         gap: 15px;
     }
 
-    .photo-upload-area {
-        padding: 25px 15px;
+    .photo-steps .step {
+        flex: 1 0 45%;
+        margin-bottom: 20px;
+    }
+
+    .photo-steps .step span {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2rem;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .step-navigation {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-back,
+    .btn-next {
+        width: 100%;
     }
 }
 
 @media (max-width: 480px) {
-    .photo-gallery {
-        grid-template-columns: 1fr 1fr;
+    .photo-steps .step {
+        flex: 1 0 100%;
     }
 
-    .upload-instructions p {
-        font-size: 14px;
+    .photo-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .step-instructions {
+        padding: 20px;
+    }
+
+    .photo-upload-area {
+        padding: 30px 15px;
     }
 }
 
@@ -1109,4 +1366,362 @@ body {
 
 .dropdown-list li:hover {
     background-color: #f5f5f5;
+}
+
+.choice-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 2rem;
+}
+
+.choice-card {
+    flex: 1;
+    padding: 2rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.choice-card:hover {
+    border-color: #0d6efd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.choice-card i {
+    font-size: 2.5rem;
+    color: #0d6efd;
+    margin-bottom: 1rem;
+}
+
+.description-section,
+.upload-section {
+    margin-top: 2rem;
+    animation: fadeIn 0.3s ease;
+}
+
+.btn-continue {
+    margin-top: 1rem;
+    padding: 0.5rem 2rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h3 {
+    margin: 0;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: #0d6efd;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.btn-back i {
+    margin-right: 0.5rem;
+}
+
+.btn-back:hover {
+    text-decoration: underline;
+}
+
+.photo-steps {
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 0;
+}
+
+.photo-steps .step {
+    flex: 1;
+    text-align: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    position: relative;
+}
+
+.photo-steps .step span {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    background: #e9ecef;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.photo-steps .step.active span {
+    background: #a50dfd;
+    color: white;
+}
+
+.photo-steps .step p {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #6c757d;
+}
+
+.photo-steps .step.active p {
+    color: #5e2f73;
+    font-weight: 500;
+}
+
+.step-instructions {
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.step-instructions h3 {
+    color: #624070;
+    margin-top: 0;
+}
+
+
+.upload-icon {
+    font-size: 2rem;
+    color: #666;
+}
+
+.upload-icon i {
+    margin-bottom: 1rem;
+}
+
+.photo-count {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.photo-item {
+    position: relative;
+    aspect-ratio: 4/3;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.5rem;
+}
+
+.btn-remove {
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-remove:hover {
+    background: rgba(255, 0, 0, 0.7);
+}
+
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+/* Step 3 - Responsive */
+.choice-container {
+    display: flex;
+    flex-direction: column;
+    /* Empilement vertical sur mobile */
+    gap: 15px;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .choice-container {
+        flex-direction: row;
+        /* Affichage côte à côte sur desktop */
+        gap: 20px;
+    }
+}
+
+.choice-card {
+    padding: 1.5rem;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.choice-card i {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+}
+
+.description-section,
+.upload-section {
+    padding: 1rem;
+}
+
+@media (min-width: 768px) {
+
+    .description-section,
+    .upload-section {
+        padding: 2rem;
+    }
+}
+
+textarea.form-control {
+    min-height: 150px;
+    width: 100%;
+    padding: 1rem;
+}
+
+.section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+@media (min-width: 768px) {
+    .section-header {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+.upload-area {
+    padding: 1.5rem;
+}
+
+.preview-container {
+    margin-top: 1.5rem;
+}
+
+.pdf-preview,
+.image-preview {
+    max-width: 100%;
+    height: auto;
+}
+
+@media (min-width: 992px) {
+    .pdf-preview {
+        height: 500px;
+    }
+}
+
+/* Step 4 - Responsive */
+.photo-steps {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0;
+}
+
+.photo-steps .step {
+    flex: 1 0 45%;
+    /* 2 colonnes sur mobile */
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+}
+
+@media (min-width: 576px) {
+    .photo-steps .step {
+        flex: 1;
+        margin-bottom: 0;
+    }
+}
+
+.step-instructions {
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.photo-upload-area {
+    padding: 1.5rem;
+}
+
+.photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 colonnes sur mobile */
+    gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .photo-grid {
+        grid-template-columns: repeat(3, 1fr);
+        /* 3 colonnes sur tablette */
+    }
+}
+
+@media (min-width: 992px) {
+    .photo-grid {
+        grid-template-columns: repeat(4, 1fr);
+        /* 4 colonnes sur desktop */
+    }
+}
+
+.step-navigation {
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 576px) {
+    .step-navigation {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+}
+
+.btn-back,
+.btn-next {
+    width: 100%;
+    padding: 0.75rem;
+}
+
+@media (min-width: 576px) {
+
+    .btn-back,
+    .btn-next {
+        width: auto;
+        padding: 0.75rem 1.5rem;
+    }
 }

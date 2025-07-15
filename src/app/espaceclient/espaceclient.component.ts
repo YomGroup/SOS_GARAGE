@@ -11,6 +11,7 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, map, mergeMap } from 'rxjs/operators';
 
 import * as bootstrap from 'bootstrap';
+import { VehicleService, Vehicle } from '../../services/vehicle.service';
 @Component({
   selector: 'app-espaceclient',
   imports: [RouterOutlet, RouterLink, CommonModule, RouterLinkActive, HttpClientModule],
@@ -21,22 +22,22 @@ export class EspaceclientComponent implements OnInit {
   // Dans votre composant
   sidebarCollapsed = false;
   sidebarHidden = false;
+  vehicles: Vehicle[] = [];
+  hasAssurance: boolean = true;
+
+
   toggleSidebar() {
     if (this.isMobile) {
-      // Sur mobile, toggle entre cachée et ouverte pleine largeur
       this.sidebarCollapsed = !this.sidebarCollapsed;
     } else {
-      // Sur desktop, toggle entre largeur pleine et réduite (icônes)
       this.sidebarCollapsed = !this.sidebarCollapsed;
     }
   }
   checkWindowWidth() {
     this.isMobile = window.innerWidth < 768;
     if (!this.isMobile) {
-      // Par défaut sidebar visible sur desktop
       this.sidebarCollapsed = false;
     } else {
-      // Sidebar cachée par défaut sur mobile
       this.sidebarCollapsed = true;
     }
   }
@@ -57,9 +58,10 @@ export class EspaceclientComponent implements OnInit {
     if (this.userid) {
       this.assureService.getAssurerID(this.userid).subscribe({
         next: (data: any) => {
-          this.assureId = data.id; // adapte selon ta réponse
+          this.assureId = data.id;
           console.log('Assure ID:', this.assureId);
           this.loadUserData();
+
         },
         error: (err) => {
           console.error('Erreur lors de la récupération de l’assure  ID :', err);
@@ -101,6 +103,7 @@ export class EspaceclientComponent implements OnInit {
   private authService = inject(AuthService);
   userid: string | null = null;
   assureId: number = 0;
+  private vehiculeService = inject(VehicleService);
 
   private loadUserData(): void {
     this.assureService.addAssurerGet(this.assureId).subscribe({
@@ -130,6 +133,10 @@ export class EspaceclientComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.vehiculeService.refreshVehicules(this.assureId);
+    this.vehiculeService.vehicules$.subscribe(vehicles => {
+      this.hasAssurance = vehicles.every(v => v.nomAssurence && v.nomAssurence.trim() !== '');
+    });
 
     const today = new Date();
     this.currentDate = today.toLocaleDateString('fr-FR', {

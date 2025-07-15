@@ -29,16 +29,30 @@ export class VehiculesComponent implements OnInit {
     carteGrise: '',
     contratAssurance: '',
     dateMiseEnCirculation: '',
-    imgUrl: '', // ou new Date().toISOString()
-    assure: null
+    imgUrl: '',
+    assure: null,
+    nomAssurence: '',
+    typeAssurence: []
   };
   cpt: number = 5;
   scrapErrorMessage: string = '';
   userid: string | null = null;
   assureId: number = 0;
   scrappingReussi: boolean = false;
-
-
+  // Assurance selection
+  showAssuranceSelection = false;
+  selectedVehicle: Vehicle | null = null;
+  assuranceOptions = [
+    { id: 1, name: 'Tiers', selected: false },
+    { id: 2, name: 'Tous_risque', selected: false },
+    { id: 3, name: 'Bris_de_glace', selected: false },
+    { id: 4, name: 'vol', selected: false }
+  ];
+  isAssuranceDropdownOpen = false;
+  assurances: any[] = [];
+  selectedAssurance: any = null;
+  currentStep: number = 1;
+  hasAssurance: boolean = false;
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -48,6 +62,8 @@ export class VehiculesComponent implements OnInit {
         next: (data: any) => {
           this.assureId = data.id; // adapte selon ta réponse
           this.loadVehicles(this.assureId);
+          this.loadAssurances();
+
         },
         error: (err) => {
           console.error('Erreur lors de la récupération de l’assure  ID :', err);
@@ -67,6 +83,68 @@ export class VehiculesComponent implements OnInit {
       }
     });
   }
+  private loadAssurances(): void {
+    this.vehiculeService.listAssuranceVehicules().subscribe({
+      next: (data: any) => {
+        this.assurances = data;
+        console.log('Assurances chargées:', this.assurances);
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des assurances', err);
+      }
+    });
+  }
+  nextStep(): void {
+    if (this.currentStep < 2) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 1) {
+      this.currentStep--;
+    }
+  }
+
+  toggleAssuranceDropdown(): void {
+    this.isAssuranceDropdownOpen = !this.isAssuranceDropdownOpen;
+  }
+
+  selectAssurance(assurance: any): void {
+    this.selectedAssurance = assurance;
+    this.newVehicle.nomAssurence = assurance;
+    this.isAssuranceDropdownOpen = false;
+  }
+  // Update your onToggleAssurance method to:
+  onToggleAssurance(id: number, event: Event) {
+    const isChecked = (event.target as HTMLInputElement).checked;
+
+    if (!Array.isArray(this.newVehicle.typeAssurence)) {
+      this.newVehicle.typeAssurence = [];
+    }
+    if (isChecked) {
+      if (!this.newVehicle.typeAssurence.includes(id)) {
+        this.newVehicle.typeAssurence.push(id);
+      }
+    } else {
+      this.newVehicle.typeAssurence = this.newVehicle.typeAssurence.filter((x: number) => x !== id);
+    }
+  }
+  shouldDisplay(id: number): boolean {
+    const selected = this.newVehicle.typeAssurence;
+
+    // Si "Tous risques" est sélectionné, ne montrer que "Tous risques"
+    if (selected.includes(2) && id !== 2) {
+      return false;
+    }
+
+    // Si "Tiers" est sélectionné, cacher "Tous risques"
+    if (selected.includes(1) && id === 2) {
+      return false;
+    }
+
+    return true;
+  }
 
   /*
     ngOnInit() {
@@ -80,7 +158,7 @@ export class VehiculesComponent implements OnInit {
 
     this.loadingScrap = true;
     this.scrapErrorMessage = '';
-    this.scrappingReussi = false; // réinitialise à false à chaque tentative
+    this.scrappingReussi = false;
 
     // Déclenche le timeout de 5s
     const timeout = setTimeout(() => {
@@ -98,7 +176,7 @@ export class VehiculesComponent implements OnInit {
         this.newVehicle.marque = data.AWN_marque || '';
         this.newVehicle.cylindree = data.AWN_nbr_cylindre_energie || '';
         this.newVehicle.carteGrise = data.AWN_date_cg || '';
-        this.newVehicle.contratAssurance = data.AWN_version || '';
+        this.newVehicle.contratAssurance = '';
         this.newVehicle.dateMiseEnCirculation = data.AWN_date_mise_en_circulation_us || '';
         this.newVehicle.imgUrl = data.AWN_model_image || '';
         clearTimeout(timeout); // Annule le timeout si ça répond à temps
@@ -122,23 +200,29 @@ export class VehiculesComponent implements OnInit {
       modele: this.newVehicle.modele,
       cylindree: this.newVehicle.cylindree,
       dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
-
+      typeAssurence: this.newVehicle.typeAssurence
+        .map((id: number) => {
+          const found = this.assuranceOptions.find(opt => opt.id === id);
+          return found ? found.name : '';
+        })
+        .filter((name: string) => name)
+        .join('_'),
+      nomAssurence: this.newVehicle.nomAssurence,
       carteGrise: this.newVehicle.carteGrise,
       contratAssurance: this.newVehicle.contratAssurance,
       assure: this.assureId,
-
       imgUrl: Array.isArray(this.newVehicle.imgUrl) && this.newVehicle.imgUrl.length > 0
         ? this.newVehicle.imgUrl
         : (this.newVehicle.imgUrl && this.newVehicle.imgUrl.trim() ? [this.newVehicle.imgUrl] : [])
-
     };
+    console.log('vehicule', payload);
 
     if (this.isEditMode && this.newVehicle.id) {
-      console.log(this.newVehicle.imgUrl);      // Mode édition
+      console.log(payload);
       this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
         next: (data) => {
-          console.log('Véhicule mis à jour avec succès :', data);
           this.loadVehicles(this.assureId);
+          this.vehiculeService.refreshVehicules(this.assureId);
           this.cancelAdd();
         },
         error: (err) => {
@@ -168,9 +252,10 @@ export class VehiculesComponent implements OnInit {
     this.isEditMode = true;
     this.showAddForm = true;
 
-    // Clone l'objet pour ne pas lier directement au tableau principal
     this.newVehicle = {
       ...vehicle,
+
+      typeAssurence: this.extractTypeAssurenceIds(vehicle.typeAssurence || ''),
       dateMiseEnCirculation: vehicle.dateMiseEnCirculation
         ? new Date(vehicle.dateMiseEnCirculation).toISOString().split('T')[0]
         : '',
@@ -178,8 +263,11 @@ export class VehiculesComponent implements OnInit {
   }
 
 
+
   cancelAdd() {
+    this.currentStep = 1;
     this.showAddForm = false;
+    this.scrappingReussi = false;
     this.newVehicle = {
       immatriculation: '',
       marque: '',
@@ -189,12 +277,44 @@ export class VehiculesComponent implements OnInit {
       contratAssurance: '',
       dateMiseEnCirculation: '',
       imgUrl: '',
-      assure: null
+      assure: null,
+      typeAssurence: [],
+      nomAssurence: ''
     };
     this.isEditMode = false;
     this.scrapErrorMessage = '';
   }
+  cancelAssuranceSelection(): void {
+    this.showAssuranceSelection = false;
+    this.selectedVehicle = null;
+    this.resetAssuranceOptions();
+  }
 
+  private resetAssuranceOptions(): void {
+    this.assuranceOptions.forEach(opt => opt.selected = false);
+  }
+  validateAssuranceSelection(): void {
+    if (this.selectedVehicle) {
+      const selectedAssurances = this.assuranceOptions
+        .filter(opt => opt.selected)
+        .map(opt => opt.name);
+
+      console.log('Assurances sélectionnées:', selectedAssurances);
+      // Traitez ici les assurances sélectionnées
+      this.showAssuranceSelection = false;
+    }
+  }
+  private extractTypeAssurenceIds(typeStr: string): number[] {
+    const names = typeStr.split('_');
+    return this.assuranceOptions
+      .filter(opt => names.includes(opt.name))
+      .map(opt => opt.id);
+  }
+
+  openAssuranceSelection(vehicle: Vehicle): void {
+    this.selectedVehicle = vehicle;
+    this.showAssuranceSelection = true;
+  }
   deleteVehicle(id: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
       // Suppression optimiste - on retire immédiatement le véhicule de la liste

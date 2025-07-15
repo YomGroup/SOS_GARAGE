@@ -10,12 +10,16 @@ import { AssureService } from '../../services/assure.service';
 import { DocumentService } from '../../services/document.service';
 import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
+import { firstValueFrom } from 'rxjs';
+import { FirebaseStorageService } from '../../services/firebase-storage.service';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 interface Document {
   id: number;
   nom: string;
   fichier: string;
   modifiedBlobUrl: string | null;
+  fileBlob?: Blob;
 }
 
 @Component({
@@ -54,6 +58,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   ];
 
   // Variables d'état
+  incidentDescription: string = '';
+  hasChosenDeclarationMethod: boolean = false;
+  declarationMethod: 'describe' | 'upload' | null = null;
   currentStep = 1;
   vehicleStatus = '';
   selectedVehicle = '';
@@ -80,12 +87,32 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   assurances: any[] = [];
   selectedAssurance: any = null;
   showAssuranceStep = false;
+  currentPhotoStep: number = 1;
+  photoSteps: any = {
+    1: [], // Photos d'ensemble
+    2: [], // Plaque immatriculation
+    3: [], // Numéro de série
+    4: []  // Zones endommagées
+  };
+  typeassurance: string[] = [
+    "STATIONNEMENT_IMPACT",
+    "VANDALISME",
+    "BRIS_DE_GLACE",
+    "INCENDIE",
+    "VOL_OU_TENTATIVE",
+    "EVENEMENT_CLIMATIQUE",
+    "DOMMAGE_INCONNU",
+    "COLLISION_VEHICULE"
+  ];
+  selectedTypeAssurance: string = '';
+
   // Services
   private vehiculeService = inject(VehicleService);
   private authService = inject(AuthService);
   private assureService = inject(AssureService);
   private sinistreService = inject(SinistreService);
   private documentService = inject(DocumentService);
+  private firebaseStorageService = inject(FirebaseStorageService);
   constructor(@Inject(DOCUMENT) private document: Document) {
 
   }
@@ -152,12 +179,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       try {
         const modifiedBlob = await this.modifyPdfWithUserData(doc.fichier);
         doc.modifiedBlobUrl = URL.createObjectURL(modifiedBlob);
+        doc.fileBlob = modifiedBlob;  // <-- stocker le Blob modifié ici
       } catch (error) {
         console.error(`Erreur lors de la modification du document ${doc.nom}`, error);
         doc.modifiedBlobUrl = this.getPdfPath(doc.fichier);
+        doc.fileBlob = undefined;  // pas modifié donc pas de blob
       }
     }
   }
+
   private async modifyPdfWithUserData(pdfPath: string): Promise<Blob> {
     const response = await fetch(pdfPath);
     const pdfBytes = await response.arrayBuffer();
@@ -208,7 +238,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data;
-        this.vehicles = data.map((vehicule: any) => vehicule.marque);
+        this.vehicles = data.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
 
       },
       error: (err) => {
@@ -216,7 +246,23 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     });
   }
+  // Nouvelles méthodes
+  selectDeclarationMethod(method: 'describe' | 'upload'): void {
+    this.declarationMethod = method;
+    this.hasChosenDeclarationMethod = true;
+  }
 
+  validateDescription(): void {
+    if (this.incidentDescription.trim().length > 10) { // Validation minimale
+      this.nextStep();
+    } else {
+      alert('Veuillez fournir une description plus détaillée');
+    }
+  }
+  resetDeclarationMethod(): void {
+    this.hasChosenDeclarationMethod = false;
+    this.declarationMethod = null;
+  }
   get currentPdf(): string {
     try {
       const doc = this.documents.find(d => d.id === this.currentDocument);
@@ -257,6 +303,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.signedDocuments.add(this.currentDocument);
       this.isSigning = false;
       this.isChecked = false;
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth' // Pour un défilement doux
+      });
 
       if (this.signedDocuments.size === this.documents.length) {
         this.allDocumentsSigned = true;
@@ -281,12 +331,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Autres méthodes utilitaires
   canProceed(): boolean {
     switch (this.currentStep) {
-      case 1: return !!this.vehicleStatus;
-      case 2:
-        if (this.vehicleStatus === 'not-rolling') {
-          return !!this.selectedVehicle && !!this.selectedAssurance;
-        }
-        return !!this.selectedVehicle;
+      case 1:
+        return true;//!!this.selectedVehicle;
+      case 2: return true;//return !!this.vehicleStatus;
+
       case 3: case 4: return true;
       case 5: return false;
       default: return false;
@@ -308,8 +356,14 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     if (this.userData) {
       this.prepareDocumentTemplates();
     }
+    this.nextStep();
   }
+  onStatusChange() {
 
+    if (this.canProceed()) {
+      this.nextStep();
+    }
+  }
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
@@ -337,14 +391,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  onPhotoSelect(event: Event): void {
+  onPhotoSelect(event: Event, step: number): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      // Limite à 10 photos maximum
-      const remainingSlots = 10 - this.previewPhotos.length;
-      const filesToAdd = Array.from(input.files).slice(0, remainingSlots);
+      const files = Array.from(input.files);
 
-      filesToAdd.forEach(file => {
+      files.forEach(file => {
         if (!file.type.match('image.*')) {
           alert('Seules les images sont acceptées');
           return;
@@ -352,19 +404,51 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
         const reader = new FileReader();
         reader.onload = (e: any) => {
-          this.previewPhotos.push({
+          this.photoSteps[step].push({
             url: e.target.result,
             file: file
           });
-          this.photosFiles.push(file); // Ajoute aussi au tableau principal
         };
         reader.readAsDataURL(file);
       });
 
-      if (input.files.length > remainingSlots) {
-        alert(`Vous avez atteint la limite de 10 photos. ${remainingSlots} photos ajoutées.`);
-      }
+      // Réinitialiser l'input pour permettre la sélection des mêmes fichiers
+      input.value = '';
     }
+  }
+  getCurrentStepPhotos() {
+    return this.photoSteps[this.currentPhotoStep];
+  }
+
+  setPhotoStep(step: number): void {
+    if (this.currentPhotoStep !== step) {
+      this.currentPhotoStep = step;
+    }
+  }
+
+  nextPhotoStep(): void {
+    if (this.currentPhotoStep < 4) {
+      this.currentPhotoStep++;
+    } else {
+      // Toutes les étapes photos sont complétées
+      this.nextStep(); // Passer à l'étape suivante du formulaire
+    }
+  }
+
+  prevPhotoStep(): void {
+    if (this.currentPhotoStep > 1) {
+      this.currentPhotoStep--;
+    }
+  }
+
+  canProceedPhotoStep(): boolean {
+    // Vérifie qu'au moins une photo a été ajoutée pour l'étape courante
+    return this.photoSteps[this.currentPhotoStep].length > 0;
+  }
+
+  removePhoto(index: number, step: number): void {
+    URL.revokeObjectURL(this.photoSteps[step][index].url);
+    this.photoSteps[step].splice(index, 1);
   }
   removeConstat(): void {
     if (this.constatPreviewUrl) {
@@ -374,11 +458,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.constatFile = undefined;
     this.showPdfViewer = false;
   }
+  /*
   removePhoto(index: number): void {
     URL.revokeObjectURL(this.previewPhotos[index].url);
     this.previewPhotos.splice(index, 1);
     this.photosFiles.splice(index, 1);
-  }
+  }*/
 
   get isCurrentDocumentSigned(): boolean {
     return this.signedDocuments.has(this.currentDocument);
@@ -394,20 +479,24 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       // 2. Construire le payload avec les noms de fichiers
       const sinistrePayload = {
-        type: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+        type: this.selectedTypeAssurance,
         contactAssistance: this.email,
         lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
-        documents: [], // tableau vide comme demandé
+        documents: [],
         imgUrl: savedFiles.photosNames,
-        idVehicule: this.vehiclesAll.find(v => v.marque === this.selectedVehicle)?.id || 0
+        idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
+        statut: 'EN_ATTENTE_EXPERTISE',
+        assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
+        input: this.incidentDescription || '',
+        etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT'
       };
       console.log('Payload envoyé:', sinistrePayload);
 
       // 1. Envoyer d'abord le sinistre (comme avant)
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
         next: async (sinistreResponse: any) => {
-          const sinistreId = sinistreResponse.id; // Adaptez selon la réponse
+          const sinistreId = sinistreResponse.id;
 
           // 2. Envoyer les documents avec juste le nom du fichier
           await this.sendSignedDocuments(sinistreId);
@@ -428,50 +517,79 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const doc = this.documents.find(d => d.id === docId);
       if (!doc) continue;
 
-      // Extraire juste le nom du fichier (ex: "Mandat_Gestion_Sinistre.pdf")
-      const fileName = doc.fichier.split('/').pop() || doc.nom + '.pdf';
+      if (!doc.fileBlob) {
+        console.error(`Aucun fichier Blob trouvé pour le document ${doc.nom}`);
+        continue;
+      }
 
-      const documentPayload = {
-        type: this.getDocumentType(doc.nom), // "constat", "mandat" etc.
-        fichier: fileName, // Juste le nom du fichier
-        signatureElectronique: [],
-        idsinistre: sinistreId
-      };
+      try {
+        // Upload the PDF Blob - using toString() conversion
+        const downloadURL = await this.firebaseStorageService.uploadPdfFile(
+          doc.fileBlob,
+          sinistreId //Convert number to string
+        ).toPromise();
 
-      console.log('Envoi document:', documentPayload);
+        console.log(`Fichier uploadé avec URL: ${downloadURL}`);
 
-      await this.documentService.addDocumentPost(documentPayload).subscribe({
-        next: () => console.log(`Document ${fileName} envoyé`),
-        error: (err) => console.error(`Erreur document ${fileName}:`, err)
-      });
+        const documentPayload = {
+          type: this.getDocumentType(doc.nom),
+          fichier: downloadURL,
+          signatureElectronique: [],
+          idsinistre: sinistreId
+        };
+
+        await this.documentService.addDocumentPost(documentPayload).toPromise();
+        console.log(`Document ${doc.nom} envoyé à l'API`);
+      } catch (error) {
+        console.error(`Erreur lors du traitement du document ${doc.nom}`, error);
+      }
     }
   }
 
-  // Helper pour déterminer le type de document
   private getDocumentType(nomDocument: string): string {
     return nomDocument.includes('Mandat') ? 'mandat' :
-      nomDocument.includes('Ordre') ? 'ordre_reparation' :
+      nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
   private async saveFilesToAssets(): Promise<{ photosNames: string[] }> {
+    const storage = getStorage();
     const photosNames: string[] = [];
 
-    // Créer le répertoire si inexistant (à adapter selon votre environnement)
-    const declarationDir = 'src/assets/declaration/';
+    const baseDir = 'declaration/photos';
 
-    // Sauvegarder le constat
-    if (this.constatFile) {
-      await this.saveFileToDisk(this.constatFile, declarationDir);
+    const photoStepDirs: { [key: number]: string } = {
+      1: 'avant',
+      2: 'plaque',
+      3: 'cote',
+      4: 'degats'
+    };
+
+    for (const step in this.photoSteps) {
+      const photos = this.photoSteps[step];
+      const dirName = photoStepDirs[+step];
+
+      for (const photo of photos) {
+        const file = photo.file;
+        const firebasePath = `${baseDir}/${dirName}/${file.name}`;
+
+        const fileRef = ref(storage, firebasePath);
+        await uploadBytes(fileRef, file);
+
+        photosNames.push(firebasePath);
+      }
     }
 
-    // Sauvegarder les photos
-    for (const file of this.photosFiles) {
-      await this.saveFileToDisk(file, declarationDir);
-      photosNames.push(file.name);
+    // Upload du constat s’il existe
+    if (this.constatFile) {
+      const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
+      const constatRef = ref(storage, constatPath);
+      await uploadBytes(constatRef, this.constatFile);
+      console.log(`✅ Constat téléversé : ${constatPath}`);
     }
 
     return { photosNames };
   }
+
 
   private saveFileToDisk(file: File, directory: string): Promise<void> {
     return new Promise((resolve, reject) => {

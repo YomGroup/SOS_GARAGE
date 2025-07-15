@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
+import { RouterLink } from '@angular/router';
 
 interface Notification {
   message: string;
@@ -18,12 +19,13 @@ interface Sinistre {
   documents: string[];
   photos: string[];
   constat: string;
+  type: string;
 }
 
 @Component({
   selector: 'app-sinistre',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './sinistre.component.html',
   styleUrls: ['./sinistre.component.css']
 })
@@ -76,7 +78,8 @@ export class SinistreComponent implements OnInit {
           notifications: this.generateNotifications(sinistreApi),
           documents: sinistreApi.documents?.map((doc: any) => doc.fichier) || [],
           photos: sinistreApi.imgUrl || [],
-          constat: sinistreApi.lienConstat || 'Aucun constat'
+          constat: sinistreApi.lienConstat || 'Aucun constat',
+          type: sinistreApi.type || 'aucun'
         };
         sinistres.push(sinistre);
       });

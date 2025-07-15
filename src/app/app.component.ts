@@ -17,6 +17,7 @@ export class AppComponent implements OnInit {
 
   title = 'SOS_GARAGE';
 
+
   private authService = inject(AuthService);
 
   async ngOnInit() {

@@ -76,13 +76,35 @@
                     <!-- Section Permis -->
                     <div class="mb-4">
                         <h6 class="mb-3 text-muted"><i class="bi bi-card-text me-2"></i>Permis de conduire</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Numéro de permis</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.numeroPermis" 
-                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
-                            </div>
-                        </div>
+                       <div class="row g-3">
+    <div class="col-md-6">
+        <label class="form-label">Numéro de permis</label>
+        <input type="text" class="form-control" [(ngModel)]="userData.numeroPermis" 
+               [class.bg-light]="!isEditing" [readonly]="!isEditing">
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Date d'obtention</label>
+        <input type="date" class="form-control" [(ngModel)]="userData.dateObtention"
+               [class.bg-light]="!isEditing" [readonly]="!isEditing">
+    </div>
+   <div class="col-12">
+    <label class="form-label">Type de permis</label>
+    <div class="d-flex flex-wrap gap-3">
+        <!-- Bouton radio pour chaque type de permis -->
+        <div class="form-check" *ngFor="let type of permisTypes">
+            <input class="form-check-input" type="radio" 
+                   name="permisType"  
+                   [id]="'permis-'+type.value"
+                   [value]="type.value" 
+                   [(ngModel)]="userData.typePermis"  
+                   [disabled]="!isEditing">
+            <label class="form-check-label" [for]="'permis-'+type.value">
+                {{type.label}}
+            </label>
+        </div>
+    </div>
+</div>
+</div>
                     </div>
 
                     <!-- Section Adresse -->

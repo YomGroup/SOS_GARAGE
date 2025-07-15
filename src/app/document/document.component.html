@@ -30,7 +30,7 @@
             </div>
           </div>
           <div class="col-md-2">
-            <button class="btn btn-secondary w-100" (click)="resetFilters()">
+            <button class="btn btn-secondary w-100"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);" (click)="resetFilters()">
               <i class="fas fa-filter-circle-xmark me-2"></i>Réinitialiser
             </button>
           </div>
@@ -62,9 +62,7 @@
             <button class="btn btn-sm btn-outline-success" title="Télécharger" (click)="onDownload(item.doc)">
               <i class="fas fa-download"></i>
             </button>
-            <button class="btn btn-sm btn-outline-danger" title="Supprimer" (click)="onDelete(item.doc)">
-              <i class="fas fa-trash"></i>
-            </button>
+          
           </div>
         </div>
       </div>

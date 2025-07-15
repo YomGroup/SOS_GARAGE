@@ -25,9 +25,17 @@ export class ProfileComponent {
     sexe: 'M',
     codePostal: '',
     ville: '',
-    pays: 'FR'
+    pays: 'FR',
+    dateObtention: '',
+    typePermis: ''
   };
-
+  // Définissez les types de permis disponibles
+  permisTypes = [
+    { value: 'a', label: 'Permis A (Moto)' },
+    { value: 'b', label: 'Permis B (Voiture)' },
+    { value: 'c', label: 'Permis C (Poids lourd)' },
+    { value: 'd', label: 'Permis D (Bus)' }
+  ];
   isEditing = false;
   originalData: any = {};
   userid: string | null = null;
