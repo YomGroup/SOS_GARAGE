@@ -297,6 +297,9 @@
   transition: all 0.3s ease;
   margin-left: 20px;
   margin-top: 5px;
+  display: none;
+}
+.nav-submenu.visible {
   display: block;
 }
 

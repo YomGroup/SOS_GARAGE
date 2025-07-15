@@ -21,7 +21,7 @@ const routes: Routes = [
       { path: 'message', component: MessageComponent },
       { path: 'profil', component: GarageProfileComponent },
       { path: 'finance', component: GarageFinanceComponent },
-      { path: '', redirectTo: 'missions', pathMatch: 'full' }
+      { path: '', redirectTo: 'statistiques', pathMatch: 'full' }
     ]
   }
 ];

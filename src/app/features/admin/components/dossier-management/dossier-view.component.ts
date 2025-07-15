@@ -265,7 +265,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
         this.attributionEnCours = false;
         this.selectedReparateurId = null;
         alert('Mission créée avec succès !');
-        // Tu peux rafraîchir la vue ou émettre un event pour recharger les missions
+        this.missionUpdated.emit(mission); // Ajout : notifie le parent pour recharger
       },
       error: () => alert('Erreur lors de la création de la mission')
     });

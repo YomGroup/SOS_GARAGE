@@ -172,6 +172,7 @@ export interface Vehicule {
     password: string;
     useridKeycloak: string;
     numeroPermis: string;
+    dateObtentionPermis: string;
     vehicules: Vehicule[];
     messages: Message[];
   }

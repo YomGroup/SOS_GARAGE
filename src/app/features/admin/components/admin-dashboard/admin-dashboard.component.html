@@ -63,7 +63,7 @@
         </div>
 
 
-    <!-- Activité récente dynamique -->
+    <!-- Activité récente et sections latérales -->
     <div class="row mb-4 equal-height-row">
       <div class="col-xl-8 col-lg-12 mb-4">
         <div class="card equal-height">
@@ -82,59 +82,62 @@
         </div>
       </div>
       <div class="col-xl-4 col-lg-12 mb-4">
-        <div class="card equal-height">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 opacity-90">Tâches prioritaires</h5>
+        <div class="row">
+          <!-- Tâches prioritaires -->
+          <div class="col-12 mb-4">
+            <div class="card equal-height">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 opacity-90">Tâches prioritaires</h5>
+              </div>
+              <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item" (click)="onTaskClick('missions')" tabindex="0">
+                    <i class="fas fa-tasks text-info me-2"></i>
+                    {{ pendingMissionsCount }} missions en attente
+                  </li>
+                  <li class="list-group-item" (click)="onTaskClick('reparateurs')" tabindex="0">
+                    <i class="fas fa-user-cog text-warning me-2"></i>
+                    {{ pendingReparateursCount }} réparateurs à valider
+                  </li>
+                  <li class="list-group-item" (click)="onTaskClick('sinistres')" tabindex="0">
+                    <i class="fas fa-file-alt text-danger me-2"></i>
+                    {{ pendingSinistresCount }} sinistres à traiter
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div class="card-body p-0">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" (click)="onTaskClick('missions')" tabindex="0">
-                <i class="fas fa-tasks text-info me-2"></i>
-                {{ pendingMissionsCount }} missions en attente
-              </li>
-              <li class="list-group-item" (click)="onTaskClick('reparateurs')" tabindex="0">
-                <i class="fas fa-user-cog text-warning me-2"></i>
-                {{ pendingReparateursCount }} réparateurs à valider
-              </li>
-              <li class="list-group-item" (click)="onTaskClick('sinistres')" tabindex="0">
-                <i class="fas fa-file-alt text-danger me-2"></i>
-                {{ pendingSinistresCount }} sinistres à traiter
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Sinistres déclarés dynamiques -->
-    <div class="row">
-      <div class="col-xl-4 col-lg-12 ms-auto mb-4">
-        <div class="card equal-height">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
-          </div>
-          <div class="card-body p-0">
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item" *ngFor="let sinistre of recentSinistres" (click)="onSinistreClick(sinistre)" tabindex="0">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
-                    <span class="ms-2">{{ sinistre.type || 'Sinistre' }}</span>
-                  </div>
-                  <span class="status-badge" [ngClass]="{
-                    'status-pending': !sinistre.isvalid,
-                    'status-progress': sinistre.isvalid && sinistre.conditionsAcceptees,
-                    'status-closed': sinistre.isvalid && !sinistre.conditionsAcceptees
-                  }">
-                  </span>
-                </div>
-                <div class="sinistre-details">
-                  <i class="fas fa-car me-2 text-primary"></i>
-                  <span class="opacity-90">{{ sinistre.contactAssistance }}</span>
-                  <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'shortDate') : '' }}</small>
-                </div>
-              </li>
-            </ul>
+          
+          <!-- Sinistres déclarés -->
+          <div class="col-12">
+            <div class="card equal-height">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
+              </div>
+              <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item" *ngFor="let sinistre of recentSinistres" (click)="onSinistreClick(sinistre)" tabindex="0">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <div>
+                        <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
+                        <span class="ms-2">{{ sinistre.type || 'Sinistre' }}</span>
+                      </div>
+                      <span class="status-badge" [ngClass]="{
+                        'status-pending': !sinistre.isvalid,
+                        'status-progress': sinistre.isvalid && sinistre.conditionsAcceptees,
+                        'status-closed': sinistre.isvalid && !sinistre.conditionsAcceptees
+                      }">
+                      </span>
+                    </div>
+                    <div class="sinistre-details">
+                      <i class="fas fa-car me-2 text-primary"></i>
+                      <span class="opacity-90">{{ sinistre.contactAssistance }}</span>
+                      <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'shortDate') : '' }}</small>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>

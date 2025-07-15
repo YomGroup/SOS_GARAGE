@@ -42,6 +42,7 @@ export class MissionViewComponent implements OnChanges {
   showAssuranceInfo: boolean = false;
   showMissionDetails: boolean = false;
   showStatutAvancement: boolean = false;
+  showVehiclePhotos: boolean = false;
   vehiculesMap: Map<number, Vehicule> = new Map();
   statutAvancementEdit: string | null = null;
 

@@ -145,9 +145,9 @@ export class SidebarComponent implements OnInit {
   }
   
   toggleSubmenu(item: MenuItem) {
-    // Toggle le sous-menu ET navigue si route
     item.expanded = !item.expanded;
-    if (item.route) {
+    if (item.route && !item.expanded) {
+      // Navigue seulement si on ferme le sous-menu (optionnel)
       this.router.navigate([item.route]);
     }
   }
@@ -188,6 +188,35 @@ export class SidebarComponent implements OnInit {
       this.router.navigate([child.route]);
     }
     // Fermer le sous-menu sur mobile après clic
+    if (this.isMobile) {
+      this.closeSidebar.emit();
+    }
+  }
+
+  onSubmenuClick(event: MouseEvent, parent: MenuItem, child: MenuItem) {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    // Toujours développer le parent d'abord
+    if (!parent.expanded) {
+      parent.expanded = true;
+    }
+    
+    // Appliquer le filtre
+    if (parent.title === 'Gestion des réparations') {
+      this.onMissionFilterClick(event, child.filter || '');
+      // Naviguer vers la route parent si elle existe
+      if (parent.route) {
+        this.router.navigate([parent.route]);
+      }
+    } else {
+      this.onDossierFilterClick(event, child.filter || '');
+      // Naviguer vers la route parent si elle existe
+      if (parent.route) {
+        this.router.navigate([parent.route]);
+      }
+    }
+    
     if (this.isMobile) {
       this.closeSidebar.emit();
     }

@@ -28,7 +28,7 @@
              (click)="toggleSubmenu(item)">
             <i [ngClass]="item.icon"></i>
             <span>{{ item.title }}</span>
-            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
           </a>
           <div *ngIf="!item.route"
                class="nav-link-title"
@@ -36,13 +36,13 @@
                (click)="toggleSubmenu(item)">
             <i [ngClass]="item.icon"></i>
             <span>{{ item.title }}</span>
-            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
           </div>
         </div>
       
-        <div class="nav-submenu" *ngIf="item.expanded">
+        <div class="nav-submenu" [class.visible]="item.expanded">
           <a *ngFor="let child of item.children"
-             (click)="item.title === 'Gestion des réparations' ? onMissionFilterClick($event, child.filter || '') : onDossierFilterClick($event, child.filter || '')"
+             (click)="onSubmenuClick($event, item, child)"
              class="nav-item-child"
              [attr.data-tooltip]="child.title">
             <i [ngClass]="child.icon"></i>
@@ -50,6 +50,7 @@
           </a>
         </div>
       </div>
+      
       
       <ng-template #simpleLinkRef>
         <a [routerLink]="item.route"
