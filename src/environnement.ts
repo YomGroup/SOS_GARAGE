@@ -3,10 +3,17 @@ export const environment = {
 };
 
 export const firebaseConfig = {
-    apiKey: "AIzaSyBJZ_OE2Kgo6lpMcAQXFv8EGOVuVbPuTvg",
-    authDomain: "sosmongarage-5c352.firebaseapp.com",
-    projectId: "sosmongarage-5c352",
-    storageBucket: "sosmongarage-5c352.firebasestorage.app",
-    messagingSenderId: "1040009221395",
-    appId: "1:1040009221395:web:03c65b81a50212fb3ab6e6"
+    apiKey: "AIzaSyBKmwyn0T6NwXsXC9ugcWBFmAwnRDZJiXs",
+
+    authDomain: "sosmongarage-b8a55.firebaseapp.com",
+
+    projectId: "sosmongarage-b8a55",
+
+    storageBucket: "sosmongarage-b8a55.firebasestorage.app",
+
+    messagingSenderId: "497587401882",
+
+    appId: "1:497587401882:web:77916104ceadb13cd85b23",
+
+    measurementId: "G-W7KCQBMFQE"
 };

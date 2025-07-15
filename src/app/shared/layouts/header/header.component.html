@@ -1,21 +1,52 @@
 <div class="header">
   <div class="header-content">
-    <button class="sidebar-toggle" (click)="onToggleSidebar()">
-      <i class="bi bi-list"></i>
-    </button>
-    <div>
-      <h1 class="header-title">Hello Said</h1>
-      <div class="header-date">10 Janvier 2025</div>
+    <div class="header-left">
+      <button *ngIf="isMobile && sidebarOpened" class="header-close" (click)="closeSidebar.emit()" aria-label="Fermer la barre latérale">
+        <i class="bi bi-x-lg"></i>
+      </button>
+      <button *ngIf="isMobile && !sidebarOpened" class="header-burger" (click)="openSidebar.emit()" aria-label="Ouvrir la barre latérale">
+        <i class="bi bi-list"></i>
+      </button>
+      <h1 class="header-title">Bonjour {{ userName() }}</h1>
+      <div class="header-date">{{ getCurrentDate() }}</div>
     </div>
     <div class="user-info">
-      <span class="icon-envelope">
+      <span class="icon-envelope" [matMenuTriggerFor]="messageMenu" style="cursor:pointer;">
         <i class="bi bi-envelope-fill"></i>
       </span>
-      <span class="icon-bell">
+      <mat-menu #messageMenu="matMenu">
+        <span class="empty-message" style="padding: 8px 16px; display: block; color: gray;">Aucun message</span>
+      </mat-menu>
+      <span class="icon-bell" [matMenuTriggerFor]="notificationMenu" style="cursor:pointer;">
         <i class="bi bi-bell-fill"></i>
-        <span class="notification-badge">+3</span>
+        <span class="notification-badge" *ngIf="notificationCount() > 0">+{{ notificationCount() }}</span>
       </span>
-      <span class="user-avatar">S</span>
+      <mat-menu #notificationMenu="matMenu">
+        <ng-container *ngIf="notifications().length; else noNotif">
+          <button mat-menu-item *ngFor="let notif of notifications()">
+            <mat-icon>{{ getNotificationIcon(notif.type) }}</mat-icon>
+            <span>{{ notif.message }}</span>
+            <span class="notif-time" style="margin-left:auto; font-size:0.8em; color:gray;">{{ notif.time | date:'shortTime' }}</span>
+          </button>
+        </ng-container>
+        <ng-template #noNotif>
+          <span class="empty-notif" style="padding: 8px 16px; display: block; color: gray;">Aucune notification</span>
+        </ng-template>
+      </mat-menu>
+      <span class="user-avatar" [matMenuTriggerFor]="profileMenu" style="cursor:pointer;">
+        {{ userName() ? userName().charAt(0).toUpperCase() : 'U' }}
+      </span>
+      <mat-menu #profileMenu="matMenu">
+        <div style="padding: 12px 24px; max-width: 220px;">
+          <div style="font-weight: bold;">{{ userName() }}</div>
+          <div style="font-size: 0.9em; color: gray;">{{ userEmail() }}</div>
+        </div>
+        <mat-divider></mat-divider>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>Déconnexion</span>
+        </button>
+      </mat-menu>
     </div>
   </div>
 </div>

@@ -10,12 +10,16 @@ import { AssureService } from '../../services/assure.service';
 import { DocumentService } from '../../services/document.service';
 import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
+import { firstValueFrom } from 'rxjs';
+import { FirebaseStorageService } from '../../services/firebase-storage.service';
+import { getStorage, ref, uploadBytes } from 'firebase/storage';
 
 interface Document {
   id: number;
   nom: string;
   fichier: string;
   modifiedBlobUrl: string | null;
+  fileBlob?: Blob;
 }
 
 @Component({
@@ -90,6 +94,17 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     3: [], // Numéro de série
     4: []  // Zones endommagées
   };
+  typeassurance: string[] = [
+    "STATIONNEMENT_IMPACT",
+    "VANDALISME",
+    "BRIS_DE_GLACE",
+    "INCENDIE",
+    "VOL_OU_TENTATIVE",
+    "EVENEMENT_CLIMATIQUE",
+    "DOMMAGE_INCONNU",
+    "COLLISION_VEHICULE"
+  ];
+  selectedTypeAssurance: string = '';
 
   // Services
   private vehiculeService = inject(VehicleService);
@@ -97,6 +112,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private assureService = inject(AssureService);
   private sinistreService = inject(SinistreService);
   private documentService = inject(DocumentService);
+  private firebaseStorageService = inject(FirebaseStorageService);
   constructor(@Inject(DOCUMENT) private document: Document) {
 
   }
@@ -163,12 +179,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       try {
         const modifiedBlob = await this.modifyPdfWithUserData(doc.fichier);
         doc.modifiedBlobUrl = URL.createObjectURL(modifiedBlob);
+        doc.fileBlob = modifiedBlob;  // <-- stocker le Blob modifié ici
       } catch (error) {
         console.error(`Erreur lors de la modification du document ${doc.nom}`, error);
         doc.modifiedBlobUrl = this.getPdfPath(doc.fichier);
+        doc.fileBlob = undefined;  // pas modifié donc pas de blob
       }
     }
   }
+
   private async modifyPdfWithUserData(pdfPath: string): Promise<Blob> {
     const response = await fetch(pdfPath);
     const pdfBytes = await response.arrayBuffer();
@@ -460,20 +479,24 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       // 2. Construire le payload avec les noms de fichiers
       const sinistrePayload = {
-        type: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+        type: this.selectedTypeAssurance,
         contactAssistance: this.email,
         lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
-        documents: [], // tableau vide comme demandé
+        documents: [],
         imgUrl: savedFiles.photosNames,
-        idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0
+        idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
+        statut: 'EN_ATTENTE_EXPERTISE',
+        assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
+        input: this.incidentDescription || '',
+        etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT'
       };
       console.log('Payload envoyé:', sinistrePayload);
 
       // 1. Envoyer d'abord le sinistre (comme avant)
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
         next: async (sinistreResponse: any) => {
-          const sinistreId = sinistreResponse.id; // Adaptez selon la réponse
+          const sinistreId = sinistreResponse.id;
 
           // 2. Envoyer les documents avec juste le nom du fichier
           await this.sendSignedDocuments(sinistreId);
@@ -494,50 +517,79 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const doc = this.documents.find(d => d.id === docId);
       if (!doc) continue;
 
-      // Extraire juste le nom du fichier (ex: "Mandat_Gestion_Sinistre.pdf")
-      const fileName = doc.fichier.split('/').pop() || doc.nom + '.pdf';
+      if (!doc.fileBlob) {
+        console.error(`Aucun fichier Blob trouvé pour le document ${doc.nom}`);
+        continue;
+      }
 
-      const documentPayload = {
-        type: this.getDocumentType(doc.nom), // "constat", "mandat" etc.
-        fichier: fileName, // Juste le nom du fichier
-        signatureElectronique: [],
-        idsinistre: sinistreId
-      };
+      try {
+        // Upload the PDF Blob - using toString() conversion
+        const downloadURL = await this.firebaseStorageService.uploadPdfFile(
+          doc.fileBlob,
+          sinistreId //Convert number to string
+        ).toPromise();
 
-      console.log('Envoi document:', documentPayload);
+        console.log(`Fichier uploadé avec URL: ${downloadURL}`);
 
-      await this.documentService.addDocumentPost(documentPayload).subscribe({
-        next: () => console.log(`Document ${fileName} envoyé`),
-        error: (err) => console.error(`Erreur document ${fileName}:`, err)
-      });
+        const documentPayload = {
+          type: this.getDocumentType(doc.nom),
+          fichier: downloadURL,
+          signatureElectronique: [],
+          idsinistre: sinistreId
+        };
+
+        await this.documentService.addDocumentPost(documentPayload).toPromise();
+        console.log(`Document ${doc.nom} envoyé à l'API`);
+      } catch (error) {
+        console.error(`Erreur lors du traitement du document ${doc.nom}`, error);
+      }
     }
   }
 
-  // Helper pour déterminer le type de document
   private getDocumentType(nomDocument: string): string {
     return nomDocument.includes('Mandat') ? 'mandat' :
-      nomDocument.includes('Ordre') ? 'ordre_reparation' :
+      nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
   private async saveFilesToAssets(): Promise<{ photosNames: string[] }> {
+    const storage = getStorage();
     const photosNames: string[] = [];
 
-    // Créer le répertoire si inexistant (à adapter selon votre environnement)
-    const declarationDir = 'src/assets/declaration/';
+    const baseDir = 'declaration/photos';
 
-    // Sauvegarder le constat
-    if (this.constatFile) {
-      await this.saveFileToDisk(this.constatFile, declarationDir);
+    const photoStepDirs: { [key: number]: string } = {
+      1: 'avant',
+      2: 'plaque',
+      3: 'cote',
+      4: 'degats'
+    };
+
+    for (const step in this.photoSteps) {
+      const photos = this.photoSteps[step];
+      const dirName = photoStepDirs[+step];
+
+      for (const photo of photos) {
+        const file = photo.file;
+        const firebasePath = `${baseDir}/${dirName}/${file.name}`;
+
+        const fileRef = ref(storage, firebasePath);
+        await uploadBytes(fileRef, file);
+
+        photosNames.push(firebasePath);
+      }
     }
 
-    // Sauvegarder les photos
-    for (const file of this.photosFiles) {
-      await this.saveFileToDisk(file, declarationDir);
-      photosNames.push(file.name);
+    // Upload du constat s’il existe
+    if (this.constatFile) {
+      const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
+      const constatRef = ref(storage, constatPath);
+      await uploadBytes(constatRef, this.constatFile);
+      console.log(`✅ Constat téléversé : ${constatPath}`);
     }
 
     return { photosNames };
   }
+
 
   private saveFileToDisk(file: File, directory: string): Promise<void> {
     return new Promise((resolve, reject) => {

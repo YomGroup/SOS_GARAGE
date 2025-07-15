@@ -38,33 +38,48 @@
           <h2 *ngIf="userType === 'garagiste'" class="form-title">Inscription Garagiste</h2>
         </div>
        
-        <!-- Champs pour Assuré -->
-        <div *ngIf="userType === 'assure'">
-          <div class="form-group">
-            <input formControlName="nom" placeholder="Nom" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="prenom" placeholder="Prénom" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="email" placeholder="Email" type="email" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="adresse" placeholder="Adresse" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="adressePostale" placeholder="Adresse postale" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="numeroPermis" placeholder="Numéro de permis" class="form-control-custom">
-          </div>
-          <div class="form-group">
-            <input formControlName="password" placeholder="Mot de passe" type="password" class="form-control-custom">
-          </div>
-        </div>
+      <!-- Champs pour Assuré -->
+<div *ngIf="userType === 'assure'">
+  <div class="form-group">
+    <input formControlName="nom" placeholder="Nom" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="prenom" placeholder="Prénom" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="email" placeholder="Email" type="email" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="adresse" placeholder="Adresse" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="adressePostale" placeholder="Adresse postale" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="numeroPermis" placeholder="Numéro de permis" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="typePermis" placeholder="Type de permis" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <label>Date du permis</label>
+    <input type="date" formControlName="datePermis" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <label>Date d'obtention du permis</label>
+    <input type="date" formControlName="dateObtentionPermis" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="typeGarantie" placeholder="Type de garantie" class="form-control-custom" />
+  </div>
+  <div class="form-group">
+    <input formControlName="password" placeholder="Mot de passe" type="password" class="form-control-custom" />
+  </div>
+</div>
+
        
         <!-- Champs pour Garagiste -->
         <div *ngIf="userType === 'garagiste'">

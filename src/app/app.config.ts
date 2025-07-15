@@ -10,7 +10,9 @@ import { KeycloakBearerInterceptor, KeycloakService } from 'keycloak-angular';
 import { environment, firebaseConfig } from '../environnement';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
-
+import { ApiInterceptor } from './services/api-interceptor.service';
+import { getStorage } from 'firebase/storage';
+import { provideStorage } from '@angular/fire/storage';
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
@@ -35,6 +37,7 @@ export const appConfig: ApplicationConfig = {
     provideFirestore(() => getFirestore()),
     provideHttpClient(withInterceptorsFromDi()),
     provideHttpClient(),
+    provideStorage(() => getStorage()),
     KeycloakService,
     {
       provide: APP_INITIALIZER,
@@ -44,9 +47,15 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: KeycloakBearerInterceptor,
+      useClass: ApiInterceptor,
       multi: true
     }
+    // Temporairement désactivé pour tester
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: KeycloakBearerInterceptor,
+    //   multi: true
+    // }
   ]
 };
 

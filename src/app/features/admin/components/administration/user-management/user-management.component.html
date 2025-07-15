@@ -1,0 +1,242 @@
+<div class="card mb-4">
+    <div class="card-body">
+      <h2 class="mb-4"><i class="fas fa-users me-2 text-primary"></i>Gestion des Utilisateurs</h2>
+      
+      <!-- Message d'erreur -->
+      <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ errorMessage }}
+      </div>
+
+      <!-- Indicateur de chargement -->
+      <div *ngIf="isLoading" class="text-center mb-3">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+        <p class="mt-2">Chargement des utilisateurs...</p>
+      </div>
+      
+      <div class="mb-4" *ngIf="!isLoading">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="search-input">
+              <i class="fas fa-search"></i>
+              <input type="text" (keyup)="applyFilter($event)" placeholder="Nom, prénom, email, rôle..." class="form-control">
+            </div>
+          </div>
+          <div class="col-md-6 text-end">
+            <button class="btn btn-primary-custom" (click)="openUserForm()">
+              <i class="fas fa-user-plus me-2"></i>Nouvel Utilisateur
+            </button>
+          </div>
+        </div>
+      </div>
+  
+      <div class="table-responsive mb-5" *ngIf="!isLoading">
+        <table class="table table-hover align-middle">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Email</th>
+              <th>Téléphone</th>
+              <th>Rôle</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers.slice(currentPage * pageSize, (currentPage + 1) * pageSize)">
+              <td>{{user.nom}}</td>
+              <td>{{user.prenom}}</td>
+              <td>{{user.email}}</td>
+              <td>{{user.telephone}}</td>
+              <td>
+                <span [ngClass]="user.role === 'Assuré' ? 'badge bg-info' : 'badge bg-warning'">
+                  {{user.role}}
+                </span>
+              </td>
+              <td>
+                <span [ngClass]="user.actif ? 'badge bg-success' : 'badge bg-danger'">
+                  {{user.actif ? 'Actif' : 'Inactif'}}
+                </span>
+              </td>
+              <td>
+                <div class="d-flex gap-2">
+                  <button class="btn btn-sm btn-outline-primary" (click)="editUser(user)" title="Modifier">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger" (click)="deleteUser(user)" title="Supprimer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                  <button class="btn btn-sm" 
+                          [ngClass]="user.actif ? 'btn-outline-warning' : 'btn-outline-success'" 
+                          (click)="toggleActive(user)"
+                          [title]="user.actif ? 'Désactiver' : 'Activer'"
+                          [disabled]="user.role === 'Assuré'">
+                    <i [class]="user.actif ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-info" (click)="resetPassword(user)" title="Réinitialiser mot de passe">
+                    <i class="fas fa-key"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        
+        <div class="pagination-container mt-3 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-muted">
+              Affichage de {{currentPage * pageSize + 1}} à 
+              {{min((currentPage + 1) * pageSize, filteredUsers.length)}} 
+              sur {{filteredUsers.length}} utilisateurs
+            </span>
+          </div>
+          
+          <div class="d-flex gap-2">
+            <select class="form-select page-select" [(ngModel)]="pageSize" (change)="onPageSizeChange()">
+              <option *ngFor="let size of pageSizeOptions" [value]="size">{{size}} par page</option>
+            </select>
+            
+            <nav>
+              <ul class="pagination mb-0">
+                <li class="page-item" [class.disabled]="currentPage === 0">
+                  <button class="page-link" (click)="currentPage = currentPage - 1; applyPagination()">
+                    &laquo;
+                  </button>
+                </li>
+                <li class="page-item" *ngFor="let page of getPageNumbers()" [class.active]="page === currentPage + 1">
+                  <button class="page-link" (click)="currentPage = page - 1; applyPagination()">
+                    {{page}}
+                  </button>
+                </li>
+                <li class="page-item" [class.disabled]="(currentPage + 1) * pageSize >= filteredUsers.length">
+                  <button class="page-link" (click)="currentPage = currentPage + 1; applyPagination()">
+                    &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Formulaire d'ajout/modification utilisateur -->
+      <div *ngIf="showForm" class="mt-4">
+        <div class="card">
+          <div class="card-body">
+            <h4 class="mb-3"><i class="fas fa-user-edit me-2 text-primary"></i>{{isEditing ? 'Modifier' : 'Ajouter'}} un utilisateur</h4>
+            
+            <form [formGroup]="userFormGroup" class="row g-3">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Nom *</label>
+                  <input type="text" formControlName="nom" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('nom')?.invalid && userFormGroup.get('nom')?.touched}">
+                  <div *ngIf="userFormGroup.get('nom')?.hasError('required') && userFormGroup.get('nom')?.touched" class="invalid-feedback">
+                    Nom requis
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Prénom *</label>
+                  <input type="text" formControlName="prenom" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('prenom')?.invalid && userFormGroup.get('prenom')?.touched}">
+                  <div *ngIf="userFormGroup.get('prenom')?.hasError('required') && userFormGroup.get('prenom')?.touched" class="invalid-feedback">
+                    Prénom requis
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" formControlName="email" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('email')?.invalid && userFormGroup.get('email')?.touched}">
+                  <div *ngIf="userFormGroup.get('email')?.hasError('required') && userFormGroup.get('email')?.touched" class="invalid-feedback">
+                    Email requis
+                  </div>
+                  <div *ngIf="userFormGroup.get('email')?.hasError('email') && userFormGroup.get('email')?.touched" class="invalid-feedback">
+                    Email invalide
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Téléphone *</label>
+                  <input type="tel" formControlName="telephone" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('telephone')?.invalid && userFormGroup.get('telephone')?.touched}">
+                  <div *ngIf="userFormGroup.get('telephone')?.hasError('required') && userFormGroup.get('telephone')?.touched" class="invalid-feedback">
+                    Téléphone requis
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label>Adresse *</label>
+                  <input type="text" formControlName="adresse" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('adresse')?.invalid && userFormGroup.get('adresse')?.touched}">
+                  <div *ngIf="userFormGroup.get('adresse')?.hasError('required') && userFormGroup.get('adresse')?.touched" class="invalid-feedback">
+                    Adresse requise
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Rôle *</label>
+                  <select formControlName="role" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('role')?.invalid && userFormGroup.get('role')?.touched}">
+                    <option value="">Sélectionner un rôle</option>
+                    <option *ngFor="let role of roles" [value]="role">{{role}}</option>
+                  </select>
+                  <div *ngIf="userFormGroup.get('role')?.hasError('required') && userFormGroup.get('role')?.touched" class="invalid-feedback">
+                    Rôle requis
+                  </div>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label>Mot de passe *</label>
+                  <input type="password" formControlName="password" class="form-control" [ngClass]="{'is-invalid': userFormGroup.get('password')?.invalid && userFormGroup.get('password')?.touched}">
+                  <div *ngIf="userFormGroup.get('password')?.hasError('required') && userFormGroup.get('password')?.touched" class="invalid-feedback">
+                    Mot de passe requis
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Champs spécifiques aux assurés -->
+              <div class="col-md-6" *ngIf="userFormGroup.get('role')?.value === 'Assuré'">
+                <div class="form-group">
+                  <label>Numéro de permis</label>
+                  <input type="text" formControlName="numeroPermis" class="form-control">
+                </div>
+              </div>
+              
+              <div class="col-md-6" *ngIf="userFormGroup.get('role')?.value === 'Assuré'">
+                <div class="form-group">
+                  <label>Adresse postale</label>
+                  <input type="text" formControlName="adressePostale" class="form-control">
+                </div>
+              </div>
+              
+              <!-- Champs spécifiques aux réparateurs -->
+              <div class="col-md-6" *ngIf="userFormGroup.get('role')?.value === 'Réparateur'">
+                <div class="form-group">
+                  <label>
+                    <input type="checkbox" formControlName="isvalids" /> Utilisateur actif
+                  </label>
+                </div>
+              </div>
+              
+              <div class="col-12 text-end">
+                <button type="button" class="btn btn-outline-secondary me-2" (click)="closeUserForm()">Annuler</button>
+                <button type="button" class="btn btn-primary-custom" (click)="saveUser()" [disabled]="!userFormGroup.valid">
+                  {{isEditing ? 'Mettre à jour' : 'Créer'}}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

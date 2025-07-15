@@ -19,6 +19,19 @@ import { DossierManagementComponent } from './components/dossier-management/doss
 import { GarageValidationComponent } from './components/garage-validation/garage-validation.component';
 import { EpaveManagementComponent } from './components/epave-management/epave-management.component';
 import { RoleManagementComponent } from './components/role-management/role-management.component';
+import { AddGarageComponent } from './components/garage-validation/add-garage/add-garage.component';
+import { AdministrationComponent } from './components/administration/administration.component';
+import { ParametreComponent } from './components/parametre/parametre.component';
+import { UserManagementComponent } from './components/administration/user-management/user-management.component';
+import { AuditLogsComponent } from './components/administration/audit-logs/audit-logs.component';
+import { AccessManagementComponent } from './components/administration/access-management/access-management.component';
+import { AdminStatsComponent } from './components/administration/admin-stats/admin-stats.component';
+import { PreferencesManagementComponent } from './components/parametre/preferences-management/preferences-management.component';
+import { NotificationManagementComponent } from './components/parametre/notification-management/notification-management.component';
+import { SecurityManagementComponent } from './components/parametre/security-management/security-management.component';
+import { CustomizationManagementComponent } from './components/parametre/customization-management/customization-management.component';
+import { DossierViewComponent } from './components/dossier-management/dossier-view.component';
+import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 
 const routes: Routes = [
   {
@@ -27,7 +40,14 @@ const routes: Routes = [
   },
   {
     path: 'dossiers',
-    component: DossierManagementComponent
+    component: DossierManagementComponent,
+    children: [
+      { path: 'view/:id', component: DossierViewComponent }
+    ]
+  },
+  {
+    path: 'gestion-finance',
+    component: GestionFinanceComponent
   },
   {
     path: 'garages',
@@ -38,8 +58,26 @@ const routes: Routes = [
     component: EpaveManagementComponent
   },
   {
-    path: 'roles',
-    component: RoleManagementComponent
+    path: 'administration',
+    component: AdministrationComponent,
+    children: [
+      { path: '', redirectTo: 'user-management', pathMatch: 'full' },
+      { path: 'user-management', component: UserManagementComponent },
+      { path: 'audit-logs', component: AuditLogsComponent },
+      { path: 'access-management', component: AccessManagementComponent },
+      { path: 'admin-stats', component: AdminStatsComponent }
+    ]
+  },
+  {
+    path: 'parametre',
+    component: ParametreComponent,
+    children: [
+      { path: '', redirectTo: 'preferences-management', pathMatch: 'full' },
+      { path: 'preferences-management', component: PreferencesManagementComponent },
+      { path: 'notification-management', component: NotificationManagementComponent },
+      { path: 'security-management', component: SecurityManagementComponent },
+      { path: 'customization-management', component: CustomizationManagementComponent }
+    ]
   },
   {
     path: '',
@@ -69,7 +107,13 @@ const routes: Routes = [
     DossierManagementComponent,
     GarageValidationComponent,
     EpaveManagementComponent,
-    RoleManagementComponent
+    RoleManagementComponent,
+    AddGarageComponent,
+    ParametreComponent,
+    UserManagementComponent,
+    AuditLogsComponent,
+    AccessManagementComponent,
+    AdminStatsComponent
   ]
 })
 export class AdminModule { } 

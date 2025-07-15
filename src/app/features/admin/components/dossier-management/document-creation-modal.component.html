@@ -1,0 +1,112 @@
+<div class="modal-header bg-primary text-white">
+  <h5 class="modal-title">
+    <i class="fas fa-file-signature me-2"></i>
+    Création d'un document d'expertise
+  </h5>
+  <button type="button" class="btn-close btn-close-white" aria-label="Fermer" (click)="close()"></button>
+</div>
+
+<div class="modal-body modal-lg custom-modal-lg">
+  <form (ngSubmit)="generateAndEmitPDF()" #expertiseForm="ngForm">
+    
+    <!-- Section Expert -->
+    <div class="border rounded p-3 mb-4">
+      <h6 class="text-primary mb-3">
+        <i class="fas fa-user-tie me-1"></i> Informations de l'expert
+      </h6>
+
+      <div class="mb-3">
+        <label class="form-label">Nom</label>
+        <input class="form-control" [(ngModel)]="formData.nom" name="nom" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Prénom</label>
+        <input class="form-control" [(ngModel)]="formData.prenom" name="prenom" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Spécialité / Expertise</label>
+        <input class="form-control" [(ngModel)]="formData.expertise" name="expertise" required>
+      </div>
+    </div>
+
+    <!-- Section Véhicule -->
+    <div class="border rounded p-3 mb-4">
+      <h6 class="text-primary mb-3">
+        <i class="fas fa-car me-1"></i> Informations du véhicule
+      </h6>
+
+      <div class="mb-3">
+        <label class="form-label">Marque</label>
+        <input class="form-control" [(ngModel)]="formData.marque" name="marque" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Modèle</label>
+        <input class="form-control" [(ngModel)]="formData.modele" name="modele" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Immatriculation</label>
+        <input class="form-control" [(ngModel)]="formData.immatriculation" name="immatriculation" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Kilométrage</label>
+        <input type="number" class="form-control" [(ngModel)]="formData.kilometrage" name="kilometrage" required>
+      </div>
+    </div>
+
+    <!-- Section Sinistre -->
+    <div class="border rounded p-3 mb-4">
+      <h6 class="text-primary mb-3">
+        <i class="fas fa-exclamation-triangle me-1"></i> Détails du sinistre
+      </h6>
+
+      <div class="mb-3">
+        <label class="form-label">Date du sinistre</label>
+        <input type="date" class="form-control" [(ngModel)]="formData.dateSinistre" name="dateSinistre" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Description</label>
+        <textarea class="form-control" rows="3" [(ngModel)]="formData.description" name="description" required></textarea>
+      </div>
+    </div>
+
+    <!-- Section Conclusion -->
+    <div class="border rounded p-3 mb-4">
+      <h6 class="text-primary mb-3">
+        <i class="fas fa-clipboard-check me-1"></i> Conclusion de l'expertise
+      </h6>
+
+      <div class="mb-3">
+        <label class="form-label">Évaluation des dommages (€)</label>
+        <input type="number" class="form-control" [(ngModel)]="formData.evaluation" name="evaluation" required>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Conclusion</label>
+        <textarea class="form-control" rows="3" [(ngModel)]="formData.conclusion" name="conclusion" required></textarea>
+      </div>
+    </div>
+
+    <!-- Bouton d'action -->
+    <div class="text-end">
+      <button type="submit" class="btn btn-success" [disabled]="!expertiseForm.form.valid">
+        <i class="fas fa-file-download me-1"></i>
+        Générer et enregistrer
+      </button>
+    </div>
+  </form>
+</div>
+
+<style>
+.custom-modal-lg {
+  max-width: 900px;
+  min-width: 700px;
+  min-height: 600px;
+  margin: 0 auto;
+}
+</style>

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 export interface Notification {
     id: string;
@@ -39,6 +41,8 @@ export class NotificationService {
 
     notifications$ = this.notificationsSubject.asObservable();
 
+    constructor(private http: HttpClient) {}
+
     getUnreadCount(): number {
         return this.notificationsSubject.value.filter(n => !n.read).length;
     }
@@ -58,5 +62,9 @@ export class NotificationService {
             timestamp: new Date()
         };
         this.notificationsSubject.next([newNotification, ...notifications]);
+    }
+
+    getUserNotifications(): Observable<Notification[]> {
+        return this.http.get<Notification[]>('https://sosmongarage-production.up.railway.app/V1/api/notifications');
     }
 }

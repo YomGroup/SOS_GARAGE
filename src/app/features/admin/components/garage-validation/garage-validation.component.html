@@ -6,47 +6,55 @@
       <!-- En-tête avec statistiques -->
       <div class="stats-cards mb-4">
         <div class="row">
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon pending">
-                <i class="fas fa-clock"></i>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">En attente</h3>
+                  <div class="stats-number">{{ stats.enAttente }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
               </div>
-              <div class="stat-info">
-                <h3>24</h3>
-                <p>En attente</p>
-      </div>
-    </div>
-  </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon active">
-                <i class="fas fa-check-circle"></i>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Garages valides</h3>
+                  <div class="stats-number">{{ stats.valides }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-check-circle"></i>
+                </div>
               </div>
-              <div class="stat-info">
-                <h3>156</h3>
-                <p>Garages actifs</p>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Rejetés</h3>
+                  <div class="stats-number">{{ stats.rejetes }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-times-circle"></i>
+                </div>
               </div>
-        </div>
-      </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon rejected">
-                <i class="fas fa-times-circle"></i>
-              </div>
-              <div class="stat-info">
-                <h3>12</h3>
-                <p>Rejetés</p>
-              </div>
-      </div>
-    </div>
-          <div class="col-md-3">
-            <div class="stat-card">
-              <div class="stat-icon total">
-                <i class="fas fa-building"></i>
-              </div>
-              <div class="stat-info">
-                <h3>192</h3>
-                <p>Total</p>
+            </div>
+          </div>
+          <div class="col-md-3 mb-3">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Total</h3>
+                  <div class="stats-number">{{ stats.total }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-building"></i>
+                </div>
               </div>
             </div>
           </div>
@@ -58,31 +66,24 @@
         <div class="card-body">
           <div class="row align-items-center">
             <div class="col-md-3">
-              <select class="form-select">
+              <select class="form-select" [(ngModel)]="selectedStatus" (change)="loadData()">
                 <option value="">Tous les statuts</option>
                 <option value="pending">En attente</option>
-                <option value="active">Actif</option>
+                <option value="active">Valide</option>
                 <option value="rejected">Rejeté</option>
               </select>
             </div>
             <div class="col-md-3">
-              <select class="form-select">
-                <option value="">Toutes les régions</option>
-                <option value="idf">Île-de-France</option>
-                <option value="paca">Provence-Alpes-Côte d'Azur</option>
-                <option value="occitanie">Occitanie</option>
+              <select class="form-select" [(ngModel)]="selectedVille" (change)="loadData()">
+                <option value="">Toutes les villes</option>
+                <option *ngFor="let ville of villesDisponibles" [value]="ville">{{ ville }}</option>
               </select>
             </div>
             <div class="col-md-4">
               <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" placeholder="Rechercher un garage...">
+                <input type="text" class="form-control" placeholder="Rechercher un garage..." [(ngModel)]="searchNom" (input)="loadData()">
                 </div>
-            </div>
-            <div class="col-md-2">
-              <button class="btn btn-primary-custom w-100">
-                <i class="fas fa-plus me-2"></i>Nouveau
-              </button>
             </div>
           </div>
         </div>
@@ -90,72 +91,41 @@
 
       <!-- Liste des garages -->
       <div class="garage-list">
-        <!-- Garage en attente -->
-        <div class="garage-card pending">
+        <!-- Tous les garages avec leurs statuts -->
+        <div class="garage-card" *ngFor="let reparateur of tousLesGarages">
           <div class="garage-header">
             <div class="garage-title">
-              <h4>Auto Service Paris</h4>
-              <span class="badge pending">En attente</span>
+              <h4>{{ reparateur.nomDuGarage }}</h4>
+              <span class="badge pending" *ngIf="reparateur.isvalids === 'en attente'">En attente</span>
+              <span class="badge active" *ngIf="reparateur.isvalids === 'valide'">Valide</span>
+              <span class="badge rejected" *ngIf="reparateur.isvalids === 'rejetée'">Rejeté</span>
             </div>
             <div class="garage-actions">
-              <button class="btn btn-sm btn-success" title="Valider">
+              <!-- Actions pour garages en attente -->
+              <button class="btn btn-sm btn-success" title="Valider" 
+                      (click)="validerReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'en attente'">
                 <i class="fas fa-check"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Rejeter">
+              <button class="btn btn-sm btn-danger" title="Rejeter" 
+                      (click)="rejeterReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'en attente'">
                 <i class="fas fa-times"></i>
               </button>
-            </div>
-          </div>
-          <div class="garage-content">
-            <div class="garage-info">
-              <div class="info-item">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>123 Avenue des Champs-Élysées, 75008 Paris</span>
-              </div>
-              <div class="info-item">
-                <i class="fas fa-phone"></i>
-                <span>01 23 45 67 89</span>
-              </div>
-              <div class="info-item">
-                <i class="fas fa-envelope"></i>
-                <span>contact&#64;autoservice.fr</span>
-              </div>
-            </div>
-            <div class="garage-details">
-              <div class="detail-item">
-                <span class="label">SIRET</span>
-                <span class="value">123 456 789 00012</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Spécialités</span>
-                <span class="value">Mécanique générale, Carrosserie</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Capacité</span>
-                <span class="value">10 véhicules</span>
-              </div>
-            </div>
-          </div>
-          <div class="garage-footer">
-            <button class="btn btn-outline-primary" (click)="viewDetails()">
-              <i class="fas fa-eye me-2"></i>Voir détails
-            </button>
-          </div>
-        </div>
-
-        <!-- Garage actif -->
-        <div class="garage-card active">
-          <div class="garage-header">
-            <div class="garage-title">
-              <h4>Mécanique Express</h4>
-              <span class="badge active">Actif</span>
-            </div>
-            <div class="garage-actions">
-              <button class="btn btn-sm btn-warning" title="Suspendre">
+              
+              <!-- Actions pour garages validés -->
+              <button class="btn btn-sm btn-warning" title="Suspendre" (click)="suspendreReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-pause"></i>
               </button>
-              <button class="btn btn-sm btn-danger" title="Désactiver">
+              <button class="btn btn-sm btn-danger" title="Supprimer" (click)="supprimerReparateur(reparateur)"
+                      *ngIf="reparateur.isvalids === 'valide'">
                 <i class="fas fa-ban"></i>
+              </button>
+              
+              <!-- Action commune pour modifier la commission -->
+              <button class="btn btn-sm btn-info" title="Modifier la commission" (click)="openCommissionPrompt(reparateur)">
+                <i class="fas fa-percent"></i>
               </button>
             </div>
           </div>
@@ -163,41 +133,46 @@
             <div class="garage-info">
               <div class="info-item">
                 <i class="fas fa-map-marker-alt"></i>
-                <span>45 Rue de la République, 69002 Lyon</span>
+                <span>{{ reparateur.adresse }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-phone"></i>
-                <span>04 56 78 90 12</span>
+                <span>{{ reparateur.telephone }}</span>
               </div>
               <div class="info-item">
                 <i class="fas fa-envelope"></i>
-                <span>contact&#64;mecanique-express.fr</span>
+                <span>{{ reparateur.email }}</span>
               </div>
             </div>
             <div class="garage-details">
               <div class="detail-item">
                 <span class="label">SIRET</span>
-                <span class="value">987 654 321 00012</span>
+                <span class="value">{{ reparateur.siret }}</span>
               </div>
               <div class="detail-item">
-                <span class="label">Spécialités</span>
-                <span class="value">Diagnostic, Réparation</span>
-              </div>
-              <div class="detail-item">
-                <span class="label">Capacité</span>
-                <span class="value">15 véhicules</span>
+                <span class="label">Commission</span>
+                <span class="value" *ngIf="editedCommissionId !== reparateur.id">{{ reparateur.commission }}%
+                  <button class="btn btn-link btn-sm p-0 ms-2" (click)="startEditCommission(reparateur)" title="Modifier">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                </span>
+                <span *ngIf="editedCommissionId === reparateur.id">
+                  <input type="number" min="0" max="100" [(ngModel)]="editedCommissionValue" style="width:60px;display:inline-block;" /> %
+                  <button class="btn btn-success btn-sm ms-1" (click)="saveEditCommission(reparateur)" title="Valider"><i class="fas fa-check"></i></button>
+                  <button class="btn btn-secondary btn-sm ms-1" (click)="cancelEditCommission()" title="Annuler"><i class="fas fa-times"></i></button>
+                </span>
               </div>
             </div>
           </div>
           <div class="garage-footer">
-            <button class="btn btn-outline-primary" (click)="viewDetails()">
+            <button class="btn btn-outline-primary" (click)="viewDetails(reparateur)">
               <i class="fas fa-eye me-2"></i>Voir détails
             </button>
           </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Pagination -->
+      <!-- Pagination -->
       <nav aria-label="Navigation des garages">
         <ul class="pagination justify-content-center">
           <li class="page-item disabled">

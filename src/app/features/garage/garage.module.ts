@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SharedModule } from '../../shared/shared.module';
 import { GarageRoutingModule } from './garage-routing.module';
-import { MessageComponent } from '../../message/message.component';
 
 @NgModule({
   imports: [
@@ -13,8 +12,10 @@ import { MessageComponent } from '../../message/message.component';
     FormsModule,
     ReactiveFormsModule,
     SharedModule,
-    GarageRoutingModule,
-    MessageComponent
+    GarageRoutingModule
+  ],
+  declarations: [
+    
   ]
 })
 export class GarageModule { } 

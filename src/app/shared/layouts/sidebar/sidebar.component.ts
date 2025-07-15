@@ -1,7 +1,10 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectorRef, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
+import { Router } from '@angular/router';
+import { DossierFilterService } from '../../../features/admin/components/dossier-management/dossier-filter.service';
+import { MissionFilterService } from '../../../features/garage/components/reparation-management/mission-filter.service';
 
 interface MenuItem {
   title: string;
@@ -12,6 +15,7 @@ interface MenuItem {
   expanded?: boolean;
   badge?: string;
   isNew?: boolean;
+  filter?: string;
 }
 
 @Component({
@@ -21,169 +25,22 @@ interface MenuItem {
     CommonModule,
     RouterModule
   ],
-  template: `
-    <aside class="sidebar" [class.collapsed]="collapsed">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <img src="assets/logo_sos.png" alt="Logo" />
-        </div>
-      </div>
-      
-      <nav class="nav-menu">
-        <a *ngFor="let item of menuItems"
-           [routerLink]="item.route"
-           (click)="item.action ? item.action($event) : null"
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{exact: true}"
-           class="nav-item"
-           [attr.data-tooltip]="item.title">
-          <i [ngClass]="item.icon"></i>
-          <span>{{ item.title }}</span>
-        </a>
-      </nav>
-    </aside>
-  `,
-  styles: [`
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 280px;
-      height: 100vh;
-      background: white;
-      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-      overflow-y: auto;
-      padding: 0;
-      transition: all 0.3s ease;
-    }
-
-    .sidebar-header {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 32px;
-    }
-
-    .sidebar-logo {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .sidebar-logo img {
-      width: 100%;
-      max-width: 220px;
-      height: auto;
-      margin: 20px auto 0 auto;
-      display: block;
-    }
-
-    .nav-menu {
-      display: flex;
-      flex-direction: column;
-      padding: 0 15px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 18px 20px;
-      text-decoration: none;
-      color: #4a5568;
-      transition: all 0.3s ease;
-      cursor: pointer;
-      border-radius: 12px;
-      margin-bottom: 8px;
-      font-size: 16px;
-      font-weight: 500;
-    }
-
-    .nav-item i {
-      font-size: 20px;
-      width: 24px;
-      text-align: center;
-    }
-
-    .nav-item:hover {
-      background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 50%);
-      color: #333;
-      transform: translateX(5px);
-    }
-
-    .nav-item.active {
-      background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-      color: white;
-      border-radius: 25px;
-      transform: translateX(5px);
-      box-shadow: 0 4px 15px rgba(30, 77, 184, 0.3);
-    }
-
-    /* Styles pour le mode collapsed */
-    .sidebar.collapsed {
-      width: 80px;
-    }
-
-    .sidebar.collapsed .sidebar-logo img {
-      max-width: 40px;
-    }
-
-    .sidebar.collapsed .nav-item {
-      padding: 18px;
-      justify-content: center;
-    }
-
-    .sidebar.collapsed .nav-item span {
-      display: none;
-    }
-
-    .sidebar.collapsed .nav-item i {
-      margin: 0;
-      font-size: 24px;
-    }
-
-    /* Tooltip pour le mode collapsed */
-    .sidebar.collapsed .nav-item[data-tooltip]:before {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-size: 14px;
-      white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      margin-left: 10px;
-    }
-
-    .sidebar.collapsed .nav-item[data-tooltip]:hover:before {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    @media (max-width: 768px) {
-      .sidebar {
-        width: 250px;
-      }
-      
-      .sidebar.collapsed {
-        width: 0;
-        padding: 0;
-      }
-    }
-  `]
+  templateUrl: './sidebar.component.html',
+  styleUrls: ['./sidebar.component.css']
 })
 export class SidebarComponent implements OnInit {
-  @Input() collapsed = false;
+  @Input() collapsed: boolean = false;
+  @Input() isMobile: boolean = false;
+  @Input() isOpen: boolean = false;
+  @Output() closeSidebar = new EventEmitter<void>();
+  @Output() openSidebar = new EventEmitter<void>();
+  @Output() dossierFilterChange = new EventEmitter<string>();
   
   private keycloakService = inject(KeycloakService);
+  private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
+  private dossierFilterService = inject(DossierFilterService);
+  private missionFilterService = inject(MissionFilterService);
 
   username: string = 'Visiteur';
   userRoles: string[] = [];
@@ -195,31 +52,52 @@ export class SidebarComponent implements OnInit {
         const userProfile = await this.keycloakService.loadUserProfile();
         this.username = userProfile.firstName || userProfile.username || 'Utilisateur';
         this.userRoles = this.keycloakService.getUserRoles();
+        this.cdr.detectChanges();
       } catch (error) {
         console.error('Erreur lors du chargement du profil utilisateur', error);
       }
     }
+    
+    // Auto-expandre les sous-menus actifs
+    this.expandActiveSubmenus();
   }
 
   adminMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-speedometer2', route: '/admin/dashboard', badge: '3' },
-    { title: 'Dossiers', icon: 'bi bi-folder', route: '/admin/dossiers' },
-    { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
-    { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     {
-      title: 'Administration', icon: 'bi bi-gear', expanded: false,
+      title: 'Dossiers',
+      icon: 'bi bi-folder',
+      route: '/admin/dossiers',
+      expanded: false,
       children: [
-        { title: 'Utilisateurs', route: '/admin/users', icon: 'bi bi-people' },
-        { title: 'Rôles', route: '/admin/roles', icon: 'bi bi-shield-lock' }
+        { title: 'Nouveaux dossiers', icon: 'bi bi-calendar-day', filter: 'nouveaux' },
+        { title: 'Dossiers en cours', icon: 'bi bi-clock-history', filter: 'enCours' },
+        { title: 'Dossiers terminés', icon: 'bi bi-check-circle', filter: 'termines' }
       ]
     },
-    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/settings' }
+    { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
+    { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
+   // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
+    { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
+    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
+    
   ];
 
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
-    { title: 'Réception de mission', icon: 'bi bi-clipboard-check', route: '/garage/missions' },
-    { title: 'Gestion des réparations', icon: 'bi bi-tools', route: '/garage/reparations' },
+    {
+      title: 'Gestion des réparations',
+      icon: 'bi bi-tools',
+      route: '/garage/reparations',
+      expanded: false,
+      children: [
+        { title: 'Nouvelles missions', icon: 'bi bi-calendar-day', filter: 'nouvelles' },
+        { title: 'Missions en cours', icon: 'bi bi-clock-history', filter: 'enCours' },
+        { title: 'Missions terminées', icon: 'bi bi-check-circle', filter: 'terminees' }
+      ]
+    },
+    { title: 'Finance', icon: 'bi bi-cash-coin', route: '/garage/finance' },
+    { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
   ];
 
   assureMenuItems: MenuItem[] = [
@@ -233,8 +111,18 @@ export class SidebarComponent implements OnInit {
 
   get menuItems(): MenuItem[] {
     const commonItems: MenuItem[] = [
-      { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
-      { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' },
+      {
+        title: 'Messages',
+        icon: 'bi bi-envelope',
+        route: this.userRoles.includes('ROLE_GARAGISTE')
+          ? '/garage/message'
+          : this.userRoles.includes('ROLE_ADMIN')
+            ? '/admin/messages'
+            : this.userRoles.includes('ROLE_ASSURE')
+              ? '/clientDashboard/message'
+              : '/message',
+        badge: '2'
+      },
       { 
         title: 'Déconnexion', 
         icon: 'bi bi-box-arrow-right', 
@@ -256,10 +144,97 @@ export class SidebarComponent implements OnInit {
   }
   
   toggleSubmenu(item: MenuItem) {
+    // Toggle le sous-menu ET navigue si route
     item.expanded = !item.expanded;
+    if (item.route) {
+      this.router.navigate([item.route]);
+    }
+  }
+
+  toggleSubmenuOnly(event: MouseEvent, item: MenuItem) {
+    // Empêche la navigation, toggle seulement
+    event.preventDefault();
+    event.stopPropagation();
+    item.expanded = !item.expanded;
+  }
+
+  isParentActive(item: MenuItem): boolean {
+    if (!item.route) return false;
+    const currentUrl = this.router.url;
+    
+    // Vérifier si la route parente est active
+    const isParentRouteActive = currentUrl === item.route || currentUrl.startsWith(item.route + '/');
+    
+    // Si l'élément a des enfants, vérifier aussi si un des enfants est actif
+    if (item.children && item.children.length > 0) {
+      const hasActiveChild = item.children.some(child => {
+        if (!child.route) return false;
+        return currentUrl === child.route || currentUrl.startsWith(child.route + '/');
+      });
+      return isParentRouteActive || hasActiveChild;
+    }
+    
+    return isParentRouteActive;
+  }
+
+
+
+  onChildClick(event: MouseEvent, child: MenuItem) {
+    // Empêcher la propagation pour éviter les conflits
+    event.stopPropagation();
+    // Naviguer si une route est définie
+    if (child.route) {
+      this.router.navigate([child.route]);
+    }
+    // Fermer le sous-menu sur mobile après clic
+    if (this.isMobile) {
+      this.closeSidebar.emit();
+    }
+  }
+
+  onLogoClick() {
+    if (this.collapsed) {
+      this.openSidebar.emit();
+    }
+  }
+
+  onItemClick(event: MouseEvent, item: MenuItem) {
+    if (item.action) {
+      item.action(event);
+    }
+  }
+
+  expandActiveSubmenus() {
+    const currentUrl = this.router.url;
+    
+    // Parcourir tous les éléments du menu pour trouver les sous-menus actifs
+    this.menuItems.forEach(item => {
+      if (item.children && item.children.length > 0) {
+        const hasActiveChild = item.children.some(child => {
+          if (!child.route) return false;
+          return currentUrl === child.route || currentUrl.startsWith(child.route + '/');
+        });
+        
+        if (hasActiveChild) {
+          item.expanded = true;
+        }
+      }
+    });
   }
 
   logout() {
     this.keycloakService.logout(window.location.origin);
+  }
+
+  onDossierFilterClick(event: MouseEvent, filter: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dossierFilterService.setFiltre(filter as any);
+  }
+
+  onMissionFilterClick(event: MouseEvent, filter: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.missionFilterService.setFiltre(filter as any);
   }
 }

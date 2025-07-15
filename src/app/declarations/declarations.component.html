@@ -77,11 +77,24 @@
   </div>
 </div>
         <!-- Step 3: Constat -->
-       <!-- Step 3: Constat -->
      <div class="step-content" *ngIf="currentStep === 3">
-  <h2>Déclaration de l'incident</h2>
+   <h2>Déclaration de l'incident</h2>
+  <div class="mb-4">
+  <label for="typeAssuranceSelect" class="form-label fw-semibold text-primary">
+    Type d'incident :
+  </label>
+  <select id="typeAssuranceSelect"
+          class="form-select shadow-sm border-primary rounded"
+          [(ngModel)]="selectedTypeAssurance"
+          name="typeAssurance">
+    <option value="" disabled selected>-- Choisissez un type --</option>
+    <option *ngFor="let type of typeassurance" [value]="type">
+      {{ type }}
+    </option>
+  </select>
+</div>
 
-  <!-- Choix initial -->
+
   <div class="choice-container" *ngIf="!hasChosenDeclarationMethod">
     <div class="choice-card" (click)="selectDeclarationMethod('describe')">
       <i class="bi bi-text-paragraph"></i>
@@ -96,7 +109,6 @@
     </div>
   </div>
 
-  <!-- Section description -->
   <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
     <div class="section-header">
       <button class="btn-back" (click)="resetDeclarationMethod()">
@@ -153,8 +165,6 @@
     </div>
   </div>
 </div>
-        <!-- Step 4: Photos -->
-      <!-- Step 4: Photos -->
 <!-- Step 4: Photos -->
 <div class="step-content" *ngIf="currentStep === 4">
   <h2>Photos du véhicule accidenté</h2>
@@ -163,7 +173,7 @@
   <div class="photo-steps">
     <div class="step" [class.active]="currentPhotoStep === 1" (click)="setPhotoStep(1)">
       <span>1</span>
-      <p>Photo d'ensemble</p>
+      <p>Avant</p>
     </div>
     <div class="step" [class.active]="currentPhotoStep === 2" (click)="setPhotoStep(2)">
       <span>2</span>
@@ -171,7 +181,7 @@
     </div>
     <div class="step" [class.active]="currentPhotoStep === 3" (click)="setPhotoStep(3)">
       <span>3</span>
-      <p>Numéro de série</p>
+      <p>côté</p>
     </div>
     <div class="step" [class.active]="currentPhotoStep === 4" (click)="setPhotoStep(4)">
       <span>4</span>
@@ -182,27 +192,19 @@
   <!-- Instructions spécifiques -->
   <div class="step-instructions">
     <div *ngIf="currentPhotoStep === 1">
-      <h3><i class="bi bi-camera"></i> Photo d'ensemble du véhicule</h3>
-      <p>Prenez une photo montrant l'ensemble du véhicule et son environnement immédiat.</p>
-      <p class="help-text">Cette photo doit permettre d'identifier clairement le contexte de l'accident.</p>
+      <h3><i class="bi bi-camera"></i> Photo de l'avant du  véhicule</h3>
     </div>
     
     <div *ngIf="currentPhotoStep === 2">
       <h3><i class="bi bi-123"></i> Plaque d'immatriculation</h3>
-      <p>Photographiez clairement la plaque d'immatriculation avant ou arrière.</p>
-      <p class="help-text">La plaque doit être lisible et non obstruée.</p>
     </div>
     
     <div *ngIf="currentPhotoStep === 3">
       <h3><i class="bi bi-upc-scan"></i> Numéro de série (VIN)</h3>
-      <p>Prenez en photo la plaque constructeur située au bas du pare-brise côté conducteur.</p>
-      <p class="help-text">Le numéro doit être clairement visible.</p>
     </div>
     
     <div *ngIf="currentPhotoStep === 4">
       <h3><i class="bi bi-exclamation-triangle"></i> Zones endommagées</h3>
-      <p>Photographiez chaque zone endommagée sous différents angles.</p>
-      <p class="help-text">Prenez au moins 2 photos par dégât (vue d'ensemble et détail).</p>
     </div>
   </div>
 
@@ -235,11 +237,11 @@
 
   <!-- Navigation entre étapes -->
   <div class="step-navigation">
-    <button class="btn-back" (click)="prevPhotoStep()" [disabled]="currentPhotoStep === 1">
+    <button class="btn-backs" (click)="prevPhotoStep()" [disabled]="currentPhotoStep === 1">
       <i class="bi bi-chevron-left"></i> Étape précédente
     </button>
     
-    <button class="btn-next" (click)="nextPhotoStep()" [disabled]="!canProceedPhotoStep()">
+    <button class="btn-nexts" (click)="nextPhotoStep()" [disabled]="!canProceedPhotoStep()">
       {{ currentPhotoStep === 4 ? 'Terminer' : 'Étape suivante' }} 
       <i class="bi bi-chevron-right"></i>
     </button>

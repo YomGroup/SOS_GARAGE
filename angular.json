@@ -39,16 +39,19 @@
           },
           "configurations": {
             "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2.5MB",
+                  "maximumError": "3MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "15kB",
+                  "maximumError": "20kB"
                 }
               ],
               "outputHashing": "all"
@@ -57,6 +60,33 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "netlify": {
+              "optimization": true,
+              "extractLicenses": true,
+              "sourceMap": false,
+              "allowedCommonJsDependencies": [
+                "sweetalert2",
+                "canvg",
+                "html2canvas",
+                "pako",
+                "core-js",
+                "raf",
+                "rgbcolor"
+              ],
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "3MB",
+                  "maximumError": "4MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "15kB",
+                  "maximumError": "20kB"
+                }
+              ],
+              "outputHashing": "all"
             }
           },
           "defaultConfiguration": "production"

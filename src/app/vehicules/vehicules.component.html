@@ -8,6 +8,13 @@
 </button>
 
   </div>
+  <div class="col-12" *ngIf="vehicles.length === 0">
+  <div class="alert alert-info text-center py-4">
+    <i class="bi bi-info-circle me-2"></i>
+    Vous n'avez pas encore ajouté de véhicule.
+  </div>
+</div>
+
 <!-- Modal Add Vehicle Form -->
 <div class="modal fade" [class.show]="showAddForm" [style.display]="showAddForm ? 'block' : 'none'" tabindex="-1" role="dialog" aria-modal="true">
   <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -83,7 +90,7 @@
     
     <div class="vehicle-dropdown" 
          [class.open]="isAssuranceDropdownOpen"
-         (click)="toggleAssuranceDropdown()">
+         (click)="toggleAssuranceDropdown()" >
       <span>{{ selectedAssurance || 'Sélectionner une assurance' }}</span>
       <i class="dropdown-icon bi bi-chevron-down"></i>
     </div>
@@ -101,18 +108,25 @@
   </div>
 
   <div class="formule-container">
-    <h6 class="formule-title">Votre formule d'assurance</h6>
-    <div class="formule-options">
-      <div class="formule-option" *ngFor="let option of assuranceOptions">
+  <h6 class="formule-title">Votre formule d'assurance</h6>
+  <div class="formule-options">
+    <div class="formule-option" *ngFor="let option of assuranceOptions">
+      <ng-container *ngIf="shouldDisplay(option.id)">
         <label class="option-label">
-          <input type="checkbox" [(ngModel)]="option.selected" 
-                 name="assurance-{{option.id}}">
+          <input
+            type="checkbox"
+            [checked]="newVehicle.typeAssurence.includes(option.id)"
+            (change)="onToggleAssurance(option.id, $event)"
+            name="assurance-{{option.id}}"
+          />
           <span class="checkmark"></span>
-          <span class="option-text">{{option.name}}</span>
+          <span class="option-text">{{ option.name }}</span>
         </label>
-      </div>
+      </ng-container>
     </div>
   </div>
+</div>
+
    <div class="col-12">
                 <label class="form-label fw-semibold">Contrat d'Assurance</label>
                 <input type="text" class="form-control" [(ngModel)]="newVehicle.contratAssurance"

@@ -1,0 +1,105 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-cogs me-2 text-primary"></i>Préférences Utilisateur</h2>
+    
+    <div class="preferences-container">
+      <form class="preferences-form">
+        <div class="row g-4">
+          <!-- Langue -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="langue" class="form-label">
+                <i class="fas fa-globe me-2 text-primary"></i>Langue de l'application
+              </label>
+              <select id="langue" class="form-control" [(ngModel)]="selectedLanguage" name="langue">
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="es">🇪🇸 Español</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Thème -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="theme" class="form-label">
+                <i class="fas fa-palette me-2 text-primary"></i>Thème de l'interface
+              </label>
+              <select id="theme" class="form-control" [(ngModel)]="selectedTheme" name="theme">
+                <option value="light">☀️ Mode clair</option>
+                <option value="dark">🌙 Mode sombre</option>
+                <option value="auto">🔄 Automatique</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Fuseau horaire -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="timezone" class="form-label">
+                <i class="fas fa-clock me-2 text-primary"></i>Fuseau horaire
+              </label>
+              <select id="timezone" class="form-control" [(ngModel)]="selectedTimezone" name="timezone">
+                <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
+                <option value="UTC">UTC (UTC+0)</option>
+                <option value="America/New_York">America/New_York (UTC-5)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Format de date -->
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="dateFormat" class="form-label">
+                <i class="fas fa-calendar me-2 text-primary"></i>Format de date
+              </label>
+              <select id="dateFormat" class="form-control" [(ngModel)]="selectedDateFormat" name="dateFormat">
+                <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Notifications par défaut -->
+          <div class="col-12">
+            <div class="form-group">
+              <label class="form-label">
+                <i class="fas fa-bell me-2 text-primary"></i>Notifications par défaut
+              </label>
+              <div class="notification-options">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="emailNotif" [(ngModel)]="emailNotifications" name="emailNotif">
+                  <label class="form-check-label" for="emailNotif">
+                    Recevoir les notifications par email
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="pushNotif" [(ngModel)]="pushNotifications" name="pushNotif">
+                  <label class="form-check-label" for="pushNotif">
+                    Recevoir les notifications push
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="smsNotif" [(ngModel)]="smsNotifications" name="smsNotif">
+                  <label class="form-check-label" for="smsNotif">
+                    Recevoir les notifications par SMS
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline-secondary me-2" (click)="resetPreferences()">
+            <i class="fas fa-undo me-2"></i>Réinitialiser
+          </button>
+          <button type="submit" class="btn btn-primary-custom" (click)="savePreferences()">
+            <i class="fas fa-save me-2"></i>Enregistrer les préférences
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> 

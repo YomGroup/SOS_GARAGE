@@ -1,16 +1,20 @@
-<div class="app-layout" [class.dark]="isDarkMode()">
-  <app-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="toggleSidebar()" />
-  
-  <div class="layout-content" [class.sidebar-collapsed]="sidebarCollapsed()">
-    <app-header 
-      [sidebarCollapsed]="sidebarCollapsed()" 
-      (toggleSidebar)="toggleSidebar()"
+<div class="app-layout" [class.dark]="isDarkMode()" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Overlay mobile -->
+  <div class="sidebar-overlay" [class.show]="isMobile && isSidebarOpen" (click)="closeSidebar()"></div>
+  <!-- Sidebar -->
+  <app-sidebar [collapsed]="sidebarCollapsed()" [isMobile]="isMobile" [isOpen]="isSidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
+  <div class="layout-content">
+    <app-header
+      [sidebarCollapsed]="sidebarCollapsed()"
       (toggleTheme)="toggleTheme()"
-    />
-
+      [isMobile]="isMobile"
+      [sidebarOpened]="isSidebarOpen"
+      (openSidebar)="openSidebar()"
+      (closeSidebar)="closeSidebar()"
+    ></app-header>
     <main class="main-content">
       <div class="content-wrapper">
-        <router-outlet />
+        <router-outlet></router-outlet>
       </div>
     </main>
   </div>

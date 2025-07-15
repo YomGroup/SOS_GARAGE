@@ -28,14 +28,19 @@ export class RegisterComponent {
   initForm() {
     if (this.userType === 'assure') {
       this.registerForm = this.fb.group({
-        nom: ['', Validators.required],
-        prenom: ['', Validators.required],
-        email: ['', [Validators.required, Validators.email]],
-        telephone: ['', Validators.required],
-        adresse: ['', Validators.required],
-        adressePostale: ['', Validators.required],
-        numeroPermis: ['', Validators.required],
-        password: ['', [Validators.required, Validators.minLength(8)]],
+        nom: [''],
+        prenom: [''],
+        email: [''],
+        telephone: [''],
+        adresse: [''],
+        adressePostale: [''],
+        numeroPermis: [''],
+        typePermis: [''],
+        datePermis: [''],
+        dateObtentionPermis: [''],
+        typeGarantie: [''],
+        password: [''],
+        // ... autres champs véhicule
       });
     } else if (this.userType === 'garagiste') {
       this.registerForm = this.fb.group({

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,9 @@ import { MatBadgeModule } from '@angular/material/badge';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../../services/auth.service';
 import { Notification, NotificationType } from '../../models/notification.model';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-header',
@@ -26,14 +28,17 @@ import { Notification, NotificationType } from '../../models/notification.model'
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent {
-  @Input() sidebarCollapsed = false;
-  @Input() darkMode = false;
+export class HeaderComponent implements OnInit {
+  @Input() sidebarCollapsed: boolean = false;
+  @Input() isMobile: boolean = false;
+  @Input() sidebarOpened: boolean = false;
+  @Output() openSidebar = new EventEmitter<void>();
+  @Output() closeSidebar = new EventEmitter<void>();
   @Output() toggleSidebar = new EventEmitter<void>();
 
   userAvatar = 'assets/images/avatar.png';
-  userName = signal('John Doe');
-  userEmail = signal('john.doe@example.com');
+  userName = signal('Chargement...');
+  userEmail = signal('Chargement...');
   notificationCount = signal(3);
   notifications = signal<Notification[]>([
     {
@@ -56,13 +61,52 @@ export class HeaderComponent {
   private themeService: ThemeService;
   isDarkMode;
 
-  constructor(themeService: ThemeService) {
+  constructor(
+    themeService: ThemeService,
+    private authService: AuthService,
+    private notificationService: NotificationService
+  ) {
     this.themeService = themeService;
     this.isDarkMode = this.themeService.isDarkMode;
   }
 
+  ngOnInit(): void {
+    this.loadUserInfo();
+    this.loadNotifications();
+  }
+
+  private loadUserInfo(): void {
+    const token = this.authService.getToken();
+    if (token) {
+      // Utiliser le nom préféré ou le nom complet du token décodé
+      const nomUnique = token.preferred_username || token.name || `${token.given_name || ''} ${token.family_name || ''}`.trim();
+      this.userName.set(nomUnique);
+      this.userEmail.set(token.email || '');
+    } else {
+      // Fallback si le token n'est pas disponible
+      this.userName.set('Utilisateur');
+      this.userEmail.set('');
+    }
+  }
+
+  private loadNotifications(): void {
+    this.notificationService.getUserNotifications().subscribe((notifications: any[]) => {
+      const mappedNotifications = notifications.map(n => ({
+        type: n.type,
+        message: n.message,
+        time: n.timestamp ? new Date(n.timestamp) : new Date()
+      }));
+      this.notifications.set(mappedNotifications);
+      this.notificationCount.set(mappedNotifications.length);
+    });
+  }
+
   toggleTheme(): void {
     this.themeService.toggleTheme();
+  }
+
+  getCurrentDate(): string {
+    return new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
   }
 
   getNotificationIcon(type: NotificationType): string {

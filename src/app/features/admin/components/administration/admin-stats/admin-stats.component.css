@@ -1,0 +1,114 @@
+.card {
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+h2 {
+  color: var(--primary-blue, #004AAD);
+  font-size: 2em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+h4 {
+  color: var(--primary-blue, #004AAD);
+  font-size: 1.3em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  margin-top: 32px;
+}
+
+.stat-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  border-top: 5px solid #1976d2;
+  box-shadow: 0 2px 8px rgba(0,74,173,0.04);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  margin-bottom: 24px;
+  transition: box-shadow 0.2s;
+}
+.stat-card:hover {
+  box-shadow: 0 4px 16px rgba(0,74,173,0.10);
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: #fff;
+  font-size: 1.5rem;
+}
+.stat-value {
+  font-size: 2.1em;
+  font-weight: bold;
+  color: #222;
+}
+.stat-label {
+  color: #666;
+  font-size: 1.1em;
+  margin-top: 0.5rem;
+}
+
+.table {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.table thead th {
+  background: var(--primary-blue, #004AAD);
+  color: white;
+  border: none;
+  padding: 1rem;
+}
+
+.table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(0, 74, 173, 0.05);
+}
+
+.badge {
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.95em;
+}
+
+.bg-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: #fff;
+}
+.bg-danger {
+  background: linear-gradient(135deg, #e53935, #ff7043);
+  color: #fff;
+}
+.bg-info {
+  background: linear-gradient(135deg, #17a2b8, #00bcd4);
+  color: #fff;
+}
+.bg-warning {
+  background: linear-gradient(135deg, #ffc107, #fd7e14);
+  color: #fff;
+}
+
+.text-primary {
+  color: var(--primary-blue, #004AAD) !important;
+} 

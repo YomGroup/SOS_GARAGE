@@ -1,142 +1,581 @@
-/* Cartes de réparation */
-.document-card {
-    background: white;
-    border-radius: 15px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-.document-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-}
-.document-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-    font-size: 1.5rem;
-    color: white;
-}
-.document-icon.reports {
-    background: linear-gradient(135deg, #004AAD, #0066CC);
-}
-.document-info {
-    text-align: center;
-    flex-grow: 1;
-}
-.document-info h6 {
-    color: #004AAD;
-    margin-bottom: 0.5rem;
-}
-.document-actions {
-    display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
+/* Styles inspirés de dossier-management pour reparation-management */
+
+/* Variables CSS exactes comme dossier-management */
+:root {
+  --primary-blue: #1e4db8;
+  --primary-purple: #8b2eb8;
+  --gradient: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 100%);
+  --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Tableau */
+/* Styles pour les nouvelles cartes de réparations harmonisés */
+.dossier-card-modern {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: none;
+}
+
+.dossier-card-modern:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+}
+
+/* En-tête avec dégradé harmonisé */
+.dossier-header {
+  background: linear-gradient(135deg, var(--primary-blue) 0%, #5a6ac8 100%);
+  color: white;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.dossier-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.dossier-brand h5.dossier-marque {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: white;
+}
+
+.dossier-annee {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 0.25rem;
+}
+
+.dossier-transmission {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+.dossier-numero-badge {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  padding: 0.5rem 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.numero-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+}
+
+.dossier-statut-badge {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.statut-text {
+  background: linear-gradient(135deg, #6c757d, #5a6268);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Classes pour les différents statuts harmonisées */
+.statut-text.statut-valide,
+.statut-text.badge-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.statut-text.statut-attente,
+.statut-text.badge-warning {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+}
+
+.statut-text.statut-rejete,
+.statut-text.badge-danger {
+  background: linear-gradient(135deg, #dc3545, #e83e8c);
+}
+
+.statut-text.statut-cours,
+.statut-text.badge-info {
+  background: linear-gradient(135deg, var(--primary-blue), #5a6ac8);
+}
+
+/* Corps de la carte */
+.dossier-body {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.dossier-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 1rem;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Actions */
+.dossier-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 15px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 45px;
+}
+
+.btn-voir {
+  background: linear-gradient(135deg, #17a2b8, #138496);
+  color: white;
+}
+
+.btn-voir:hover {
+  background: linear-gradient(135deg, #138496, #117a8b);
+  transform: translateY(-2px);
+}
+
+.btn-modifier {
+  background: linear-gradient(135deg, var(--primary-blue), #5a6ac8);
+  color: white;
+}
+
+.btn-modifier:hover {
+  background: linear-gradient(135deg, #1a3f8f, #4a5ab8);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: white;
+}
+
+.btn-success:hover {
+  background: linear-gradient(135deg, #218838, #1e7e34);
+  transform: translateY(-2px);
+}
+
+.btn-supprimer {
+  background: linear-gradient(135deg, #dc3545, #e83e8c);
+  color: white;
+}
+
+.btn-supprimer:hover {
+  background: linear-gradient(135deg, #c82333, #d63384);
+  transform: translateY(-2px);
+}
+
+.btn-text {
+  font-weight: 600;
+}
+
+/* Tableau amélioré */
 .table {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-.table thead th {
-    background: #004AAD;
-    color: white;
-    border: none;
-    padding: 1rem;
-}
-.table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
-}
-.table tbody tr:hover {
-    background-color: rgba(0, 74, 173, 0.05);
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
-/* Badges statut */
+.table thead th {
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 1rem;
+  font-weight: 600;
+}
+
+.table tbody td {
+  padding: 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.table tbody tr:hover {
+  background-color: rgba(30, 77, 184, 0.05);
+}
+
 .badge {
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.8rem;
 }
 
 /* Boutons personnalisés */
 .btn-primary-custom {
-    background: linear-gradient(135deg, #004AAD, #0066CC);
-    border: none;
-    color: white;
-    padding: 0.5rem 1.5rem;
-    border-radius: 25px;
-    transition: all 0.3s ease;
+  background: var(--gradient);
+  border: none;
+  color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 25px;
+  transition: all 0.3s ease;
 }
+
 .btn-primary-custom:hover {
-    background: linear-gradient(135deg, #0066CC, #004AAD);
-    color: white;
+  background: linear-gradient(135deg, #1a3f8f, #7a1ea8);
+  color: white;
+  transform: translateY(-2px);
 }
+
 .btn-outline-custom {
-    border: 2px solid #004AAD;
-    color: #004AAD;
-    background: transparent;
-    border-radius: 25px;
-    padding: 0.5rem 1.5rem;
-    transition: all 0.3s ease;
+  border: 2px solid var(--primary-blue);
+  color: var(--primary-blue);
+  background: transparent;
+  border-radius: 25px;
+  padding: 0.5rem 1.5rem;
+  transition: all 0.3s ease;
 }
+
 .btn-outline-custom:hover, .btn-outline-custom.active {
-    background: #004AAD;
-    color: white;
+  background: var(--primary-blue);
+  color: white;
 }
 
 /* Filtres et champs */
 .form-select, .form-control {
-    border-radius: 25px;
-    border: 1px solid #e9ecef;
-    padding: 0.5rem 1rem;
-}
-.form-select:focus, .form-control:focus {
-    border-color: #004AAD;
-    box-shadow: 0 0 0 2px rgba(0,74,173,0.1);
-}
-.input-group-text {
-    background: #f8f9fa;
-    border: none;
-    border-radius: 25px 0 0 25px;
+  border-radius: 25px;
+  border: 1px solid #e9ecef;
+  padding: 0.5rem 1rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .container-fluid {
-        padding: 0 0.5rem;
-    }
-    .document-card {
-        padding: 1rem;
-    }
-    .table thead th, .table tbody td {
-        padding: 0.5rem;
-    }
+.form-select:focus, .form-control:focus {
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(30, 77, 184, 0.1);
+}
+
+.input-group-text {
+  background: #f8f9fa;
+  border: none;
+  border-radius: 25px 0 0 25px;
 }
 
 /* Vue toggle */
 .view-toggle {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-    margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-bottom: 1rem;
 }
+
 .view-toggle .btn {
-    min-width: 120px;
+  min-width: 120px;
 }
+
 .view-toggle .btn.active {
-    background: #004AAD;
-    color: white;
-    border-color: #004AAD;
+  background: var(--primary-blue);
+  color: white;
+  border-color: var(--primary-blue);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .dossier-header {
+    padding: 1.25rem;
+  }
+  
+  .dossier-body {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .dossier-header {
+    padding: 1rem;
+  }
+  
+  .dossier-body {
+    padding: 1rem;
+  }
+  
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.2rem;
+  }
+  
+  .dossier-annee {
+    font-size: 1rem;
+  }
+  
+  .dossier-transmission {
+    font-size: 0.85rem;
+  }
+  
+  .dossier-info-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+  
+  .dossier-actions {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  .btn-action {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dossier-header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .dossier-numero-badge {
+    align-self: flex-end;
+  }
+  
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.1rem;
+  }
+  
+  .dossier-annee {
+    font-size: 0.9rem;
+  }
+  
+  .dossier-transmission {
+    font-size: 0.8rem;
+  }
+  
+  .btn-action {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.75rem;
+    min-width: 50px;
+  }
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dossier-card-modern {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Dark mode support */
+:host-context(.dark) .dossier-card-modern {
+  background: #2d3748;
+  border-color: #4a5568;
+}
+
+:host-context(.dark) .info-label {
+  color: #a0aec0;
+}
+
+:host-context(.dark) .info-value {
+  color: #e2e8f0;
+}
+
+/* Responsive container */
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 0 0.5rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .table {
+    font-size: 0.9rem;
+  }
+  
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+.card-flex-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 1.5rem;
+}
+
+.dossier-card-modern {
+  min-width: 320px;
+  max-width: 350px;
+  min-height: 370px;
+  margin-bottom: 1rem;
+  flex: 1 1 320px;
+}
+
+@media (max-width: 768px) {
+  .card-flex-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  .dossier-card-modern {
+    min-width: 100%;
+    max-width: 100%;
+    min-height: unset;
+  }
+}
+
+/* Améliorations pour mobile - Cartes de réparation */
+@media (max-width: 768px) {
+  .dossier-header {
+    padding: 1rem;
+  }
+  .dossier-body {
+    padding: 1rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.2rem;
+  }
+  .dossier-annee {
+    font-size: 1rem;
+  }
+  .dossier-transmission {
+    font-size: 0.85rem;
+  }
+  .dossier-info-row {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .info-item {
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+    text-align: left;
+  }
+  .dossier-actions {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .btn-action {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 576px) {
+  .dossier-header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .dossier-numero-badge {
+    padding: 0.3rem 0.8rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1.1rem;
+  }
+  .dossier-annee {
+    font-size: 0.9rem;
+  }
+  .dossier-transmission {
+    font-size: 0.8rem;
+  }
+  .btn-action {
+    font-size: 0.8rem;
+    padding: 0.5rem 0.6rem;
+    min-height: 35px;
+  }
+}
+
+/* Version ultra-compacte pour très petits écrans */
+@media (max-width: 480px) {
+  .dossier-header {
+    padding: 0.8rem;
+  }
+  .dossier-body {
+    padding: 0.8rem;
+  }
+  .dossier-brand h5.dossier-marque {
+    font-size: 1rem;
+  }
+  .dossier-annee {
+    font-size: 0.85rem;
+  }
+  .dossier-transmission {
+    font-size: 0.75rem;
+  }
+  .btn-action {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.5rem;
+    min-height: 32px;
+  }
+}
+
+/* Style pour les dossiers non-traités */
+.dossier-non-traite {
+  border: 2px dashed #ffc107;
+  background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+}
+
+.dossier-non-traite .dossier-header {
+  background: linear-gradient(135deg, #ffc107, #f39c12);
+}
+
+.dossier-non-traite .dossier-header-content .dossier-brand h5 {
+  color: #856404;
+}
+
+.dossier-non-traite .statut-text {
+  background: #856404;
+  color: white;
 }

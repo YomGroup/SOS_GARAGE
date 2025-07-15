@@ -1,23 +1,67 @@
-<aside class="sidebar" [class.collapsed]="collapsed">
-  <div class="sidebar-header">
-    <div class="sidebar-logo">
+<aside class="sidebar"
+  [class.collapsed]="collapsed"
+  [class.mobile]="isMobile"
+  [class.show]="isMobile && isOpen"
+  [class.hide]="isMobile && !isOpen">
+  <div class="sidebar-header" style="position: relative;">
+    <div class="sidebar-logo" (click)="onLogoClick()" style="cursor: pointer;">
       <img src="assets/logo_sos.png" alt="Logo" />
     </div>
+    <button *ngIf="!isMobile" class="sidebar-toggle-btn" [class.collapsed]="collapsed" (click)="closeSidebar.emit()" aria-label="Replier la barre latérale">
+      <span class="chevron">&#x2039;</span>
+    </button>
+    <button *ngIf="isMobile" class="sidebar-close" (click)="closeSidebar.emit()" aria-label="Fermer la barre latérale">
+      <i class="bi bi-x"></i>
+    </button>
   </div>
   
   <nav class="nav-menu">
-    <a *ngFor="let item of menuItems"
-       [routerLink]="item.route"
-       routerLinkActive="active"
-       [routerLinkActiveOptions]="{exact: true}"
-       class="nav-item"
-       [attr.data-tooltip]="item.title">
-      <i [ngClass]="item.icon"></i>
-      <span>{{ item.title }}</span>
-    </a>
-    <a (click)="logout()" class="nav-item" data-tooltip="Déconnexion">
-      <i class="bi bi-box-arrow-right"></i>
-      <span>Déconnexion</span>
-    </a>
+    <ng-container *ngFor="let item of menuItems">
+      <div *ngIf="item.children; else simpleLinkRef" class="nav-item nav-item-parent" [class.expanded]="item.expanded">
+        <div class="nav-link-parent">
+          <a *ngIf="item.route"
+             [routerLink]="item.route"
+             routerLinkActive="active"
+             [routerLinkActiveOptions]="{exact: false}"
+             [class.active]="isParentActive(item)"
+             class="nav-link-title"
+             (click)="toggleSubmenu(item)">
+            <i [ngClass]="item.icon"></i>
+            <span>{{ item.title }}</span>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
+          </a>
+          <div *ngIf="!item.route"
+               class="nav-link-title"
+               [class.active]="isParentActive(item)"
+               (click)="toggleSubmenu(item)">
+            <i [ngClass]="item.icon"></i>
+            <span>{{ item.title }}</span>
+            <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'" (click)="toggleSubmenuOnly($event, item)"></i>
+          </div>
+        </div>
+      
+        <div class="nav-submenu" *ngIf="item.expanded">
+          <a *ngFor="let child of item.children"
+             (click)="item.title === 'Gestion des réparations' ? onMissionFilterClick($event, child.filter || '') : onDossierFilterClick($event, child.filter || '')"
+             class="nav-item-child"
+             [attr.data-tooltip]="child.title">
+            <i [ngClass]="child.icon"></i>
+            <span>{{ child.title }}</span>
+          </a>
+        </div>
+      </div>
+      
+      <ng-template #simpleLinkRef>
+        <a [routerLink]="item.route"
+           (click)="onItemClick($event, item)"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact: true}"
+           class="nav-item"
+           [attr.data-tooltip]="item.title">
+          <i [ngClass]="item.icon"></i>
+          <span>{{ item.title }}</span>
+        </a>
+      </ng-template>
+    </ng-container>
   </nav>
 </aside>

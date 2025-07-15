@@ -4,139 +4,146 @@
 
   <div class="container-fluid px-4">
     <!-- Statistics -->
-    <div class="row mb-4">
-      <div class="col-md-3 mb-3">
-        <div class="stats-card">
-          <div class="d-flex justify-content-between align-items-center">
-        <div>
-              <h3 class="stats-title opacity-90">Garages actifs</h3>
-              <div class="stats-number">156</div>
+    <div class="min-h-screen">
+      <div class="container-fluid px-4">
+        <!-- Statistics -->
+        <div class="row mb-4 stats-row">
+          <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Véhicules enregistrés</h3>
+                  <div class="stats-number">{{ stats.totalVehicules }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-car"></i>
+                </div>
+              </div>
             </div>
-            <div class="stats-icon">
-              <i class="fas fa-building"></i>
+          </div>
+          <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Sinistres</h3>
+                  <div class="stats-number">{{ stats.totalSinistres }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Missions</h3>
+                  <div class="stats-number">{{ stats.totalMissions }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-tasks"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-6 col-lg-3 mb-4">
+            <div class="stats-card">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h3 class="stats-title opacity-90">Réparateurs</h3>
+                  <div class="stats-number">{{ stats.totalReparateurs }}</div>
+                </div>
+                <div class="stats-icon">
+                  <i class="fas fa-user-cog"></i>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card">
-          <div class="d-flex justify-content-between align-items-center">
-        <div>
-              <h3 class="stats-title opacity-90">Dossiers en cours</h3>
-              <div class="stats-number">89</div>
-            </div>
-            <div class="stats-icon">
-              <i class="fas fa-folder"></i>
-            </div>
-          </div>
-        </div>
-        </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card">
-          <div class="d-flex justify-content-between align-items-center">
-        <div>
-              <h3 class="stats-title opacity-90">Épaves à traiter</h3>
-              <div class="stats-number">45</div>
-        </div>
-            <div class="stats-icon">
-              <i class="fas fa-car-crash"></i>
-        </div>
-        </div>
-        </div>
-      </div>
-      <div class="col-md-3 mb-3">
-        <div class="stats-card">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h3 class="stats-title opacity-90">Documents validés</h3>
-              <div class="stats-number">234</div>
-            </div>
-            <div class="stats-icon">
-              <i class="fas fa-file-alt"></i>
-            </div>
-      </div>
-        </div>
-      </div>
-      </div>
 
-    <!-- Recent Activity & Tasks -->
-    <div class="row mb-4">
-      <div class="col-lg-8">
-        <div class="card">
+
+    <!-- Activité récente dynamique -->
+    <div class="row mb-4 equal-height-row">
+      <div class="col-xl-8 col-lg-12 mb-4">
+        <div class="card equal-height">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0 opacity-90">Activité récente</h5>
-            <div class="header-actions">
-              <button class="btn btn-outline-primary btn-sm">
-                <i class="fas fa-filter me-2"></i>Filtrer
-              </button>
-            </div>
           </div>
           <div class="card-body p-0">
-            <div class="recent-claims">
-              <div class="claim-item">
-                <div>
-                  <strong class="opacity-90">Garage Auto Service Paris</strong>
-                  <br>
-                  <small class="text-muted opacity-75">Nouvelle demande d'inscription</small>
-                </div>
-                <span class="status-badge status-pending">En attente</span>
-              </div>
-              <div class="claim-item">
-                <div>
-                  <strong class="opacity-90">Dossier #DOS-2024-089</strong>
-                  <br>
-                  <small class="text-muted opacity-75">En attente de validation</small>
-                </div>
-                <span class="status-badge status-progress">En cours</span>
-              </div>
-              <div class="claim-item">
-                <div>
-                  <strong class="opacity-90">Épave BMW X3</strong>
-                  <br>
-                  <small class="text-muted opacity-75">À traiter</small>
-                </div>
-                <span class="status-badge status-pending">En attente</span>
-              </div>
-            </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item" *ngFor="let item of recentActivity">
+                <i [ngClass]="item.icon"></i>
+                <span class="ms-2">{{ item.label }}</span>
+                <small class="text-muted float-end">{{ item.date | date:'short' }}</small>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="card">
+      <div class="col-xl-4 col-lg-12 mb-4">
+        <div class="card equal-height">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0 opacity-90">Tâches prioritaires</h5>
-            <button class="btn btn-outline-primary btn-sm">
-              <i class="fas fa-plus me-2"></i>Nouvelle tâche
-            </button>
           </div>
           <div class="card-body p-0">
-            <div class="notification-item">
-              <i class="fas fa-building text-warning me-2"></i>
-              <small class="opacity-90">3 nouveaux garages à valider</small>
-              <br>
-              <small class="text-muted opacity-75">Il y a 2 heures</small>
-            </div>
-            <div class="notification-item">
-              <i class="fas fa-folder text-info me-2"></i>
-              <small class="opacity-90">5 dossiers en attente de validation</small>
-              <br>
-              <small class="text-muted opacity-75">Il y a 5 heures</small>
-</div>
-            <div class="notification-item">
-              <i class="fas fa-car-crash text-danger me-2"></i>
-              <small class="opacity-90">2 épaves à traiter en urgence</small>
-              <br>
-              <small class="text-muted opacity-75">Hier</small>
-      </div>
-      </div>
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item">
+                <i class="fas fa-tasks text-info me-2"></i>
+                {{ pendingMissionsCount }} missions en attente
+              </li>
+              <li class="list-group-item">
+                <i class="fas fa-user-cog text-warning me-2"></i>
+                {{ pendingReparateursCount }} réparateurs à valider
+              </li>
+              <li class="list-group-item">
+                <i class="fas fa-file-alt text-danger me-2"></i>
+                {{ pendingSinistresCount }} sinistres à traiter
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
+    </div>
+
+    <!-- Sinistres déclarés dynamiques -->
+    <div class="row">
+      <div class="col-xl-4 col-lg-12 ms-auto mb-4">
+        <div class="card equal-height">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
+          </div>
+          <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+              <li class="list-group-item" *ngFor="let sinistre of recentSinistres">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
+                    <span class="ms-2">{{ sinistre.type || 'Sinistre' }}</span>
+                  </div>
+                  <span class="status-badge" [ngClass]="{
+                    'status-pending': !sinistre.isvalid,
+                    'status-progress': sinistre.isvalid && sinistre.conditionsAcceptees,
+                    'status-closed': sinistre.isvalid && !sinistre.conditionsAcceptees
+                  }">
+                  </span>
+                </div>
+                <div class="sinistre-details">
+                  <i class="fas fa-car me-2 text-primary"></i>
+                  <span class="opacity-90">{{ sinistre.contactAssistance }}</span>
+                  <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'shortDate') : '' }}</small>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
+    </div>
 
     <!-- Analytics & Sinistres -->
-    <div class="row">
-      <div class="col-lg-8">
-        <div class="card">
+    <!-- <div class="row">
+      <div class="col-xl-8 col-lg-12 mb-4">
+        <div class="card equal-height">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h5 class="mb-0 opacity-90">Analyses et statistiques</h5>
             <div class="graph-controls">
@@ -164,51 +171,6 @@
           </div>
         </div>
       </div>
-      <div class="col-lg-4">
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
-            <button class="btn btn-outline-primary btn-sm">
-              <i class="fas fa-plus me-2"></i>Nouveau sinistre
-            </button>
-          </div>
-          <div class="card-body p-0">
-            <div class="sinistre-item">
-              <div class="sinistre-header">
-                <span class="sinistre-id opacity-90">SIN-001</span>
-                <span class="status-badge status-closed">Clôturé</span>
-              </div>
-              <div class="sinistre-details">
-                <i class="fas fa-car me-2 text-primary"></i>
-                <span class="opacity-90">Mercedes AMG</span>
-                <small class="text-muted opacity-75 d-block">15 Mai 2025</small>
-              </div>
-            </div>
-            <div class="sinistre-item">
-              <div class="sinistre-header">
-                <span class="sinistre-id opacity-90">SIN-002</span>
-                <span class="status-badge status-progress">En cours</span>
-              </div>
-              <div class="sinistre-details">
-                <i class="fas fa-car me-2 text-primary"></i>
-                <span class="opacity-90">BMW X5</span>
-                <small class="text-muted opacity-75 d-block">16 Mai 2025</small>
-              </div>
-            </div>
-            <div class="sinistre-item">
-              <div class="sinistre-header">
-                <span class="sinistre-id opacity-90">SIN-003</span>
-                <span class="status-badge status-pending">En attente</span>
-              </div>
-              <div class="sinistre-details">
-                <i class="fas fa-car me-2 text-primary"></i>
-                <span class="opacity-90">Audi RS6</span>
-                <small class="text-muted opacity-75 d-block">17 Mai 2025</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </div> -->
   </div>
 </div>

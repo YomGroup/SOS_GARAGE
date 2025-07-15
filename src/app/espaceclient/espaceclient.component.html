@@ -161,6 +161,10 @@
         <main class="flex-grow-1 p-4 overflow-auto"
               [style.marginLeft.px]="sidebarCollapsed ? 70 : 250"
               style="transition: margin-left 0.3s ease;">
+           <div *ngIf="!hasAssurance" class="alert alert-warning text-center rounded-0 mb-0">
+  ⚠️ Un ou plusieurs de vos véhicules n’ont pas encore de contrat d’assurance. 
+  <a routerLink="/clientDashboard/vehicules" class="fw-bold text-decoration-underline">Complétez vos informations</a>
+</div>
             <router-outlet></router-outlet>
         </main>
     </div>
