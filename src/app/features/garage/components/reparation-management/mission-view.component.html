@@ -54,6 +54,28 @@
         </ng-template>
       </div>
 
+      <!-- Bloc démarrage travaux amélioré -->
+      <div class="demarrer-travaux-wrapper" *ngIf="debutTravauxPossible() || saisieDelaiTravaux">
+        <div class="demarrer-travaux-section" *ngIf="debutTravauxPossible() && !saisieDelaiTravaux">
+          <button class="btn btn-success btn-lg btn-pulse" (click)="lancerDebutTravaux()">
+            <i class="fas fa-play me-2"></i>Démarrer les travaux
+          </button>
+        </div>
+        <div class="demarrer-travaux-form card" *ngIf="saisieDelaiTravaux">
+          <form (ngSubmit)="validerDebutTravaux()" class="d-flex align-items-center gap-3 p-3">
+            <label for="delaiEstime" class="mb-0">Délai estimé (jours) :</label>
+            <input id="delaiEstime" type="number" min="1" [(ngModel)]="delaiEstimeInput" name="delaiEstime" class="form-control form-control-lg" style="width:120px;" autofocus>
+            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-check me-1"></i>Valider</button>
+            <button type="button" class="btn btn-secondary btn-lg" (click)="annulerDebutTravaux()"><i class="fas fa-times me-1"></i>Annuler</button>
+          </form>
+        </div>
+      </div>
+      <!-- Affichage du délai estimé et de la date de début si présents -->
+      <div class="travaux-infos mt-3" *ngIf="mission?.dateDebutTravaux">
+        <span><i class="fas fa-calendar me-1"></i>Début des travaux : {{ mission?.dateDebutTravaux | date:'dd/MM/yyyy HH:mm' }}</span>
+        <span *ngIf="mission?.delaiEstime"> | <i class="fas fa-hourglass-half me-1"></i>Délai estimé : {{ mission?.delaiEstime }} jour(s)</span>
+      </div>
+
       <!-- Informations principales (toujours visible, tout en haut) -->
       <div class="form-section main-info-section">
         <h3><i class="fas fa-info-circle me-2"></i>Informations principales</h3>
@@ -511,6 +533,9 @@
                     {{ getFileNameFromUrl(doc) }}
                     <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
                     <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
+                    <button *ngIf="getFileNameFromUrl(doc).toLowerCase().includes('facture')" type="button" class="btn btn-outline-warning btn-sm ms-2" (click)="envoyerFactureParMail(doc)">
+                      <i class="fas fa-envelope me-1"></i>Envoyer la facture par mail
+                    </button>
                   </div>
                 </ng-container>
                 <ng-template #noDocEdit>
@@ -531,6 +556,9 @@
                     <i class="fas fa-file-pdf me-2"></i>
                     {{ getFileNameFromUrl(doc) }}
                     <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
+                    <button *ngIf="getFileNameFromUrl(doc).toLowerCase().includes('facture')" type="button" class="btn btn-outline-warning btn-sm ms-2" (click)="envoyerFactureParMail(doc)">
+                      <i class="fas fa-envelope me-1"></i>Envoyer la facture par mail
+                    </button>
                   </div>
                 </ng-container>
                 <ng-template #noDocRead>
@@ -540,6 +568,25 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- Section rapports du garage -->
+      <div class="garage-reports-section mt-4">
+        <h4><i class="fas fa-file-alt me-2"></i>Rapports du garage</h4>
+        <button type="button" class="btn btn-outline-info mb-2" (click)="uploadRapportsGarage()" [disabled]="uploadingFiles">
+          <i class="fas fa-upload me-2"></i>{{ uploadingFiles ? 'Upload en cours...' : 'Téléverser des rapports' }}
+        </button>
+        <div *ngIf="rapportsGarage.length > 0; else noRapportGarage">
+          <div *ngFor="let rapport of rapportsGarage; let i = index" class="rapport-item d-flex align-items-center gap-2 mb-2">
+            <i class="fas fa-file-pdf text-danger"></i>
+            <span>{{ getFileNameFromUrl(rapport) }}</span>
+            <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(rapport)">Télécharger</button>
+            <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerRapportGarage(i)">Supprimer</button>
+          </div>
+        </div>
+        <ng-template #noRapportGarage>
+          <span class="text-muted">Aucun rapport téléversé.</span>
+        </ng-template>
       </div>
     </div>
   </div>

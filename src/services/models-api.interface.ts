@@ -84,6 +84,9 @@ export interface Mission {
   expert?: Expert;
   expertise?: Expertise;
   expertises?: any[];
+  // Ajout pour gestion des travaux garage
+  dateDebutTravaux?: string; // ISO
+  delaiEstime?: number; // en jours
 }
 
 // Interface Reparateur
@@ -220,4 +223,7 @@ export interface MissionUpdate {
   expert?: Expert;
   expertise?: Expertise;
   statutAvancement?: StatutAvancementSinistre;
+  // Ajout pour gestion des travaux garage
+  dateDebutTravaux?: string;
+  delaiEstime?: number;
 }

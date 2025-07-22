@@ -93,6 +93,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   private isInitialized: boolean = false;
   private hasLoadedData: boolean = false;
   private cdr: ChangeDetectorRef;
+  private checkDataIntervalId: any = null;
 
   constructor(
     private missionService: MissionService,
@@ -162,24 +163,25 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }, 200);
 
-    // Vérifier périodiquement si les données sont chargées
-    const checkDataInterval = setInterval(() => {
-      if (this.isInitialized && this.reparateurMissions.length === 0 && !this.loading) {
-        console.log('Vérification périodique: rechargement des données...');
-        this.loadStatistics();
-      } else if (this.reparateurMissions.length > 0) {
-        // Si on a des données, arrêter la vérification
-        clearInterval(checkDataInterval);
-      }
-    }, 1000);
-
-    // Nettoyer l'intervalle quand le composant est détruit
-    this.destroy$.subscribe(() => {
-      clearInterval(checkDataInterval);
-    });
+    if (!this.checkDataIntervalId) {
+      this.checkDataIntervalId = setInterval(() => {
+        if (!this.hasLoadedData && !this.loading) {
+          console.log('Vérification périodique: rechargement des données...');
+          this.loadStatistics();
+        } else if (this.hasLoadedData && !this.loading) {
+          // Arrêter la vérification, même si la liste est vide
+          clearInterval(this.checkDataIntervalId);
+          this.checkDataIntervalId = null;
+        }
+      }, 1000);
+    }
   }
 
   ngOnDestroy(): void {
+    if (this.checkDataIntervalId) {
+      clearInterval(this.checkDataIntervalId);
+      this.checkDataIntervalId = null;
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }

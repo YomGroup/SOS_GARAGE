@@ -45,9 +45,14 @@ export class MissionViewComponent implements OnChanges {
   showVehiclePhotos: boolean = false;
   vehiculesMap: Map<number, Vehicule> = new Map();
   statutAvancementEdit: string | null = null;
+  rapportsGarage: string[] = [];
 
   // Exposer l'enum pour le template
   StatutAvancementSinistre = StatutAvancementSinistre;
+
+  // Variables d'état pour la saisie du délai
+  saisieDelaiTravaux: boolean = false;
+  delaiEstimeInput: number = 1;
 
   constructor(
     private missionService: MissionService, 
@@ -795,5 +800,113 @@ export class MissionViewComponent implements OnChanges {
         alert('Erreur lors de la confirmation du passage de l\'expert : ' + err.message);
       }
     });
+  }
+
+  debutTravauxPossible(): boolean {
+    if (!this.mission) return false;
+    return this.mission.statut !== 'terminée' &&
+      this.mission.statut !== 'TERMINEE' &&
+      (!this.mission.dateDebutTravaux || this.mission.statut !== 'EN_COURS_REPARATION');
+  }
+
+  lancerDebutTravaux() {
+    if (!this.mission) return;
+    this.saisieDelaiTravaux = true;
+    this.delaiEstimeInput = this.mission.delaiEstime || 1;
+  }
+
+  annulerDebutTravaux() {
+    this.saisieDelaiTravaux = false;
+    this.delaiEstimeInput = 1;
+  }
+
+  validerDebutTravaux() {
+    if (!this.mission) return;
+    const missionUpdate: MissionUpdate = {
+      statut: 'EN_COURS_REPARATION',
+      dateDebutTravaux: new Date().toISOString(),
+      delaiEstime: this.delaiEstimeInput
+    };
+    this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
+      next: (updatedMission) => {
+        this.saisieDelaiTravaux = false;
+        this.delaiEstimeInput = 1;
+        this.missionUpdated.emit(updatedMission);
+      },
+      error: (error) => {
+        alert('Erreur lors du démarrage des travaux : ' + error.message);
+      }
+    });
+  }
+
+  envoyerFactureParMail(docUrl: string) {
+    // TODO: remplacer par un appel API réel
+    alert('La facture a été envoyée par mail avec succès ! (simulation)');
+  }
+
+  uploadRapportsGarage() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'application/pdf,image/*';
+    input.multiple = true;
+    input.onchange = (event: any) => {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        this.uploaderRapportsGarageFirebase(Array.from(files));
+      }
+    };
+    input.click();
+  }
+
+  uploaderRapportsGarageFirebase(files: File[]) {
+    if (!this.mission || !this.mission.id) {
+      alert('Mission non trouvée');
+      return;
+    }
+    this.uploadingFiles = true;
+    const uploadPromises: Promise<string>[] = [];
+    files.forEach(file => {
+      // On stocke dans Firebase comme des PDF/images génériques
+      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
+      uploadPromises.push(uploadPromise);
+    });
+    if (uploadPromises.length === 0) {
+      this.uploadingFiles = false;
+      return;
+    }
+    Promise.all(uploadPromises)
+      .then((downloadURLs: string[]) => {
+        this.rapportsGarage = [
+          ...this.rapportsGarage,
+          ...downloadURLs
+        ];
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        alert('Rapport(s) uploadé(s) avec succès !');
+      })
+      .catch((error) => {
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        alert(`Erreur lors de l\'upload des rapports: ${error.message}`);
+      });
+  }
+
+  supprimerRapportGarage(index: number) {
+    const url = this.rapportsGarage[index];
+    if (url && url.includes('firebasestorage.googleapis.com')) {
+      this.firebaseService.deletePdfFile(url).subscribe({
+        next: () => {
+          this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
+      this.cdr.detectChanges();
+    }
   }
 } 

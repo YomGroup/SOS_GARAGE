@@ -654,3 +654,94 @@
   color: #6c757d;
   border: 1px solid #dee2e6;
 } 
+
+.demarrer-travaux-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 24px 0 16px 0;
+}
+.demarrer-travaux-section {
+  background: linear-gradient(90deg, #e3ffe6 0%, #b2f7c1 100%);
+  border: 2px solid #43a047;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(67, 160, 71, 0.10);
+  padding: 24px 32px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+}
+.btn-pulse {
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(67,160,71,0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(67,160,71,0); }
+  100% { box-shadow: 0 0 0 0 rgba(67,160,71,0); }
+}
+.demarrer-travaux-form.card {
+  background: #f8fff8;
+  border: 1.5px solid #43a047;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(67, 160, 71, 0.08);
+  margin-top: 8px;
+  transition: box-shadow 0.3s, background 0.3s;
+  width: 100%;
+  max-width: 520px;
+}
+.demarrer-travaux-form input.form-control-lg {
+  font-size: 1.2rem;
+  padding: 8px 14px;
+}
+.demarrer-travaux-form button {
+  min-width: 110px;
+}
+.travaux-infos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 18px;
+  font-size: 1.1rem;
+  color: #388e3c;
+  font-weight: 500;
+  margin-bottom: 10px;
+} 
+
+.garage-reports-section {
+  background: #f7fafd;
+  border: 1.5px solid #90caf9;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(33, 150, 243, 0.08);
+  padding: 18px 24px 12px 24px;
+  margin-bottom: 24px;
+  margin-top: 24px;
+  max-width: 600px;
+}
+.garage-reports-section h4 {
+  color: #1976d2;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.rapport-item {
+  background: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 1px 4px rgba(33, 150, 243, 0.04);
+  transition: box-shadow 0.2s;
+}
+.rapport-item:hover {
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.10);
+}
+.rapport-item i {
+  font-size: 1.2rem;
+}
+.rapport-item span {
+  flex: 1;
+  font-size: 1rem;
+  color: #1976d2;
+  font-weight: 500;
+} 
