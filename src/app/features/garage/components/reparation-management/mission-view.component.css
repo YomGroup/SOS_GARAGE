@@ -745,3 +745,40 @@
   color: #1976d2;
   font-weight: 500;
 } 
+
+.uploaded-documents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.uploaded-document-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f9fa;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.doc-info {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.doc-name {
+  margin-left: 6px;
+  font-size: 1rem;
+  word-break: break-all;
+}
+
+.doc-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+} 

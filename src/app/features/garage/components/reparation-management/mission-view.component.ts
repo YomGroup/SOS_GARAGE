@@ -9,6 +9,10 @@ import { ExpertService } from '../../../../../services/expert.service';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 import { firstValueFrom } from 'rxjs';
 
+function getAssuranceContactsFromStorage(): Record<string, { telephone: string, email: string, adresse: string }> {
+  return JSON.parse(localStorage.getItem('assuranceContacts') || '{}');
+}
+
 @Component({
   selector: 'app-mission-view',
   templateUrl: './mission-view.component.html',
@@ -46,6 +50,7 @@ export class MissionViewComponent implements OnChanges {
   vehiculesMap: Map<number, Vehicule> = new Map();
   statutAvancementEdit: string | null = null;
   rapportsGarage: string[] = [];
+  uploadErrorMessage: string = '';
 
   // Exposer l'enum pour le template
   StatutAvancementSinistre = StatutAvancementSinistre;
@@ -53,6 +58,35 @@ export class MissionViewComponent implements OnChanges {
   // Variables d'état pour la saisie du délai
   saisieDelaiTravaux: boolean = false;
   delaiEstimeInput: number = 1;
+
+  // --- AJOUT : Liste simulée d'assurances ---
+  assurances = [
+    {
+      id: 1,
+      nom: 'AXA',
+      telephone: '01 23 45 67 89',
+      email: 'contact@axa.fr',
+      adresse: '10 rue de Paris, 75000 Paris'
+    },
+    {
+      id: 2,
+      nom: 'MAIF',
+      telephone: '01 98 76 54 32',
+      email: 'service@maif.fr',
+      adresse: '20 avenue de Lyon, 69000 Lyon'
+    },
+    {
+      id: 3,
+      nom: 'Allianz',
+      telephone: '01 11 22 33 44',
+      email: 'info@allianz.fr',
+      adresse: '5 boulevard de Nice, 06000 Nice'
+    }
+  ];
+  assuranceSelectionnee: any = null;
+
+  // --- Service local pour lire les infos d'assurance depuis le localStorage (comme côté admin) ---
+  assuranceContactInfo: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
 
   constructor(
     private missionService: MissionService, 
@@ -71,6 +105,7 @@ export class MissionViewComponent implements OnChanges {
     if (changes['mission'] || changes['dossier']) {
       this.chargerInformationsAssureEtVehicule();
       this.chargerVehiculeParMission();
+      this.loadAssuranceContactInfo();
     }
   }
 
@@ -79,6 +114,7 @@ export class MissionViewComponent implements OnChanges {
     console.log('Expertises côté garage :', this.mission?.expertises);
     this.chargerInformationsAssureEtVehicule();
     this.chargerVehiculeParMission();
+    this.loadAssuranceContactInfo();
   }
 
   // Ajout : méthode pour charger infos client et véhicule
@@ -162,6 +198,21 @@ export class MissionViewComponent implements OnChanges {
     this.missionEdit = {};
   }
 
+  // Calcul de la commission basé sur factureFinale
+  calculerCommission(factureFinale: number, franchiseApplicable: number, commissionPourcentage: number): number {
+    if (
+      factureFinale != null &&
+      franchiseApplicable != null &&
+      commissionPourcentage != null &&
+      !isNaN(factureFinale) &&
+      !isNaN(franchiseApplicable) &&
+      !isNaN(commissionPourcentage)
+    ) {
+      return (factureFinale - franchiseApplicable) * (commissionPourcentage / 100);
+    }
+    return 0;
+  }
+
   enregistrerModification() {
     if (!this.mission) return;
     
@@ -195,6 +246,32 @@ export class MissionViewComponent implements OnChanges {
       missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance;
     }
 
+    // Champs financiers ajoutés
+    if (this.missionEdit.montantStatue !== undefined && this.missionEdit.montantStatue !== null) {
+      const montantStatue = Number(this.missionEdit.montantStatue);
+      if (!isNaN(montantStatue) && montantStatue >= 0) {
+        missionUpdate.montantStatue = montantStatue;
+      }
+    }
+    if (this.missionEdit.franchiseApplicable !== undefined && this.missionEdit.franchiseApplicable !== null) {
+      const franchiseApplicable = Number(this.missionEdit.franchiseApplicable);
+      if (!isNaN(franchiseApplicable) && franchiseApplicable >= 0) {
+        missionUpdate.franchiseApplicable = franchiseApplicable;
+      }
+    }
+    if (this.missionEdit.commissionPourcentage !== undefined && this.missionEdit.commissionPourcentage !== null) {
+      const commissionPourcentage = Number(this.missionEdit.commissionPourcentage);
+      if (!isNaN(commissionPourcentage) && commissionPourcentage >= 0) {
+        missionUpdate.commissionPourcentage = commissionPourcentage;
+      }
+    }
+    // Calcul et sauvegarde du montant de la commission
+    missionUpdate.commissionMontant = this.calculerCommission(
+      this.missionEdit.factureFinale,
+      this.missionEdit.franchiseApplicable,
+      this.missionEdit.commissionPourcentage
+    );
+
     console.log('Données à envoyer:', missionUpdate);
 
     this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
@@ -213,6 +290,12 @@ export class MissionViewComponent implements OnChanges {
 
   // Nouvelles méthodes pour les uploads spécifiques
   uploadDevis() {
+    if (!this.missionEdit.devis || isNaN(Number(this.missionEdit.devis)) || Number(this.missionEdit.devis) <= 0) {
+      this.uploadErrorMessage = 'Veuillez saisir le montant du devis avant de téléverser le document.';
+      setTimeout(() => { this.uploadErrorMessage = ''; }, 4000);
+      return;
+    }
+    this.uploadErrorMessage = '';
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/pdf,image/*';
@@ -227,6 +310,12 @@ export class MissionViewComponent implements OnChanges {
   }
 
   uploadFacture() {
+    if (!this.missionEdit.factureFinale || isNaN(Number(this.missionEdit.factureFinale)) || Number(this.missionEdit.factureFinale) <= 0) {
+      this.uploadErrorMessage = 'Veuillez saisir le montant de la facture avant de téléverser le document.';
+      setTimeout(() => { this.uploadErrorMessage = ''; }, 4000);
+      return;
+    }
+    this.uploadErrorMessage = '';
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'application/pdf,image/*';
@@ -281,8 +370,6 @@ export class MissionViewComponent implements OnChanges {
 
     files.forEach(file => {
       let uploadPromise: Promise<string>;
-      
-      // Utiliser le bon service selon le type
       if (type === 'devis') {
         uploadPromise = firstValueFrom(this.firebaseService.uploadDevisFile(file, this.mission!.id!));
       } else if (type === 'facture') {
@@ -290,11 +377,9 @@ export class MissionViewComponent implements OnChanges {
       } else {
         uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
       }
-      
       uploadPromises.push(uploadPromise);
     });
 
-    // Vérifier qu'il y a des promesses à traiter
     if (uploadPromises.length === 0) {
       this.uploadingFiles = false;
       return;
@@ -303,21 +388,17 @@ export class MissionViewComponent implements OnChanges {
     Promise.all(uploadPromises)
       .then((downloadURLs: string[]) => {
         console.log('Documents uploadés:', downloadURLs);
-        
-        // Ajouter les URLs aux documents existants
         if (!this.missionEdit.documentsAssurance) {
           this.missionEdit.documentsAssurance = [];
         }
-        
+        // Ajout du type pour chaque document
+        const docsWithType = downloadURLs.map(url => ({ url, type: type || 'autre' }));
         this.missionEdit.documentsAssurance = [
           ...this.missionEdit.documentsAssurance,
-          ...downloadURLs
+          ...docsWithType
         ];
-
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        
-        // Afficher un message de succès
         const typeLabel = type ? ` (${type})` : '';
         alert(`Document${typeLabel} uploadé avec succès !`);
       })
@@ -908,5 +989,75 @@ export class MissionViewComponent implements OnChanges {
       this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
       this.cdr.detectChanges();
     }
+  }
+
+  // --- Méthode pour sélectionner une assurance ---
+  selectAssurance(event: Event) {
+    const value = (event.target as HTMLSelectElement).value;
+    this.assuranceSelectionnee = this.assurances.find(a => a.nom === value) || null;
+  }
+
+  // --- Méthodes pour contacter assurance/expert ---
+  contacterAssuranceParMail() {
+    if (this.assuranceSelectionnee) {
+      window.open(`mailto:${this.assuranceSelectionnee.email}`);
+    } else {
+      alert('Veuillez sélectionner une assurance.');
+    }
+  }
+  contacterAssuranceParTel() {
+    if (this.assuranceSelectionnee) {
+      window.open(`tel:${this.assuranceSelectionnee.telephone}`);
+    } else {
+      alert('Veuillez sélectionner une assurance.');
+    }
+  }
+  contacterExpertParMail() {
+    if (this.expertiseCourante?.mailExpert) {
+      window.open(`mailto:${this.expertiseCourante.mailExpert}`);
+    } else {
+      alert('Aucun email expert disponible.');
+    }
+  }
+  contacterExpertParTel() {
+    if (this.expertiseCourante?.contactExpert) {
+      window.open(`tel:${this.expertiseCourante.contactExpert}`);
+    } else {
+      alert('Aucun téléphone expert disponible.');
+    }
+  }
+
+  // --- Méthode générique pour envoyer un document par mail ---
+  envoyerDocumentParMail(docUrl: string, destinataire: 'assurance' | 'expert') {
+    let email = '';
+    if (destinataire === 'assurance' && this.assuranceSelectionnee) {
+      email = this.assuranceSelectionnee.email;
+    } else if (destinataire === 'expert' && this.expertiseCourante?.mailExpert) {
+      email = this.expertiseCourante.mailExpert;
+    }
+    if (email) {
+      // Simule l'envoi d'un mail avec le document en pièce jointe (en vrai, il faut un backend)
+      alert(`Le document a été envoyé par mail à ${email} (simulation)`);
+    } else {
+      alert('Aucun email disponible pour le destinataire sélectionné.');
+    }
+  }
+
+  loadAssuranceContactInfo() {
+    const nomAssurance = this.getVehiculeForMission(this.mission!)?.nomAssurence;
+    if (nomAssurance) {
+      const allContacts = getAssuranceContactsFromStorage();
+      this.assuranceContactInfo = allContacts[nomAssurance] || { telephone: '', email: '', adresse: '' };
+    } else {
+      this.assuranceContactInfo = { telephone: '', email: '', adresse: '' };
+    }
+  }
+
+  // --- Méthodes pour ouvrir mailto: ou tel: depuis le template ---
+  openMail(email: string) {
+    window.open('mailto:' + email);
+  }
+  openTel(tel: string) {
+    window.open('tel:' + tel);
   }
 } 

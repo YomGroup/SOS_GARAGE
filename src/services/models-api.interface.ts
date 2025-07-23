@@ -84,6 +84,10 @@ export interface Mission {
   expert?: Expert;
   expertise?: Expertise;
   expertises?: any[];
+  montantStatue?: number;
+  franchiseApplicable?: number;
+  commissionPourcentage?: number;
+  montantCommission?: number;
   // Ajout pour gestion des travaux garage
   dateDebutTravaux?: string; // ISO
   delaiEstime?: number; // en jours
@@ -226,4 +230,8 @@ export interface MissionUpdate {
   // Ajout pour gestion des travaux garage
   dateDebutTravaux?: string;
   delaiEstime?: number;
+  montantStatue?: number;
+  franchiseApplicable?: number;
+  commissionPourcentage?: number;
+  commissionMontant?: number;
 }

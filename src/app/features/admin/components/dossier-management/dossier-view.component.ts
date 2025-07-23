@@ -11,6 +11,14 @@ import { FirebaseStorageService } from '../../../../../services/firebase-storage
 import { firstValueFrom } from 'rxjs';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 
+// --- Service local pour gérer les infos d'assurance dans le localStorage ---
+function getAssuranceContactsFromStorage(): Record<string, { telephone: string, email: string, adresse: string }> {
+  return JSON.parse(localStorage.getItem('assuranceContacts') || '{}');
+}
+function saveAssuranceContactsToStorage(data: Record<string, { telephone: string, email: string, adresse: string }>) {
+  localStorage.setItem('assuranceContacts', JSON.stringify(data));
+}
+
 @Component({
   selector: 'app-dossier-view',
   templateUrl: './dossier-view.component.html',
@@ -79,7 +87,12 @@ export class DossierViewComponent implements OnChanges, OnInit {
   showAttributionSection: boolean = false;
   showChangeReparateurSection: boolean = false;
   showExpertDetails: boolean = false;
+  showAssuranceInfo: boolean = false;
   // Ajoute d'autres propriétés similaires pour les autres sections si besoin
+
+  // --- Pour édition des infos d'assurance ---
+  assuranceContactEdit: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
+  assuranceContactOriginal: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
 
   editionExpertEnCours: boolean = false;
   expertiseEdit: Partial<Expertise> = {};
@@ -128,6 +141,18 @@ export class DossierViewComponent implements OnChanges, OnInit {
     this.commissionStatutOriginal = this.mission?.commissionStatut || '';
     this.chargerInformationsAssure();
     this.chargerVehiculeSinistre(); // Ajouter l'appel ici aussi
+    // Charger les infos d'assurance si nom dispo
+    const nomAssurance = this.getVehiculeInfo(this.dossier).assurance;
+    if (nomAssurance && nomAssurance !== 'Assurance non spécifiée') {
+      const allContacts = getAssuranceContactsFromStorage();
+      if (allContacts[nomAssurance]) {
+        this.assuranceContactEdit = { ...allContacts[nomAssurance] };
+        this.assuranceContactOriginal = { ...allContacts[nomAssurance] };
+      } else {
+        this.assuranceContactEdit = { telephone: '', email: '', adresse: '' };
+        this.assuranceContactOriginal = { telephone: '', email: '', adresse: '' };
+      }
+    }
   }
 
   close() {
@@ -186,6 +211,32 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (this.missionEdit.documentsAssurance) {
       missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance;
     }
+
+    // Champs financiers ajoutés
+    if (this.missionEdit.montantStatue !== undefined && this.missionEdit.montantStatue !== null) {
+      const montantStatue = Number(this.missionEdit.montantStatue);
+      if (!isNaN(montantStatue) && montantStatue >= 0) {
+        missionUpdate.montantStatue = montantStatue;
+      }
+    }
+    if (this.missionEdit.franchiseApplicable !== undefined && this.missionEdit.franchiseApplicable !== null) {
+      const franchiseApplicable = Number(this.missionEdit.franchiseApplicable);
+      if (!isNaN(franchiseApplicable) && franchiseApplicable >= 0) {
+        missionUpdate.franchiseApplicable = franchiseApplicable;
+      }
+    }
+    if (this.missionEdit.commissionPourcentage !== undefined && this.missionEdit.commissionPourcentage !== null) {
+      const commissionPourcentage = Number(this.missionEdit.commissionPourcentage);
+      if (!isNaN(commissionPourcentage) && commissionPourcentage >= 0) {
+        missionUpdate.commissionPourcentage = commissionPourcentage;
+      }
+    }
+    // Calcul et sauvegarde du montant de la commission
+    missionUpdate.commissionMontant = this.calculerCommission(
+      this.missionEdit.montantStatue,
+      this.missionEdit.franchiseApplicable,
+      this.missionEdit.commissionPourcentage
+    );
 
     console.log('Données à envoyer:', missionUpdate);
 
@@ -829,5 +880,31 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   isImageOrPdf(url: string): boolean {
     return /\.(pdf|jpg|jpeg|png)$/i.test(url);
+  }
+
+  // Méthode pour sauvegarder les infos d'assurance
+  saveAssuranceContact() {
+    const nomAssurance = this.getVehiculeInfo(this.dossier).assurance;
+    if (!nomAssurance || nomAssurance === 'Assurance non spécifiée') return;
+    const allContacts = getAssuranceContactsFromStorage();
+    allContacts[nomAssurance] = { ...this.assuranceContactEdit };
+    saveAssuranceContactsToStorage(allContacts);
+    this.assuranceContactOriginal = { ...this.assuranceContactEdit };
+    alert('Informations de contact de l\'assurance enregistrées !');
+  }
+
+  // Calcul de la commission
+  calculerCommission(montantStatue: number, franchiseApplicable: number, commissionPourcentage: number): number {
+    if (
+      montantStatue != null &&
+      franchiseApplicable != null &&
+      commissionPourcentage != null &&
+      !isNaN(montantStatue) &&
+      !isNaN(franchiseApplicable) &&
+      !isNaN(commissionPourcentage)
+    ) {
+      return (montantStatue - franchiseApplicable) * (commissionPourcentage / 100);
+    }
+    return 0;
   }
 } 
