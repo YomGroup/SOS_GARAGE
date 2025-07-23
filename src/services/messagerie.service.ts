@@ -1,13 +1,8 @@
-// message.service.ts
 import { Injectable } from '@angular/core';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
 import { db } from '../main';
-import {
-    query,
-    orderBy,
-    onSnapshot,
-    where,
-} from 'firebase/firestore';
+import { Observable } from 'rxjs';
+import { getDocs, or } from 'firebase/firestore';
 
 @Injectable({ providedIn: 'root' })
 export class MessageService {
@@ -19,19 +14,50 @@ export class MessageService {
             timestamp: serverTimestamp()
         });
     }
-    listenToMessages(senderId: string, receiverId: string, callback: (msgs: any[]) => void) {
+
+    async getConversationUsers(userId: string): Promise<string[]> {
+        const messagesRef = collection(db, 'messages');
         const q = query(
-            collection(db, 'messages'),
-            where('senderId', 'in', [senderId, receiverId]),
-            orderBy('timestamp')
+            messagesRef,
+            or(
+                where('senderId', '==', userId),
+                where('receiverId', '==', userId)
+            )
         );
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const messages: any[] = [];
-            snapshot.forEach((doc) => messages.push({ id: doc.id, ...doc.data() }));
-            callback(messages);
+        const snapshot = await getDocs(q);
+        const userIds = new Set<string>();
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            if (data['senderId'] !== userId) userIds.add(data['senderId']);
+            if (data['receiverId'] !== userId) userIds.add(data['receiverId']);
         });
 
-        return unsubscribe;
+        return Array.from(userIds);
     }
+
+    listenToMessages(user1: string, user2: string): Observable<any[]> {
+        return new Observable(observer => {
+            const q = query(
+                collection(db, 'messages'),
+                where('senderId', 'in', [user1, user2]),
+                where('receiverId', 'in', [user1, user2]),
+                orderBy('timestamp')
+            );
+
+            const unsubscribe = onSnapshot(q, snapshot => {
+                const messages = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                observer.next(messages);
+            });
+
+            // Fonction de nettoyage
+            return () => unsubscribe();
+        });
+    }
+
+
 }
