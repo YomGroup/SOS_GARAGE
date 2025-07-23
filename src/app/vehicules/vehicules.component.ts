@@ -200,13 +200,13 @@ export class VehiculesComponent implements OnInit {
       modele: this.newVehicle.modele,
       cylindree: this.newVehicle.cylindree,
       dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
-      typeAssurence: this.newVehicle.typeAssurence
-        .map((id: number) => {
-          const found = this.assuranceOptions.find(opt => opt.id === id);
-          return found ? found.name : '';
-        })
-        .filter((name: string) => name)
-        .join('_'),
+      /* typeAssurence: this.newVehicle.typeAssurence
+         .map((id: number) => {
+           const found = this.assuranceOptions.find(opt => opt.id === id);
+           return found ? found.name : '';
+         })
+         .filter((name: string) => name)
+         .join('_'),*/
       nomAssurence: this.newVehicle.nomAssurence,
       carteGrise: this.newVehicle.carteGrise,
       contratAssurance: this.newVehicle.contratAssurance,

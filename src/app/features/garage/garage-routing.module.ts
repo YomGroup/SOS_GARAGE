@@ -9,17 +9,18 @@ import { MessageComponent } from '../../message/message.component';
 import { GarageProfileComponent } from './components/garage-profile/garage-profile.component';
 import { GarageFinanceComponent } from './gestion-finance/garage-finance.component';
 
+
 const routes: Routes = [
   {
     path: '',
     component: GarageComponent,
     children: [
-      { path: 'missions', component: MissionReceptionComponent },
+      { path: 'missions', component: MessageComponent },
       { path: 'reparations', component: ReparationManagementComponent },
       { path: 'communication', component: CommunicationComponent },
       { path: 'statistiques', component: StatisticsComponent },
-      { path: 'message', component: MessageComponent },
-      { path: 'profil', component: GarageProfileComponent },
+      { path: 'messages', component: MessageComponent },
+      { path: 'profil', component: MessageComponent },
       { path: 'finance', component: GarageFinanceComponent },
       { path: '', redirectTo: 'statistiques', pathMatch: 'full' }
     ]

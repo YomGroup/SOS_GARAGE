@@ -35,7 +35,7 @@ export class SidebarComponent implements OnInit {
   @Output() closeSidebar = new EventEmitter<void>();
   @Output() openSidebar = new EventEmitter<void>();
   @Output() dossierFilterChange = new EventEmitter<string>();
-  
+
   private keycloakService = inject(KeycloakService);
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
@@ -44,7 +44,7 @@ export class SidebarComponent implements OnInit {
 
   username: string = 'Visiteur';
   userRoles: string[] = [];
-  
+
   async ngOnInit(): Promise<void> {
     const isLoggedIn = await this.keycloakService.isLoggedIn();
     if (isLoggedIn) {
@@ -57,7 +57,7 @@ export class SidebarComponent implements OnInit {
         console.error('Erreur lors du chargement du profil utilisateur', error);
       }
     }
-    
+
     // Auto-expandre les sous-menus actifs
     this.expandActiveSubmenus();
   }
@@ -78,10 +78,10 @@ export class SidebarComponent implements OnInit {
     { title: 'Véhicules', icon: 'bi bi-car-front', route: '/admin/vehicules' },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
-   // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
+    // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
     { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
-    
+
   ];
 
   garageMenuItems: MenuItem[] = [
@@ -116,7 +116,7 @@ export class SidebarComponent implements OnInit {
         title: 'Messages',
         icon: 'bi bi-envelope',
         route: this.userRoles.includes('ROLE_GARAGISTE')
-          ? '/garage/message'
+          ? '/garage/messages'
           : this.userRoles.includes('ROLE_ADMIN')
             ? '/admin/messages'
             : this.userRoles.includes('ROLE_ASSURE')
@@ -124,9 +124,9 @@ export class SidebarComponent implements OnInit {
               : '/message',
         badge: '2'
       },
-      { 
-        title: 'Déconnexion', 
-        icon: 'bi bi-box-arrow-right', 
+      {
+        title: 'Déconnexion',
+        icon: 'bi bi-box-arrow-right',
         action: (event: MouseEvent) => {
           event.preventDefault();
           this.logout();
@@ -143,7 +143,7 @@ export class SidebarComponent implements OnInit {
     }
     return []; // Retourne un menu vide si aucun rôle ne correspond
   }
-  
+
   toggleSubmenu(item: MenuItem) {
     item.expanded = !item.expanded;
     if (item.route && !item.expanded) {
@@ -162,10 +162,10 @@ export class SidebarComponent implements OnInit {
   isParentActive(item: MenuItem): boolean {
     if (!item.route) return false;
     const currentUrl = this.router.url;
-    
+
     // Vérifier si la route parente est active
     const isParentRouteActive = currentUrl === item.route || currentUrl.startsWith(item.route + '/');
-    
+
     // Si l'élément a des enfants, vérifier aussi si un des enfants est actif
     if (item.children && item.children.length > 0) {
       const hasActiveChild = item.children.some(child => {
@@ -174,7 +174,7 @@ export class SidebarComponent implements OnInit {
       });
       return isParentRouteActive || hasActiveChild;
     }
-    
+
     return isParentRouteActive;
   }
 
@@ -236,7 +236,7 @@ export class SidebarComponent implements OnInit {
 
   expandActiveSubmenus() {
     const currentUrl = this.router.url;
-    
+
     // Parcourir tous les éléments du menu pour trouver les sous-menus actifs
     this.menuItems.forEach(item => {
       if (item.children && item.children.length > 0) {
@@ -244,7 +244,7 @@ export class SidebarComponent implements OnInit {
           if (!child.route) return false;
           return currentUrl === child.route || currentUrl.startsWith(child.route + '/');
         });
-        
+
         if (hasActiveChild) {
           item.expanded = true;
         }
