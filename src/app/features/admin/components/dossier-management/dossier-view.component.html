@@ -73,6 +73,20 @@
             <label>Déclarée comme épave</label>
             <div class="readonly-field">{{ mission?.declareCommeEpave ? 'Oui' : 'Non' }}</div>
           </div>
+          <div class="form-group" *ngIf="mission?.dateDebutTravaux">
+            <label>Début des travaux</label>
+            <div class="readonly-field">
+              <i class="fas fa-calendar me-1"></i>
+              {{ mission?.dateDebutTravaux | date:'dd/MM/yyyy HH:mm' }}
+            </div>
+          </div>
+          <div class="form-group" *ngIf="mission?.delaiEstime">
+            <label>Délai estimé</label>
+            <div class="readonly-field">
+              <i class="fas fa-hourglass-half me-1"></i>
+              {{ mission?.delaiEstime }} jour(s)
+            </div>
+          </div>
         </div>
       </div>
 
@@ -367,32 +381,43 @@
           <div class="form-section">
             <!-- Mode édition -->
             <form *ngIf="editionExpertEnCours; else nominationLectureSeule" (ngSubmit)="enregistrerExpert()">
-              <div class="form-grid">
-                <div class="form-group">
-                  <label>Nom de l'expert</label>
-                  <input type="text" class="form-control" [(ngModel)]="expertiseEdit.nomExpert" name="nomExpert">
-                </div>
-                <div class="form-group">
-                  <label>Prénom de l'expert</label>
-                  <input type="text" class="form-control" [(ngModel)]="expertiseEdit.prenomExpert" name="prenomExpert">
-                </div>
-                <div class="form-group">
-                  <label>Institution</label>
-                  <input type="text" class="form-control" [(ngModel)]="expertiseEdit.institutionExpert" name="institutionExpert">
-                </div>
-                <div class="form-group">
-                  <label>Contact de l'expert</label>
-                  <input type="text" class="form-control" [(ngModel)]="expertiseEdit.contactExpert" name="contactExpert">
-                </div>
-                <div class="form-group">
-                  <label>Email de l'expert</label>
-                  <input type="email" class="form-control" [(ngModel)]="expertiseEdit.mailExpert" name="emailExpert">
-                </div>
-                <div class="form-group">
-                  <label>Date d'expertise prévue</label>
-                  <input type="date" class="form-control" [(ngModel)]="expertiseEdit.dateExpertisePrevue" name="dateExpertisePrevue">
-                </div>
-              </div>
+              <!-- Choix expert existant OU saisie manuelle -->
+              <div class="form-group mb-3">
+  <label>Choisir un expert existant</label>
+  <select class="form-select" [(ngModel)]="expertSelectionneId" name="expertSelectionneId" (change)="onExpertSelected()">
+    <option [ngValue]="null">-- Saisir un nouvel expert --</option>
+    <option *ngFor="let expert of expertsDisponibles; let i = index" [ngValue]="i">
+      {{ expert.nom }} {{ expert.prenom }} ({{ expert.institution }})
+    </option>
+  </select>
+</div>
+
+<div class="form-grid">
+  <div class="form-group">
+    <label>Nom de l'expert</label>
+    <input type="text" class="form-control" [(ngModel)]="expertiseEdit.nomExpert" name="nomExpert" [readonly]="expertSelectionneId !== null">
+  </div>
+  <div class="form-group">
+    <label>Prénom de l'expert</label>
+    <input type="text" class="form-control" [(ngModel)]="expertiseEdit.prenomExpert" name="prenomExpert" [readonly]="expertSelectionneId !== null">
+  </div>
+  <div class="form-group">
+    <label>Institution</label>
+    <input type="text" class="form-control" [(ngModel)]="expertiseEdit.institutionExpert" name="institutionExpert" [readonly]="expertSelectionneId !== null">
+  </div>
+  <div class="form-group">
+    <label>Contact de l'expert</label>
+    <input type="text" class="form-control" [(ngModel)]="expertiseEdit.contactExpert" name="contactExpert" [readonly]="expertSelectionneId !== null">
+  </div>
+  <div class="form-group">
+    <label>Email de l'expert</label>
+    <input type="email" class="form-control" [(ngModel)]="expertiseEdit.mailExpert" name="emailExpert" [readonly]="expertSelectionneId !== null">
+  </div>
+  <div class="form-group">
+    <label>Date d'expertise prévue</label>
+    <input type="date" class="form-control" [(ngModel)]="expertiseEdit.dateExpertisePrevue" name="dateExpertisePrevue">
+  </div>
+</div>
               <div class="actions-grid">
                 <button type="button" class="btn btn-secondary" (click)="annulerExpert()">Annuler</button>
                 <button type="submit" class="btn btn-success">Enregistrer</button>
@@ -482,6 +507,10 @@
                 <label>Expertise effectuée</label>
                 <div class="readonly-field">{{ expertiseCourante?.expertiseEffectuee ? 'Oui' : 'Non' }}</div>
               </div>
+              <div class="form-group">
+                <label>Prise en charge</label>
+                <div class="readonly-field">{{ expertiseCourante?.priseEnCharge ? 'Oui' : 'Non' }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -507,10 +536,6 @@
               </div>
               <!-- Champs financiers ajoutés -->
               <div class="form-group">
-                <label>Montant statue (€)</label>
-                <input type="number" class="form-control" [(ngModel)]="missionEdit.montantStatue" name="montantStatue">
-              </div>
-              <div class="form-group">
                 <label>Franchise applicable (€)</label>
                 <input type="number" class="form-control" [(ngModel)]="missionEdit.franchiseApplicable" name="franchiseApplicable">
               </div>
@@ -521,7 +546,7 @@
               <div class="form-group">
                 <label>Montant commission (€)</label>
                 <div class="readonly-field">
-                  {{ calculerCommission(missionEdit.montantStatue ?? 0, missionEdit.franchiseApplicable ?? 0, missionEdit.commissionPourcentage ?? 0) | number:'1.2-2' }}
+                  {{ calculerCommission(missionEdit.factureFinale ?? 0, missionEdit.franchiseApplicable ?? 0, missionEdit.commissionPourcentage ?? 0) | number:'1.2-2' }}
                 </div>
               </div>
             </div>
@@ -541,10 +566,6 @@
               <div class="readonly-field">{{ mission?.factureFinale }}</div>
             </div>
             <div class="form-group">
-                <label>Montant statue (€)</label>
-                <div class="readonly-field">{{ mission?.montantStatue }}</div>
-            </div>
-            <div class="form-group">
                 <label>Franchise applicable (€)</label>
                 <div class="readonly-field">{{ mission?.franchiseApplicable }}</div>
             </div>
@@ -555,7 +576,7 @@
             <div class="form-group">
                 <label>Montant commission (€)</label>
               <div class="readonly-field">
-                  {{ calculerCommission(mission?.montantStatue ?? 0, mission?.franchiseApplicable ?? 0, mission?.commissionPourcentage ?? 0) | number:'1.2-2' }}
+                 {{ calculerCommission(mission?.factureFinale ?? 0, mission?.franchiseApplicable ?? 0, mission?.commissionPourcentage ?? 0) | number:'1.2-2' }}
                 </div>
               </div>
             </div>
@@ -582,7 +603,7 @@
             <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDocEdit">
               <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
                 <i class="fas fa-file-pdf me-2"></i>
-                {{ getFileNameFromUrl(doc) }}
+                {{ getFileNameFromUrl((doc && doc.url) ? doc.url : doc) }}
                 <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
                 <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
               </div>
@@ -600,18 +621,6 @@
           </ng-container>
           
           <!-- En mode lecture seule, utiliser mission -->
-          <ng-container *ngIf="!editionEnCours">
-            <ng-container *ngIf="mission && mission.documentsAssurance && mission.documentsAssurance.length > 0; else noDocRead">
-              <div *ngFor="let doc of mission.documentsAssurance; let i = index" class="document-item">
-                <i class="fas fa-file-pdf me-2"></i>
-                {{ getFileNameFromUrl(doc) }}
-                <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
-              </div>
-            </ng-container>
-            <ng-template #noDocRead>
-              <span>Aucun document disponible.</span>
-            </ng-template>
-          </ng-container>
             </div>
           </div>
         </div>

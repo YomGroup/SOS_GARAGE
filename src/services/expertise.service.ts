@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Expertise } from './models-api.interface';
+import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class ExpertiseService {
@@ -24,4 +25,27 @@ export class ExpertiseService {
   updateExpertise(expertise: Expertise): Observable<Expertise> {
     return this.http.put<Expertise>(`${this.apiUrl}/${expertise.id}`, expertise);
   }
-} 
+
+  getExpertsFromExpertises(): Observable<any[]> {
+    return this.getExpertises().pipe(
+      // On transforme la liste d'expertises en liste d'experts uniques
+      map((expertises: Expertise[]) => {
+        const expertsMap = new Map<string, any>();
+        expertises.forEach(exp => {
+          // Utilise un identifiant unique (nom + prénom + institution par exemple)
+          const key = `${exp.nomExpert}|${exp.prenomExpert}|${exp.institutionExpert}`;
+          if (exp.nomExpert && !expertsMap.has(key)) {
+            expertsMap.set(key, {
+              nom: exp.nomExpert,
+              prenom: exp.prenomExpert,
+              institution: exp.institutionExpert,
+              telephone: exp.contactExpert,
+              email: exp.mailExpert
+            });
+          }
+        });
+        return Array.from(expertsMap.values());
+      })
+    );
+  }
+}
