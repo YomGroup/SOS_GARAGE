@@ -1,34 +1,109 @@
-<div class="chat-container">
-  <div class="chat-header">
-    <h5>Conversation</h5>
-  </div>
-  <div class="discussion-list">
-  <div class="discussion-list">
-  <h3>Mes Discussions</h3>
-  <ul>
-    <li *ngFor="let user of conversationUsers" (click)="selectUser(user.useridKeycloak)">
-      {{ user.name }} {{ user.prenom }}
-    </li>
-  </ul>
-</div>
-
-
-  <div class="chat-messages">
-    <div *ngFor="let message of messages" 
-         [class]="message.senderId === senderId ? 'message-sent' : 'message-received'">
-      <div class="message-content">{{ message.text }}</div>
-      <div class="message-time">
+<div class="container-fluid h-100">
+  <div class="row h-100">
+    <!-- Colonne gauche - Liste des conversations -->
+    <div class="col-md-4 col-lg-3 bg-light border-end p-0">
+      <div class="chat-sidebar h-100 d-flex flex-column">
+        <!-- Header de la sidebar -->
+        <div class="sidebar-header bg-primary text-white p-3">
+          <h5 class="mb-0">
+            <i class="fas fa-comments me-2"></i>
+            Mes Discussions
+          </h5>
+        </div>
+        
+        <!-- Liste des conversations -->
+        <div class="discussion-list flex-grow-1 overflow-auto">
+          <ul class="list-group list-group-flush">
+            <li *ngFor="let user of conversationUsers" 
+                (click)="selectUser(user.useridKeycloak)"
+                class="list-group-item list-group-item-action d-flex align-items-center p-3 border-0 conversation-item"
+                [class.active]="receiverId === user.useridKeycloak">
+              <div class="avatar-container me-3">
+                <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
+                     style="width: 40px; height: 40px; font-weight: bold;">
+                  {{ (user.name.charAt(0) + user.prenom.charAt(0)).toUpperCase() }}
+                </div>
+              </div>
+              <div class="user-info flex-grow-1">
+                <div class="user-name fw-semibold text-dark">
+                  {{ user.name }} {{ user.prenom }}
+                </div>
+                <div class="last-message text-muted small">
+                  Dernière activité
+                </div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="chat-input">
-    <input type="text" 
-           [(ngModel)]="newMessage" 
-           (keyup.enter)="sendMessage()"
-           placeholder="Écrivez un message...">
-    <button (click)="sendMessage()" [disabled]="!newMessage.trim()">
-      <i class="send-icon">→</i>
-    </button>
+    <!-- Colonne droite - Zone de chat -->
+    <div class="col-md-8 col-lg-9 p-0">
+      <div class="chat-container h-100 d-flex flex-column">
+        <!-- Header du chat -->
+        <div class="chat-header bg-white border-bottom p-3 shadow-sm">
+          <div class="d-flex align-items-center" *ngIf="selectedUser">
+            <div class="selected-user-avatar me-3">
+              <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                   style="width: 35px; height: 35px; font-weight: bold;">
+                {{ (selectedUser.name.charAt(0) + selectedUser.prenom.charAt(0)).toUpperCase() }}
+              </div>
+            </div>
+            <div>
+              <h6 class="mb-0 text-dark">{{ selectedUser.name }} {{ selectedUser.prenom }}</h6>
+              <small class="text-muted">En ligne</small>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-center" *ngIf="!selectedUser">
+            <span class="text-muted">Sélectionnez une conversation</span>
+          </div>
+        </div>
+
+        <!-- Zone des messages -->
+        <div class="chat-messages flex-grow-1 p-3 overflow-auto bg-light" style="max-height: calc(100vh - 200px);">
+          <div *ngFor="let message of messages" class="mb-3">
+            <div class="d-flex" 
+                 [ngClass]="message.senderId === senderId ? 'justify-content-end' : 'justify-content-start'">
+              <div class="message-bubble max-width-70"
+                   [ngClass]="message.senderId === senderId ? 'message-sent' : 'message-received'">
+                <div class="message-content p-3 rounded-3 shadow-sm">
+                  {{ message.text }}
+                </div>
+                <div class="message-time text-muted small mt-1 px-2">
+                  {{ message.timestamp?.toDate() | date:'short' }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Message quand aucune conversation n'est sélectionnée -->
+          <div *ngIf="!selectedUser" class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center text-muted">
+              <i class="fas fa-comments fa-3x mb-3"></i>
+              <h5>Sélectionnez une conversation pour commencer</h5>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zone de saisie -->
+        <div class="chat-input bg-white border-top p-3" *ngIf="selectedUser">
+          <div class="input-group">
+            <input type="text" 
+                   class="form-control border-0 bg-light rounded-pill ps-4"
+                   [(ngModel)]="newMessage"
+                   (keyup.enter)="sendMessage()"
+                   placeholder="Écrivez un message..."
+                   style="box-shadow: none;">
+            <button class="btn btn-primary rounded-circle ms-2 d-flex align-items-center justify-content-center"
+                    (click)="sendMessage()" 
+                    [disabled]="!newMessage.trim()"
+                    style="width: 45px; height: 45px;">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

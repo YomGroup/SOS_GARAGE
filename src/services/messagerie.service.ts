@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
-import { addDoc, collection, serverTimestamp, onSnapshot, query, orderBy, where } from 'firebase/firestore';
+import { Injectable, NgZone } from '@angular/core';
+import { addDoc, collection, serverTimestamp, onSnapshot, query, orderBy, where, or, and } from 'firebase/firestore';
 import { db } from '../main';
 import { Observable } from 'rxjs';
-import { getDocs, or } from 'firebase/firestore';
+import { getDocs } from 'firebase/firestore';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+    providedIn: 'root'
+})
 export class MessageService {
+
     async sendMessage(senderId: string, receiverId: string, text: string) {
         await addDoc(collection(db, 'messages'), {
             senderId,
@@ -39,25 +42,44 @@ export class MessageService {
 
     listenToMessages(user1: string, user2: string): Observable<any[]> {
         return new Observable(observer => {
+            // Vérification que les deux utilisateurs sont définis
+            if (!user1 || !user2) {
+                observer.next([]);
+                return () => { };
+            }
+
+            // Requête corrigée : récupérer tous les messages entre ces deux utilisateurs
             const q = query(
                 collection(db, 'messages'),
-                where('senderId', 'in', [user1, user2]),
-                where('receiverId', 'in', [user1, user2]),
-                orderBy('timestamp')
+                or(
+                    and(
+                        where('senderId', '==', user1),
+                        where('receiverId', '==', user2)
+                    ),
+                    and(
+                        where('senderId', '==', user2),
+                        where('receiverId', '==', user1)
+                    )
+                ),
+                orderBy('timestamp', 'asc')
             );
 
-            const unsubscribe = onSnapshot(q, snapshot => {
-                const messages = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                observer.next(messages);
-            });
+            const unsubscribe = onSnapshot(q,
+                (snapshot) => {
+                    const messages = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    observer.next(messages);
+                },
+                (error) => {
+                    console.error('Erreur lors de l\'écoute des messages:', error);
+                    observer.error(error);
+                }
+            );
 
             // Fonction de nettoyage
             return () => unsubscribe();
         });
     }
-
-
 }

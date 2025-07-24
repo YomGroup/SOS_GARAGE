@@ -6,6 +6,7 @@ import { VehicleService, Vehicle } from '../../services/vehicle.service';
 import { inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
 @Component({
   selector: 'app-vehicules',
@@ -53,6 +54,8 @@ export class VehiculesComponent implements OnInit {
   selectedAssurance: any = null;
   currentStep: number = 1;
   hasAssurance: boolean = false;
+  contratFile: File | null = null;
+  loadingSubmit: boolean = false;
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -71,6 +74,13 @@ export class VehiculesComponent implements OnInit {
       });
     }
   }
+  onContratAssuranceSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (file) {
+      this.contratFile = file;
+    }
+  }
+
   // Dans ta classe
   loadVehicles(assureId: number): void {
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
@@ -170,7 +180,6 @@ export class VehiculesComponent implements OnInit {
 
     this.vehiculeService.getVehiculesData(immat).subscribe({
       next: (data: any) => {
-        console.log('Scrapping terminé avec succès :', data);
 
         this.newVehicle.modele = data.AWN_modele || '';
         this.newVehicle.marque = data.AWN_marque || '';
@@ -179,7 +188,17 @@ export class VehiculesComponent implements OnInit {
         this.newVehicle.contratAssurance = '';
         this.newVehicle.dateMiseEnCirculation = data.AWN_date_mise_en_circulation_us || '';
         this.newVehicle.imgUrl = data.AWN_model_image || '';
-        clearTimeout(timeout); // Annule le timeout si ça répond à temps
+        this.newVehicle.dateDerniereCg = data.AWN_date_derniere_cg || '';
+        this.newVehicle.energie = data.AWN_energie || '';
+        this.newVehicle.nomCommerciale = data.AWN_nom_commercial || '';
+        this.newVehicle.puissanceChevaux = data.AWN_puissance_chevaux || '';
+        this.newVehicle.puissanceFiscale = data.AWN_puissance_fiscale || '';
+        this.newVehicle.boiteVitesse = data.AWN_type_boite_vites || '';
+        this.newVehicle.typeMine = data.AWN_type_mine || '';
+        this.newVehicle.version = data.AWN_version || '';
+        clearTimeout(timeout);
+        console.log('Scrapping terminé avec succès :', this.newVehicle);
+
         this.loadingScrap = false;
         this.scrappingReussi = true;
       },
@@ -193,37 +212,65 @@ export class VehiculesComponent implements OnInit {
   }
 
 
-  submitVehicle() {
+  async submitVehicle() {
+    this.loadingSubmit = true;
+    if (this.contratFile) {
+      const storage = getStorage();
+      const filePath = `vehicules/contrats/${this.contratFile.name}`;
+      const fileRef = ref(storage, filePath);
+
+      try {
+        const snapshot = await uploadBytes(fileRef, this.contratFile);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        this.newVehicle.contratAssurance = downloadURL;
+        console.log('Contrat assurance téléversé :', downloadURL);
+      } catch (err) {
+        console.error('Erreur de téléversement :', err);
+        return; // Ne pas envoyer les données si l’upload a échoué
+      }
+    }
     const payload = {
       immatriculation: this.newVehicle.immatriculation,
       marque: this.newVehicle.marque,
       modele: this.newVehicle.modele,
       cylindree: this.newVehicle.cylindree,
       dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
-      /* typeAssurence: this.newVehicle.typeAssurence
-         .map((id: number) => {
-           const found = this.assuranceOptions.find(opt => opt.id === id);
-           return found ? found.name : '';
-         })
-         .filter((name: string) => name)
-         .join('_'),*/
+      typeAssurence: this.newVehicle.typeAssurence
+        .map((id: number) => {
+          const found = this.assuranceOptions.find(opt => opt.id === id);
+          return found ? found.name : '';
+        })
+        .filter((name: string) => name)
+        .join('_'),
       nomAssurence: this.newVehicle.nomAssurence,
       carteGrise: this.newVehicle.carteGrise,
       contratAssurance: this.newVehicle.contratAssurance,
       assure: this.assureId,
+      dateDerniereCg: this.newVehicle.dateDerniereCg,
+      energie: this.newVehicle.energie,
+      nomCommerciale: this.newVehicle.nomCommerciale,
+      puissanceChevaux: this.newVehicle.puissanceChevaux,
+      puissanceFiscale: this.newVehicle.puissanceFiscale,
+      boiteVitesse: this.newVehicle.boiteVitesse,
+      typeMine: this.newVehicle.typeMine,
+      version: this.newVehicle.version,
       imgUrl: Array.isArray(this.newVehicle.imgUrl) && this.newVehicle.imgUrl.length > 0
         ? this.newVehicle.imgUrl
         : (this.newVehicle.imgUrl && this.newVehicle.imgUrl.trim() ? [this.newVehicle.imgUrl] : [])
     };
-    console.log('vehicule', payload);
+    const finalCallback = () => {
+      this.loadingSubmit = false;
+    };
+    console.log('vehicule envoyé', payload);
 
     if (this.isEditMode && this.newVehicle.id) {
-      console.log(payload);
       this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
         next: (data) => {
           this.loadVehicles(this.assureId);
           this.vehiculeService.refreshVehicules(this.assureId);
           this.cancelAdd();
+          finalCallback();
+
         },
         error: (err) => {
           console.error('Erreur lors de la mise à jour du véhicule :', err.error.message);
@@ -231,6 +278,8 @@ export class VehiculesComponent implements OnInit {
             console.error('Message d\'erreur détaillé :', err.error.message);
           }
           this.scrapErrorMessage = 'Une erreur s\'est produite. Veuillez réessayer.';
+          finalCallback();
+
         }
 
       });
@@ -240,9 +289,13 @@ export class VehiculesComponent implements OnInit {
         next: (data) => {
           this.loadVehicles(this.assureId);
           this.cancelAdd();
+          finalCallback();
+
         },
         error: (err) => {
           console.error('Erreur lors de l’ajout du véhicule :', err);
+          finalCallback();
+
         }
       });
     }
@@ -251,6 +304,8 @@ export class VehiculesComponent implements OnInit {
   updateVehicle(vehicle: Vehicle) {
     this.isEditMode = true;
     this.showAddForm = true;
+    console.log('Raw typeAssurence string:', vehicle.typeAssurence);
+    console.log('Parsed typeAssurence IDs:', this.extractTypeAssurenceIds(vehicle.typeAssurence || ''));
 
     this.newVehicle = {
       ...vehicle,
@@ -279,7 +334,15 @@ export class VehiculesComponent implements OnInit {
       imgUrl: '',
       assure: null,
       typeAssurence: [],
-      nomAssurence: ''
+      nomAssurence: '',
+      dateDerniereCg: '',
+      energie: '',
+      nomCommerciale: '',
+      puissanceChevaux: '',
+      puissanceFiscale: '',
+      boiteVitesse: '',
+      typeMine: '',
+      version: '',
     };
     this.isEditMode = false;
     this.scrapErrorMessage = '';
@@ -305,11 +368,38 @@ export class VehiculesComponent implements OnInit {
     }
   }
   private extractTypeAssurenceIds(typeStr: string): number[] {
-    const names = typeStr.split('_');
-    return this.assuranceOptions
-      .filter(opt => names.includes(opt.name))
-      .map(opt => opt.id);
+    if (!typeStr) return [];
+
+    const result: number[] = [];
+
+    // On vérifie s'il commence par "Tiers"
+    if (typeStr.startsWith("Tiers")) {
+      result.push(
+        ...this.assuranceOptions
+          .filter(opt => opt.name === "Tiers")
+          .map(opt => opt.id)
+      );
+
+      // On récupère le reste après "Tiers_"
+      const rest = typeStr.replace("Tiers_", "");
+
+      // On split uniquement ce reste si nécessaire
+      this.assuranceOptions.forEach(opt => {
+        if (opt.name !== "Tiers" && rest.includes(opt.name)) {
+          result.push(opt.id);
+        }
+      });
+    } else {
+      // Cas normal pour les autres types comme "Tous_risque"
+      const match = this.assuranceOptions.find(opt => opt.name === typeStr);
+      if (match) result.push(match.id);
+    }
+
+    return result;
   }
+
+
+
 
   openAssuranceSelection(vehicle: Vehicle): void {
     this.selectedVehicle = vehicle;
