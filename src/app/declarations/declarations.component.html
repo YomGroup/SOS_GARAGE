@@ -93,7 +93,13 @@
     </option>
   </select>
 </div>
-
+<div class="mb-4">
+  <label for="lieuSinistre" class="form-label fw-semibold text-primary">
+    Lieu du sinistre :
+  </label>
+  <input type="text" id="lieuSinistre" class="form-control shadow-sm border-primary rounded"
+         [(ngModel)]="lieuSinistre" name="lieuSinistre" placeholder="Entrez le lieu du sinistre" />
+</div>
 
   <div class="choice-container" *ngIf="!hasChosenDeclarationMethod">
     <div class="choice-card" (click)="selectDeclarationMethod('describe')">

@@ -88,6 +88,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   selectedAssurance: any = null;
   showAssuranceStep = false;
   currentPhotoStep: number = 1;
+  lieuSinistre: string = '';
+
   photoSteps: any = {
     1: [], // Photos d'ensemble
     2: [], // Plaque immatriculation
@@ -484,6 +486,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
         documents: [],
+        lieu: this.lieuSinistre,
         imgUrl: savedFiles.photosNames,
         idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
         statut: 'EN_ATTENTE_EXPERTISE',
@@ -497,6 +500,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
         next: async (sinistreResponse: any) => {
           const sinistreId = sinistreResponse.id;
+          console.log(sinistreResponse);
 
           // 2. Envoyer les documents avec juste le nom du fichier
           await this.sendSignedDocuments(sinistreId);

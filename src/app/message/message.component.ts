@@ -7,13 +7,8 @@ import { Subscription } from 'rxjs';
 import { Message } from '../shared/models/Message.model';
 import { ReparateurService } from '../../services/reparateur.service';
 import { Reparateur } from '../../services/models-api.interface';
-
-interface ReparateurLight {
-  id: number;
-  name: string;
-  prenom: string;
-  useridKeycloak: string;
-}
+import { ActivatedRoute } from '@angular/router';
+import { NgZone } from '@angular/core';
 
 @Component({
   selector: 'app-message',
@@ -28,6 +23,7 @@ export class MessageComponent implements OnInit, OnDestroy {
   senderId: string = '';
   receiverId: string = '';
   isAssure: boolean = false;
+  selectedUser?: Reparateur;
 
   private messagesSub!: Subscription;
   private currentUserSub!: Subscription;
@@ -37,76 +33,142 @@ export class MessageComponent implements OnInit, OnDestroy {
     private messageService: MessageService,
     private authService: AuthService,
     private cdRef: ChangeDetectorRef,
-    private reparateurService: ReparateurService
+    private reparateurService: ReparateurService,
+    private route: ActivatedRoute,
+    private ngZone: NgZone
   ) { }
-  loadConversationUsers(): void {
-    this.messageService.getConversationUsers(this.senderId).then(userIds => {
-      const requests = userIds.map(id =>
-        this.reparateurService.getReparateurByKeycloakId(id).toPromise().catch(() => undefined)
-      );
 
-      Promise.all(requests)
-        .then(reparateurs => {
-          this.conversationUsers = reparateurs.filter((r): r is Reparateur => !!r);
-          console.log(this.conversationUsers);
-        })
-        .catch(err => {
-          console.error('Erreur récupération des garagistes :', err);
-        });
+  async loadConversationUsers(): Promise<void> {
+    try {
+      const userIds = await this.messageService.getConversationUsers(this.senderId);
+
+      if (this.isAssure) {
+        // Si c'est un assuré, on récupère les infos des garagistes
+        const requests = userIds.map(id =>
+          this.reparateurService.getReparateurByKeycloakId(id).toPromise().catch(() => undefined)
+        );
+
+        const reparateurs = await Promise.all(requests);
+        this.conversationUsers = reparateurs.filter((r): r is Reparateur => !!r);
+        console.log('Garagistes trouvés:', this.conversationUsers);
+      } else {
+        // Sinon, on affiche simplement les IDs dans la liste
+        this.conversationUsers = userIds.map(id => ({
+          id: 0,
+          name: 'Utilisateur',
+          prenom: id.slice(0, 6) + '...',
+          useridKeycloak: id,
+          email: '',
+          telephone: '',
+          adresse: '',
+          codePostal: '',
+          ville: '',
+          commission: 0,
+          siret: '',
+          nomDuGarage: '',
+          servicePropose: [],
+          missions: [],
+          anneeExperience: 0,
+          nombreVehiculeReparee: 0,
+          nombreEmployes: 0,
+          logo: '',
+          imagesReparations: []
+        }));
+      }
+
+      this.cdRef.detectChanges();
+    } catch (error) {
+      console.error('Erreur lors du chargement des utilisateurs de conversation:', error);
+    }
+  }
+
+  async ngOnInit(): Promise<void> {
+    await this.initializeUserData();
+
+    // Charger les utilisateurs de conversation
+    await this.loadConversationUsers();
+
+    // Écouter les paramètres de route
+    this.route.queryParams.subscribe(params => {
+      const targetId = params['receiverId'];
+      if (targetId) {
+        this.selectUser(targetId);
+      }
     });
   }
 
-
-  ngOnInit(): void {
-    this.initializeUserData();
-    this.setupMessageListener();
-
-    if (this.isAssure) {
-      this.loadConversationUsers();
-    }
-  }
   selectUser(userId: string): void {
+    console.log('Sélection de l\'utilisateur:', userId);
     this.receiverId = userId;
-    if (this.messagesSub) this.messagesSub.unsubscribe();
+    this.selectedUser = this.conversationUsers.find(u => u.useridKeycloak === userId);
+
+    // Arrêter l'ancienne souscription si elle existe
+    if (this.messagesSub) {
+      this.messagesSub.unsubscribe();
+    }
+
+    // Démarrer l'écoute des messages
     this.setupMessageListener();
   }
 
-
-  private initializeUserData(): void {
+  private async initializeUserData(): Promise<void> {
     const token = this.authService.getToken();
     if (!token) return;
 
     this.senderId = this.authService.getKeycloakId() ?? '';
     this.isAssure = this.authService.getRoles().includes('ROLE_ASSURE');
-    this.receiverId = this.isAssure
-      ? 'ff70d32c-6d5b-4ff7-a0ee-80ef63354ede' // ID garagiste
-      : 'd85fd9c7-ba62-4aa7-bc67-0768a9f86b77'; // ID assuré
+
+    console.log('Utilisateur initialisé:', { senderId: this.senderId, isAssure: this.isAssure });
   }
 
   private setupMessageListener(): void {
+    // Vérifier que nous avons bien un senderId et receiverId
+    if (!this.senderId || !this.receiverId) {
+      console.warn('SenderId ou ReceiverId manquant:', { senderId: this.senderId, receiverId: this.receiverId });
+      return;
+    }
+
+    console.log('Configuration de l\'écoute des messages entre:', this.senderId, 'et', this.receiverId);
+
     this.messagesSub = this.messageService
       .listenToMessages(this.senderId, this.receiverId)
       .subscribe({
         next: (messages) => {
-          this.messages = messages;
-          this.cdRef.detectChanges(); // Force la détection des changements
-          this.scrollToBottom();
+          console.log('Messages reçus:', messages.length);
+          this.ngZone.run(() => {
+            this.messages = messages;
+            this.cdRef.detectChanges();
+            this.scrollToBottom();
+          });
         },
-        error: (err) => console.error('Error receiving messages:', err)
+        error: (err) => {
+          console.error('Erreur lors de la réception des messages:', err);
+        }
       });
   }
 
-  sendMessage(): void {
-    if (this.newMessage.trim()) {
-      this.messageService.sendMessage(
-        this.senderId,
-        this.receiverId,
-        this.newMessage.trim()
-      ).then(() => {
+  async sendMessage(): Promise<void> {
+    if (this.newMessage.trim() && this.receiverId) {
+      try {
+        console.log('Envoi du message:', {
+          from: this.senderId,
+          to: this.receiverId,
+          message: this.newMessage.trim()
+        });
+
+        await this.messageService.sendMessage(
+          this.senderId,
+          this.receiverId,
+          this.newMessage.trim()
+        );
+
         this.newMessage = '';
-      }).catch(err => {
-        console.error('Error sending message:', err);
-      });
+        console.log('Message envoyé avec succès');
+      } catch (err) {
+        console.error('Erreur lors de l\'envoi du message:', err);
+      }
+    } else {
+      console.warn('Message vide ou pas de destinataire sélectionné');
     }
   }
 

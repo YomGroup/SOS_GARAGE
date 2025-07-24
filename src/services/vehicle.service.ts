@@ -19,7 +19,14 @@ export interface Vehicle {
     nomAssurence?: string;
     typeAssurence?: string;
     etatvehicule?: string; // ou false par défaut si tu préfères
-
+    dateDerniereCg?: string;
+    energie?: string;
+    nomCommerciale?: string;
+    puissanceChevaux?: string;
+    puissanceFiscale?: string;
+    boiteVitesse?: string;
+    typeMine?: string;
+    version?: string;
 }
 
 
