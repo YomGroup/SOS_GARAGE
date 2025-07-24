@@ -21,6 +21,15 @@ function getAssuranceContactsFromStorage(): Record<string, { telephone: string, 
   imports: [CommonModule, FormsModule]
 })
 export class MissionViewComponent implements OnChanges {
+  // Permet de filtrer les documents de type 'devis' dans le template
+  isDevisDocument(doc: any): boolean {
+    return doc && typeof doc === 'object' && doc.type === 'devis';
+  }
+
+  // Permet de filtrer les documents de type 'facture' dans le template
+  isFactureDocument(doc: any): boolean {
+    return doc && typeof doc === 'object' && doc.type === 'facture';
+  }
   @Input() mission: Mission | null = null;
   @Input() dossier: any = null; // Ajout pour les dossiers non-traités
   @Input() loading: boolean = false;
@@ -85,8 +94,9 @@ export class MissionViewComponent implements OnChanges {
   ];
   assuranceSelectionnee: any = null;
 
-  // --- Service local pour lire les infos d'assurance depuis le localStorage (comme côté admin) ---
-  assuranceContactInfo: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
+  // --- Infos d'assurance récupérées via l'API (comme côté admin) ---
+  assuranceContactInfo: { nom?: string, telephone: string, email: string, adresse: string } = { nom: '', telephone: '', email: '', adresse: '' };
+  isAssuranceExistante: boolean = false;
 
   constructor(
     private missionService: MissionService, 
@@ -105,7 +115,6 @@ export class MissionViewComponent implements OnChanges {
     if (changes['mission'] || changes['dossier']) {
       this.chargerInformationsAssureEtVehicule();
       this.chargerVehiculeParMission();
-      this.loadAssuranceContactInfo();
     }
   }
 
@@ -114,7 +123,37 @@ export class MissionViewComponent implements OnChanges {
     console.log('Expertises côté garage :', this.mission?.expertises);
     this.chargerInformationsAssureEtVehicule();
     this.chargerVehiculeParMission();
-    this.loadAssuranceContactInfo();
+  }
+
+  // Nouvelle méthode : charge les infos d'assurance depuis l'API par nom
+  loadAssuranceContactInfo() {
+    const nomAssur = this.getVehiculeForMission(this.mission!)?.nomAssurence || '';
+    if (!nomAssur) {
+      this.assuranceContactInfo = { nom: '', telephone: '', email: '', adresse: '' };
+      this.isAssuranceExistante = false;
+      return;
+    }
+    // Appel API pour récupérer l'assurance par nom
+    fetch(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${encodeURIComponent(nomAssur)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(assurance => {
+        if (assurance && assurance.nom) {
+          this.assuranceContactInfo = {
+            nom: assurance.nom,
+            telephone: assurance.telephone || '',
+            email: assurance.email || '',
+            adresse: assurance.adresse || ''
+          };
+          this.isAssuranceExistante = true;
+        } else {
+          this.assuranceContactInfo = { nom: nomAssur, telephone: '', email: '', adresse: '' };
+          this.isAssuranceExistante = false;
+        }
+      })
+      .catch(() => {
+        this.assuranceContactInfo = { nom: nomAssur, telephone: '', email: '', adresse: '' };
+        this.isAssuranceExistante = false;
+      });
   }
 
   // Ajout : méthode pour charger infos client et véhicule
@@ -159,12 +198,20 @@ export class MissionViewComponent implements OnChanges {
         next: (vehicule) => {
           this.vehiculesMap.set(this.mission!.id!, vehicule);
           this.cdr.detectChanges();
+          // Charger les infos d'assurance après avoir le véhicule
+          this.loadAssuranceContactInfo();
         },
         error: () => {
           this.vehiculesMap.set(this.mission!.id!, null as any);
           this.cdr.detectChanges();
+          // Même en cas d'erreur, tenter de charger (affichera vide)
+          this.loadAssuranceContactInfo();
         }
       });
+    } else {
+      // Si pas d'ID mission, reset infos d'assurance
+      this.assuranceContactInfo = { nom: '', telephone: '', email: '', adresse: '' };
+      this.isAssuranceExistante = false;
     }
   }
 
@@ -487,32 +534,38 @@ export class MissionViewComponent implements OnChanges {
     this.cdr.detectChanges();
   }
 
-  telechargerDocument(docUrl: string) {
+  telechargerDocument(doc: any) {
+    // Accepte soit un objet {url, ...}, soit une string
+    const url = (doc && typeof doc === 'object' && doc.url) ? doc.url : doc;
+    if (!url || typeof url !== 'string') {
+      alert('URL de document invalide');
+      return;
+    }
     // Si c'est une URL Firebase, télécharger via le service
-    if (docUrl.includes('firebasestorage.googleapis.com')) {
-      this.firebaseService.downloadPdfFile(docUrl).subscribe({
+    if (url.includes('firebasestorage.googleapis.com')) {
+      this.firebaseService.downloadPdfFile(url).subscribe({
         next: (blob: Blob) => {
-          const url = window.URL.createObjectURL(blob);
+          const downloadUrl = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
-          a.href = url;
-          a.download = this.getFileNameFromUrl(docUrl);
+          a.href = downloadUrl;
+          a.download = this.getFileNameFromUrl(url);
           document.body.appendChild(a);
           a.click();
           setTimeout(() => {
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(downloadUrl);
             document.body.removeChild(a);
           }, 0);
         },
         error: (error) => {
           console.error('Erreur lors du téléchargement:', error);
-          alert(`Erreur lors du téléchargement: ${error.message}`);
+          alert(`Erreur lors du téléchargement: ${error.message || 'Erreur lors du téléchargement du fichier'}`);
         }
       });
     } else {
       // Téléchargement direct si ce n'est pas Firebase
       const a = document.createElement('a');
-      a.href = docUrl;
-      a.download = this.getFileNameFromUrl(docUrl);
+      a.href = url;
+      a.download = this.getFileNameFromUrl(url);
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -525,7 +578,11 @@ export class MissionViewComponent implements OnChanges {
 
   public getFileNameFromUrl(url: string): string {
     try {
-      return decodeURIComponent(url.split('/').pop() || '');
+      // Prend la partie après le dernier slash
+      let fileName = url.split('/').pop() || '';
+      // Retire les paramètres d’URL éventuels (après le ?)
+      fileName = fileName.split('?')[0];
+      return decodeURIComponent(fileName);
     } catch {
       return url;
     }
@@ -1043,15 +1100,7 @@ export class MissionViewComponent implements OnChanges {
     }
   }
 
-  loadAssuranceContactInfo() {
-    const nomAssurance = this.getVehiculeForMission(this.mission!)?.nomAssurence;
-    if (nomAssurance) {
-      const allContacts = getAssuranceContactsFromStorage();
-      this.assuranceContactInfo = allContacts[nomAssurance] || { telephone: '', email: '', adresse: '' };
-    } else {
-      this.assuranceContactInfo = { telephone: '', email: '', adresse: '' };
-    }
-  }
+  // ...ancienne version supprimée, la version API reste en place plus haut...
 
   // --- Méthodes pour ouvrir mailto: ou tel: depuis le template ---
   openMail(email: string) {

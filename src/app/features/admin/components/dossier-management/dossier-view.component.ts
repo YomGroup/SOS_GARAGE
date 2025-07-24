@@ -10,13 +10,16 @@ import { AssureService } from '../../../../../services/assure.service';
 import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
 import { firstValueFrom } from 'rxjs';
 import { ExpertiseService } from '../../../../../services/expertise.service';
+import { HttpClient } from '@angular/common/http';
 
-// --- Service local pour gérer les infos d'assurance dans le localStorage ---
-function getAssuranceContactsFromStorage(): Record<string, { telephone: string, email: string, adresse: string }> {
-  return JSON.parse(localStorage.getItem('assuranceContacts') || '{}');
-}
-function saveAssuranceContactsToStorage(data: Record<string, { telephone: string, email: string, adresse: string }>) {
-  localStorage.setItem('assuranceContacts', JSON.stringify(data));
+
+
+
+interface AssuranceContact {
+  nom: string;
+  telephone: string;
+  email: string;
+  adresse: string;
 }
 
 @Component({
@@ -91,11 +94,20 @@ export class DossierViewComponent implements OnChanges, OnInit {
   // Ajoute d'autres propriétés similaires pour les autres sections si besoin
 
   // --- Pour édition des infos d'assurance ---
-  assuranceContactEdit: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
-  assuranceContactOriginal: { telephone: string, email: string, adresse: string } = { telephone: '', email: '', adresse: '' };
+  assuranceContactEdit: AssuranceContact = { nom: '', telephone: '', email: '', adresse: '' };
+  assuranceContactOriginal: AssuranceContact = { nom: '', telephone: '', email: '', adresse: '' };
+  isAssuranceExistante: boolean = false;
 
   editionExpertEnCours: boolean = false;
   expertiseEdit: Partial<Expertise> = {};
+
+  // Liste des experts disponibles (à charger depuis le service)
+  expertsDisponibles: any[] = [];
+  expertSelectionneId: number | null = null;
+
+  assurancesDisponibles: string[] = [];
+  assuranceSelectionnee: string | null = null;
+  assurancesData: any = {};
 
   constructor(
     private missionService: MissionService, 
@@ -104,7 +116,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
     private dossiersService: DossiersService,
     private firebaseService: FirebaseStorageService,
     private cdr: ChangeDetectorRef,
-    private expertiseService: ExpertiseService
+    private expertiseService: ExpertiseService,
+    private http: HttpClient
   ) {}
 
   ngOnChanges(changes: SimpleChanges) {
@@ -140,19 +153,9 @@ export class DossierViewComponent implements OnChanges, OnInit {
     this.commissionStatutEdit = this.mission?.commissionStatut || '';
     this.commissionStatutOriginal = this.mission?.commissionStatut || '';
     this.chargerInformationsAssure();
-    this.chargerVehiculeSinistre(); // Ajouter l'appel ici aussi
-    // Charger les infos d'assurance si nom dispo
-    const nomAssurance = this.getVehiculeInfo(this.dossier).assurance;
-    if (nomAssurance && nomAssurance !== 'Assurance non spécifiée') {
-      const allContacts = getAssuranceContactsFromStorage();
-      if (allContacts[nomAssurance]) {
-        this.assuranceContactEdit = { ...allContacts[nomAssurance] };
-        this.assuranceContactOriginal = { ...allContacts[nomAssurance] };
-      } else {
-        this.assuranceContactEdit = { telephone: '', email: '', adresse: '' };
-        this.assuranceContactOriginal = { telephone: '', email: '', adresse: '' };
-      }
-    }
+    this.chargerVehiculeSinistre();
+    this.chargerAssurancesJson();
+    this.chargerExpertsDisponibles();
   }
 
   close() {
@@ -213,10 +216,10 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
 
     // Champs financiers ajoutés
-    if (this.missionEdit.montantStatue !== undefined && this.missionEdit.montantStatue !== null) {
-      const montantStatue = Number(this.missionEdit.montantStatue);
-      if (!isNaN(montantStatue) && montantStatue >= 0) {
-        missionUpdate.montantStatue = montantStatue;
+    if (this.missionEdit.factureFinale !== undefined && this.missionEdit.factureFinale !== null) {
+      const factureFinale = Number(this.missionEdit.factureFinale);
+      if (!isNaN(factureFinale) && factureFinale >= 0) {
+        missionUpdate.factureFinale = factureFinale;
       }
     }
     if (this.missionEdit.franchiseApplicable !== undefined && this.missionEdit.franchiseApplicable !== null) {
@@ -233,7 +236,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
     // Calcul et sauvegarde du montant de la commission
     missionUpdate.commissionMontant = this.calculerCommission(
-      this.missionEdit.montantStatue,
+      this.missionEdit.factureFinale,
       this.missionEdit.franchiseApplicable,
       this.missionEdit.commissionPourcentage
     );
@@ -242,6 +245,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
     this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
       next: (updatedMission) => {
+
         console.log('Mission mise à jour avec succès:', updatedMission);
         this.editionEnCours = false;
         this.missionEdit = { documentsAssurance: [] };
@@ -309,7 +313,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
       reparation: null,
       declareCommeEpave: false,
       epaveValideeParAdmin: false,
-      dateDeclarationEpave: ''
+      dateDeclarationEpave: '',
+      assure: this.assureInfo?.id ?? 0
     };
     this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
       next: (mission) => {
@@ -410,6 +415,54 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (!this.missionEdit.documentsAssurance) return;
     this.missionEdit.documentsAssurance = this.missionEdit.documentsAssurance.filter((_: any, i: number) => i !== index);
     this.cdr.detectChanges();
+  }
+
+  chargerAssurancesJson() {
+  this.http.get<any>('assets/assurances.json').subscribe(data => {
+    this.assurancesData = data;
+    this.assurancesDisponibles = Object.keys(data);
+    // Pré-remplir si le véhicule a déjà une assurance
+    const nomAssurance = this.getVehiculeInfo(this.dossier)?.assurance;
+    if (nomAssurance) {
+      this.assuranceSelectionnee = this.assurancesDisponibles.includes(nomAssurance) ? nomAssurance : null;
+      this.onAssuranceSelected();
+    }
+  });
+}
+
+  onAssuranceSelected() {
+    const nom = this.assuranceSelectionnee || this.getVehiculeInfo(this.dossier)?.assurance || '';
+    if (!nom) {
+      this.assuranceContactEdit = { nom: '', telephone: '', email: '', adresse: '' };
+      this.assuranceContactOriginal = { ...this.assuranceContactEdit };
+      this.isAssuranceExistante = false;
+      return;
+    }
+    // Appel direct à l'API pour récupérer l'assurance par nom
+    this.http.get<any>(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${encodeURIComponent(nom)}`).subscribe(
+      (assurance) => {
+        if (assurance && assurance.nom) {
+          this.assuranceContactEdit = {
+            nom: assurance.nom,
+            telephone: assurance.telephone || '',
+            email: assurance.email || '',
+            adresse: assurance.adresse || ''
+          };
+          this.assuranceContactOriginal = { ...this.assuranceContactEdit };
+          this.isAssuranceExistante = true;
+        } else {
+          this.assuranceContactEdit = { nom, telephone: '', email: '', adresse: '' };
+          this.assuranceContactOriginal = { ...this.assuranceContactEdit };
+          this.isAssuranceExistante = false;
+        }
+      },
+      (err) => {
+        // Si non trouvé, on laisse vide sauf le nom
+        this.assuranceContactEdit = { nom, telephone: '', email: '', adresse: '' };
+        this.assuranceContactOriginal = { ...this.assuranceContactEdit };
+        this.isAssuranceExistante = false;
+      }
+    );
   }
 
   telechargerDocument(docUrl: string) {
@@ -878,33 +931,109 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
   }
 
+  
+
+  // Méthode pour charger les experts depuis le service (adapte le nom du service si besoin)
+  chargerExpertsDisponibles() {
+    this.expertiseService.getExpertsFromExpertises().subscribe({
+      next: (experts: any[]) => {
+        this.expertsDisponibles = experts;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des experts:', err);
+        this.expertsDisponibles = [];
+      }
+    });
+  }
+
+  onExpertSelected() {
+  if (this.expertSelectionneId === null) {
+    // Saisie manuelle : on vide les champs
+    this.expertiseEdit.nomExpert = '';
+    this.expertiseEdit.prenomExpert = '';
+    this.expertiseEdit.institutionExpert = '';
+    this.expertiseEdit.contactExpert = '';
+    this.expertiseEdit.mailExpert = '';
+  } else {
+    // Remplir avec les infos de l’expert sélectionné
+    const expert = this.expertsDisponibles[this.expertSelectionneId];
+    if (expert) {
+      this.expertiseEdit.nomExpert = expert.nom;
+      this.expertiseEdit.prenomExpert = expert.prenom;
+      this.expertiseEdit.institutionExpert = expert.institution;
+      this.expertiseEdit.contactExpert = expert.telephone;
+      this.expertiseEdit.mailExpert = expert.email;
+    }
+  }
+}
+  
+
+
   isImageOrPdf(url: string): boolean {
     return /\.(pdf|jpg|jpeg|png)$/i.test(url);
   }
 
-  // Méthode pour sauvegarder les infos d'assurance
+
+
+
+  // Nouvelle méthode pour sauvegarder les infos d'assurance via l'API backend
   saveAssuranceContact() {
-    const nomAssurance = this.getVehiculeInfo(this.dossier).assurance;
-    if (!nomAssurance || nomAssurance === 'Assurance non spécifiée') return;
-    const allContacts = getAssuranceContactsFromStorage();
-    allContacts[nomAssurance] = { ...this.assuranceContactEdit };
-    saveAssuranceContactsToStorage(allContacts);
-    this.assuranceContactOriginal = { ...this.assuranceContactEdit };
-    alert('Informations de contact de l\'assurance enregistrées !');
+    // Récupère le nom de l'assurance du véhicule (toujours utilisé comme nom principal)
+    const vehiculeInfo = this.getVehiculeInfo(this.dossier);
+    const nom = vehiculeInfo?.assurance || this.assuranceContactEdit.nom;
+    if (!nom) return;
+    // Construction de l'objet à envoyer
+    const assurance = {
+      nom: nom,
+      telephone: this.assuranceContactEdit.telephone,
+      email: this.assuranceContactEdit.email,
+      adresse: this.assuranceContactEdit.adresse
+    };
+    // Vérifier si l'assurance existe déjà (par nom)
+    this.http.get<any[]>("https://sosmongarage-production.up.railway.app/V1/api/assurances").subscribe(
+      (assurances) => {
+        const existante = assurances.find(a => a.nom === nom);
+        if (existante) {
+          // Mise à jour (PUT)
+          this.http.put(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${existante.id}`, { ...existante, ...assurance }).subscribe(
+            () => {
+              this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
+              alert("Informations de contact de l'assurance mises à jour dans la base de données !");
+            },
+            (err) => {
+              alert("Erreur lors de la mise à jour de l'assurance : " + err.message);
+            }
+          );
+        } else {
+          // Création (POST)
+          this.http.post("https://sosmongarage-production.up.railway.app/V1/api/assurances", assurance).subscribe(
+            () => {
+              this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
+              alert("Nouvelle assurance enregistrée dans la base de données !");
+            },
+            (err) => {
+              alert("Erreur lors de l'enregistrement de l'assurance : " + err.message);
+            }
+          );
+        }
+      },
+      (err) => {
+        alert("Erreur lors de la vérification des assurances existantes : " + err.message);
+      }
+    );
   }
 
   // Calcul de la commission
-  calculerCommission(montantStatue: number, franchiseApplicable: number, commissionPourcentage: number): number {
+  calculerCommission(factureFinale: number, franchiseApplicable: number, commissionPourcentage: number): number {
     if (
-      montantStatue != null &&
       franchiseApplicable != null &&
       commissionPourcentage != null &&
-      !isNaN(montantStatue) &&
+      !isNaN(factureFinale) &&
       !isNaN(franchiseApplicable) &&
       !isNaN(commissionPourcentage)
     ) {
-      return (montantStatue - franchiseApplicable) * (commissionPourcentage / 100);
+      return (factureFinale - franchiseApplicable) * (commissionPourcentage / 100);
     }
     return 0;
   }
-} 
+}

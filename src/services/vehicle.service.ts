@@ -18,7 +18,7 @@ export interface Vehicle {
     imgUrl?: string;
     nomAssurence?: string;
     typeAssurence?: string;
-    etatvehicule?: string; // ou false par défaut si tu préfères
+    etatvehicule?: string; 
 
 }
 
