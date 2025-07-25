@@ -110,35 +110,35 @@ export class DossierViewComponent implements OnChanges, OnInit {
   assurancesData: any = {};
 
   constructor(
-    private missionService: MissionService, 
-    private reparateurService: ReparateurService, 
+    private missionService: MissionService,
+    private reparateurService: ReparateurService,
     private assureService: AssureService,
     private dossiersService: DossiersService,
     private firebaseService: FirebaseStorageService,
     private cdr: ChangeDetectorRef,
     private expertiseService: ExpertiseService,
     private http: HttpClient
-  ) {}
+  ) { }
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('ngOnChanges triggered with changes:', changes);
     console.log('Current dossier:', this.dossier);
     console.log('Current mission:', this.mission);
-    
+
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();
     }
     if (!this.mission && this.sinistre) {
       this.chargerReparateursValides();
     }
-    
+
     // Charger automatiquement les informations de l'assuré si la mission ou le dossier change
     if (changes['mission'] || changes['dossier']) {
       console.log('Mission or dossier changed, loading data...');
       this.chargerInformationsAssure();
       this.chargerVehiculeSinistre();
     }
-    
+
     // Si on a un dossier mais pas de mission, forcer le chargement des données
     if (this.dossier && !this.mission) {
       console.log('Dossier without mission detected, loading data...');
@@ -184,9 +184,9 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   enregistrerModification() {
     if (!this.mission) return;
-    
+
     const missionUpdate: MissionUpdate = {};
-    
+
     // Validation et conversion des données
     if (this.missionEdit.devis !== undefined && this.missionEdit.devis !== null) {
       const devis = Number(this.missionEdit.devis);
@@ -194,18 +194,18 @@ export class DossierViewComponent implements OnChanges, OnInit {
         missionUpdate.devis = devis;
       }
     }
-    
+
     if (this.missionEdit.factureFinale !== undefined && this.missionEdit.factureFinale !== null) {
       const facture = Number(this.missionEdit.factureFinale);
       if (!isNaN(facture) && facture >= 0) {
         missionUpdate.factureFinale = facture;
       }
     }
-    
+
     if (this.missionEdit.pretVehicule !== undefined) {
       missionUpdate.pretVehicule = Boolean(this.missionEdit.pretVehicule);
     }
-    
+
     if (this.missionEdit.statut && ['en attente', 'en cours', 'terminée'].includes(this.missionEdit.statut)) {
       missionUpdate.statut = this.missionEdit.statut;
     }
@@ -267,16 +267,16 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (!mission) return false;
     return Array.isArray(mission.photosVehicule) && mission.photosVehicule.length > 0;
   }
-  
+
   getDossier(dossier: Dossier): Dossier {
     return dossier;
   }
-  
+
   chargerReparateursValides() {
     this.reparateurService.getAllReparateurs().subscribe({
       next: (reps) => {
         console.log('Réparateurs reçus:', reps); // 👈 Inspecte ici
-  
+
         this.reparateursValides = reps.filter(r => {
           console.log('Champ isvalids:', r.isvalids); // 👈 Que contient ce champ ?
           return r.isvalids?.toLowerCase() === 'valide';
@@ -365,17 +365,17 @@ export class DossierViewComponent implements OnChanges, OnInit {
     Promise.all(uploadPromises)
       .then((downloadURLs: string[]) => {
         console.log('Documents uploadés:', downloadURLs);
-        
+
         // Ajouter les URLs aux documents existants
         if (!this.missionEdit.documentsAssurance) {
           this.missionEdit.documentsAssurance = [];
         }
-        
+
         this.missionEdit.documentsAssurance = [
           ...this.missionEdit.documentsAssurance,
           ...downloadURLs
         ];
-        
+
         this.uploadingFiles = false;
         this.cdr.detectChanges();
         console.log('Documents ajoutés avec succès');
@@ -389,9 +389,9 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   supprimerDocument(index: number) {
     if (!this.missionEdit.documentsAssurance) return;
-    
+
     const documentUrl = this.missionEdit.documentsAssurance[index];
-    
+
     // Supprimer de Firebase si c'est une URL Firebase
     if (documentUrl && documentUrl.includes('firebasestorage.googleapis.com')) {
       this.firebaseService.deletePdfFile(documentUrl).subscribe({
@@ -418,17 +418,17 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   chargerAssurancesJson() {
-  this.http.get<any>('assets/assurances.json').subscribe(data => {
-    this.assurancesData = data;
-    this.assurancesDisponibles = Object.keys(data);
-    // Pré-remplir si le véhicule a déjà une assurance
-    const nomAssurance = this.getVehiculeInfo(this.dossier)?.assurance;
-    if (nomAssurance) {
-      this.assuranceSelectionnee = this.assurancesDisponibles.includes(nomAssurance) ? nomAssurance : null;
-      this.onAssuranceSelected();
-    }
-  });
-}
+    this.http.get<any>('assets/assurances.json').subscribe(data => {
+      this.assurancesData = data;
+      this.assurancesDisponibles = Object.keys(data);
+      // Pré-remplir si le véhicule a déjà une assurance
+      const nomAssurance = this.getVehiculeInfo(this.dossier)?.assurance;
+      if (nomAssurance) {
+        this.assuranceSelectionnee = this.assurancesDisponibles.includes(nomAssurance) ? nomAssurance : null;
+        this.onAssuranceSelected();
+      }
+    });
+  }
 
   onAssuranceSelected() {
     const nom = this.assuranceSelectionnee || this.getVehiculeInfo(this.dossier)?.assurance || '';
@@ -508,7 +508,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
           return fileNameMatch[1];
         }
       }
-      
+
       // Fallback pour les autres URLs
       const urlObj = new URL(url);
       const pathname = urlObj.pathname;
@@ -536,16 +536,16 @@ export class DossierViewComponent implements OnChanges, OnInit {
     // 1. Vérifications initiales + conversion explicite en number
     if (!this.mission || this.selectedReparateurId === null) return;
     const selectedId = +this.selectedReparateurId; // Conversion en number
-  
+
     // 2. Trouve le réparateur (avec vérification de type)
     const nouveauReparateur = this.reparateursValides.find(r => r.id === selectedId);
-    
+
     if (!nouveauReparateur) {
       this.attributionError = true;
       this.attributionMessage = 'Réparateur introuvable.';
       return;
     }
-    
+
     // 3. Appel API
     this.missionService.updateMissionReparateur(this.mission.id!, nouveauReparateur).subscribe({
       next: (missionMaj) => {
@@ -566,9 +566,9 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (!this.mission || this.commissionStatutEdit === this.mission.commissionStatut) {
       return;
     }
-  
+
     this.savingCommission = true;
-  
+
     // Appel API simple avec les données minimales
     this.missionService.updateMissionPartial(this.mission.id!, {
       commissionStatut: this.commissionStatutEdit
@@ -576,19 +576,19 @@ export class DossierViewComponent implements OnChanges, OnInit {
       next: (missionMaj) => {
         console.log('Avant mise à jour - commissionStatutEdit:', this.commissionStatutEdit);
         console.log('Avant mise à jour - mission.commissionStatut:', this.mission?.commissionStatut);
-        
+
         this.mission = missionMaj;
         // Mettre à jour commissionStatutEdit pour refléter la nouvelle valeur
         this.commissionStatutEdit = missionMaj.commissionStatut || '';
         this.commissionStatutOriginal = missionMaj.commissionStatut || '';
-        
+
         console.log('Après mise à jour - commissionStatutEdit:', this.commissionStatutEdit);
         console.log('Après mise à jour - mission.commissionStatut:', this.mission?.commissionStatut);
         console.log('Après mise à jour - commissionStatutOriginal:', this.commissionStatutOriginal);
-        
+
         this.commissionStatusUpdated.emit(missionMaj);
         this.savingCommission = false;
-        
+
         // Forcer la détection de changements avec un délai
         setTimeout(() => {
           this.cdr.detectChanges();
@@ -615,7 +615,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
   chargerInformationsAssure() {
     // Récupérer l'ID du sinistre depuis la mission ou le dossier
     const sinistreId = this.mission?.sinistre?.id || this.dossier?.id;
-    
+
     if (!sinistreId) {
       console.log('Aucun ID de sinistre disponible pour récupérer les informations de l\'assuré');
       return;
@@ -638,7 +638,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
   // Méthode pour charger le véhicule du sinistre
   chargerVehiculeSinistre() {
     console.log('chargerVehiculeSinistre called. Current dossier:', this.dossier);
-    
+
     // Utiliser directement les données du véhicule depuis dossier.vehicule
     if (this.dossier?.vehicule) {
       console.log('Utilisation des données du véhicule depuis dossier.vehicule:', this.dossier.vehicule);
@@ -664,7 +664,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (!this.mission && this.dossier?.id) {
       this.loadingVehicule = true;
       console.log('Appel API pour récupérer le véhicule pour dossierId:', this.dossier.id);
-      
+
       this.dossiersService.getVehiculeBySinistreId(this.dossier.id).subscribe({
         next: (vehicule) => {
           console.log('Véhicule du dossier récupéré via API:', vehicule);
@@ -691,7 +691,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
     this.loadingVehicule = true;
     console.log('Appel API pour récupérer le véhicule pour sinistreId:', sinistreId);
-    
+
     this.dossiersService.getVehiculeBySinistreId(sinistreId).subscribe({
       next: (vehicule) => {
         console.log('Véhicule du sinistre récupéré via API:', vehicule);
@@ -714,7 +714,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
     // Utiliser directement les véhicules de l'assuré depuis l'interface Assure
     if (this.assureInfo.vehicules && this.assureInfo.vehicules.length > 0) {
-      return this.assureInfo.vehicules.find(vehicule => 
+      return this.assureInfo.vehicules.find(vehicule =>
         vehicule.sinistres && vehicule.sinistres.some(s => s.id === this.mission?.sinistre?.id)
       );
     }
@@ -764,33 +764,33 @@ export class DossierViewComponent implements OnChanges, OnInit {
   getVehiculeInfo(dossier: any): any {
     console.log('getVehiculeInfo called with dossier:', dossier);
     console.log('vehiculeSinistre:', this.vehiculeSinistre);
-    
+
     // Si on a un véhicule dans le dossier, l'utiliser en priorité
     if (dossier?.vehicule) {
       console.log('Using dossier.vehicule:', dossier.vehicule);
       return {
         marque: dossier.vehicule.marque || 'Marque non spécifiée',
         modele: dossier.vehicule.modele || 'Modèle non spécifié',
-        annee: dossier.vehicule.dateMiseEnCirculation ? 
+        annee: dossier.vehicule.dateMiseEnCirculation ?
           dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
         immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
         assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
       };
     }
-    
+
     // Si pas de véhicule dans le dossier mais qu'on a un véhiculeSinistre chargé
     if (this.vehiculeSinistre) {
       console.log('Using vehiculeSinistre:', this.vehiculeSinistre);
       return {
         marque: this.vehiculeSinistre.marque || 'Marque non spécifiée',
         modele: this.vehiculeSinistre.modele || 'Modèle non spécifié',
-        annee: this.vehiculeSinistre.dateMiseEnCirculation ? 
+        annee: this.vehiculeSinistre.dateMiseEnCirculation ?
           this.vehiculeSinistre.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
         immatriculation: this.vehiculeSinistre.immatriculation || 'Immatriculation non spécifiée',
         assurance: this.vehiculeSinistre.nomAssurence || 'Assurance non spécifiée'
       };
     }
-    
+
     // Si on a un véhicule via l'assuré (quand il y a une mission)
     const vehiculeAssure = this.getVehiculeAssure();
     if (vehiculeAssure) {
@@ -798,13 +798,13 @@ export class DossierViewComponent implements OnChanges, OnInit {
       return {
         marque: vehiculeAssure.marque || 'Marque non spécifiée',
         modele: vehiculeAssure.modele || 'Modèle non spécifié',
-        annee: vehiculeAssure.dateMiseEnCirculation ? 
+        annee: vehiculeAssure.dateMiseEnCirculation ?
           vehiculeAssure.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
         immatriculation: vehiculeAssure.immatriculation || 'Immatriculation non spécifiée',
         assurance: vehiculeAssure.nomAssurence || 'Assurance non spécifiée'
       };
     }
-    
+
     console.log('Using default values');
     // Valeurs par défaut si aucune source n'est disponible
     return {
@@ -931,7 +931,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
   }
 
-  
+
 
   // Méthode pour charger les experts depuis le service (adapte le nom du service si besoin)
   chargerExpertsDisponibles() {
@@ -947,26 +947,26 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   onExpertSelected() {
-  if (this.expertSelectionneId === null) {
-    // Saisie manuelle : on vide les champs
-    this.expertiseEdit.nomExpert = '';
-    this.expertiseEdit.prenomExpert = '';
-    this.expertiseEdit.institutionExpert = '';
-    this.expertiseEdit.contactExpert = '';
-    this.expertiseEdit.mailExpert = '';
-  } else {
-    // Remplir avec les infos de l’expert sélectionné
-    const expert = this.expertsDisponibles[this.expertSelectionneId];
-    if (expert) {
-      this.expertiseEdit.nomExpert = expert.nom;
-      this.expertiseEdit.prenomExpert = expert.prenom;
-      this.expertiseEdit.institutionExpert = expert.institution;
-      this.expertiseEdit.contactExpert = expert.telephone;
-      this.expertiseEdit.mailExpert = expert.email;
+    if (this.expertSelectionneId === null) {
+      // Saisie manuelle : on vide les champs
+      this.expertiseEdit.nomExpert = '';
+      this.expertiseEdit.prenomExpert = '';
+      this.expertiseEdit.institutionExpert = '';
+      this.expertiseEdit.contactExpert = '';
+      this.expertiseEdit.mailExpert = '';
+    } else {
+      // Remplir avec les infos de l’expert sélectionné
+      const expert = this.expertsDisponibles[this.expertSelectionneId];
+      if (expert) {
+        this.expertiseEdit.nomExpert = expert.nom;
+        this.expertiseEdit.prenomExpert = expert.prenom;
+        this.expertiseEdit.institutionExpert = expert.institution;
+        this.expertiseEdit.contactExpert = expert.telephone;
+        this.expertiseEdit.mailExpert = expert.email;
+      }
     }
   }
-}
-  
+
 
 
   isImageOrPdf(url: string): boolean {
@@ -1036,4 +1036,20 @@ export class DossierViewComponent implements OnChanges, OnInit {
     }
     return 0;
   }
+
+getJoursRestants(): number | null {
+  const debut = this.mission?.dateDebutTravaux ? new Date(this.mission.dateDebutTravaux) : null;
+  const delai = this.mission?.delaiEstime ?? null;
+
+  if (!debut || delai === null) return null;
+
+  const dateFin = new Date(debut);
+  dateFin.setDate(dateFin.getDate() + delai);
+
+  const aujourdHui = new Date();
+  const diffTime = dateFin.getTime() - aujourdHui.getTime();
+  const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  return diffJours;
+}
 }

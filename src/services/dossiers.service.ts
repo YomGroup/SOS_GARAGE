@@ -6,6 +6,7 @@ import { Vehicule, Assure, Expert } from './models-api.interface';
 
 export interface Dossier {
   id: number;
+  createdAt: string;
   type: string;
   contactAssistance: string;
   lienConstat: string;
