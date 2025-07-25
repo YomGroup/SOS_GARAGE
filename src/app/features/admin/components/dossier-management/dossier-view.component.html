@@ -199,11 +199,17 @@
               </div>
               <div class="form-group">
                 <label>Email</label>
-                <div class="readonly-field">{{ assureInfo.email }}</div>
+                <div class="readonly-field d-flex align-items-center gap-2">
+                  {{ assureInfo.email }}
+                  <button *ngIf="assureInfo.email" class="btn btn-outline-primary btn-sm" (click)="$event.stopPropagation(); openMail(assureInfo.email)"><i class="fas fa-envelope"></i></button>
+                </div>
               </div>
               <div class="form-group">
                 <label>Téléphone</label>
-                <div class="readonly-field">{{ assureInfo.telephone }}</div>
+                <div class="readonly-field d-flex align-items-center gap-2">
+                  {{ assureInfo.telephone }}
+                  <button *ngIf="assureInfo.telephone" class="btn btn-outline-success btn-sm" (click)="$event.stopPropagation(); openTel(assureInfo.telephone)"><i class="fas fa-phone"></i></button>
+                </div>
               </div>
               <div class="form-group">
                 <label>Adresse</label>
@@ -318,12 +324,16 @@
               </div>
               <div class="form-group">
                 <label>Email</label>
-                <div class="readonly-field">{{ mission.reparateur.email }}</div>
+                <div class="readonly-field d-flex align-items-center gap-2">
+                  {{ mission.reparateur.email }}
+                  <button *ngIf="mission.reparateur.email" class="btn btn-outline-primary btn-sm" (click)="$event.stopPropagation(); openMail(mission.reparateur.email)"><i class="fas fa-envelope"></i></button>
+                </div>
               </div>
               <div class="form-group">
                 <label>Téléphone</label>
-                <div class="readonly-field">
+                <div class="readonly-field d-flex align-items-center gap-2">
                   {{ mission.reparateur.telephone }}
+                  <button *ngIf="mission.reparateur.telephone" class="btn btn-outline-success btn-sm" (click)="$event.stopPropagation(); openTel(mission.reparateur.telephone)"><i class="fas fa-phone"></i></button>
                 </div>
               </div>
               <div class="form-group">
@@ -874,14 +884,16 @@
                 </div>
                 <div class="form-group">
                   <label>Contact de l'expert</label>
-                  <div class="readonly-field">
+                  <div class="readonly-field d-flex align-items-center gap-2">
                     {{ expertiseCourante?.contactExpert || "Non renseigné" }}
+                    <button *ngIf="expertiseCourante?.contactExpert" class="btn btn-outline-success btn-sm" (click)="$event.stopPropagation(); openTel(expertiseCourante.contactExpert)"><i class="fas fa-phone"></i></button>
                   </div>
                 </div>
                 <div class="form-group">
                   <label>Email de l'expert</label>
-                  <div class="readonly-field">
+                  <div class="readonly-field d-flex align-items-center gap-2">
                     {{ expertiseCourante?.mailExpert || "Non renseigné" }}
+                    <button *ngIf="expertiseCourante?.mailExpert" class="btn btn-outline-primary btn-sm" (click)="$event.stopPropagation(); openMail(expertiseCourante.mailExpert)"><i class="fas fa-envelope"></i></button>
                   </div>
                 </div>
                 <div class="form-group">

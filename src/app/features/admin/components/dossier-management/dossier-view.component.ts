@@ -1062,4 +1062,12 @@ getJoursRestants(): number | null {
 
   return diffJours;
 }
+
+  // Méthodes utilitaires pour ouvrir mail ou téléphone depuis le template
+  openMail(email: string) {
+    window.open('mailto:' + email, '_blank');
+  }
+  openTel(tel: string) {
+    window.open('tel:' + tel, '_blank');
+  }
 }
