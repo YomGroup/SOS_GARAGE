@@ -773,8 +773,18 @@ export class DossierViewComponent implements OnChanges, OnInit {
         modele: dossier.vehicule.modele || 'Modèle non spécifié',
         annee: dossier.vehicule.dateMiseEnCirculation ?
           dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+        dateDerniereCg: dossier.vehicule.dateDerniereCg || 'Date dernière CG non spécifiée',
         immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
-        assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+        assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée',
+        energie: dossier.vehicule.energie || 'Energie non spécifiée',
+        nomCommerciale: dossier.vehicule.nomCommerciale || 'Nom commercial non spécifié',
+        puissanceChevaux: dossier.vehicule.puissanceChevaux || 'Puissance non spécifiée',
+        puissanceFiscale: dossier.vehicule.puissanceFiscale || 'Puissance fiscale non spécifiée',
+        boiteVitesse: dossier.vehicule.boiteVitesse || 'Boite de vitesse non spécifiée',
+        typeMine: dossier.vehicule.typeMine || 'Type mine non spécifié',
+        version: dossier.vehicule.version || 'Version non spécifiée',
+        carteGrise: dossier.vehicule.carteGrise || 'Carte grise non spécifiée'
+        
       };
     }
 

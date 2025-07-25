@@ -543,23 +543,21 @@
                   }}
                 </div>
               </div>
-              <div
-                class="form-group"
-                *ngIf="
-                  dossier?.vehicule?.carteGrise ||
-                  vehiculeSinistre?.carteGrise ||
-                  getVehiculeAssure()?.carteGrise
-                "
-              >
+              <div class="form-group">
                 <label>Carte grise</label>
                 <div class="readonly-field">
-                  {{
-                    dossier?.vehicule?.carteGrise ||
-                      vehiculeSinistre?.carteGrise ||
-                      getVehiculeAssure()?.carteGrise
-                  }}
+                  <ng-container *ngIf="getVehiculeInfo(dossier).carteGrise && getVehiculeInfo(dossier).carteGrise.startsWith('http'); else carteGriseTexte">
+                    <a [href]="getVehiculeInfo(dossier).carteGrise" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2" style="text-decoration:none;">
+                      <i class="fas fa-file-pdf me-1"></i>
+                      Voir / Télécharger la carte grise
+                    </a>
+                  </ng-container>
+                  <ng-template #carteGriseTexte>
+                    <span class="text-muted">{{ getVehiculeInfo(dossier).carteGrise || 'Carte grise non spécifiée' }}</span>
+                  </ng-template>
                 </div>
               </div>
+
               <div
                 class="form-group"
                 *ngIf="
