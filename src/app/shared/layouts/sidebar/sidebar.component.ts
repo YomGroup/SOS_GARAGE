@@ -118,10 +118,19 @@ export class SidebarComponent implements OnInit {
         route: this.userRoles.includes('ROLE_GARAGISTE')
           ? '/garage/messages'
           : this.userRoles.includes('ROLE_ADMIN')
-            ? '/admin/messages'
+            ? '/admin/message'
             : this.userRoles.includes('ROLE_ASSURE')
               ? '/clientDashboard/message'
               : '/message',
+        badge: '2'
+      },
+      {
+        title: 'Message',
+        icon: 'bi bi-envelope',
+        route: this.userRoles.includes('ROLE_GARAGISTE')
+          ? '/garage/messages' : '#',
+
+
         badge: '2'
       },
       {
@@ -196,12 +205,12 @@ export class SidebarComponent implements OnInit {
   onSubmenuClick(event: MouseEvent, parent: MenuItem, child: MenuItem) {
     event.preventDefault();
     event.stopPropagation();
-    
+
     // Toujours développer le parent d'abord
     if (!parent.expanded) {
       parent.expanded = true;
     }
-    
+
     // Appliquer le filtre
     if (parent.title === 'Gestion des réparations') {
       this.onMissionFilterClick(event, child.filter || '');
@@ -216,7 +225,7 @@ export class SidebarComponent implements OnInit {
         this.router.navigate([parent.route]);
       }
     }
-    
+
     if (this.isMobile) {
       this.closeSidebar.emit();
     }

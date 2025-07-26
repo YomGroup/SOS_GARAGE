@@ -19,10 +19,13 @@ const routes: Routes = [
       { path: 'reparations', component: ReparationManagementComponent },
       { path: 'communication', component: CommunicationComponent },
       { path: 'statistiques', component: StatisticsComponent },
-      { path: 'messages', component: MessageComponent },
-      { path: 'profil', component: MessageComponent },
+      { path: 'messagesss', component: MessageComponent },
+
+      { path: 'message', component: MessageComponent },
+      { path: 'profil', component: GarageProfileComponent },
       { path: 'finance', component: GarageFinanceComponent },
       { path: '', redirectTo: 'statistiques', pathMatch: 'full' }
+
     ]
   }
 ];

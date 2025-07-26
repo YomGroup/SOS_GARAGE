@@ -51,9 +51,7 @@
               {{ item.vehicle.marque }} {{ item.vehicle.modele }} - {{ item.vehicle.immatriculation }}
             </p>
             <small class="text-muted">Ajouté le {{ getDocumentDate(item.doc.createdAt) }}</small>
-            <div class="mt-2">
-              <span class="badge bg-light text-dark">{{ item.doc.fichier }}</span>
-            </div>
+           
           </div>
           <div class="document-actions">
             <button class="btn btn-sm btn-outline-primary" title="Voir" (click)="onView(item.doc)">
