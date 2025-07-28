@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../environments/environment';
 
 export interface Vehicule {
     id: number;
@@ -47,8 +48,8 @@ export interface ASSURE {
     providedIn: 'root'
 })
 export class AssureService {
-    private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/assure';
-    private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/assure';
+    private apiUrl = `${environment.apiUrl}/assure`;
+    private apiUrlAdd = `${environment.apiUrl}/assure`;
 
     private http = inject(HttpClient);
 
@@ -74,6 +75,6 @@ export class AssureService {
         return null;
     }
     getAssurerID(id: string) {
-        return this.http.get(`https://sosmongarage-production.up.railway.app/V1/api/assure/keycloak/${id}`);
+        return this.http.get(`${environment.apiUrl}/assure/keycloak/${id}`);
     }
 }

@@ -3,6 +3,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { jwtDecode } from 'jwt-decode';
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { environment } from '../environments/environment';
 
 export interface DecodedToken {
     preferred_username: string;
@@ -30,9 +31,9 @@ export interface Assure {
 })
 export class AuthService {
     private decodedToken: DecodedToken | null = null;
-    private apiUrl = ' https://sosmongarage-production.up.railway.app/V1/api/assure';
+    private apiUrl = `${environment.apiUrl}/assure`;
 
-    private apiUrlgarage = 'https://sosmongarage-production.up.railway.app/V1/api/reparateurs';
+    private apiUrlgarage = `${environment.apiUrl}/reparateurs`;
     private http = inject(HttpClient);
 
     constructor(private keycloakService: KeycloakService) { }

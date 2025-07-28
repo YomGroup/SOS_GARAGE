@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface Notification {
     id: string;
@@ -65,6 +66,6 @@ export class NotificationService {
     }
 
     getUserNotifications(): Observable<Notification[]> {
-        return this.http.get<Notification[]>('https://sosmongarage-production.up.railway.app/V1/api/notifications');
+        return this.http.get<Notification[]>(`${environment.apiUrl}/notifications`);
     }
 }

@@ -24,6 +24,7 @@ export interface Vehicule {
   id?: number;
   marque?: string;
   modele?: string;
+
 }
 
 export enum TypeSinistre {
@@ -163,6 +164,14 @@ export interface Vehicule {
     imgUrl: string[];
     sinistres: Sinistre[];
     nomAssurence: string;
+    dateDerniereCg?: string;
+    energie?: string;
+    nomCommerciale?: string;
+    puissanceChevaux?: string;
+    puissanceFiscale?: string;
+    boiteVitesse?: string;
+    typeMine?: string;
+    version?: string;
     
   }
 
