@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map, tap, switchMap } from 'rxjs/operators';
 import { Vehicule, Assure, Expert } from './models-api.interface';
+import { environment } from '../environments/environment';
 
 export interface Dossier {
   id: number;
@@ -37,7 +38,7 @@ export interface Dossier {
   providedIn: 'root'
 })
 export class DossiersService {
-  private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/sinistre';
+  private apiUrl = `${environment.apiUrl}/sinistre`;
 
   constructor(private http: HttpClient) {}
 
@@ -65,7 +66,7 @@ export class DossiersService {
   }
 
   getAssureFromSinistreId(sinistreId: number): Observable<Assure> {
-    return this.http.get<Assure>(`https://sosmongarage-production.up.railway.app/V1/api/assure/assure/${sinistreId}`);
+    return this.http.get<Assure>(`${environment.apiUrl}/assure/assure/${sinistreId}`);
   }
 
   updateStatutSinistre(id: number, statut: string): Observable<any> {

@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Expertise } from './models-api.interface';
 import { map } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ExpertiseService {
-  private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/expertises';
+  private apiUrl = `${environment.apiUrl}/expertises`;
 
   constructor(private http: HttpClient) {}
 

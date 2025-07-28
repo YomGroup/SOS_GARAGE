@@ -3,12 +3,13 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, forkJoin, throwError } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Mission, Assure, Vehicule , Sinistre, Reparateur, DocumentsSinistre, Notification, Avantage, Reparation, Message, MissionUpdate} from './models-api.interface';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MissionService {
-  private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) { }
 

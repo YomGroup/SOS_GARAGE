@@ -8,6 +8,7 @@ import { DossiersService } from '../../../../../services/dossiers.service';
 import { ExpertService } from '../../../../../services/expert.service';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 function getAssuranceContactsFromStorage(): Record<string, { telephone: string, email: string, adresse: string }> {
   return JSON.parse(localStorage.getItem('assuranceContacts') || '{}');
@@ -134,7 +135,7 @@ export class MissionViewComponent implements OnChanges {
       return;
     }
     // Appel API pour récupérer l'assurance par nom
-    fetch(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${encodeURIComponent(nomAssur)}`)
+    fetch(`${environment.apiUrl}/assurances/${encodeURIComponent(nomAssur)}`)
       .then(r => r.ok ? r.json() : null)
       .then(assurance => {
         if (assurance && assurance.nom) {

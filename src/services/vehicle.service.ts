@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
+import { environment } from '../environments/environment';
 
 export interface Vehicle {
     id: string;
@@ -39,10 +40,10 @@ export interface TimelineEvent {
     providedIn: 'root'
 })
 export class VehicleService {
-    private apiUrl = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule/all';
+    private apiUrl = `${environment.apiUrl}/vehicule/all`;
 
-    private apiUrlAdd = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
-    private apiUrlData = 'https://sosmongarage-production.up.railway.app/V1/api/vehicule';
+    private apiUrlAdd = `${environment.apiUrl}/vehicule`;
+    private apiUrlData = `${environment.apiUrl}/vehicule`;
     private http = inject(HttpClient);
     private vehiculesSubject = new BehaviorSubject<Vehicle[]>([]);
     vehicules$ = this.vehiculesSubject.asObservable();

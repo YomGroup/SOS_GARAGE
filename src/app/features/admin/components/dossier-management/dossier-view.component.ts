@@ -11,6 +11,7 @@ import { FirebaseStorageService } from '../../../../../services/firebase-storage
 import { firstValueFrom } from 'rxjs';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../../environments/environment';
 
 
 
@@ -439,7 +440,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
       return;
     }
     // Appel direct à l'API pour récupérer l'assurance par nom
-    this.http.get<any>(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${encodeURIComponent(nom)}`).subscribe(
+    this.http.get<any>(`${environment.apiUrl}/assurances/${encodeURIComponent(nom)}`).subscribe(
       (assurance) => {
         if (assurance && assurance.nom) {
           this.assuranceContactEdit = {
@@ -1000,12 +1001,12 @@ export class DossierViewComponent implements OnChanges, OnInit {
       adresse: this.assuranceContactEdit.adresse
     };
     // Vérifier si l'assurance existe déjà (par nom)
-    this.http.get<any[]>("https://sosmongarage-production.up.railway.app/V1/api/assurances").subscribe(
+    this.http.get<any[]>(`${environment.apiUrl}/assurances`).subscribe(
       (assurances) => {
         const existante = assurances.find(a => a.nom === nom);
         if (existante) {
           // Mise à jour (PUT)
-          this.http.put(`https://sosmongarage-production.up.railway.app/V1/api/assurances/${existante.id}`, { ...existante, ...assurance }).subscribe(
+          this.http.put(`${environment.apiUrl}/assurances/${existante.id}`, { ...existante, ...assurance }).subscribe(
             () => {
               this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
               alert("Informations de contact de l'assurance mises à jour dans la base de données !");
@@ -1016,7 +1017,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
           );
         } else {
           // Création (POST)
-          this.http.post("https://sosmongarage-production.up.railway.app/V1/api/assurances", assurance).subscribe(
+          this.http.post(`${environment.apiUrl}/assurances`, assurance).subscribe(
             () => {
               this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
               alert("Nouvelle assurance enregistrée dans la base de données !");
