@@ -18,7 +18,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
     keycloak.init({
       config: {
         url: 'https://keyckoak-prod-production.up.railway.app',
-        realm: 'sos-garage',
+        realm: 'sos-mon-garage',
         clientId: 'sosmongaragefront'
       },
       initOptions: {
