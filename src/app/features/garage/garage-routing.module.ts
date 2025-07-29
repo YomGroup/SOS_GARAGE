@@ -19,8 +19,6 @@ const routes: Routes = [
       { path: 'reparations', component: ReparationManagementComponent },
       { path: 'communication', component: CommunicationComponent },
       { path: 'statistiques', component: StatisticsComponent },
-      { path: 'messagesss', component: MessageComponent },
-
       { path: 'message', component: MessageComponent },
       { path: 'profil', component: GarageProfileComponent },
       { path: 'finance', component: GarageFinanceComponent },

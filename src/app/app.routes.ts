@@ -40,9 +40,15 @@ export const routes: Routes = [
         path: '',
         loadChildren: () =>
           import('./features/garage/garage.module').then(m => m.GarageModule)
+      },
+      {
+        path: 'message',
+        component: MessageComponent,
+        data: { title: 'Mes Messages' }
       }
     ]
   },
+
   {
     path: 'clientDashboard',
     component: EspaceclientComponent,
@@ -72,7 +78,6 @@ export const routes: Routes = [
 
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-      { path: 'message', component: MessageComponent },
 
   { path: '', redirectTo: 'client', pathMatch: 'full' }
 ];

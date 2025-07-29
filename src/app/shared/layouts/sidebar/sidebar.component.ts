@@ -113,18 +113,6 @@ export class SidebarComponent implements OnInit {
   get menuItems(): MenuItem[] {
     const commonItems: MenuItem[] = [
       {
-        title: 'Messages',
-        icon: 'bi bi-envelope',
-        route: this.userRoles.includes('ROLE_GARAGISTE')
-          ? '/garage/messages'
-          : this.userRoles.includes('ROLE_ADMIN')
-            ? '/admin/message'
-            : this.userRoles.includes('ROLE_ASSURE')
-              ? '/clientDashboard/message'
-              : '/message',
-        badge: '2'
-      },
-      {
         title: 'Message',
         icon: 'bi bi-envelope',
         route: this.userRoles.includes('ROLE_GARAGISTE')
