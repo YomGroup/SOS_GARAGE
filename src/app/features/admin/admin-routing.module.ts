@@ -1,4 +1,4 @@
-import { MessageComponent } from './../../message/message.component';
+import { MessageComponent } from '../../shared/components/message/message.component';
 import { NgModule, Component } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard.component';
@@ -28,6 +28,12 @@ const routes: Routes = [
     children: [
       { path: 'view/:id', component: DossierViewComponent }
     ]
+  },
+    {
+    path: 'message',
+    loadComponent: () =>
+      import('../../shared/components/message/message.component')
+        .then(m => m.MessageComponent)
   },
   {
     path: 'vehicules',
@@ -65,10 +71,6 @@ const routes: Routes = [
   {
     path: 'roles',
     component: RoleManagementComponent
-  },
-  {
-    path: 'messages',
-    component: MessageComponent
   },
   {
     path: 'administration',
