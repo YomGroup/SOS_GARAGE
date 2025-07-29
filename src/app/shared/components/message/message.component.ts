@@ -1,12 +1,12 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
-import { MessageService } from '../../services/messagerie.service';
-import { AuthService } from '../../services/auth.service';
+import { MessageService } from '../../../../services/messagerie.service';
+import { AuthService } from '../../../../services/auth.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Message } from '../shared/models/Message.model';
-import { ReparateurService } from '../../services/reparateur.service';
-import { Reparateur } from '../../services/models-api.interface';
+import { Message } from '../../models/Message.model';
+import { ReparateurService } from '../../../../services/reparateur.service';
+import { Reparateur } from '../../../../services/models-api.interface';
 import { ActivatedRoute } from '@angular/router';
 import { NgZone } from '@angular/core';
 

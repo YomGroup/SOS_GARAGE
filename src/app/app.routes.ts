@@ -13,7 +13,7 @@ import { RegisterComponent } from './register/register.component';
 import { SinistreComponent } from './sinistre/sinistre.component';
 import { DocumentComponent } from './document/document.component';
 import { ProfileComponent } from './profile/profile.component';
-import { MessageComponent } from './message/message.component';
+import { MessageComponent } from './shared/components/message/message.component';
 import { AuthGuard } from './app/auth-guard.service';
 
 export const routes: Routes = [
@@ -40,7 +40,10 @@ export const routes: Routes = [
         path: '',
         loadChildren: () =>
           import('./features/garage/garage.module').then(m => m.GarageModule)
-      }
+        
+      }, 
+
+
     ]
   },
   {
@@ -56,7 +59,13 @@ export const routes: Routes = [
       { path: 'notification', component: NotificationComponent, data: { title: 'Notifications' } },
       { path: 'sinistre', component: SinistreComponent, data: { title: 'Mes Sinistres' } },
       { path: 'document', component: DocumentComponent, data: { title: 'Mes Documents' } },
-      { path: 'message', component: MessageComponent, data: { title: 'Mes Messages' } },
+      //{ path: 'message', component: MessageComponent, data: { title: 'Mes Messages' } },
+      {
+          path: 'message',
+          loadComponent: () =>
+            import('./shared/components/message/message.component')
+              .then(m => m.MessageComponent)
+        },
       { path: 'profiles', component: ProfileComponent, data: { title: 'Mon Profil' } },
     ]
   },
@@ -72,7 +81,7 @@ export const routes: Routes = [
 
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-      { path: 'message', component: MessageComponent },
+  //{ path: 'message', component: MessageComponent },
 
   { path: '', redirectTo: 'client', pathMatch: 'full' }
 ];

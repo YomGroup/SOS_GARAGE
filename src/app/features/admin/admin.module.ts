@@ -33,6 +33,7 @@ import { CustomizationManagementComponent } from './components/parametre/customi
 import { DossierViewComponent } from './components/dossier-management/dossier-view.component';
 import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 import { VehiculesComponent } from './components/vehicules-management/vehicules.component';
+import { MessageComponent } from '../../shared/components/message/message.component';
 
 const routes: Routes = [
   {
@@ -57,6 +58,12 @@ const routes: Routes = [
   {
     path: 'garages',
     component: GarageValidationComponent
+  },
+    {
+    path: 'message',
+    loadComponent: () =>
+      import('../../shared/components/message/message.component')
+        .then(m => m.MessageComponent)
   },
   {
     path: 'epaves',
