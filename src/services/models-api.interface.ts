@@ -7,9 +7,11 @@ export interface Avantage {
 
 export interface Message {
   // À compléter selon vos besoins
-  id?: number;
-  contenu?: string;
-  date?: string;
+  id?: string;
+  senderId: string;
+  receiverId: string;
+  text: string;
+  timestamp?: any;
 }
 
 export interface Reparation {
@@ -147,51 +149,51 @@ export interface Sinistre {
   numeroContrat?: string;
   numeroSinistre?: string;
   dateDeclaration?: string;
-} 
+}
 
 // Interface Vehicule
 export interface Vehicule {
-    id?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    immatriculation?: string;
-    marque?: string;
-    modele?: string;
-    cylindree?: string;
-    dateMiseEnCirculation: string;
-    carteGrise: string;
-    contratAssurance: string;
-    imgUrl: string[];
-    sinistres: Sinistre[];
-    nomAssurence: string;
-    dateDerniereCg?: string;
-    energie?: string;
-    nomCommerciale?: string;
-    puissanceChevaux?: string;
-    puissanceFiscale?: string;
-    boiteVitesse?: string;
-    typeMine?: string;
-    version?: string;
-    
-  }
+  id?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  immatriculation?: string;
+  marque?: string;
+  modele?: string;
+  cylindree?: string;
+  dateMiseEnCirculation: string;
+  carteGrise: string;
+  contratAssurance: string;
+  imgUrl: string[];
+  sinistres: Sinistre[];
+  nomAssurence: string;
+  dateDerniereCg?: string;
+  energie?: string;
+  nomCommerciale?: string;
+  puissanceChevaux?: string;
+  puissanceFiscale?: string;
+  boiteVitesse?: string;
+  typeMine?: string;
+  version?: string;
 
-  // Interface Assure
-  export interface Assure {
-    id?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    name?: string;
-    prenom?: string;
-    email: string;
-    telephone: string;
-    adresse: string;
-    password: string;
-    useridKeycloak: string;
-    numeroPermis: string;
-    dateObtentionPermis: string;
-    vehicules: Vehicule[];
-    messages: Message[];
-  }
+}
+
+// Interface Assure
+export interface Assure {
+  id?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  name?: string;
+  prenom?: string;
+  email: string;
+  telephone: string;
+  adresse: string;
+  password: string;
+  useridKeycloak: string;
+  numeroPermis: string;
+  dateObtentionPermis: string;
+  vehicules: Vehicule[];
+  messages: Message[];
+}
 
 // Interface Expert
 export interface Expert {

@@ -1,54 +1,4 @@
-/* Variables CSS pour la cohérence */
-:root {
-    --primary-gradient: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-    --primary-gradient-light: linear-gradient(135deg, rgba(30, 77, 184, 0.7) 0%, rgba(139, 46, 184, 0.7) 100%);
-    --primary-gradient-bg: linear-gradient(135deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
-    --primary-color: #8b5cf6;
-    --primary-hover: #8b2eb8;
-    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    --border-radius: 12px;
-    --border-radius-large: 20px;
-    --transition: all 0.3s ease;
-    --shadow-hover: 0 8px 25px rgba(59, 130, 246, 0.3);
-    --text-primary: #1f2937;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-}
-
-/* Reset et base */
-html,
-body {
-    max-width: 100%;
-    overflow-x: hidden;
-}
-
-.container {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.claim-declaration {
-    overflow-x: hidden;
-    max-width: 100vw;
-}
-
-.claim-declaration h1 {
-    text-align: left;
-    color: var(--text-primary);
-    font-size: 32px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.instruction {
-    text-align: left;
-    color: var(--text-secondary);
-    font-size: 16px;
-    margin-bottom: 40px;
-}
-
-/* Progress Indicator */
+/* 1. Correction du progress indicator - cercles séparés par des lignes */
 .progress-indicator {
     display: flex;
     justify-content: center;
@@ -82,10 +32,11 @@ body {
 }
 
 .step.completed {
-    background-color: var(--primary-hover);
+    background-color: #8b2eb8;
     color: white;
 }
 
+/* Ligne de connexion entre les étapes */
 .step:not(:last-child) {
     margin-right: 60px;
     position: relative;
@@ -107,88 +58,7 @@ body {
     background-color: black;
 }
 
-/* Step Content */
-.step-content {
-    margin-bottom: 40px;
-    background: var(--primary-gradient-bg);
-    border-radius: var(--border-radius-large);
-    padding: 40px;
-    text-align: center;
-}
-
-.step-content h2 {
-    margin-bottom: 30px;
-    color: var(--text-primary);
-    font-size: 34px;
-    font-weight: bold;
-}
-
-/* Styles communs pour les boutons */
-.btn-base {
-    padding: 15px 30px;
-    border-radius: var(--border-radius);
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: var(--transition);
-    text-decoration: none;
-    text-align: center;
-    justify-content: center;
-}
-
-/* Navigation Buttons */
-.navigation-buttons {
-    display: flex;
-    justify-content: space-between;
-    gap: 140%;
-    margin-top: 40px;
-    max-width: 600px;
-}
-
-.btn-back {
-    @extend .btn-base;
-    border: 2px solid #e5e7eb;
-    background-color: white;
-    color: var(--text-muted);
-    cursor: not-allowed;
-}
-
-.btn-back:not(:disabled) {
-    color: var(--text-secondary);
-    cursor: pointer;
-    border-color: #d1d5db;
-}
-
-.btn-back:not(:disabled):hover {
-    background-color: #f9fafb;
-    border-color: var(--text-muted);
-}
-
-.btn-next {
-    @extend .btn-base;
-    border: 1px solid transparent;
-    background: var(--primary-gradient-light);
-    color: white;
-}
-
-.btn-next:hover {
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-hover);
-    background: var(--primary-gradient);
-}
-
-.btn-next:disabled {
-    background: #e5e7eb;
-    color: var(--text-muted);
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
-}
-
-/* Vehicle Status Cards */
+/* 2. Correction des cartes véhicule selon la maquette */
 .vehicle-status {
     display: flex;
     justify-content: center;
@@ -212,9 +82,9 @@ body {
     align-items: center;
     justify-content: center;
     padding: 40px 30px;
-    border-radius: var(--border-radius-large);
+    border-radius: 20px;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     height: 180px;
     font-size: 20px;
     font-weight: 600;
@@ -222,31 +92,48 @@ body {
     position: relative;
     width: 100%;
     box-sizing: border-box;
+}
+
+/* Style par défaut pour toutes les cartes - même style */
+.radio-label {
     background: white;
-    color: var(--primary-color);
-    border: 3px solid var(--primary-color);
+    color: #8b5cf6;
+    border: 3px solid #8b5cf6;
     opacity: 0.7;
 }
 
-.radio-group input:checked+.radio-label {
-    background: var(--primary-gradient);
+/* État sélectionné pour "Mon véhicule est roulant" */
+.radio-group input[value="rolling"]:checked+.radio-label {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
     color: white;
     border: none;
     opacity: 1;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
+/* État sélectionné pour "Mon véhicule est Non roulant" */
+.radio-group input[value="not-rolling"]:checked+.radio-label {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+    color: white;
+    border: none;
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+/* États hover */
 .radio-label:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-/* Vehicle Selection Dropdown */
+/* 3. Correction du dropdown véhicule */
+/* Correction du dropdown véhicule selon la maquette */
 .vehicle-selection {
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #1e4db8 10%, #8b2eb8 100%);
     padding: 50px;
-    border-radius: var(--border-radius-large);
+    border-radius: 20px;
     max-width: 600px;
     margin: 0 auto;
     position: relative;
@@ -255,17 +142,17 @@ body {
 .vehicle-dropdown {
     position: relative;
     background: white;
-    border: 3px solid var(--primary-color);
+    border: 3px solid #8b5cf6;
     border-radius: 15px;
     padding: 20px 30px;
     cursor: pointer;
-    color: var(--primary-color);
+    color: #8b5cf6;
     font-size: 18px;
     font-weight: 500;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     opacity: 0.7;
 }
 
@@ -276,19 +163,19 @@ body {
 }
 
 .vehicle-dropdown.open {
-    background: var(--primary-gradient);
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
     color: white;
     border: none;
     opacity: 1;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
 .vehicle-dropdown::after {
     content: '▼';
     font-size: 14px;
     transition: transform 0.3s ease;
-    color: var(--primary-color);
+    color: #8b5cf6;
 }
 
 .vehicle-dropdown.open::after {
@@ -296,7 +183,7 @@ body {
     color: white;
 }
 
-/* Dropdown List */
+/* Style de la liste déroulante */
 .dropdown-list {
     position: absolute;
     top: 100%;
@@ -304,14 +191,13 @@ body {
     right: 0;
     background: white;
     border: 2px solid #e5e7eb;
-    border-radius: var(--border-radius);
+    border-radius: 12px;
     margin-top: 8px;
     padding: 0;
     list-style: none;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     z-index: 10;
     overflow: hidden;
-    animation: slideDown 0.3s ease;
 }
 
 .dropdown-list li {
@@ -329,88 +215,169 @@ body {
 
 .dropdown-list li:hover {
     background-color: #f8fafc;
-    color: var(--primary-color);
+    color: #8b5cf6;
 }
 
-/* Upload Areas */
+/* Animation d'apparition de la liste */
+.dropdown-list {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 4. Correction des boutons de navigation */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 135%;
+    margin-top: 40px;
+    max-width: 600px;
+
+}
+
+.btn-back {
+    padding: 15px 30px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background-color: white;
+    color: #9ca3af;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: not-allowed;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-back:not(:disabled) {
+    color: #6b7280;
+    cursor: pointer;
+    border-color: #d1d5db;
+}
+
+.btn-back:not(:disabled):hover {
+    background-color: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-next {
+    padding: 15px 30px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(30, 77, 184, 0.7) 0%, rgba(139, 46, 184, 0.7) 100%);
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-next:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+
+}
+
+.btn-next:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* 5. Ajustement du conteneur de contenu */
+.step-content {
+    margin-bottom: 40px;
+    background: linear-gradient(135deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
+
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+}
+
+.step-content h2 {
+    margin-bottom: 30px;
+    color: #1f2937;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+/* 6. Conteneur principal */
+/*
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}*/
+
+.claim-declaration h1 {
+    text-align: left;
+    color: #1f2937;
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.instruction {
+    text-align: left;
+    color: #6b7280;
+    font-size: 16px;
+    margin-bottom: 40px;
+}
+
+/* 7. Sections upload */
 .file-upload,
 .photo-upload {
     max-width: 500px;
     margin: 0 auto;
 }
 
-.upload-area,
-.photo-upload-area {
-    border: 3px dashed #761ae7;
-    border-radius: 20px;
+.upload-area {
+    border: 2px solid #8b5cf6;
+    border-radius: 15px;
+    padding: 40px 20px;
     text-align: center;
     cursor: pointer;
-    transition: var(--transition);
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
-    position: relative;
-    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.upload-area {
-    padding: 40px 20px;
-    border-color: var(--primary-color);
+.upload-area:hover {
+    border-color: #8b5cf6;
+    background-color: #faf7ff;
 }
 
-.photo-upload-area {
-    border-color: #761ae7;
-}
-
-.photo-upload-area::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    z-index: 1;
-}
-
-.upload-area:hover,
-.photo-upload-area:hover {
-    border-color: #6b1aa9;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.15);
-}
-
-.upload-area i,
-.upload-icon i {
+.upload-area i {
     font-size: 48px;
-    color: var(--primary-color);
+    color: #8b5cf6;
     margin-bottom: 15px;
     display: block;
 }
 
-.upload-icon i {
-    font-size: 3rem;
-    color: #68098a;
-}
-
-.upload-area p,
-.upload-icon p {
-    color: var(--text-secondary);
+.upload-area p {
+    color: #6b7280;
     font-size: 22px;
     margin: 0;
 }
 
-.upload-icon p {
-    font-size: 1.2rem;
-    color: #475569;
-    font-weight: 500;
-    margin-bottom: 8px;
-}
-
 .help-text {
     margin-top: 20px;
-    color: var(--text-secondary);
+    color: #6b7280;
     font-size: 14px;
     text-align: center;
 }
@@ -424,7 +391,7 @@ body {
     text-decoration: underline;
 }
 
-/* Document Signing */
+/* 8. Correction de la section Signature de document selon la maquette */
 .document-signing {
     max-width: 800px;
     margin: 0 auto;
@@ -433,7 +400,7 @@ body {
 .document-preview {
     background: white;
     border: 2px solid #e5e7eb;
-    border-radius: var(--border-radius-large);
+    border-radius: 20px;
     padding: 0;
     margin-bottom: 30px;
     min-height: 400px;
@@ -452,7 +419,7 @@ body {
 
 .document-header h3 {
     margin: 0;
-    color: var(--text-primary);
+    color: #1f2937;
     font-size: 24px;
     font-weight: 600;
 }
@@ -467,14 +434,9 @@ body {
     min-height: 300px;
 }
 
-.signature-controls {
-    border-top: 1px solid #eee;
-    background-color: #f9fafb;
-}
-
 .document-placeholder {
     text-align: center;
-    color: var(--text-muted);
+    color: #9ca3af;
     font-size: 16px;
 }
 
@@ -485,7 +447,7 @@ body {
     display: block;
 }
 
-/* Sign Button */
+/* Bouton de signature */
 .btn-sign {
     width: 100%;
     max-width: 400px;
@@ -502,7 +464,7 @@ body {
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     text-align: center;
 }
 
@@ -510,15 +472,16 @@ body {
     background: #3b82f6;
     color: white;
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
 .btn-sign i {
     font-size: 20px;
 }
 
+/* État signé */
 .btn-sign.signed {
-    background: var(--success-gradient);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
     border: none;
     cursor: default;
@@ -526,9 +489,10 @@ body {
 
 .btn-sign.signed:hover {
     transform: none;
-    background: var(--success-gradient);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
+/* Animation de signature */
 .btn-sign.signing {
     pointer-events: none;
     opacity: 0.7;
@@ -548,73 +512,7 @@ body {
     animation: spin 1s linear infinite;
 }
 
-/* Custom Checkbox */
-.custom-checkbox {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: Arial, sans-serif;
-    color: #333;
-    user-select: none;
-    padding: 10px 0;
-}
-
-.custom-checkbox input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-}
-
-.custom-checkbox .checkmark {
-    position: relative;
-    height: 24px;
-    width: 24px;
-    background-color: #fff;
-    border: 2px solid #007bff;
-    border-radius: 4px;
-    margin-right: 12px;
-    transition: var(--transition);
-    flex-shrink: 0;
-}
-
-.custom-checkbox:hover .checkmark {
-    border-color: #0056b3;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
-}
-
-.custom-checkbox input[type="checkbox"]:checked~.checkmark {
-    background-color: #8215a9;
-    border-color: #8215a9;
-    animation: checkboxPulse 0.3s ease-in-out;
-}
-
-.custom-checkbox .checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 7px;
-    top: 3px;
-    width: 6px;
-    height: 12px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-
-.custom-checkbox input[type="checkbox"]:checked~.checkmark:after {
-    display: block;
-}
-
-.custom-checkbox input[type="checkbox"]:focus~.checkmark {
-    outline: 2px solid #7607f4;
-    outline-offset: 2px;
-}
-
-/* Success Message */
+/* Success Message Styles */
 .success-message {
     text-align: center;
     max-width: 600px;
@@ -625,7 +523,7 @@ body {
 .success-icon {
     width: 100px;
     height: 100px;
-    background: var(--success-gradient);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -640,14 +538,14 @@ body {
 }
 
 .success-message h2 {
-    color: var(--text-primary);
+    color: #1f2937;
     font-size: 28px;
     font-weight: 700;
     margin-bottom: 15px;
 }
 
 .success-message p {
-    color: var(--text-secondary);
+    color: #6b7280;
     font-size: 18px;
     margin-bottom: 40px;
     line-height: 1.6;
@@ -662,390 +560,17 @@ body {
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
     text-decoration: none;
     display: inline-block;
 }
 
 .btn-contact:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-}
-
-/* Photo Steps Section */
-.photo-steps {
-    display: flex;
-    justify-content: space-between;
-    margin: 30px 0 40px;
-    position: relative;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.photo-steps::before {
-    content: '';
-    position: absolute;
-    top: 30px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #e2e8f0 0%, #cbd5e1 100%);
-    z-index: 1;
-}
-
-.photo-steps .step {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-    transition: var(--transition);
-    position: relative;
-    z-index: 2;
-    background: white;
-    padding: 0 15px;
-}
-
-.photo-steps .step span {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    font-weight: 700;
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    color: #64748b;
-    margin-bottom: 12px;
-    border: 3px solid #e2e8f0;
-    transition: all 0.4s ease;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.photo-steps .step.active span {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-color: #667eea;
-    transform: scale(1.1);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-.photo-steps .step p {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #64748b;
-    text-align: center;
-    transition: var(--transition);
-    max-width: 80px;
-    line-height: 1.3;
-}
-
-.photo-steps .step.active p {
-    color: #667eea;
-    transform: translateY(-2px);
-}
-
-/* Step Instructions */
-.step-instructions {
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border-radius: 16px;
-    padding: 30px;
-    margin-bottom: 30px;
-    border: 1px solid rgba(102, 126, 234, 0.1);
-    position: relative;
-    overflow: hidden;
-}
-
-.step-instructions::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-}
-
-.step-instructions h3 {
-    color: #1e293b;
-    font-size: 1.4rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.step-instructions h3 i {
-    color: #667eea;
-    font-size: 1.5rem;
-}
-
-.step-instructions p {
-    color: #475569;
-    font-size: 1rem;
-    line-height: 1.6;
-    margin-bottom: 8px;
-}
-
-.step-instructions .help-text {
-    color: #64748b;
-    font-size: 0.9rem;
-    font-style: italic;
-    margin-top: 10px;
-}
-
-/* Photo Gallery */
-.photo-gallery {
-    margin-top: 30px;
-}
-
-.photo-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.photo-item {
-    position: relative;
-    border-radius: 16px;
-    overflow: hidden;
-    aspect-ratio: 4/3;
-    transition: var(--transition);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.5);
-}
-
-.photo-item:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-}
-
-.photo-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.photo-item:hover img {
-    transform: scale(1.05);
-}
-
-.photo-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.5));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.photo-item:hover .photo-overlay {
-    opacity: 1;
-}
-
-.btn-remove {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition);
-    font-size: 1.2rem;
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-}
-
-.btn-remove:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
-}
-
-/* Assurance Selection */
-.assurance-selection {
-    margin-top: 2rem;
-}
-
-.assurance-dropdown {
-    position: relative;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 12px;
-    cursor: pointer;
-    margin-top: 8px;
-    background-color: white;
-}
-
-.assurance-dropdown.open {
-    border-color: #1e4db8;
-}
-
-.assurance-dropdown span {
-    display: block;
-}
-
-.assurance-dropdown::after {
-    content: '▼';
-    float: right;
-    font-size: 12px;
-    color: #666;
-}
-
-.assurance-dropdown.open::after {
-    content: '▲';
-}
-
-.no-assurances {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-}
-
-/* Choice Cards */
-.choice-container {
-    display: flex;
-    gap: 20px;
-    margin-top: 2rem;
-}
-
-.choice-card {
-    flex: 1;
-    padding: 2rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    text-align: center;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.choice-card:hover {
-    border-color: #0d6efd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.choice-card i {
-    font-size: 2.5rem;
-    color: #0d6efd;
-    margin-bottom: 1rem;
-}
-
-/* Section Headers */
-.section-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 1.5rem;
-}
-
-.section-header h3 {
-    margin: 0;
-    flex-grow: 1;
-    text-align: center;
-}
-
-/* Photo Count */
-.photo-count {
-    font-size: 1rem;
-    color: #2e0522;
-    font-weight: 600;
-    background: rgba(102, 126, 234, 0.1);
-    padding: 5px 15px;
-    border-radius: 20px;
-    display: inline-block;
-}
-
-/* Upload Icon */
-.upload-icon {
-    position: relative;
-    z-index: 2;
-}
-
-/* Step Navigation */
-.step-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 40px;
-    gap: 20px;
-}
-
-.btn-backs,
-.btn-nexts {
-    padding: 15px 30px;
-    border: none;
-    border-radius: var(--border-radius);
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    min-width: 150px;
-    justify-content: center;
-}
-
-.btn-backs {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    color: #64748b;
-    border: 2px solid #e2e8f0;
-}
-
-.btn-backs:hover:not(:disabled) {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-    color: #475569;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-}
-
-.btn-backs:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.btn-nexts {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-}
-
-.btn-nexts:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
-}
-
-.btn-nexts:disabled {
-    background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
-    color: #94a3b8;
-    cursor: not-allowed;
-    box-shadow: none;
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
 }
 
 /* Animations */
-@keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 @keyframes successPulse {
     0% {
         transform: scale(0.8);
@@ -1062,6 +587,121 @@ body {
     }
 }
 
+/* Responsive */
+@media (max-width: 768px) {
+    .document-preview {
+        min-height: 300px;
+    }
+
+    .document-content {
+        padding: 20px;
+        min-height: 200px;
+    }
+
+    .btn-sign {
+        font-size: 16px;
+        padding: 15px 25px;
+    }
+}
+
+.custom-checkbox {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: Arial, sans-serif;
+    color: #333;
+    user-select: none;
+    padding: 10px 0;
+}
+
+/* Masquer la checkbox par défaut */
+.custom-checkbox input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* Créer la checkbox personnalisée */
+.custom-checkbox .checkmark {
+    position: relative;
+    height: 24px;
+    width: 24px;
+    background-color: #fff;
+    border: 2px solid #007bff;
+    border-radius: 4px;
+    margin-right: 12px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+/* Au survol */
+.custom-checkbox:hover .checkmark {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+}
+
+/* Quand la checkbox est cochée */
+.custom-checkbox input[type="checkbox"]:checked~.checkmark {
+    background-color: #8215a9;
+    border-color: #8215a9;
+}
+
+/* Créer la coche */
+.custom-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Afficher la coche quand cochée */
+.custom-checkbox input[type="checkbox"]:checked~.checkmark:after {
+    display: block;
+}
+
+/* État focus pour l'accessibilité */
+.custom-checkbox input[type="checkbox"]:focus~.checkmark {
+    outline: 2px solid #7607f4;
+    outline-offset: 2px;
+}
+
+/* Styles pour les messages de statut */
+.custom-checkbox+span {
+    margin-left: 10px;
+    font-size: 14px;
+    font-style: italic;
+}
+
+/* Message "Signature en cours..." */
+span[ng-reflect-ng-if="true"]:first-of-type {
+    color: #ffc107;
+}
+
+/* Message "Document signé" */
+span[ng-reflect-ng-if="true"]:last-of-type {
+    color: #28a745;
+    font-weight: 500;
+}
+
+/* Animation pour la transition */
+.custom-checkbox .checkmark {
+    animation: none;
+}
+
+.custom-checkbox input[type="checkbox"]:checked~.checkmark {
+    animation: checkboxPulse 0.3s ease-in-out;
+}
+
 @keyframes checkboxPulse {
     0% {
         transform: scale(1);
@@ -1076,130 +716,8 @@ body {
     }
 }
 
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Sections animées */
-.description-section,
-.upload-section {
-    margin-top: 2rem;
-    animation: fadeIn 0.3s ease;
-}
-
-.btn-continue {
-    margin-top: 1rem;
-    padding: 0.5rem 2rem;
-}
-
-/* Styles pour les textarea */
-textarea.form-control {
-    min-height: 150px;
-    width: 100%;
-    padding: 1rem;
-}
-
-/* Preview containers */
-.preview-container {
-    margin-top: 1.5rem;
-}
-
-.pdf-preview,
-.image-preview {
-    max-width: 100%;
-    height: auto;
-}
-
-/* ===== RESPONSIVE DESIGN ===== */
-
-/* Mobile First - Base styles pour petits écrans */
-@media (max-width: 480px) {
-    .container {
-        padding: 15px 10px;
-    }
-
-    .step-content {
-        padding: 25px;
-    }
-
-    .step-content h2 {
-        font-size: 1.5rem;
-    }
-
-    .navigation-buttons {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    /* Photo steps */
-    .photo-steps .step {
-        flex: 1 0 100%;
-    }
-
-    .photo-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .step-instructions {
-        padding: 20px;
-    }
-
-    .photo-upload-area {
-        padding: 30px 15px;
-    }
-}
-
-/* Petits mobiles et mobiles */
-@media (max-width: 576px) {
-    .upload-area {
-        padding: 20px 10px;
-    }
-
-    .upload-area p {
-        font-size: 16px;
-    }
-
-    .document-preview {
-        min-height: 250px;
-    }
-
-    .document-content {
-        padding: 15px;
-    }
-
-    .navigation-buttons {
-        display: flex;
-        flex-direction: row;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .btn-sign {
-        font-size: 16px;
-        padding: 12px 24px;
-        width: 100%;
-    }
-
+/* Responsive */
+@media (max-width: 768px) {
     .custom-checkbox {
         font-size: 14px;
     }
@@ -1216,71 +734,17 @@ textarea.form-control {
         width: 5px;
         height: 10px;
     }
-
-    /* Photo steps responsive */
-    .photo-steps .step {
-        flex: 1 0 45%;
-        margin-bottom: 0.5rem;
-        padding: 0.5rem;
-    }
-
-    .step-instructions {
-        padding: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .photo-upload-area {
-        padding: 1.5rem;
-    }
-
-    .photo-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-    }
-
-    .step-navigation {
-        flex-direction: column;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-    }
-
-    .btn-back,
-    .btn-next,
-    .btn-backs,
-    .btn-nexts {
-        width: 100%;
-        padding: 0.75rem;
-    }
-
-    /* Choice container responsive */
-    .choice-container {
-        flex-direction: column;
-        gap: 15px;
-        margin-top: 1.5rem;
-    }
-
-    .choice-card {
-        padding: 1.5rem;
-    }
-
-    .choice-card i {
-        font-size: 2rem;
-        margin-bottom: 0.75rem;
-    }
-
-    .description-section,
-    .upload-section {
-        padding: 1rem;
-    }
-
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
 }
 
-/* Tablettes */
+/* Ajouts responsive uniquement - ne modifie pas les styles existants */
+
+/* 1. Conteneur principal */
+.claim-declaration {
+    overflow-x: hidden;
+    max-width: 100vw;
+}
+
+/* 2. Progress Indicator */
 @media (max-width: 768px) {
     .progress-indicator {
         max-width: 90%;
@@ -1294,79 +758,9 @@ textarea.form-control {
         width: 30px;
         left: calc(100% + 5px);
     }
-
-    .vehicle-selection {
-        padding: 15px;
-    }
-
-    .vehicle-dropdown {
-        padding: 12px 15px;
-    }
-
-    .navigation-buttons {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    .btn-back,
-    .btn-next,
-    .btn-backs,
-    .btn-nexts {
-        width: 100%;
-    }
-
-    .document-preview {
-        border-radius: 12px;
-        margin: 10px;
-    }
-
-    .document-content {
-        padding: 10px;
-    }
-
-    pdf-viewer {
-        height: 90vh !important;
-    }
-
-    /* Photo steps responsive */
-    .photo-steps {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin: 1rem 0;
-    }
-
-    .photo-steps .step span {
-        width: 50px;
-        height: 50px;
-        font-size: 1.2rem;
-    }
-
-    .photo-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .step-navigation {
-        flex-direction: row;
-        justify-content: space-between;
-    }
-
-    .choice-container {
-        flex-direction: row;
-        gap: 20px;
-    }
-
-    .description-section,
-    .upload-section {
-        padding: 2rem;
-    }
-
-    .section-header {
-        flex-direction: row;
-        align-items: center;
-    }
 }
 
-/* Tablettes larges */
+/* 3. Cartes véhicule */
 @media (max-width: 992px) {
     .vehicle-status {
         flex-direction: column;
@@ -1377,50 +771,824 @@ textarea.form-control {
         max-width: 100%;
         width: 100%;
     }
+}
 
-    .pdf-preview {
-        height: 500px;
+/* 4. Dropdown véhicule */
+@media (max-width: 768px) {
+    .vehicle-selection {
+        padding: 15px;
     }
 
-    .photo-grid {
-        grid-template-columns: repeat(4, 1fr);
+    .vehicle-dropdown {
+        padding: 12px 15px;
     }
 }
 
-/* Desktop - styles pour écrans moyens et larges */
-@media (min-width: 576px) {
-    .photo-steps .step {
-        flex: 1;
-        margin-bottom: 0;
+/* 5. Zones d'upload */
+@media (max-width: 576px) {
+    .upload-area {
+        padding: 20px 10px;
     }
 
-    .step-navigation {
-        flex-direction: row;
-        justify-content: space-between;
+    .upload-area p {
+        font-size: 16px;
+    }
+}
+
+/* 6. Navigation */
+@media (max-width: 768px) {
+    .navigation-buttons {
+        flex-direction: column;
+        gap: 10px;
     }
 
     .btn-back,
-    .btn-next,
-    .btn-backs,
-    .btn-nexts {
-        width: auto;
-        padding: 0.75rem 1.5rem;
+    .btn-next {
+        width: 100%;
     }
 }
 
-@media (min-width: 768px) {
+/* 7. Document signing */
+@media (max-width: 576px) {
+    .document-preview {
+        min-height: 250px;
+    }
+
+    .document-content {
+        padding: 15px;
+    }
+}
+
+/* 8. Corrections générales */
+@media (max-width: 480px) {
+    .container {
+        padding: 15px 10px;
+    }
+
+    .step-content h2 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Empêche le débordement horizontal */
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* ========== ÉTAPE 3 : DÉCLARATION DE L'INCIDENT ========== */
+
+/* Sélecteurs de base */
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.form-select,
+.form-control {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    font-size: 16px;
+    color: #374151;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-control:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Container des choix */
+.choice-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.choice-card {
+    background: white;
+    border: 3px solid #8b5cf6;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.choice-card:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+}
+
+.choice-card i {
+    font-size: 48px;
+    color: #8b5cf6;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.choice-card h3 {
+    color: #1f2937;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.choice-card p {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+
+/* Preview container */
+.preview-container {
+    margin-top: 30px;
+    padding: 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 15px;
+    background: #f9fafb;
+}
+
+.preview-container h4 {
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-remove {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: 2px solid #ef4444;
+    border-radius: 8px;
+    background: white;
+    color: #ef4444;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-remove:hover {
+    background: #ef4444;
+    color: white;
+}
+
+
+@media (max-width: 480px) {
+    .step-content h2 {
+        font-size: 24px;
+    }
+
+    .choice-card {
+        padding: 25px 15px;
+    }
+
+    .photo-steps {
+        gap: 10px;
+    }
+
+    .photo-steps .step {
+        min-width: 80px;
+        padding: 10px;
+    }
+
+    .photo-steps .step p {
+        font-size: 12px;
+    }
+
+    .photo-upload-area {
+        padding: 40px 15px;
+    }
+
+    .step-instructions h3 {
+        font-size: 20px;
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* ========== ÉTAPE 3 : DÉCLARATION DE L'INCIDENT ========== */
+
+/* Sélecteurs de base */
+.mb-4 {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.form-select,
+.form-control {
+    width: 100%;
+    padding: 15px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    background: white;
+    font-size: 16px;
+    color: #374151;
+    transition: all 0.3s ease;
+}
+
+.form-select:focus,
+.form-control:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+/* Container des choix */
+.choice-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.choice-card {
+    background: white;
+    border: 3px solid #8b5cf6;
+    border-radius: 20px;
+    padding: 40px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.8;
+}
+
+.choice-card:hover {
+    opacity: 1;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(139, 92, 246, 0.2);
+}
+
+.choice-card i {
+    font-size: 48px;
+    color: #8b5cf6;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.choice-card h3 {
+    color: #1f2937;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.choice-card p {
+    color: #6b7280;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Sections description et upload */
+.description-section,
+.upload-section {
+    max-width: 700px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid #f3f4f6;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.section-header .btn-back {
+    padding: 10px 20px;
+    border: 2px solid #8b5cf6;
+    border-radius: 10px;
+    background: white;
+    color: #8b5cf6;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-header .btn-back:hover {
+    background: #8b5cf6;
+    color: white;
+}
+
+.section-header h3 {
+    color: #1f2937;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header h3 i {
+    color: #8b5cf6;
+}
+
+/* Textarea pour description */
+.description-section textarea {
+    min-height: 150px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* Zone d'upload simplifiée */
+.file-upload .upload-area {
+    border: 3px dashed #8b5cf6;
+    border-radius: 20px;
+    padding: 60px 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #faf7ff;
+}
+
+.file-upload .upload-area:hover {
+    border-color: #7c3aed;
+    background: #f3e8ff;
+}
+
+.file-upload .upload-area p {
+    font-size: 20px;
+    color: #8b5cf6;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.file-upload .upload-area i {
+    font-size: 24px;
+}
+
+.help-text {
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+.help-text a {
+    color: #8b5cf6;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+/* Preview container */
+.preview-container {
+    margin-top: 30px;
+    padding: 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 15px;
+    background: #f9fafb;
+}
+
+.preview-container h4 {
+    color: #1f2937;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.image-preview img {
+    max-width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn-remove {
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: 2px solid #ef4444;
+    border-radius: 8px;
+    background: white;
+    color: #ef4444;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-remove:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* ========== ÉTAPE 4 : PHOTOS DU VÉHICULE ========== */
+
+/* Steps navigation pour photos */
+.photo-steps {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.photo-steps .step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    border: 2px solid #e5e7eb;
+    min-width: 120px;
+}
+
+.photo-steps .step span {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 18px;
+    transition: all 0.3s ease;
+}
+
+.photo-steps .step p {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    text-align: center;
+}
+
+.photo-steps .step.active {
+    border-color: #8b5cf6;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.1) 100%);
+}
+
+.photo-steps .step.active span {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.photo-steps .step.active p {
+    color: #8b5cf6;
+    font-weight: 600;
+}
+
+/* Instructions */
+.step-instructions {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: white;
+    border-radius: 15px;
+    border: 2px solid #f3f4f6;
+}
+
+.step-instructions h3 {
+    color: #1f2937;
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.step-instructions h3 i {
+    color: #8b5cf6;
+}
+
+/* Zone d'upload photo */
+.photo-upload-area {
+    border: 3px dashed #8b5cf6;
+    border-radius: 20px;
+    padding: 80px 40px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #faf7ff;
+    margin-bottom: 30px;
+}
+
+.photo-upload-area:hover {
+    border-color: #7c3aed;
+    background: #f3e8ff;
+    transform: translateY(-3px);
+}
+
+.upload-icon i {
+    font-size: 64px;
+    color: #8b5cf6;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.upload-icon p {
+    font-size: 20px;
+    color: #1f2937;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+.photo-count {
+    font-size: 16px;
+    color: #8b5cf6;
+    font-weight: 500;
+}
+
+/* Galerie photos */
+.photo-gallery {
+    margin-bottom: 30px;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.photo-item:hover {
+    transform: translateY(-3px);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.photo-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.photo-item:hover .photo-overlay {
+    opacity: 1;
+}
+
+.photo-overlay .btn-remove {
+    margin: 0;
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.photo-overlay .btn-remove:hover {
+    background: #ef4444;
+}
+
+/* Navigation étapes photos */
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    margin-top: 40px;
+}
+
+.btn-backs,
+.btn-nexts {
+    padding: 15px 30px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: none;
+}
+
+.btn-backs {
+    background: white;
+    color: #6b7280;
+    border: 2px solid #e5e7eb;
+}
+
+.btn-backs:not(:disabled):hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+}
+
+.btn-backs:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-nexts {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+}
+
+.btn-nexts:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+.btn-nexts:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+
+    /* Étape 3 */
     .choice-container {
-        flex-direction: row;
+        grid-template-columns: 1fr;
         gap: 20px;
+    }
+
+    .choice-card {
+        padding: 30px 20px;
+    }
+
+    .choice-card i {
+        font-size: 36px;
+    }
+
+    .choice-card h3 {
+        font-size: 20px;
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
     }
 
     .description-section,
     .upload-section {
-        padding: 2rem;
+        padding: 20px;
     }
 
-    .section-header {
-        flex-direction: row;
-        align-items: center;
+    /* Étape 4 */
+    .photo-steps {
+        gap: 15px;
+    }
+
+    .photo-steps .step {
+        min-width: 100px;
+        padding: 15px;
+    }
+
+    .photo-steps .step span {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .photo-upload-area {
+        padding: 50px 20px;
+    }
+
+    .upload-icon i {
+        font-size: 48px;
+    }
+
+    .upload-icon p {
+        font-size: 18px;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .photo-item img {
+        height: 150px;
+    }
+
+    .step-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-backs,
+    .btn-nexts {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-content h2 {
+        font-size: 24px;
+    }
+
+    .choice-card {
+        padding: 25px 15px;
+    }
+
+    .photo-steps {
+        gap: 10px;
+    }
+
+    .photo-steps .step {
+        min-width: 80px;
+        padding: 10px;
+    }
+
+    .photo-steps .step p {
+        font-size: 12px;
+    }
+
+    .photo-upload-area {
+        padding: 40px 15px;
+    }
+
+    .step-instructions h3 {
+        font-size: 20px;
+        flex-direction: column;
+        gap: 8px;
     }
 }

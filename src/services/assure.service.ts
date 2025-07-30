@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { get } from 'http';
 
 export interface Vehicule {
     id: number;
@@ -76,5 +77,11 @@ export class AssureService {
     }
     getAssurerID(id: string) {
         return this.http.get(`${environment.apiUrl}/assure/keycloak/${id}`);
+    }
+    getAssurer(id: string) {
+        return this.http.get(`${environment.apiUrl}/assure/${id}`);
+    }
+    getAllAssures() {
+        return this.http.get<ASSURE[]>(`${this.apiUrl}`);
     }
 }
