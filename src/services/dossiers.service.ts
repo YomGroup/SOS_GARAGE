@@ -19,18 +19,19 @@ export interface Dossier {
   nomDuGarage?: string;
   ville?: string;
   servicePropose?: string[];
-  imgUrl: string[];
+  imgUrl?: string[];
   isvalid: boolean;
   dateCreation: Date;
   assurance: "AXA";
   dateSinistre: Date;
-  lieuSinistre: string;
+  lieu: string;
   contact: string;
   nom: string;
   prenom: string;
   email: string;
   telephone: string;
   expert?: Expert;
+  input?: string;
 }
 
 

@@ -432,7 +432,9 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   onAssuranceSelected() {
-    const nom = this.assuranceSelectionnee || this.getVehiculeInfo(this.dossier)?.assurance || '';
+    let nom = this.assuranceSelectionnee || this.getVehiculeInfo(this.dossier)?.assurance || '';
+    nom = nom.trim();
+    console.log('[Assurance] Nom envoyé à l\'API:', nom);
     if (!nom) {
       this.assuranceContactEdit = { nom: '', telephone: '', email: '', adresse: '' };
       this.assuranceContactOriginal = { ...this.assuranceContactEdit };
@@ -442,6 +444,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     // Appel direct à l'API pour récupérer l'assurance par nom
     this.http.get<any>(`${environment.apiUrl}/assurances/${encodeURIComponent(nom)}`).subscribe(
       (assurance) => {
+        console.log('[Assurance] Réponse API:', assurance);
         if (assurance && assurance.nom) {
           this.assuranceContactEdit = {
             nom: assurance.nom,
@@ -458,6 +461,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
         }
       },
       (err) => {
+        console.error('[Assurance] Erreur API:', err);
         // Si non trouvé, on laisse vide sauf le nom
         this.assuranceContactEdit = { nom, telephone: '', email: '', adresse: '' };
         this.assuranceContactOriginal = { ...this.assuranceContactEdit };
