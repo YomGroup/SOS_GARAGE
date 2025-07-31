@@ -1213,7 +1213,7 @@
         <div class="accordion-content" *ngIf="showDocuments">
           <div class="form-section">
             <div class="documents-list">
-              <!-- Documents du sinistre (dossier) -->
+              <!-- Documents du sinistre (toujours affichés si présents) -->
               <div *ngIf="dossier?.documents as documents">
                 <ng-container *ngIf="documents.length > 0">
                   <h5>

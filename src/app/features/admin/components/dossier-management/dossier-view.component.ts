@@ -125,6 +125,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     console.log('ngOnChanges triggered with changes:', changes);
     console.log('Current dossier:', this.dossier);
     console.log('Current mission:', this.mission);
+    console.log('[DEBUG] dossier.documents:', this.dossier?.documents);
 
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();

@@ -416,8 +416,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
     if (mission) {
       this.dossierSelectionne = mission;
+      this.dossierAffichageSelectionne = dossier; // <-- On garde le dossier même si mission existe
       this.dossierEnEdition = edition;
-      this.dossierAffichageSelectionne = null;
       this.sinistreDuDossier = null;
     } else {
       this.dossierSelectionne = null;
