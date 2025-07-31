@@ -90,15 +90,15 @@ export class HeaderComponent implements OnInit {
   }
 
   private loadNotifications(): void {
-    this.notificationService.getUserNotifications().subscribe((notifications: any[]) => {
-      const mappedNotifications = notifications.map(n => ({
-        type: n.type,
-        message: n.message,
-        time: n.timestamp ? new Date(n.timestamp) : new Date()
-      }));
-      this.notifications.set(mappedNotifications);
-      this.notificationCount.set(mappedNotifications.length);
-    });
+    /* this.notificationService.getUserNotifications().subscribe((notifications: any[]) => {
+       const mappedNotifications = notifications.map(n => ({
+         type: n.type,
+         message: n.message,
+         time: n.timestamp ? new Date(n.timestamp) : new Date()
+       }));
+       this.notifications.set(mappedNotifications);
+       this.notificationCount.set(mappedNotifications.length);
+     });*/
   }
 
   toggleTheme(): void {

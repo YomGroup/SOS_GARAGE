@@ -8,27 +8,47 @@
                 <img src="assets/logo_sos.png" alt="Logo" 
                      [style.width.px]="sidebarCollapsed ? 40 : 180"
                      style="height: auto; transition: all 0.3s ease;">
-                      <button class="btn btn-link p-1 me-2" (click)="toggleSidebar()">
+                <button class="btn btn-link p-1 me-2" (click)="toggleSidebar()">
                     <i class="bi bi-list fs-3"></i>
                 </button>
             </div>
             
             <!-- Titre proche du bouton -->
             <div class="flex-grow-1">
-<h1 *ngIf="!pageTitle" class="mb-0 fw-bold fs-5 fs-md-4 d-none d-sm-block">Hello {{ userData.name }}</h1>
+                <h1 *ngIf="!pageTitle" class="mb-0 fw-bold fs-5 fs-md-4 d-none d-sm-block">Hello {{ userData.name }}</h1>
                 <h2 *ngIf="pageTitle"  class="mb-0 fw-bold fs-5 fs-md-4 d-none d-sm-block">{{ pageTitle }}</h2>
             </div>
             
             <!-- Partie droite -->
             <div class="d-flex align-items-center gap-2">
                 <span class="text-muted small me-2 d-none d-sm-block">{{currentDate}}</span>
-                <button class="btn btn-light position-relative p-2 rounded-circle">
-                    <i class="bi bi-envelope-fill text-danger"></i>
+                
+                <!-- Bouton Messages avec notification -->
+                <button class="btn btn-light position-relative p-2 rounded-circle" 
+                        (click)="navigateToMessages()"
+                        [class.btn-outline-primary]="hasNewMessages"
+                        title="Messages">
+                    <i class="bi bi-envelope-fill" 
+                       [class.text-primary]="hasNewMessages"
+                       [class.text-muted]="!hasNewMessages"></i>
+                    <!-- Badge de notification -->
+                   <span *ngIf="hasNewMessages && unreadMessagesCount > 0" 
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="font-size: 0.65rem; min-width: 18px; height: 18px; line-height: 18px;"
+                          [attr.aria-label]="unreadMessagesCount + ' nouveaux messages'">
+                        {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
+                    </span>
+                    <!-- Indicateur visuel pour nouveaux messages (point rouge) -->
+                    <span *ngIf="hasNewMessages && unreadMessagesCount === 0"
+                          class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
+                          style="width: 10px; height: 10px;"
+                          aria-label="Nouveaux messages">
+                    </span>
                 </button>
-                <button class="btn btn-light position-relative p-2 rounded-circle">
-                    <i class="bi bi-bell-fill text-danger "></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning">3</span>
-                </button>
+                
+             
+                
+                <!-- Menu utilisateur -->
                 <div class="dropdown d-none d-sm-block">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle"
                        id="dropdownUser" data-bs-toggle="dropdown">
@@ -41,7 +61,7 @@
                             <span class="position-absolute top-0 end-0 translate-middle p-1 bg-success border border-light rounded-circle"></span>
                         </div>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end shadow ">
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
                         <li><a class="dropdown-item" routerLink="/clientDashboard/profiles">Mon profil</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" (click)="logout()">Déconnexion</a></li>
@@ -52,7 +72,7 @@
     </header>
 
     <!-- Contenu principal -->
-    <div class="d-flex flex-grow-1  ">
+    <div class="d-flex flex-grow-1">
         <!-- Sidebar avec items parfaitement alignés -->
         <aside
                 class="bg-white shadow-sm position-fixed start-0 h-100 overflow-y-auto"
@@ -65,29 +85,27 @@
                     !isMobile ? (sidebarCollapsed ? 70 : 250) : 250
                 "
                 [style.top.px]="75"
-                style="transition: width 0.3s ease; z-index: 1050;"
-                >
+                style="transition: width 0.3s ease; z-index: 1050;">
                             
             <nav class="nav flex-column px-2 pt-4 pb-3 h-100 d-flex flex-column">
                 <!-- Groupe d'items principaux -->
-            <div class="flex-grow-1 d-flex flex-column gap-3  mt-2 px-1">
-                            <a routerLink="/clientDashboard" 
-            routerLinkActive="active" 
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
-            [class.justify-content-center]="sidebarCollapsed"
-            style="gap: 12px; transition: all 0.3s ease;">
-            <i class="bi bi-speedometer2 fs-5"></i>
-            <span [class.d-none]="sidebarCollapsed">Tableau de bord</span>
-            </a>
+                <div class="flex-grow-1 d-flex flex-column gap-3 mt-2 px-1">
+                    <a routerLink="/clientDashboard" 
+                       routerLinkActive="active" 
+                       [routerLinkActiveOptions]="{ exact: true }"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                        <i class="bi bi-speedometer2 fs-5"></i>
+                        <span [class.d-none]="sidebarCollapsed">Tableau de bord</span>
+                    </a>
 
-                    
                     <a routerLink="/clientDashboard/vehicules" 
                        routerLinkActive="active"
                        class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
                        [class.justify-content-center]="sidebarCollapsed"
                        style="gap: 12px; transition: all 0.3s ease;">
-                        <i class="bi bi-car-front-fill fs-5 " ></i>
+                        <i class="bi bi-car-front-fill fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Mes Véhicules</span>
                     </a>
                     
@@ -118,13 +136,25 @@
                         <span [class.d-none]="sidebarCollapsed">Mes Documents</span>
                     </a>
 
+                    <!-- Lien Messages avec notification dans la sidebar -->
                     <a routerLink="/clientDashboard/message" 
                        routerLinkActive="active"
-                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3 position-relative"
                        [class.justify-content-center]="sidebarCollapsed"
                        style="gap: 12px; transition: all 0.3s ease;">
                         <i class="bi bi-chat-dots-fill fs-5"></i>
-                        <span [class.d-none]="sidebarCollapsed">Message</span>
+                        <span [class.d-none]="sidebarCollapsed">Messages</span>
+                        <!-- Badge dans la sidebar -->
+                        <span *ngIf="hasNewMessages && unreadMessagesCount > 0 && !sidebarCollapsed" 
+                              class="badge bg-danger rounded-pill ms-auto"
+                              style="font-size: 0.65rem;">
+                            {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
+                        </span>
+                        <!-- Point rouge dans la sidebar collapsed -->
+                        <span *ngIf="hasNewMessages && sidebarCollapsed"
+                              class="position-absolute top-2 end-2 p-1 bg-danger border border-light rounded-circle"
+                              style="width: 8px; height: 8px;">
+                        </span>
                     </a>
                     
                     <a routerLink="/clientDashboard/profiles" 
@@ -144,16 +174,15 @@
                         <i class="bi bi-headset fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Support</span>
                     </a>
-                     <a (click)="logout()" 
+                    
+                    <a (click)="logout()" 
                        class="nav-link d-flex align-items-center py-2 px-3 rounded-3 text-danger"
                        [class.justify-content-center]="sidebarCollapsed"
-                       style="; transition: all 0.3s ease;">
+                       style="cursor: pointer; transition: all 0.3s ease;">
                         <i class="bi bi-box-arrow-right fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Déconnexion</span>
                     </a>
                 </div>
-               
-                
             </nav>
         </aside>
 
@@ -161,10 +190,39 @@
         <main class="flex-grow-1 p-4 overflow-auto"
               [style.marginLeft.px]="sidebarCollapsed ? 70 : 250"
               style="transition: margin-left 0.3s ease;">
-           <div *ngIf="!hasAssurance" class="alert alert-warning text-center rounded-0 mb-0">
-  ⚠️ Un ou plusieurs de vos véhicules n’ont pas encore de contrat d’assurance. 
-  <a routerLink="/clientDashboard/vehicules" class="fw-bold text-decoration-underline">Complétez vos informations</a>
-</div>
+            <!-- Alerte pour les véhicules sans assurance -->
+            <div *ngIf="!hasAssurance" class="alert alert-warning text-center rounded-0 mb-0">
+                ⚠️ Un ou plusieurs de vos véhicules n'ont pas encore de contrat d'assurance. 
+                <a routerLink="/clientDashboard/vehicules" class="fw-bold text-decoration-underline">Complétez vos informations</a>
+            </div>
+            
+            <!-- Toast de notification pour nouveaux messages -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+                <div *ngIf="hasNewMessages" 
+                     class="toast show fade" 
+                     role="alert" 
+                     aria-live="assertive" 
+                     aria-atomic="true"
+                     style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);">
+                    <div class="toast-header bg-transparent text-white border-0">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        <strong class="me-auto">Nouveaux messages</strong>
+                        <button type="button" 
+                                class="btn-close btn-close-white" 
+                                (click)="messageNotificationService.markAllAsRead()"
+                                aria-label="Fermer"></button>
+                    </div>
+                    <div class="toast-body text-white">
+                        Vous avez {{ unreadMessagesCount }} nouveau{{ unreadMessagesCount > 1 ? 'x' : '' }} message{{ unreadMessagesCount > 1 ? 's' : '' }}
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-light" (click)="navigateToMessages()">
+                                Voir les messages
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <router-outlet></router-outlet>
         </main>
     </div>
