@@ -99,6 +99,11 @@ export class MissionViewComponent implements OnChanges {
   assuranceContactInfo: { nom?: string, telephone: string, email: string, adresse: string } = { nom: '', telephone: '', email: '', adresse: '' };
   isAssuranceExistante: boolean = false;
 
+  currentImages: string[] = [];
+  currentImageIndex: number = 0;
+  currentImageUrl: string = '';
+  showImageModal: boolean = false;
+
   constructor(
     private missionService: MissionService, 
     private cdr: ChangeDetectorRef,
@@ -1109,5 +1114,29 @@ export class MissionViewComponent implements OnChanges {
   }
   openTel(tel: string) {
     window.open('tel:' + tel);
+  }
+
+
+  
+  openImageModal(index: number): void {
+    this.currentImages = this.mission?.sinistre?.imgUrl || [];
+    this.currentImageIndex = index;
+    this.showImageModal = true;
+  }
+  
+  closeImageModal(): void {
+    this.showImageModal = false;
+  }
+  
+  prevImage(): void {
+    if (this.currentImageIndex > 0) {
+      this.currentImageIndex--;
+    }
+  }
+  
+  nextImage(): void {
+    if (this.currentImageIndex < this.currentImages.length - 1) {
+      this.currentImageIndex++;
+    }
   }
 } 

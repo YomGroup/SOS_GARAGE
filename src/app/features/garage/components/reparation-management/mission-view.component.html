@@ -189,10 +189,10 @@
                     <i class="fas fa-file-invoice-dollar me-2"></i>
                     {{ uploadingFiles ? 'Upload en cours...' : 'Upload Facture' }}
                   </button>
-                  <button type="button" class="btn btn-outline-info upload-btn" (click)="uploadImages()" [disabled]="uploadingFiles">
+                  <!-- <button type="button" class="btn btn-outline-info upload-btn" (click)="uploadImages()" [disabled]="uploadingFiles">
                     <i class="fas fa-images me-2"></i>
                     {{ uploadingFiles ? 'Upload en cours...' : 'Upload Images' }}
-                  </button>
+                  </button> -->
                 </div>
                 <!-- Message d'erreur upload -->
                 <div *ngIf="uploadErrorMessage" class="alert alert-danger mt-2">
@@ -284,10 +284,10 @@
                     <i class="fas fa-file-invoice-dollar me-2"></i>
                     Upload Facture
                   </button>
-                  <button type="button" class="btn btn-outline-info upload-btn" (click)="lancerEdition()">
+                  <!-- <button type="button" class="btn btn-outline-info upload-btn" (click)="lancerEdition()">
                     <i class="fas fa-images me-2"></i>
                     Upload Images
-                  </button>
+                  </button> -->
                 </div>
               </div>
               <div class="actions-grid">
@@ -332,6 +332,10 @@
             <div *ngIf="!assureInfo" class="text-center">
               <p class="text-muted">Aucune information client disponible.</p>
             </div>
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm" [disabled]="!assureInfo?.email" (click)="assureInfo?.email && openMail(assureInfo?.email || '')"><i class="fas fa-envelope me-1"></i>Contacter par mail</button>
+              <button class="btn btn-outline-success btn-sm" [disabled]="!assureInfo?.telephone" (click)="assureInfo?.telephone && openTel(assureInfo?.telephone || '')"><i class="fas fa-phone me-1"></i>Appeler</button>
+            </div>
           </div>
         </div>
       </div>
@@ -358,8 +362,8 @@
                 <div class="readonly-field">{{ getVehiculeForMission(mission!)?.immatriculation || 'Non renseigné' }}</div>
               </div>
               <div class="form-group">
-                <label>Cylindrée</label>
-                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.cylindree || 'Non renseigné' }}</div>
+                <label>Énergie</label>
+                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.energie || 'Non renseigné' }}</div>
               </div>
               <div class="form-group">
                 <label>Date de mise en circulation</label>
@@ -371,7 +375,17 @@
               </div>
               <div class="form-group">
                 <label>Contrat d'assurance</label>
-                <div class="readonly-field">{{ getVehiculeForMission(mission!)?.contratAssurance || 'Non renseigné' }}</div>
+                <div class="readonly-field">
+                  <ng-container *ngIf="getVehiculeForMission(mission!)?.contratAssurance; else notProvided">
+                    <a [href]="getVehiculeForMission(mission!)?.contratAssurance"
+                       target="_blank"
+                       rel="noopener"
+                       download>
+                      Télécharger / Voir le contrat
+                    </a>
+                  </ng-container>
+                  <ng-template #notProvided>Non renseigné</ng-template>
+                </div>
               </div>
               <div class="form-group">
                 <label>Nom de l'assurance</label>
@@ -401,22 +415,48 @@
       <!-- Photos de l'incident -->
       <div class="accordion-section">
         <button class="accordion-toggle" (click)="showVehiclePhotos = !showVehiclePhotos">
-          <i class="fas fa-camera me-2"></i>Photos de l'incident
+          <i class="fas fa-camera me-2"></i>Photos du sinistre
           <span class="chevron" [class.open]="showVehiclePhotos">&#9660;</span>
         </button>
+      
         <div class="accordion-content" *ngIf="showVehiclePhotos">
-          <ng-container *ngIf="mission?.photosVehicule as photos">
-            <div class="form-section" *ngIf="photos.length > 0">
+          <div class="form-section" *ngIf="mission?.sinistre?.imgUrl as images">
+            <ng-container *ngIf="images.length > 0">
+              <h5>
+                <i class="fas fa-images me-2"></i>Photos du sinistre ({{ images.length }})
+              </h5>
+      
               <div class="photos-grid">
-                <div class="photo-thumbnail" *ngFor="let photo of photos">
-                  <img [src]="photo" alt="Photo véhicule" class="img-fluid" />
+                <div
+                  class="photo-thumbnail"
+                  *ngFor="let photo of images; let i = index"
+                  (click)="openImageModal(i)"
+                >
+                  <img [src]="photo" [alt]="'Photo sinistre ' + (i + 1)" class="img-fluid" />
+                  <div class="image-overlay">
+                    <i class="fas fa-expand-alt text-white"></i>
+                  </div>
                 </div>
               </div>
+            </ng-container>
+          </div>
+      
+          <div *ngIf="mission?.sinistre?.imgUrl?.length === 0" class="text-center text-muted">
+            Aucune photo d'incident disponible.
+          </div>
+        </div>
+      
+        <!-- Modal simple -->
+        <div class="lightbox-modal" *ngIf="showImageModal">
+          <div class="lightbox-content">
+            <button class="lightbox-close" (click)="closeImageModal()">×</button>
+            <img [src]="currentImages[currentImageIndex]" class="lightbox-image" />
+            <div class="lightbox-controls">
+              <button (click)="prevImage()" [disabled]="currentImageIndex === 0">‹</button>
+              <span class="counter">{{ currentImageIndex + 1 }} / {{ currentImages.length }}</span>
+              <button (click)="nextImage()" [disabled]="currentImageIndex === currentImages.length - 1">›</button>
             </div>
-            <div *ngIf="photos.length === 0" class="text-center text-muted">
-              Aucune photo d'incident disponible.
-            </div>
-          </ng-container>
+          </div>
         </div>
       </div>
 
