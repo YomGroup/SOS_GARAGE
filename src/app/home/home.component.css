@@ -369,7 +369,8 @@
         padding: 0 4px;
     }
 
-    .btn-primary, .btn-danger {
+    .btn-primary,
+    .btn-danger {
         width: 100%;
         font-size: 12px;
         padding: 8px 0;
@@ -385,48 +386,124 @@
 }
 
 :host ::ng-deep .main-title {
-  font-size: 28px !important;
-  font-weight: bold !important;
-  color: #1e4db8 !important;
-  margin-bottom: 18px !important;
-  text-align: center !important;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: #1e4db8 !important;
+    margin-bottom: 18px !important;
+    text-align: center !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 :host ::ng-deep .highlight {
-  color: #ffb300 !important;
-  font-weight: bold !important;
+    color: #ffb300 !important;
+    font-weight: bold !important;
 }
 
 :host ::ng-deep .btn-primary,
 :host ::ng-deep .btn-danger {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-  border-radius: 25px !important;
-  padding: 10px 20px !important;
-  font-size: 14px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-  white-space: nowrap !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border-radius: 25px !important;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    white-space: nowrap !important;
 }
 
 @media (max-width: 576px) {
-  :host ::ng-deep .main-title {
-    font-size: 18px !important;
-    margin-bottom: 12px !important;
-    text-align: center !important;
-  }
-  :host ::ng-deep .welcome-section {
-    padding: 0 4px !important;
-  }
-  :host ::ng-deep .btn-primary, :host ::ng-deep .btn-danger {
-    width: 100% !important;
-    font-size: 12px !important;
-    padding: 8px 0 !important;
-  }
-  :host ::ng-deep .stat-card svg,
-  :host ::ng-deep .notifications-header svg {
-    width: 28px !important;
-    height: 18px !important;
-    bottom: 8px !important;
-    right: 8px !important;
-  }
+    :host ::ng-deep .main-title {
+        font-size: 18px !important;
+        margin-bottom: 12px !important;
+        text-align: center !important;
+    }
+
+    :host ::ng-deep .welcome-section {
+        padding: 0 4px !important;
+    }
+
+    :host ::ng-deep .btn-primary,
+    :host ::ng-deep .btn-danger {
+        width: 100% !important;
+        font-size: 12px !important;
+        padding: 8px 0 !important;
+    }
+
+    :host ::ng-deep .stat-card svg,
+    :host ::ng-deep .notifications-header svg {
+        width: 28px !important;
+        height: 18px !important;
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+}
+
+
+
+button {
+    margin-top: 0.5rem;
+    background-color: #8b2eb8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Styles pour la liste des sinistres */
+.sinistre-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    border-left: 4px solid #007bff;
+}
+
+.sinistre-info:hover {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(5px);
+}
+
+.sinistre-info:nth-child(odd) {
+    border-left-color: #28a745;
+}
+
+.sinistre-info:nth-child(even) {
+    border-left-color: #dc3545;
+}
+
+.sinistre-id {
+    font-weight: 600;
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.sinistre-statut {
+    color: #6c757d;
+    font-size: 0.9rem;
+    background: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Indicateur pour les sinistres supplémentaires */
+.text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+    background: #f1f3f4;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.small {
+    font-size: 0.875rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
 }

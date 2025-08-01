@@ -21,11 +21,12 @@ export class HomeComponent implements OnInit {
   userid: string | null = null;
   assureId: number = 0;
   sinistreDataLimited: any = [];
-
-
+  vehiculesDataLimited: any = [];
+  vehicules: any[] = [];
   vehiclesCount: number = 0;
   sinistreData: any;
   sinistreCount: number = 0;
+  sinistreOpenStates: { [vehicleId: number]: boolean } = {};
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
 
@@ -42,20 +43,25 @@ export class HomeComponent implements OnInit {
       });
     }
   }
+
   loadVehicules(assureId: number): void {
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         console.log('Véhicules reçus :', data);
+        this.vehicules = data;
+        this.vehiculesDataLimited = this.vehicules.slice(0, 3);
 
         this.vehiclesCount = data.length;
-        console.log('Véhicules reçus :', data);
+        console.log('Véhicules reçus :', this.vehiculesDataLimited);
       },
       error: (err) => {
         console.error('Erreur lors de l’appel API véhicules :', err);
       }
     });
   }
-
+  toggleSinistreList(vehicleId: number): void {
+    this.sinistreOpenStates[vehicleId] = !this.sinistreOpenStates[vehicleId];
+  }
 
   private loadSinistre(): void {
     this.sinistreService.getsinistreGet(this.assureId).subscribe({

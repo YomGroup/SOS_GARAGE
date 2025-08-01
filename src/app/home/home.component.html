@@ -45,14 +45,40 @@
       <h2>Sinistre déclaré</h2>
       <span class="status-filter">Etat</span>
     </div>
-    <div *ngFor="let sinistre of sinistreDataLimited " class="claim-item">
-      <div class="claim-info">
-        <div class="claim-id">{{ sinistre.type }}</div>
-        <div class="claim-details">
-      {{ sinistre.conditionsAcceptees }} - {{ sinistre.lienConstat }}
-       </div>
-  </div>
+  <div *ngFor="let vehicle of vehiculesDataLimited" class="claim-item">
+  <div class="claim-info">
+    <div class="claim-id">{{ vehicle.marque }} {{ vehicle.modele }}</div>
+    <div class="claim-details">Plaque : {{ vehicle.immatriculation }}</div>
+
+    <!-- Bouton pour afficher/cacher les sinistres -->
+    <button (click)="toggleSinistreList(vehicle.id)">
+      {{ sinistreOpenStates[vehicle.id] ? 'Masquer les sinistres' : 'Voir les sinistres' }}
+    </button>
+
+    <!-- Liste déroulante des sinistres -->
+    <div *ngIf="sinistreOpenStates[vehicle.id]">
+      <div
+        *ngFor="let sinistre of vehicle.sinistres.slice(0, 1)"
+        class="sinistre-info"
+      >
+        <div class="sinistre-id">
+          Sinistre #{{ sinistre.id }} - {{ sinistre.type.replace('_', ' ') }}
+        </div>
+        <div class="sinistre-statut">
+          État véhicule : {{ sinistre.etatvehicule }}<br> Statut : {{ sinistre.statut }}
+        </div>
+
+      </div>
+
+      <!-- Si plus de 3 sinistres, indiquer -->
+      <div *ngIf="vehicle.sinistres.length > 3" class="text-muted small mt-2">
+        ...et {{ vehicle.sinistres.length - 3 }} sinistre(s) supplémentaire(s)
+      </div>
     </div>
+  </div>
+</div>
+
+
   </div>
 
   <div class="notifications-column">
