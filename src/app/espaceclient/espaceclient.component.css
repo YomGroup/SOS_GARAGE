@@ -30,3 +30,152 @@
         margin-left: 0 !important;
     }
 }
+/* Ajouter ces styles au fichier espaceclient.component.css */
+
+/* Animation pour les notifications */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+  60% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Style pour le bouton de messages avec notification */
+.btn-message-notification {
+  transition: all 0.3s ease;
+}
+
+.btn-message-notification.has-new-messages {
+  animation: pulse 2s infinite;
+}
+
+.btn-message-notification:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Badge de notification personnalisé */
+.notification-badge {
+  animation: bounce 1s ease-in-out;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  font-weight: bold;
+  border: 2px solid white;
+}
+
+/* Point de notification */
+.notification-dot {
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+}
+
+/* Style pour le lien de messages dans la sidebar */
+.nav-link.message-link {
+  position: relative;
+  overflow: visible;
+}
+
+.nav-link.message-link.has-new-messages {
+  background: linear-gradient(90deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
+  border-left: 3px solid #1e4db8;
+}
+
+.nav-link.message-link.has-new-messages i {
+  color: #1e4db8;
+  animation: pulse 2s infinite;
+}
+
+/* Toast personnalisé */
+.toast.message-toast {
+  border: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+.toast.message-toast .toast-body {
+  backdrop-filter: blur(5px);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .notification-badge {
+    font-size: 0.6rem;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+  }
+  
+  .notification-dot {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+/* Amélioration de l'accessibilité */
+.btn:focus-visible,
+.nav-link:focus-visible {
+  outline: 2px solid #1e4db8;
+  outline-offset: 2px;
+}
+
+/* Animation d'apparition pour les nouvelles notifications */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.toast.show {
+  animation: slideInRight 0.5s ease-out;
+}
+
+/* Style pour les conversations avec messages non lus */
+.conversation-item.has-unread {
+  border-left: 4px solid #1e4db8;
+  background: linear-gradient(90deg, rgba(30, 77, 184, 0.05) 0%, transparent 50%);
+  font-weight: 500;
+}
+
+.conversation-item.has-unread .user-name {
+  color: #1e4db8;
+  font-weight: 600;
+}
+
+.conversation-item.has-unread .last-message {
+  font-weight: 500;
+  color: #495057;
+}
+
+/* Badge flottant pour le nombre de messages non lus */
+.unread-count-badge {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+}

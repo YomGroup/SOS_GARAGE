@@ -143,18 +143,24 @@ export class VehiculesComponent implements OnInit {
   shouldDisplay(id: number): boolean {
     const selected = this.newVehicle.typeAssurence;
 
-    // Si "Tous risques" est sélectionné, ne montrer que "Tous risques"
-    if (selected.includes(2) && id !== 2) {
-      return false;
+    const hasTiers = selected.includes(1);
+    const hasTousRisques = selected.includes(2);
+
+    // Si Tous risques est sélectionné → on affiche **seulement** Tous risques
+    if (hasTousRisques) {
+      return id === 2;
     }
 
-    // Si "Tiers" est sélectionné, cacher "Tous risques"
-    if (selected.includes(1) && id === 2) {
-      return false;
+    // Si Tiers est sélectionné → on affiche Tiers, Bris de glace, Vol
+    if (hasTiers) {
+      return id === 1 || id === 3 || id === 4;
     }
 
-    return true;
+    // Si rien n’est sélectionné → on affiche Tiers et Tous risques seulement
+    return id === 1 || id === 2;
   }
+
+
 
   /*
     ngOnInit() {

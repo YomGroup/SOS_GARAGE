@@ -12,7 +12,7 @@ import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseStorageService } from '../../services/firebase-storage.service';
-import { getStorage, ref, uploadBytes } from 'firebase/storage';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 
 interface Document {
   id: number;
@@ -487,7 +487,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         conditionsAcceptees: true,
         documents: [],
         lieu: this.lieuSinistre,
-        imgUrl: savedFiles.photosNames,
+        imgUrl: savedFiles.photosUrls,
         idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
         statut: 'EN_ATTENTE_EXPERTISE',
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
@@ -555,9 +555,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
-  private async saveFilesToAssets(): Promise<{ photosNames: string[] }> {
+  private async saveFilesToAssets(): Promise<{ photosUrls: string[] }> {
     const storage = getStorage();
-    const photosNames: string[] = [];
+    const photosUrls: string[] = [];
 
     const baseDir = 'declaration/photos';
 
@@ -575,23 +575,28 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       for (const photo of photos) {
         const file = photo.file;
         const firebasePath = `${baseDir}/${dirName}/${file.name}`;
-
         const fileRef = ref(storage, firebasePath);
+
+        // Upload du fichier
         await uploadBytes(fileRef, file);
 
-        photosNames.push(firebasePath);
+        // Obtenir l'URL publique
+        const downloadURL = await getDownloadURL(fileRef);
+        photosUrls.push(downloadURL);
       }
     }
 
-    // Upload du constat s’il existe
+    // Upload du constat s’il existe (avec URL, si tu veux aussi l’utiliser)
     if (this.constatFile) {
       const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
       const constatRef = ref(storage, constatPath);
       await uploadBytes(constatRef, this.constatFile);
-      console.log(`✅ Constat téléversé : ${constatPath}`);
+      const constatURL = await getDownloadURL(constatRef);
+      console.log(`✅ Constat téléversé : ${constatURL}`);
+      // Tu peux aussi ajouter `constatURL` à un autre tableau si nécessaire
     }
 
-    return { photosNames };
+    return { photosUrls };
   }
 
 

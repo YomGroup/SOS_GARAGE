@@ -13,6 +13,7 @@ import { AssureService } from '../../../../services/assure.service';
 import { MissionService } from '../../../../services/mission.service';
 import { Mission } from '../../../../services/models-api.interface';
 import { Modal } from 'bootstrap';
+import { NotificationService } from '../../../../services/notification.service';
 
 @Component({
   selector: 'app-message',
@@ -53,7 +54,8 @@ export class MessageComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private ngZone: NgZone,
     private assureService: AssureService,
-    private missionService: MissionService
+    private missionService: MissionService,
+    private messageNotificationService: NotificationService
   ) { }
   async loadConversationUsers(): Promise<void> {
     try {
@@ -145,6 +147,7 @@ export class MessageComponent implements OnInit, OnDestroy {
             console.log('Liste des conversations mise à jour:', this.conversationUsers);
           });
         }
+        await this.calculateUnreadMessages();
       } else {
         // Pour les garagistes/admins, traiter les IDs des assurés
         const newConversationUsers = await Promise.all(
@@ -229,6 +232,9 @@ export class MessageComponent implements OnInit, OnDestroy {
         next: async (message) => {
           console.log('Nouveau message entrant détecté de:', message.senderId);
 
+          // MODIFIÉ : Ne pas incrémenter ici car le service global s'en charge
+          // Le service global écoute déjà et incrémente automatiquement
+
           // Vérifier si c'est un nouveau contact
           const existingUser = this.conversationUsers.find(u => u.useridKeycloak === message.senderId);
 
@@ -236,16 +242,18 @@ export class MessageComponent implements OnInit, OnDestroy {
             console.log('Nouveau contact détecté, rechargement de la liste des conversations');
             await this.loadConversationUsers();
 
-            // NOUVEAU : Forcer la détection des changements et le scroll
             this.ngZone.run(() => {
               this.cdRef.detectChanges();
             });
           }
 
-          // NOUVEAU : Si on a une conversation active avec cet expéditeur, 
+          // Si on a une conversation active avec cet expéditeur, marquer comme lu
           if (this.receiverId === message.senderId) {
-
-            setTimeout(() => this.scrollToBottom(), 100);
+            // Marquer automatiquement comme lu si on est dans la conversation active
+            setTimeout(async () => {
+              await this.messageNotificationService.markConversationAsRead(message.senderId);
+              this.scrollToBottom();
+            }, 500);
           }
         },
         error: (err) => {
@@ -253,7 +261,6 @@ export class MessageComponent implements OnInit, OnDestroy {
         }
       });
   }
-
 
 
 
@@ -266,6 +273,8 @@ export class MessageComponent implements OnInit, OnDestroy {
     // NOUVEAU : Démarrer l'écoute des nouveaux messages entrants
     this.setupIncomingMessageListener();
 
+    // NOUVEAU : Calculer les messages non lus au démarrage
+    //await this.calculateUnreadMessages();
     // Écouter les paramètres de route
     this.route.queryParams.subscribe(params => {
       const targetId = params['receiverId'];
@@ -274,6 +283,16 @@ export class MessageComponent implements OnInit, OnDestroy {
       }
     });
   }
+  private async calculateUnreadMessages(): Promise<void> {
+    try {
+      // MODIFIÉ : Utiliser le service global pour recalculer
+      await this.messageNotificationService.recalculateUnreadMessages();
+      console.log('Messages non lus recalculés via le service global');
+    } catch (error) {
+      console.error('Erreur lors du calcul des messages non lus:', error);
+    }
+  }
+
 
   // Méthode pour basculer entre liste et conversation sur mobile
   toggleMobileView(): void {
@@ -283,7 +302,7 @@ export class MessageComponent implements OnInit, OnDestroy {
 
   // Méthode modifiée pour la sélection d'utilisateur sur mobile
   selectUserMobile(userId: string): void {
-    this.selectUser(userId); // Appel de la méthode existante
+    this.selectUser(userId); // Appel de la méthode existante qui inclut maintenant le marquage comme lu
 
     // Sur mobile, passer à la vue conversation après sélection
     const isMobile = window.innerWidth < 768;
@@ -298,6 +317,9 @@ export class MessageComponent implements OnInit, OnDestroy {
     this.receiverId = userId;
     this.selectedUser = this.conversationUsers.find(u => u.useridKeycloak === userId);
 
+    // MODIFIÉ : Utiliser le service global pour marquer comme lu
+    this.messageNotificationService.markConversationAsRead(userId);
+
     // Arrêter l'ancienne souscription si elle existe
     if (this.messagesSub) {
       this.messagesSub.unsubscribe();
@@ -307,6 +329,9 @@ export class MessageComponent implements OnInit, OnDestroy {
     this.setupMessageListener();
   }
 
+  private async markConversationAsRead(userId: string): Promise<void> {
+
+  }
   openUserSelector(): void {
     // Ouvrir le modal immédiatement
     this.openModal();
@@ -670,7 +695,6 @@ export class MessageComponent implements OnInit, OnDestroy {
   }
 
   private setupMessageListener(): void {
-    // Vérifier que nous avons bien un senderId et receiverId
     if (!this.senderId || !this.receiverId) {
       console.warn('SenderId ou ReceiverId manquant:', { senderId: this.senderId, receiverId: this.receiverId });
       return;

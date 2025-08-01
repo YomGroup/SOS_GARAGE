@@ -1,5 +1,5 @@
 import { Injectable, NgZone } from '@angular/core';
-import { addDoc, collection, serverTimestamp, onSnapshot, query, orderBy, where, or, and, limit } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp, onSnapshot, query, orderBy, where, or, and, limit, writeBatch, Timestamp } from 'firebase/firestore';
 import { db } from '../main';
 import { Observable } from 'rxjs';
 import { getDocs } from 'firebase/firestore';
@@ -10,16 +10,130 @@ import { Message } from './models-api.interface';
 })
 export class MessageService {
 
-    async sendMessage(senderId: string, receiverId: string, text: string) {
-        await addDoc(collection(db, 'messages'), {
-            senderId,
-            receiverId,
-            text,
-            timestamp: serverTimestamp(),
-            isRead: false
+    async sendMessage(senderId: string, receiverId: string, text: string): Promise<void> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            await addDoc(messagesRef, {
+                senderId,
+                receiverId,
+                text,
+                timestamp: Timestamp.now(),
+                read: false, // NOUVEAU : Marquer comme non lu par défaut
+                readAt: null // NOUVEAU : Date de lecture
+            });
+            console.log('Message envoyé avec succès');
+        } catch (error) {
+            console.error('Erreur lors de l\'envoi du message:', error);
+            throw error;
+        }
+    }
+    listenToUnreadMessagesCount(userId: string): Observable<number> {
+        return new Observable(observer => {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                observer.next(snapshot.size);
+            }, (error) => {
+                observer.error(error);
+            });
+
+            return () => unsubscribe();
         });
     }
+    async getUnreadMessagesByConversation(userId: string): Promise<Map<string, number>> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
 
+            const snapshot = await getDocs(q);
+            const unreadByUser = new Map<string, number>();
+
+            snapshot.docs.forEach(doc => {
+                const data = doc.data();
+                const senderId = data['senderId'];
+                const currentCount = unreadByUser.get(senderId) || 0;
+                unreadByUser.set(senderId, currentCount + 1);
+            });
+
+            return unreadByUser;
+        } catch (error) {
+            console.error('Erreur lors de la récupération des messages non lus par conversation:', error);
+            return new Map();
+        }
+    }
+
+    async getTotalUnreadMessagesCount(userId: string): Promise<number> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
+
+            const snapshot = await getDocs(q);
+            return snapshot.size;
+        } catch (error) {
+            console.error('Erreur lors du comptage total des messages non lus:', error);
+            return 0;
+        }
+    }
+    async markMessagesAsRead(userId: string, otherUserId: string): Promise<void> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('senderId', '==', otherUserId),
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
+
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                const batch = writeBatch(db);
+
+                snapshot.docs.forEach((docSnapshot) => {
+                    batch.update(docSnapshot.ref, {
+                        read: true,
+                        readAt: Timestamp.now()
+                    });
+                });
+
+                await batch.commit();
+                console.log(`${snapshot.size} messages marqués comme lus`);
+            }
+        } catch (error) {
+            console.error('Erreur lors du marquage des messages comme lus:', error);
+            throw error;
+        }
+    }
+    async getUnreadMessagesCount(userId: string, otherUserId: string): Promise<number> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('senderId', '==', otherUserId),
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
+
+            const snapshot = await getDocs(q);
+            return snapshot.size;
+        } catch (error) {
+            console.error('Erreur lors du comptage des messages non lus:', error);
+            return 0;
+        }
+    }
     // Méthode corrigée pour écouter tous les messages d'un utilisateur
     listenToAllUserMessages(userId: string): Observable<Message> {
         return new Observable(observer => {
@@ -58,7 +172,35 @@ export class MessageService {
             };
         });
     }
+    async markAllMessagesAsRead(userId: string): Promise<void> {
+        try {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
 
+            const snapshot = await getDocs(q);
+
+            if (!snapshot.empty) {
+                const batch = writeBatch(db);
+
+                snapshot.docs.forEach((docSnapshot) => {
+                    batch.update(docSnapshot.ref, {
+                        read: true,
+                        readAt: Timestamp.now()
+                    });
+                });
+
+                await batch.commit();
+                console.log(`${snapshot.size} messages marqués comme lus`);
+            }
+        } catch (error) {
+            console.error('Erreur lors du marquage de tous les messages comme lus:', error);
+            throw error;
+        }
+    }
     async getConversationUsers(userId: string): Promise<string[]> {
         console.log('getConversationUsers appelé pour userId:', userId);
         const messagesRef = collection(db, 'messages');
@@ -90,78 +232,35 @@ export class MessageService {
     // NOUVELLE MÉTHODE : Écouter spécifiquement les nouveaux messages entrants
     // Dans messagerie.service.ts
 
-    // MÉTHODE CORRIGÉE : Écouter spécifiquement les nouveaux messages entrants
     listenToIncomingMessages(userId: string): Observable<any> {
         return new Observable(observer => {
-            if (!userId) {
-                observer.error('UserId est requis');
-                return () => { };
-            }
-
-            console.log('Démarrage de l\'écoute des messages entrants pour:', userId);
-
             const messagesRef = collection(db, 'messages');
             const q = query(
                 messagesRef,
                 where('receiverId', '==', userId),
-                orderBy('timestamp', 'desc')
+                where('read', '==', false),
+                orderBy('timestamp', 'desc'),
+                limit(1)
             );
 
-            // Garder trace du dernier timestamp pour éviter de traiter les anciens messages
-            let lastProcessedTimestamp: any = null;
-            let isFirstLoad = true;
-
-            const unsubscribe = onSnapshot(q,
-                (snapshot) => {
-                    snapshot.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const messageData = change.doc.data();
-                            const messageTimestamp = messageData['timestamp'];
-
-                            // Si c'est le premier chargement, marquer tous les messages existants comme traités
-                            if (isFirstLoad) {
-                                if (!lastProcessedTimestamp ||
-                                    (messageTimestamp && messageTimestamp.seconds > (lastProcessedTimestamp?.seconds || 0))) {
-                                    lastProcessedTimestamp = messageTimestamp;
-                                }
-                            } else {
-                                // Traiter seulement les nouveaux messages
-                                if (!lastProcessedTimestamp ||
-                                    (messageTimestamp && messageTimestamp.seconds > lastProcessedTimestamp.seconds)) {
-
-                                    console.log('Nouveau message entrant de:', messageData['senderId']);
-
-                                    observer.next({
-                                        senderId: messageData['senderId'],
-                                        receiverId: messageData['receiverId'],
-                                        text: messageData['text'],
-                                        timestamp: messageTimestamp
-                                    });
-
-                                    lastProcessedTimestamp = messageTimestamp;
-                                }
-                            }
-                        }
-                    });
-
-                    // Après le premier chargement, commencer à traiter les nouveaux messages
-                    if (isFirstLoad) {
-                        isFirstLoad = false;
-                        console.log('Initialisation terminée, écoute des nouveaux messages activée');
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        const messageData = {
+                            id: change.doc.id,
+                            ...change.doc.data()
+                        };
+                        observer.next(messageData);
                     }
-                },
-                (error) => {
-                    console.error('Erreur lors de l\'écoute des messages entrants:', error);
-                    observer.error(error);
-                }
-            );
+                });
+            }, (error) => {
+                observer.error(error);
+            });
 
-            return () => {
-                console.log('Arrêt de l\'écoute des messages entrants pour:', userId);
-                unsubscribe();
-            };
+            return () => unsubscribe();
         });
     }
+
 
     listenToMessages(user1: string, user2: string): Observable<any[]> {
         return new Observable(observer => {
