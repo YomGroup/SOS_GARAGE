@@ -59,12 +59,8 @@ export class MessageComponent implements OnInit, OnDestroy {
   ) { }
   async loadConversationUsers(): Promise<void> {
     try {
-      console.log('Rechargement de la liste des conversations...');
       const userIds = await this.messageService.getConversationUsers(this.senderId);
-      console.log('UserIds trouvés:', userIds);
-
       if (userIds.length === 0) {
-        console.log('Aucune conversation trouvée');
         this.ngZone.run(() => {
           this.conversationUsers = [];
           this.cdRef.detectChanges();
@@ -87,7 +83,7 @@ export class MessageComponent implements OnInit, OnDestroy {
               return {
                 id: 0,
                 name: 'Administrateur',
-                prenom: id.slice(0, 6) + '...',
+                prenom: 'SOS',
                 useridKeycloak: id,
                 email: '',
                 telephone: '',
@@ -111,7 +107,7 @@ export class MessageComponent implements OnInit, OnDestroy {
               return {
                 id: 0,
                 name: 'Administrateur',
-                prenom: id.slice(0, 6) + '...',
+                prenom: 'SOS',
                 useridKeycloak: id,
                 email: '',
                 telephone: '',
@@ -144,10 +140,9 @@ export class MessageComponent implements OnInit, OnDestroy {
           this.ngZone.run(() => {
             this.conversationUsers = validUsers;
             this.cdRef.detectChanges();
-            console.log('Liste des conversations mise à jour:', this.conversationUsers);
           });
         }
-        await this.calculateUnreadMessages();
+        // await this.calculateUnreadMessages();
       } else {
         // Pour les garagistes/admins, traiter les IDs des assurés
         const newConversationUsers = await Promise.all(
@@ -158,7 +153,7 @@ export class MessageComponent implements OnInit, OnDestroy {
               if (assure) {
                 return {
                   id: assure.id || 0,
-                  name: assure.name || 'Utilisateur',
+                  name: assure.name || 'Assuré',
                   prenom: assure.prenom || '',
                   useridKeycloak: id,
                   email: assure.email || '',
@@ -183,7 +178,7 @@ export class MessageComponent implements OnInit, OnDestroy {
             return {
               id: 0,
               name: 'Administrateur',
-              prenom: id.slice(0, 6) + '...',
+              prenom: 'SOS',
               useridKeycloak: id,
               email: '',
               telephone: '',
@@ -224,22 +219,16 @@ export class MessageComponent implements OnInit, OnDestroy {
   private setupIncomingMessageListener(): void {
     if (!this.senderId) return;
 
-    console.log('Configuration de l\'écoute des nouveaux messages entrants pour:', this.senderId);
 
     this.conversationsSub = this.messageService
       .listenToIncomingMessages(this.senderId)
       .subscribe({
         next: async (message) => {
-          console.log('Nouveau message entrant détecté de:', message.senderId);
-
-          // MODIFIÉ : Ne pas incrémenter ici car le service global s'en charge
-          // Le service global écoute déjà et incrémente automatiquement
 
           // Vérifier si c'est un nouveau contact
           const existingUser = this.conversationUsers.find(u => u.useridKeycloak === message.senderId);
 
           if (!existingUser) {
-            console.log('Nouveau contact détecté, rechargement de la liste des conversations');
             await this.loadConversationUsers();
 
             this.ngZone.run(() => {
@@ -272,8 +261,6 @@ export class MessageComponent implements OnInit, OnDestroy {
 
     // NOUVEAU : Démarrer l'écoute des nouveaux messages entrants
     this.setupIncomingMessageListener();
-
-    // NOUVEAU : Calculer les messages non lus au démarrage
     //await this.calculateUnreadMessages();
     // Écouter les paramètres de route
     this.route.queryParams.subscribe(params => {
@@ -359,7 +346,6 @@ export class MessageComponent implements OnInit, OnDestroy {
       this.loadAllUsersForAdmin();
     } else if (this.isGaragiste) {
       // Pour le garagiste, garder la logique existante
-      console.log('Chargement des missions pour le réparateur connecté:', keycloakId);
 
       this.missionService.getAllMissions().subscribe({
         next: async (missions) => {

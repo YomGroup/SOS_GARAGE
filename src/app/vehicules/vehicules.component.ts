@@ -312,6 +312,7 @@ export class VehiculesComponent implements OnInit {
     this.showAddForm = true;
     console.log('Raw typeAssurence string:', vehicle.typeAssurence);
     console.log('Parsed typeAssurence IDs:', this.extractTypeAssurenceIds(vehicle.typeAssurence || ''));
+    this.selectedAssurance = vehicle.nomAssurence;
 
     this.newVehicle = {
       ...vehicle,

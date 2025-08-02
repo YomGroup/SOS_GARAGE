@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -58,9 +58,9 @@ export class LayoutComponent implements OnInit {
 
     this.setupIncomingMessageListener();
     // ⚙️ Lancer le rafraîchissement toutes les 2s
-    setInterval(() => {
+    /*setInterval(() => {
       this.setupIncomingMessageListener();
-    }, 2000);
+    }, 2000);*/
   }
   isMobile: boolean = false;
   isSidebarOpen: boolean = false;
@@ -90,6 +90,7 @@ export class LayoutComponent implements OnInit {
           console.log('Notification reçue dans EspaceClient - Messages non lus:', count);
           this.unreadMessagesCount = count;
           this.hasNewMessages = count > 0;
+          this.cdr.markForCheck();
         }
       );
 
@@ -98,8 +99,10 @@ export class LayoutComponent implements OnInit {
         hasMessages => {
           console.log('Notification hasNewMessages reçue:', hasMessages);
           this.hasNewMessages = hasMessages;
+          this.cdr.markForCheck(); // 👈 FORCER Angular à détecter le changement
         }
       );
+
 
       console.log('Notifications configurées avec succès');
     } catch (error) {
@@ -122,7 +125,7 @@ export class LayoutComponent implements OnInit {
 
           // Vérifier si c'est un nouveau contact
 
-          await this.calculateUnreadMessages();
+          //await this.calculateUnreadMessages();
 
 
 
@@ -147,7 +150,7 @@ export class LayoutComponent implements OnInit {
 
   }
 
-  constructor() {
+  constructor(private cdr: ChangeDetectorRef) {
     this.isMobile = window.innerWidth <= 992;
     window.addEventListener('resize', () => {
       this.isMobile = window.innerWidth <= 992;

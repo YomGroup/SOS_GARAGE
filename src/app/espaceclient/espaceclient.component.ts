@@ -1,5 +1,5 @@
 // espaceclient.component.ts - Modifications pour les notifications globales
-import { Component, HostListener, inject, Inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, inject, Inject, OnInit, OnDestroy, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -81,7 +81,8 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
     @Inject(PLATFORM_ID) private platformId: Object,
     private auth: AuthService,
     private router: Router,
-    private activatedRoute: ActivatedRoute
+    private activatedRoute: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
 
@@ -139,10 +140,10 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
     await this.setupMessageNotifications();
     this.setupIncomingMessageListener();
     // ⚙️ Lancer le rafraîchissement toutes les 2s
-    setInterval(() => {
+    /*setInterval(() => {
       console.log('Interval déclenché toutes les 2s');
       this.setupIncomingMessageListener();
-    }, 2000);
+    }, 2000);*/
 
 
   }
@@ -168,6 +169,8 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
           console.log('Notification reçue dans EspaceClient - Messages non lus:', count);
           this.unreadMessagesCount = count;
           this.hasNewMessages = count > 0;
+          this.cdr.markForCheck();
+
         }
       );
 
@@ -176,6 +179,8 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
         hasMessages => {
           console.log('Notification hasNewMessages reçue:', hasMessages);
           this.hasNewMessages = hasMessages;
+          this.cdr.markForCheck();
+
         }
       );
 
