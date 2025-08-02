@@ -14,11 +14,11 @@
 
 .conversation-item.active {
     background-color: #e3f2fd !important;
-    border-left: 4px solid #2196f3;
+    border-left: 4px solid #764ba2;
 }
 
 .message-sent .message-content {
-    background-color: #007bff;
+    background-color: #764ba2;
     color: white;
 }
 
@@ -110,8 +110,8 @@
 
 /* Focus states */
 .form-control:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    border-color: #764ba2;
+    box-shadow: 0 0 0 0.2rem rgba(118, 75, 162, 0.25);
 }
 
 .btn:focus {
