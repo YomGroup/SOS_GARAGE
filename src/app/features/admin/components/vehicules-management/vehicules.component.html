@@ -40,6 +40,8 @@
             </div>
           </div>
         </div>
+        <button (click)="selectedVehicle = vehicle" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#vehicleDetailModal">Voir détail</button>
+
       </div>
     </div>
   </div>
@@ -50,5 +52,46 @@
       <button class="btn btn-sm mx-1" [ngClass]="{'btn-primary': currentPage === (i+1), 'btn-outline-primary': currentPage !== (i+1)}" (click)="goToPage(i+1)">{{ i+1 }}</button>
     </ng-container>
     <button class="btn btn-outline-primary rounded-pill mx-1" (click)="nextPage()" [disabled]="currentPage === totalPages">&raquo;</button>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="vehicleDetailModal" tabindex="-1" aria-labelledby="vehicleDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="vehicleDetailModalLabel">Détail du véhicule</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-md-6">
+              <img [src]="selectedVehicle?.imgUrl" class="img-fluid" alt="Image véhicule">
+            </div>
+            <div class="col-md-6">
+              <h5>{{ selectedVehicle?.marque }} {{ selectedVehicle?.modele }}</h5>
+              <p>Immatriculation: {{ selectedVehicle?.immatriculation }}</p>
+              <p>Boite de vitesse: {{ selectedVehicle?.boiteVitesse }}</p>
+              <p>Date de mise en circulation: {{ selectedVehicle?.dateMiseEnCirculation | date:'dd/MM/yyyy' }}</p>
+              <P>Marque: {{ selectedVehicle?.marque }}</P>
+              <P>Modele: {{ selectedVehicle?.modele }}</P>
+              <P>Année: {{ selectedVehicle?.year }}</P>
+              <p>Carte grise: {{ selectedVehicle?.carteGrise }}</p>
+              <p>Contrat d'assurance: {{ selectedVehicle?.contratAssurance }}</p>
+              <p>Assure: {{ selectedVehicle?.assure }}</p>
+              <p>Nom de l'assurence: {{ selectedVehicle?.nomAssurence }}</p>
+              <p>Type d'assurence: {{ selectedVehicle?.typeAssurence }}</p>
+              <p>Etat du véhicule: {{ selectedVehicle?.etatvehicule }}</p>
+              <p>Date de la dernière CG: {{ selectedVehicle?.dateDerniereCg | date:'dd/MM/yyyy' }}</p>
+              <p>Energie: {{ selectedVehicle?.energie }}</p>
+              <p>Nom commerciale: {{ selectedVehicle?.nomCommerciale }}</p>
+              <p>Puissance en chevaux: {{ selectedVehicle?.puissanceChevaux }}</p>
+              <p>Puissance fiscale: {{ selectedVehicle?.puissanceFiscale }}</p>
+              <p>Type de mine: {{ selectedVehicle?.typeMine }}</p>
+              <p>Version: {{ selectedVehicle?.version }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

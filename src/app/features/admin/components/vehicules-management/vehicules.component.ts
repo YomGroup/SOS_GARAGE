@@ -13,6 +13,7 @@ import { VehicleService, Vehicle } from '../../../../../services/vehicle.service
   imports: [CommonModule, FormsModule],
 })
 export class VehiculesComponent implements OnInit, OnDestroy {
+  selectedVehicle: any = null;
   vehicles: Vehicle[] = [];
   searchTerm: string = '';
   private initialized = false;
