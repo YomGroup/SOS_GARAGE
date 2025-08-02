@@ -81,38 +81,51 @@
 
   </div>
 
-  <div class="notifications-column">
-    <div class="notifications-header">
-      <h2>Notification</h2>
-      <svg width="24" height="24" fill="#ff6b6b" viewBox="0 0 24 24">
-        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-      </svg>
-    </div>
-    
+<div class="notifications-column">
+  <div class="notifications-header">
+    <h2>Dernières activités</h2>
+    <svg width="24" height="24" fill="#ff6b6b" viewBox="0 0 24 24">
+      <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+    </svg>
+  </div>
+
+  <!-- Ajout récent de véhicules -->
+  <div *ngFor="let vehicule of vehicules">
     <div class="notification-item">
-      <div class="notification-icon success">
+      <div class="notification-icon info">
         <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-6h2v6zm0-8h-2V7h2v4z"/>
         </svg>
       </div>
       <div class="notification-content">
-        <div class="notification-text">Le sinistre-001 à été traité avec succès</div>
-        <div class="notification-time">Il y a 30 mn</div>
+        <div class="notification-text">
+          Véhicule <strong>{{ vehicule.marque }} {{ vehicule.nomCommerciale }}</strong> ajouté
+        </div>
+        <div class="notification-time">{{ getTimeSince(vehicule.createdAt) }}</div>
       </div>
     </div>
-    
-    <div class="notification-item">
-      <div class="notification-icon document">
-        <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-          <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
-        </svg>
-      </div>
-      <div class="notification-content">
-        <div class="notification-text">Documents à signe pour le sinistre-001</div>
-        <div class="notification-time">Il y a 39 mn</div>
+  </div>
+
+  <!-- Derniers sinistres associés -->
+  <div *ngFor="let vehicule of vehiculesDataLimited">
+    <div *ngFor="let sinistre of vehicule.sinistres.slice().reverse().slice(0, 1)"> <!-- le + récent -->
+      <div class="notification-item">
+        <div class="notification-icon success">
+          <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+          </svg>
+        </div>
+        <div class="notification-content">
+          <div class="notification-text">
+            <strong>{{ vehicule.marque }} {{ vehicule.nomCommerciale }}</strong><br>
+            Sinistre <strong>{{ sinistre.type.replaceAll('_', ' ').toLowerCase() }}</strong> à <strong>{{ sinistre.lieu }}</strong>
+          </div>
+          <div class="notification-time">{{ getTimeSince(sinistre.createdAt) }}</div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
 
 </div>

@@ -507,3 +507,11 @@ button {
 .mt-2 {
     margin-top: 0.5rem;
 }
+
+.notification-icon.success {
+    background-color: #38b000;
+}
+
+.notification-icon.info {
+    background-color: #0077b6;
+}

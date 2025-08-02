@@ -10,7 +10,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
-import { Mission, Reparation, Vehicule} from '../../../../../services/models-api.interface';
+import { Mission, Reparation, Vehicule } from '../../../../../services/models-api.interface';
 import { DossiersService, Dossier } from '../../../../../services/dossiers.service';
 import { KeycloakService } from 'keycloak-angular';
 import { MissionViewComponent } from './mission-view.component';
@@ -126,7 +126,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         const token = await this.keycloakService.getToken();
         const payload: any = JSON.parse(atob(token.split('.')[1]));
         const keycloakId = payload.sub;
-        
+
         // Charger les missions
         this.missionService.getAllMissions().subscribe({
           next: (missions: Mission[]) => {
@@ -150,12 +150,12 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
                 }
               });
             });
-            
+
             // Charger les dossiers non-traités
             this.dossiersService.getDossiers().subscribe({
               next: (dossiers: Dossier[]) => {
                 // Filtrer les dossiers qui n'ont pas de mission associée
-                this.dossiersNonTraites = dossiers.filter(dossier => 
+                this.dossiersNonTraites = dossiers.filter(dossier =>
                   !this.missions.some(mission => mission.sinistre?.id === dossier.id)
                 );
                 this.cdr.detectChanges();
@@ -164,7 +164,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
                 console.error('Erreur lors du chargement des dossiers non-traités:', err);
               }
             });
-            
+
             this.loading = false;
             this.cdr.detectChanges();
           },
@@ -245,7 +245,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   validerFacture(reparation: Reparation): void {
     const mission = this.missions.find(m => m.id === reparation.id);
     if (mission) {
-      this.missionService.updateMission(mission.id ?? 0, { 
+      this.missionService.updateMission(mission.id ?? 0, {
         factureFinale: mission.devis,
         statut: 'terminée'
       }).subscribe({
@@ -266,7 +266,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   declarerEpave(reparation: Reparation): void {
     const mission = this.missions.find(m => m.id === reparation.id);
     if (mission) {
-      this.missionService.updateMission(mission.id ?? 0, { 
+      this.missionService.updateMission(mission.id ?? 0, {
         declareCommeEpave: true,
         statut: 'épave'
       }).subscribe({

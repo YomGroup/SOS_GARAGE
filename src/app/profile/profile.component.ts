@@ -14,7 +14,7 @@ import { AuthService } from '../../services/auth.service';
 export class ProfileComponent {
   private assureService = inject(AssureService);
   userData: any = {
-    nom: '',
+    name: '',
     prenom: '',
     email: '',
     telephone: '',
@@ -22,12 +22,9 @@ export class ProfileComponent {
     numeroPermis: '',
     adresse: '',
     dateNaissance: '',
-    sexe: 'M',
-    codePostal: '',
-    ville: '',
-    pays: 'FR',
-    dateObtention: '',
-    typePermis: ''
+    dateObtentionPermis: '',
+    typePermis: '',
+    typeGarantie: ''
   };
   // Définissez les types de permis disponibles
   permisTypes = [
@@ -64,12 +61,13 @@ export class ProfileComponent {
 
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
+        console.log('Données utilisateur récupéréeskdnjn:', data);
         this.userData = {
           ...this.userData,
           ...data,
           // Formatage des données si nécessaire
           telephone: this.formatPhoneNumber(data.telephone),
-          dateNaissance: this.formatDate(data.dateNaissance)
+          //dateObtentionPermis: this.formatDate(data.dateObtentionPermis)
         };
         this.originalData = { ...this.userData };
       },
@@ -98,6 +96,14 @@ export class ProfileComponent {
     // Ici, ajouter la logique pour sauvegarder les modifications
     this.isEditing = false;
     this.originalData = { ...this.userData };
+    this.assureService.updateAssurer(this.userData).subscribe({
+      next: (data) => {
+        console.log('Profil mis à jour avec succès:', data);
+      },
+      error: (err) => {
+        console.error('Erreur lors de la mise à jour du profil:', err);
+      }
+    });
   }
 
   cancelEdit(): void {

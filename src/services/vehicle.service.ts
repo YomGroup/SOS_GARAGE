@@ -45,7 +45,7 @@ export class VehicleService {
     private apiUrlAdd = `${environment.apiUrl}/vehicule`;
     private apiUrlData = `${environment.apiUrl}/vehicule`;
     private http = inject(HttpClient);
-    private vehiculesSubject = new BehaviorSubject<Vehicle[]>([]);
+    private vehiculesSubject = new BehaviorSubject<any[]>([]);
     vehicules$ = this.vehiculesSubject.asObservable();
 
     getAllVehiculesPost(body: any = {}) {
@@ -62,7 +62,9 @@ export class VehicleService {
     }
 
     refreshVehicules(id: number) {
-        this.getVehiculesDataById(id).subscribe(); // met à jour le BehaviorSubject
+        this.getVehiculesDataById(id).subscribe((vehicles) => {
+            this.vehiculesSubject.next(vehicles);
+        });
     }
 
 

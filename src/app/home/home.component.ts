@@ -46,21 +46,46 @@ export class HomeComponent implements OnInit {
 
   loadVehicules(assureId: number): void {
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
-      next: (data: any) => {
+      next: (data: any[]) => {
         console.log('Véhicules reçus :', data);
-        this.vehicules = data;
-        this.vehiculesDataLimited = this.vehicules.slice(0, 3);
 
+        // 1. Tous les véhicules
+        this.vehicules = data;
+
+        // 2. Filtrer ceux qui ont des sinistres
+        const vehiculesAvecSinistres = data.filter(v => v.sinistres && v.sinistres.length > 0);
+
+        // 3. Trier les véhicules avec sinistres par date de création descendante
+        vehiculesAvecSinistres.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+        // 4. Limiter à 3 véhicules avec sinistres
+        this.vehiculesDataLimited = vehiculesAvecSinistres.slice(0, 3);
+
+        // 5. Compter tous les véhicules (même ceux sans sinistre)
         this.vehiclesCount = data.length;
-        console.log('Véhicules reçus :', this.vehiculesDataLimited);
+
+        console.log('Véhicules affichés avec sinistre (max 3) :', this.vehiculesDataLimited);
       },
       error: (err) => {
         console.error('Erreur lors de l’appel API véhicules :', err);
       }
     });
   }
+
   toggleSinistreList(vehicleId: number): void {
     this.sinistreOpenStates[vehicleId] = !this.sinistreOpenStates[vehicleId];
+  }
+  getTimeSince(dateStr: string): string {
+    const now = new Date();
+    const past = new Date(dateStr);
+    const diffMs = now.getTime() - past.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHrs = Math.floor(diffMin / 60);
+
+    if (diffMin < 1) return 'À l’instant';
+    if (diffMin < 60) return `Il y a ${diffMin} min`;
+    if (diffHrs < 24) return `Il y a ${diffHrs} h`;
+    return past.toLocaleDateString(); // fallback
   }
 
   private loadSinistre(): void {

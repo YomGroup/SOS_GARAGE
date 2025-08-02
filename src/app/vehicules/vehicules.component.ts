@@ -14,12 +14,15 @@ import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
   templateUrl: './vehicules.component.html',
   styleUrl: './vehicules.component.css'
 })
+
 export class VehiculesComponent implements OnInit {
   private vehiculeService = inject(VehicleService);
   private authService = inject(AuthService);
   private assureService = inject(AssureService);
   vehicles: Vehicle[] = [];
   showAddForm = false;
+  errorMessage = '';
+  showErrorToast = false;
   loadingScrap = false;
   isEditMode = false;
   newVehicle: any = {
@@ -56,6 +59,7 @@ export class VehiculesComponent implements OnInit {
   hasAssurance: boolean = false;
   contratFile: File | null = null;
   loadingSubmit: boolean = false;
+  nomAssurenceisempty: boolean = true;
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -145,14 +149,18 @@ export class VehiculesComponent implements OnInit {
 
     const hasTiers = selected.includes(1);
     const hasTousRisques = selected.includes(2);
+    const hasBrisDeGlace = selected.includes(3);
+    const hasVol = selected.includes(4);
 
     // Si Tous risques est sélectionné → on affiche **seulement** Tous risques
     if (hasTousRisques) {
       return id === 2;
     }
 
-    // Si Tiers est sélectionné → on affiche Tiers, Bris de glace, Vol
+    // Si Tiers est sélectionné → on affiche Tiers, Bris de glace, Vol (mais Bris de glace et Vol sont exclusifs)
     if (hasTiers) {
+      if (hasBrisDeGlace && id === 4) return false; // si Bris de glace sélectionné, masquer Vol
+      if (hasVol && id === 3) return false;         // si Vol sélectionné, masquer Bris de glace
       return id === 1 || id === 3 || id === 4;
     }
 
@@ -268,6 +276,33 @@ export class VehiculesComponent implements OnInit {
       this.loadingSubmit = false;
     };
     console.log('vehicule envoyé', payload);
+    const showError = (rawError: any) => {
+      let userMessage = 'Une erreur s\'est produite. Veuillez réessayer.';
+
+      // Si erreur serveur avec message textuel
+      if (rawError?.error) {
+        const errText = rawError.error;
+
+        // Cas spécifique : violation contrainte d'unicité immatriculation
+        if (typeof errText === 'string' && errText.includes('duplicate key value') && errText.includes('(immatriculation)')) {
+          userMessage = "Ce véhicule avec cette immatriculation existe déjà.";
+        }
+        // Autre cas : le backend renvoie un objet avec un champ message plus simple
+        else if (typeof errText === 'object' && errText.message) {
+          userMessage = errText.message;
+        }
+        // Sinon : essayer de prendre le message brut en string en nettoyant un peu
+        else if (typeof errText === 'string') {
+          // Optionnel: tu peux extraire la première ligne seulement
+          userMessage = errText.split('\n')[0];
+        }
+      }
+
+      this.errorMessage = userMessage;
+      this.showErrorToast = true;
+      setTimeout(() => this.showErrorToast = false, 5000);
+    }
+
 
     if (this.isEditMode && this.newVehicle.id) {
       this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
@@ -284,6 +319,8 @@ export class VehiculesComponent implements OnInit {
             console.error('Message d\'erreur détaillé :', err.error.message);
           }
           this.scrapErrorMessage = 'Une erreur s\'est produite. Veuillez réessayer.';
+          const msg = err?.error?.message || 'Une erreur s\'est produite. Veuillez réessayer.';
+          showError(err);
           finalCallback();
 
         }
@@ -300,12 +337,14 @@ export class VehiculesComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erreur lors de l’ajout du véhicule :', err);
+          showError(err);
           finalCallback();
 
         }
       });
     }
   }
+
 
   updateVehicle(vehicle: Vehicle) {
     this.isEditMode = true;
