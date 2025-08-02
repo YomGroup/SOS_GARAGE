@@ -176,24 +176,28 @@
   <h2>Photos du véhicule accidenté</h2>
   
   <!-- Étape en cours -->
-  <div class="photo-steps">
-    <div class="step" [class.active]="currentPhotoStep === 1" (click)="setPhotoStep(1)">
-      <span>1</span>
-      <p>Avant</p>
-    </div>
-    <div class="step" [class.active]="currentPhotoStep === 2" (click)="setPhotoStep(2)">
-      <span>2</span>
-      <p>Plaque d'immatriculation</p>
-    </div>
-    <div class="step" [class.active]="currentPhotoStep === 3" (click)="setPhotoStep(3)">
-      <span>3</span>
-      <p>côté</p>
-    </div>
-    <div class="step" [class.active]="currentPhotoStep === 4" (click)="setPhotoStep(4)">
-      <span>4</span>
-      <p>Dégâts</p>
-    </div>
-  </div>
+<ul class="nav nav-pills justify-content-center my-4">
+  <li class="nav-item" (click)="setPhotoStep(1)" style="cursor:pointer;">
+    <a class="nav-link" [class.active]="currentPhotoStep === 1">
+       Avant
+    </a>
+  </li>
+  <li class="nav-item" (click)="setPhotoStep(2)" style="cursor:pointer;">
+    <a class="nav-link" [class.active]="currentPhotoStep === 2">
+      Immatriculation
+    </a>
+  </li>
+  <li class="nav-item" (click)="setPhotoStep(3)" style="cursor:pointer;">
+    <a class="nav-link" [class.active]="currentPhotoStep === 3">
+      Côté
+    </a>
+  </li>
+  <li class="nav-item" (click)="setPhotoStep(4)" style="cursor:pointer;">
+    <a class="nav-link" [class.active]="currentPhotoStep === 4">
+      Dégâts
+    </a>
+  </li>
+</ul>
 
   <!-- Instructions spécifiques -->
   <div class="step-instructions">
@@ -206,7 +210,10 @@
     </div>
     
     <div *ngIf="currentPhotoStep === 3">
-      <h3><i class="bi bi-upc-scan"></i> Numéro de série (VIN)</h3>
+<h3>
+  <i class="bi bi-car-front me-2"></i> Photo latérale du véhicule
+</h3>
+
     </div>
     
     <div *ngIf="currentPhotoStep === 4">

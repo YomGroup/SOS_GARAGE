@@ -18,6 +18,25 @@
 
 <!-- Modal Add Vehicle Form -->
 <div class="modal fade" [class.show]="showAddForm" [style.display]="showAddForm ? 'block' : 'none'" tabindex="-1" role="dialog" aria-modal="true">
+ <!-- Toast d'erreur -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11000">
+  <div 
+    class="toast align-items-center text-bg-danger border-0"
+    role="alert"
+    aria-live="assertive"
+    aria-atomic="true"
+    [class.show]="showErrorToast"
+    [class.hide]="!showErrorToast"
+    style="opacity: 1; transition: opacity 0.5s ease-in-out;">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ errorMessage }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" (click)="showErrorToast = false"></button>
+    </div>
+  </div>
+</div>
+
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">

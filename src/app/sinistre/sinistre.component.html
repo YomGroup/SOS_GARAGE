@@ -90,19 +90,28 @@
                   <div>
                     <h6 class="mb-1">{{ sinistre.vehicule }}</h6>
                     <div class="d-flex align-items-center">
-                      <span class="badge rounded-pill me-2" [ngClass]="{
-                        'bg-warning text-dark': sinistre.statut === 'En cours',
-                        'bg-success': sinistre.statut === 'Clôturé',
-                        'bg-secondary': sinistre.statut === 'En attente'
-                      }">
-                        <i [class]="{
-                          'bi bi-clock': sinistre.statut === 'En cours',
-                          'bi bi-check-circle': sinistre.statut === 'Clôturé',
-                          'bi bi-hourglass': sinistre.statut === 'En attente'
-                        }" class="me-1"></i>
-                        {{ sinistre.statut }}
-                      </span>
-                      <small class="text-muted">{{ sinistre.statut }}</small>
+                 <!-- Badge lisible avec icône et couleur -->
+                    <span class="badge rounded-pill me-2" [ngClass]="{
+                      'bg-warning text-dark': isEnCours(sinistre.statut),
+                      'bg-success': isCloture(sinistre.statut),
+                      'bg-secondary': isEnAttente(sinistre.statut)
+                    }">
+                      <i class="me-1" [ngClass]="{
+                        'bi bi-clock': isEnCours(sinistre.statut),
+                        'bi bi-check-circle': isCloture(sinistre.statut),
+                        'bi bi-hourglass': isEnAttente(sinistre.statut)
+                      }"></i>
+                      {{
+                        isEnCours(sinistre.statut) ? 'En cours' :
+                        isCloture(sinistre.statut) ? 'Clôturé' :
+                        isEnAttente(sinistre.statut) ? 'En attente' :
+                        sinistre.statut
+                      }}
+                    </span>
+
+                    <!-- Badge technique en complément -->
+                    <small class="badge bg-light text-dark border">{{ sinistre.statut }}</small>
+
                     </div>
                   </div>
                 </div>
@@ -111,10 +120,10 @@
                   <span class="badge bg-light text-dark me-2">{{ sinistre.id }}</span>
                   <div class="rounded-circle p-2 text-white" 
                        [ngClass]="{
-                         'bg-success': sinistre.typeVehicule === 'roulant',
-                         'bg-danger': sinistre.typeVehicule === 'non roulant'
+                         'bg-success': sinistre.etat === 'roulant',
+                         'bg-danger': sinistre.etat === 'non roulant'
                        }">
-                    <i [class]="sinistre.typeVehicule === 'roulant' ? 'bi bi-car-front' : 'bi bi-p-circle'"></i>
+                    <i [class]="sinistre.etat === 'roulant' ? 'bi bi-car-front' : 'bi bi-p-circle'"></i>
                   </div>
                   <i class="bi bi-chevron-down ms-2" 
                      [class.bi-chevron-up]="selectedSinistre?.id === sinistre.id"></i>
@@ -123,32 +132,40 @@
 
               <!-- Détails expandus -->
               <div class="mt-3 pt-3 border-top" *ngIf="selectedSinistre?.id === sinistre.id">
-                <div class="row">
-                  <!-- Notifications -->
-                  <div class="col-md-6 mb-3 mb-md-0">
-                    <h6 class="text-primary mb-3">
-                      <i class="bi bi-bell me-2"></i>Description 
-                    </h6>
-                   {{sinistre.type}}
-                  </div>
-                  
-                  <!-- Documents et Photos -->
+                <div class="row g-4">
+                  <!-- Type -->
                   <div class="col-md-6">
-                    <h6 class="text-primary mb-3">
-                      <i class="bi bi-folder me-2"></i>Documents et Photos
+                    <h6 class="text-primary mb-1">
+                      <i class="bi bi-card-text me-2"></i><strong>Description</strong>
                     </h6>
-                    
-                    
-                    
-                    
-                    <div>
-                      <small class="text-muted d-block mb-2">Constat :</small>
-                      <span class="badge bg-info text-white">
-                        <i class="bi bi-file-earmark-text me-1"></i>{{ sinistre.constat }}
-                      </span>
-                    </div>
+                    <p class="mb-0">{{ sinistre.type }}</p>
+                  </div>
+
+                  <!-- État -->
+                  <div class="col-md-6">
+                    <h6 class="text-primary mb-1">
+                      <i class="bi bi-info-circle me-2"></i><strong>État</strong>
+                    </h6>
+                    <p class="mb-0">{{ sinistre.etat }}</p>
+                  </div>
+
+                  <!-- Raison -->
+                  <div class="col-md-6">
+                    <h6 class="text-primary mb-1">
+                      <i class="bi bi-question-circle me-2"></i><strong>Raison</strong>
+                    </h6>
+                    <p class="mb-0">{{ sinistre.raison }}</p>
+                  </div>
+
+                  <!-- Lieu -->
+                  <div class="col-md-6">
+                    <h6 class="text-primary mb-1">
+                      <i class="bi bi-geo-alt me-2"></i><strong>Lieu</strong>
+                    </h6>
+                    <p class="mb-0">{{ sinistre.lieu }}</p>
                   </div>
                 </div>
+
               </div>
             </div>
             

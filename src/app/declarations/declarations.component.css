@@ -162,6 +162,17 @@
     box-shadow: 0 8px 25px rgba(139, 92, 246, 0.2);
 }
 
+.nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%) !important;
+    color: white !important;
+}
+
+/* Optionnel: hover effect */
+.nav-pills .nav-link:hover:not(.active) {
+    background-color: rgba(30, 77, 184, 0.1);
+    color: #1e4db8;
+}
+
 .vehicle-dropdown.open {
     background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
     color: white;

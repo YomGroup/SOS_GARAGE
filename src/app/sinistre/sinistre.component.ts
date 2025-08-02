@@ -20,6 +20,10 @@ interface Sinistre {
   photos: string[];
   constat: string;
   type: string;
+  etat?: string;
+  raison?: string;
+  lieu?: string;
+
 }
 
 @Component({
@@ -64,6 +68,24 @@ export class SinistreComponent implements OnInit {
       }
     });
   }
+  isEnCours(statut: string): boolean {
+    return [
+      'EN_ATTENTE_TRAITEMENT',
+      'EN_ATTENTE_EXPERTISE',
+      'EN_ATTENTE_VALIDATION_ASSURANCE',
+      'EN_COURS_REPARATION'
+    ].includes(statut);
+  }
+
+  isCloture(statut: string): boolean {
+    return [
+      'REPARATION_TERMINEE',
+      'VEHICULE_EPAVE'
+    ].includes(statut);
+  }
+  isEnAttente(statut: string): boolean {
+    return statut === 'EN_ATTENTE_RDV';
+  }
 
   private transformApiDataToSinistres(apiData: any): Sinistre[] {
     const sinistres: Sinistre[] = [];
@@ -80,7 +102,10 @@ export class SinistreComponent implements OnInit {
           documents: sinistreApi.documents?.map((doc: any) => doc.fichier) || [],
           photos: sinistreApi.imgUrl || [],
           constat: sinistreApi.lienConstat || 'Aucun constat',
-          type: sinistreApi.type || 'aucun'
+          type: sinistreApi.type || 'aucun',
+          etat: sinistreApi.etatvehicule || 'Inconnu',
+          raison: sinistreApi.input || 'Aucune raison spécifiée',
+          lieu: sinistreApi.lieu || 'Lieu inconnu'
         };
         sinistres.push(sinistre);
       });
@@ -155,13 +180,21 @@ export class SinistreComponent implements OnInit {
   }
 
   // Statistiques
+
   getSinistresEnCours(): number {
-    return this.sinistres.filter(s => s.statut === 'En cours').length;
+    return this.sinistres.filter(s =>
+      ['EN_ATTENTE_TRAITEMENT', 'EN_ATTENTE_RDV', 'EN_COURS_REPARATION', 'EN_ATTENTE_EXPERTISE', 'EN_ATTENTE_VALIDATION_ASSURANCE']
+
+        .includes(s.statut)
+    ).length;
   }
 
   getSinistresClotures(): number {
-    return this.sinistres.filter(s => s.statut === 'Clôturé').length;
+    return this.sinistres.filter(s =>
+      s.statut === 'REPARATION_TERMINEE'
+    ).length;
   }
+
 
   getTotalVehicules(): number {
     return new Set(this.sinistres.map(s => s.vehicule)).size;
