@@ -57,6 +57,7 @@ export class SinistreComponent implements OnInit {
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.sinistres = this.transformApiDataToSinistres(data);
+        console.log('Sinistres transformés:', this.sinistres);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des sinistres:', err);
@@ -73,7 +74,7 @@ export class SinistreComponent implements OnInit {
           id: sinistreApi.id.toString(),
           vehicule: `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`,
           date: this.formatDate(sinistreApi.createdAt),
-          statut: sinistreApi.isvalid ? 'Clôturé' : 'En cours',
+          statut: sinistreApi.statut,
           typeVehicule: sinistreApi.type === 'ROULANT' ? 'roulant' : 'non roulant',
           notifications: this.generateNotifications(sinistreApi),
           documents: sinistreApi.documents?.map((doc: any) => doc.fichier) || [],
@@ -91,7 +92,6 @@ export class SinistreComponent implements OnInit {
   }
 
   private generateNotifications(sinistreApi: any): Notification[] {
-    // Exemple de notifications générées automatiquement
     return [
       {
         message: `Sinistre ${sinistreApi.isvalid ? 'clôturé' : 'en cours de traitement'}`,

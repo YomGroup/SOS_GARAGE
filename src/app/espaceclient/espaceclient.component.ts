@@ -76,7 +76,7 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
   private assureService = inject(AssureService);
   private conversationsSub!: Subscription; // NOUVEAU : subscription pour les nouvelles conversations
 
-
+  vehicules: any[] = [];
   constructor(
     @Inject(PLATFORM_ID) private platformId: Object,
     private auth: AuthService,
@@ -84,8 +84,8 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
     private activatedRoute: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {
-    this.userid = this.authService.getToken()?.['sub'] ?? null;
 
+    this.userid = this.authService.getToken()?.['sub'] ?? null;
     if (this.userid) {
       this.assureService.getAssurerID(this.userid).subscribe({
         next: (data: any) => {
@@ -102,12 +102,8 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
-    // Code existant
-    this.vehiculeService.refreshVehicules(this.assureId);
-    this.vehiculeService.vehicules$.subscribe(vehicles => {
-      this.hasAssurance = vehicles.every(v => v.nomAssurence && v.nomAssurence.trim() !== '');
-    });
 
+    this.checkAssuranceStatus();
     const today = new Date();
     this.currentDate = today.toLocaleDateString('fr-FR', {
       day: 'numeric',
@@ -123,7 +119,6 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
 
     this.email = this.auth.getToken()?.name || '';
     const hasRole = this.auth.hasRole('ROLE_ASSURE');
-
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.activatedRoute),
@@ -145,6 +140,16 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
       this.setupIncomingMessageListener();
     }, 2000);*/
 
+
+  }
+  checkAssuranceStatus(): void {
+    // Code existant
+    this.vehiculeService.refreshVehicules(this.assureId);
+    this.vehiculeService.vehicules$.subscribe(vehicles => {
+      this.hasAssurance = vehicles.every(v => v.nomAssurence && v.nomAssurence.trim() !== '');
+      this.cdr.markForCheck();
+
+    });
 
   }
   // : Configuration des notifications de messages

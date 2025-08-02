@@ -84,4 +84,7 @@ export class AssureService {
     getAllAssures() {
         return this.http.get<ASSURE[]>(`${this.apiUrl}`);
     }
+    updateAssurer(assure: ASSURE) {
+        return this.http.put<ASSURE>(`${this.apiUrl}/${assure.id}`, assure);
+    }
 }

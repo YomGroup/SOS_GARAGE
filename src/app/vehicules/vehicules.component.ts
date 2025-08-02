@@ -56,6 +56,7 @@ export class VehiculesComponent implements OnInit {
   hasAssurance: boolean = false;
   contratFile: File | null = null;
   loadingSubmit: boolean = false;
+  nomAssurenceisempty: boolean = true;
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
