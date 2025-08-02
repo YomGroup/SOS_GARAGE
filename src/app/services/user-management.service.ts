@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, forkJoin, map, catchError, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Assure {
   id: number;
-  nom: string;
+  name: string;
   prenom: string;
   email: string;
   telephone: string;
@@ -46,7 +47,7 @@ export interface UserDisplay {
   providedIn: 'root'
 })
 export class UserManagementService {
-  private baseUrl = 'https://sosmongarage-production.up.railway.app/V1';
+  private baseUrl = environment.apiUrl;
   private httpHeaders = new HttpHeaders({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -84,16 +85,16 @@ export class UserManagementService {
 
   // Récupérer tous les assurés
   getAssures(): Observable<Assure[]> {
-    console.log('Appel API getAssures:', `${this.baseUrl}/api/assure`);
-    return this.http.get<Assure[]>(`${this.baseUrl}/api/assure`).pipe(
+    console.log('Appel API getAssures:', `${this.baseUrl}/assure`);
+    return this.http.get<Assure[]>(`${this.baseUrl}/assure`).pipe(
       catchError(this.handleError)
     );
   }
 
   // Récupérer tous les réparateurs
   getReparateurs(): Observable<Reparateur[]> {
-    console.log('Appel API getReparateurs:', `${this.baseUrl}/api/reparateurs`);
-    return this.http.get<Reparateur[]>(`${this.baseUrl}/api/reparateurs`).pipe(
+    console.log('Appel API getReparateurs:', `${this.baseUrl}/reparateurs`);
+    return this.http.get<Reparateur[]>(`${this.baseUrl}/reparateurs`).pipe(
       catchError(this.handleError)
     );
   }
@@ -116,7 +117,7 @@ export class UserManagementService {
           assures.forEach(assure => {
             users.push({
               id: assure.id,
-              nom: assure.nom,
+              nom: assure.name,
               prenom: assure.prenom,
               email: assure.email,
               telephone: assure.telephone,
@@ -155,49 +156,49 @@ export class UserManagementService {
 
   // Créer un nouvel assuré
   createAssure(assure: Omit<Assure, 'id'>): Observable<Assure> {
-    return this.http.post<Assure>(`${this.baseUrl}/api/assure`, assure).pipe(
+    return this.http.post<Assure>(`${this.baseUrl}/assure`, assure).pipe(
       catchError(this.handleError)
     );
   }
 
   // Créer un nouveau réparateur
   createReparateur(reparateur: Omit<Reparateur, 'id'>): Observable<Reparateur> {
-    return this.http.post<Reparateur>(`${this.baseUrl}/api/reparateurs`, reparateur).pipe(
+    return this.http.post<Reparateur>(`${this.baseUrl}/reparateurs`, reparateur).pipe(
       catchError(this.handleError)
     );
   }
 
   // Mettre à jour un assuré
   updateAssure(id: number, assure: Partial<Assure>): Observable<Assure> {
-    return this.http.put<Assure>(`${this.baseUrl}/api/assure/${id}`, assure).pipe(
+    return this.http.put<Assure>(`${this.baseUrl}/assure/${id}`, assure).pipe(
       catchError(this.handleError)
     );
   }
 
   // Mettre à jour un réparateur
   updateReparateur(id: number, reparateur: Partial<Reparateur>): Observable<Reparateur> {
-    return this.http.put<Reparateur>(`${this.baseUrl}/api/reparateurs/${id}`, reparateur).pipe(
+    return this.http.put<Reparateur>(`${this.baseUrl}/reparateurs/${id}`, reparateur).pipe(
       catchError(this.handleError)
     );
   }
 
   // Supprimer un assuré
   deleteAssure(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/api/assure/${id}`).pipe(
+    return this.http.delete<void>(`${this.baseUrl}/assure/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   // Supprimer un réparateur
   deleteReparateur(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/api/reparateurs/${id}`).pipe(
+    return this.http.delete<void>(`${this.baseUrl}/reparateurs/${id}`).pipe(
       catchError(this.handleError)
     );
   }
 
   // Activer/Désactiver un réparateur
   toggleReparateurStatus(id: number, isvalids: boolean): Observable<Reparateur> {
-    return this.http.put<Reparateur>(`${this.baseUrl}/api/reparateurs/${id}`, { isvalids }).pipe(
+    return this.http.put<Reparateur>(`${this.baseUrl}/reparateurs/${id}`, { isvalids }).pipe(
       catchError(this.handleError)
     );
   }

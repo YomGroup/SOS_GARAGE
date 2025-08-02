@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Invitation {
   id?: number;
@@ -36,7 +37,7 @@ export interface PasswordReset {
   providedIn: 'root'
 })
 export class AccessManagementService {
-  private baseUrl = 'https://sosmongarage-production.up.railway.app/V1';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
 

@@ -153,16 +153,30 @@
               </td>
               <td>{{ mission.devis | number:'1.2-2' }} €</td>
               <td>{{ mission.factureFinale | number:'1.2-2' }} €</td>
-              <td>{{ getCommission(mission) | number:'1.2-2' }} €</td>
+              <td>{{ mission.montantCommission | number:'1.2-2' }} €</td>
               <td>
                 <span class="status-badge" [class]="'status-' + (mission.commissionStatut === 'payée' ? 'paid' : 'unpaid')">
                   {{ mission.commissionStatut }}
                 </span>
               </td>
-              <td>
-                <button class="btn-detail" (click)="openMissionDetail(mission.id ?? 0); $event.stopPropagation();">
-                  Voir détail
-                </button>
+              <td style="white-space: nowrap;">
+                <div style="display: flex; align-items: center; gap: 4px;">
+                  <button class="btn-detail" (click)="openMissionDetail(mission.id ?? 0); $event.stopPropagation();">
+                    Voir détail
+                  </button>
+                  <button
+                    *ngIf="mission.commissionStatut !== 'payée'"
+                    class="btn-pay-commission"
+                    (click)="markCommissionAsPaid(mission); $event.stopPropagation();">
+                    Payée
+                  </button>
+                  <button
+                    *ngIf="mission.commissionStatut === 'payée'"
+                    class="btn-unpay-commission"
+                    (click)="markCommissionAsUnpaid(mission); $event.stopPropagation();">
+                    Non payée
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -210,6 +224,6 @@
   *ngIf="showDossierView && selectedMission"
   [mission]="selectedMission"
   [edition]="true"
-  (close)="closeDossierView()"
+  (closed)="closeDossierView()"
   (commissionStatusUpdated)="onCommissionStatusUpdated($event)">
 </app-dossier-view>

@@ -623,3 +623,63 @@
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
+
+.btn-pay-commission {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 4px;
+  box-shadow: 0 1px 4px rgba(40, 167, 69, 0.10);
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 28px;
+  min-width: 0;
+}
+.btn-pay-commission .icon {
+  font-size: 1em;
+  margin-right: 0.2em;
+}
+.btn-pay-commission:hover, .btn-pay-commission:focus {
+  background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.18);
+  color: #fff;
+  outline: none;
+}
+.btn-pay-commission:active {
+  transform: scale(0.97);
+}
+
+.btn-unpay-commission {
+  background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-left: 4px;
+  box-shadow: 0 1px 4px rgba(255, 71, 87, 0.10);
+  transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  height: 28px;
+  min-width: 0;
+}
+.btn-unpay-commission:hover, .btn-unpay-commission:focus {
+  background: linear-gradient(135deg, #ff6b81 0%, #ff4757 100%);
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(255, 71, 87, 0.18);
+  color: #fff;
+  outline: none;
+}
+.btn-unpay-commission:active {
+  transform: scale(0.97);
+}

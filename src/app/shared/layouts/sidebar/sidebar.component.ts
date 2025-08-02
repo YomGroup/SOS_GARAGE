@@ -81,7 +81,7 @@ export class SidebarComponent implements OnInit {
     // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
     { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/admin/message' },
-    { title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
+    //{ title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
 
   ];
 

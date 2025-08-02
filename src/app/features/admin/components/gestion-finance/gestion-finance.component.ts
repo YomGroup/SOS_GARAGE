@@ -228,7 +228,7 @@ export class GestionFinanceComponent implements OnInit {
       this._clearCache();
       this.cdr.detectChanges();
     }
-    this.closeDossierView();
+    // Suppression de la fermeture automatique du détail
   }
 
   refreshData(): void {
@@ -264,6 +264,42 @@ export class GestionFinanceComponent implements OnInit {
 
   formatCurrency(value: number): string {
     return value.toFixed(2).replace('.', ',') + ' €';
+  }
+
+  markCommissionAsPaid(mission: Mission): void {
+    if (!mission.id) return;
+    this.isLoading = true;
+    this.missionService.updateMissionPartial(mission.id, { commissionStatut: 'payée' })
+      .subscribe({
+        next: (updatedMission) => {
+          this.onCommissionStatusUpdated({ ...mission, commissionStatut: 'payée' });
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.error = 'Erreur lors de la mise à jour du statut de commission';
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  markCommissionAsUnpaid(mission: Mission): void {
+    if (!mission.id) return;
+    this.isLoading = true;
+    this.missionService.updateMissionPartial(mission.id, { commissionStatut: 'non payée' })
+      .subscribe({
+        next: (updatedMission) => {
+          this.onCommissionStatusUpdated({ ...mission, commissionStatut: 'non payée' });
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.isLoading = false;
+          this.error = 'Erreur lors de la mise à jour du statut de commission';
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   // Méthodes privées d'optimisation

@@ -204,7 +204,7 @@ export class UserManagementComponent implements OnInit {
         
         if (formValue.role === 'Assuré') {
           const newAssure = {
-            nom: formValue.nom,
+            name: formValue.nom,
             prenom: formValue.prenom,
             email: formValue.email,
             telephone: formValue.telephone,
