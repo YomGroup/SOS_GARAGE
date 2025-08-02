@@ -133,48 +133,11 @@
                 <div class="form-group">
                   <label>Devis (€)</label>
                   <input type="number" class="form-control" [(ngModel)]="missionEdit.devis" name="devis" required>
-                  <!-- Affichage du devis uploadé (édition) -->
-                  <div *ngFor="let doc of missionEdit.documentsAssurance">
-                    <ng-container *ngIf="doc.type === 'devis'">
-                      <div class="uploaded-document-item">
-                        <a [href]="doc.url || doc" target="_blank" class="btn btn-link p-0">
-                          <i class="fas fa-file-pdf me-1"></i>{{ getFileNameFromUrl(doc.url || doc) }}
-                        </a>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc.url || doc, 'assurance')">
-                          <i class="fas fa-envelope me-1"></i>Envoyer à l'assurance
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc.url || doc, 'expert')">
-                          <i class="fas fa-envelope me-1"></i>Envoyer à l'expert
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="telechargerDocument(doc.url || doc)">
-                          <i class="fas fa-download me-1"></i>Télécharger
-                        </button>
-                      </div>
-                    </ng-container>
-                  </div>
+                  
                 </div>
                 <div class="form-group">
                   <label>Facture finale (€)</label>
                   <input type="number" class="form-control" [(ngModel)]="missionEdit.factureFinale" name="factureFinale">
-                  <!-- Affichage de la facture uploadée (édition) -->
-                  <div *ngFor="let doc of missionEdit.documentsAssurance">
-                    <ng-container *ngIf="doc.type === 'facture'">
-                      <div class="uploaded-document-item">
-                        <a [href]="doc.url || doc" target="_blank" class="btn btn-link p-0">
-                          <i class="fas fa-file-pdf me-1"></i>{{ getFileNameFromUrl(doc.url || doc) }}
-                        </a>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc.url || doc, 'assurance')">
-                          <i class="fas fa-envelope me-1"></i>Envoyer à l'assurance
-                        </button>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc.url || doc, 'expert')">
-                          <i class="fas fa-envelope me-1"></i>Envoyer à l'expert
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="telechargerDocument(doc.url || doc)">
-                          <i class="fas fa-download me-1"></i>Télécharger
-                        </button>
-                      </div>
-                    </ng-container>
-                  </div>
                 </div>
               </div>
               <!-- Boutons d'upload pour les documents -->
@@ -229,32 +192,11 @@
               <div class="form-group">
                 <label>Devis (€)</label>
                 <div class="readonly-field">{{ mission?.devis }}</div>
-                <!-- Affichage du devis uploadé (lecture seule) -->
-                <div *ngFor="let doc of mission?.documentsAssurance">
-                  <ng-container *ngIf="isDevisDocument(doc)">
-                    <a [href]="doc" target="_blank" class="btn btn-link p-0">
-                      <i class="fas fa-file-pdf me-1"></i>{{ getFileNameFromUrl(doc) }}
-                    </a>
-                    <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="telechargerDocument(doc)">
-                      <i class="fas fa-download me-1"></i>Télécharger
-                    </button>
-                  </ng-container>
-                </div>
+               
               </div>
               <div class="form-group">
                 <label>Facture finale (€)</label>
                 <div class="readonly-field">{{ mission?.factureFinale }}</div>
-                <!-- Affichage de la facture uploadée (lecture seule) -->
-                <div *ngFor="let doc of mission?.documentsAssurance">
-                  <ng-container *ngIf="isFactureDocument(doc)">
-                    <a [href]="doc" target="_blank" class="btn btn-link p-0">
-                      <i class="fas fa-file-pdf me-1"></i>{{ getFileNameFromUrl(doc) }}
-                    </a>
-                    <button type="button" class="btn btn-outline-primary btn-sm ms-2" (click)="telechargerDocument(doc)">
-                      <i class="fas fa-download me-1"></i>Télécharger
-                    </button>
-                  </ng-container>
-                </div>
               </div>
                 <!-- Les autres champs financiers pertinents (montant statue, franchise, commission, etc.) peuvent rester en readonly si besoin -->
                 <div class="form-group">
@@ -272,6 +214,7 @@
                   </div>
                 </div>
               </div>
+              
               <!-- Boutons d'upload en mode lecture (pour passer en édition) -->
               <div class="upload-section" *ngIf="canEditMission()">
                 <h4><i class="fas fa-upload me-2"></i>Ajouter des documents</h4>
@@ -288,6 +231,25 @@
                     <i class="fas fa-images me-2"></i>
                     Upload Images
                   </button> -->
+                </div>
+                <div class="uploaded-documents-list mt-3">
+                  <div *ngFor="let doc of mission?.documentsAssurance" class="uploaded-document-item"> 
+                    <div class="doc-info">
+                      <i class="fas fa-file-pdf text-danger me-2"></i>
+                      <span class="doc-name">{{ getFileNameFromUrl(doc) }}</span>
+                    </div>
+                    <div class="doc-actions">
+                      <a [href]="doc" target="_blank" class="btn btn-link btn-sm me-2">
+                        <i class="fas fa-eye"></i> Voir
+                      </a>
+                      <button type="button" class="btn btn-outline-info btn-sm me-2" (click)="envoyerDocumentParMail(doc, 'assurance')">
+                        <i class="fas fa-envelope"></i> Assurance
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm" (click)="envoyerDocumentParMail(doc, 'expert')">
+                        <i class="fas fa-envelope"></i> Expert
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div class="actions-grid">
