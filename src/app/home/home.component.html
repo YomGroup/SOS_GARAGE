@@ -58,7 +58,7 @@
     <!-- Liste déroulante des sinistres -->
     <div *ngIf="sinistreOpenStates[vehicle.id]">
       <div
-        *ngFor="let sinistre of vehicle.sinistres.slice(0, 1)"
+        *ngFor="let sinistre of vehicle.sinistres.slice(0, 3).reverse()"
         class="sinistre-info"
       >
         <div class="sinistre-id">
@@ -108,7 +108,7 @@
 
   <!-- Derniers sinistres associés -->
   <div *ngFor="let vehicule of vehiculesDataLimited">
-    <div *ngFor="let sinistre of vehicule.sinistres.slice().reverse().slice(0, 1)"> <!-- le + récent -->
+    <div *ngFor="let sinistre of vehicule.sinistres.slice().reverse().slice(0, 5)"> <!-- le + récent -->
       <div class="notification-item">
         <div class="notification-icon success">
           <svg width="20" height="20" fill="white" viewBox="0 0 24 24">

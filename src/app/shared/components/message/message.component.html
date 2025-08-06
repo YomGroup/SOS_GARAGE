@@ -47,33 +47,74 @@
         </div>
         
         <!-- Liste des conversations -->
-        <div class="discussion-list flex-grow-1 overflow-auto">
-          <ul class="list-group list-group-flush">
-            <li *ngFor="let user of conversationUsers" 
-                (click)="selectUserMobile(user.useridKeycloak)"
-                class="list-group-item list-group-item-action d-flex align-items-center p-3 border-0 conversation-item"
-                [class.active]="receiverId === user.useridKeycloak">
-              <div class="avatar-container me-3">
-                <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
-                     style="width: 40px; height: 40px; font-weight: bold;">
-                  {{ (user.name.charAt(0) + user.prenom.charAt(0)).toUpperCase() }}
-                </div>
-              </div>
-              <div class="user-info flex-grow-1">
-                <div class="user-name fw-semibold text-dark">
-                  {{ user.name }} {{ user.prenom }}
-                </div>
-                <div class="last-message text-muted small">
-                  Dernière activité
-                </div>
-              </div>
-              <!-- Indicateur mobile -->
-              <div class="d-md-none">
-                <i class="fas fa-chevron-right text-muted"></i>
-              </div>
-            </li>
-          </ul>
+<div class="discussion-list flex-grow-1 overflow-auto">
+  <ul class="list-group list-group-flush">
+    <li *ngFor="let user of conversationUsers" 
+        (click)="selectUserMobile(user.useridKeycloak)"
+        class="list-group-item list-group-item-action d-flex align-items-center p-3 border-0 conversation-item position-relative"
+        [class.active]="receiverId === user.useridKeycloak"
+        [class.unread-conversation]="getUnreadCount(user.useridKeycloak) > 0">
+      
+      <!-- Badge pour messages non lus -->
+      <div *ngIf="getUnreadCount(user.useridKeycloak) > 0" 
+           class="position-absolute top-0 start-0 translate-middle">
+        <span class="badge bg-danger rounded-pill" 
+              style="font-size: 0.7rem; min-width: 20px;">
+          {{ getUnreadCount(user.useridKeycloak) > 99 ? '99+' : getUnreadCount(user.useridKeycloak) }}
+        </span>
+      </div>
+
+      <div class="avatar-container me-3 position-relative">
+        <div class="avatar bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
+             style="width: 40px; height: 40px; font-weight: bold;"
+             [class.border]="getUnreadCount(user.useridKeycloak) > 0"
+             [class.border-danger]="getUnreadCount(user.useridKeycloak) > 0"
+             [style.border-width]="getUnreadCount(user.useridKeycloak) > 0 ? '2px' : '0'">
+          {{ (user.name.charAt(0) + user.prenom.charAt(0)).toUpperCase() }}
         </div>
+        
+        <!-- Indicateur en ligne pour les messages non lus -->
+        <div *ngIf="getUnreadCount(user.useridKeycloak) > 0"
+             class="position-absolute bottom-0 end-0 bg-danger rounded-circle"
+             style="width: 12px; height: 12px; border: 2px solid white;">
+        </div>
+      </div>
+
+      <div class="user-info flex-grow-1">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="user-name fw-semibold text-dark"
+               [class.fw-bold]="getUnreadCount(user.useridKeycloak) > 0">
+            {{ user.name }} {{ user.prenom }}
+          </div>
+          <small class="text-muted timestamp">
+            {{ getLastMessageTime(user.useridKeycloak) }}
+          </small>
+        </div>
+        
+        <div class="last-message text-muted small mt-1"
+             [class.fw-semibold]="getUnreadCount(user.useridKeycloak) > 0"
+             [class.text-dark]="getUnreadCount(user.useridKeycloak) > 0">
+          {{ getLastMessageText(user.useridKeycloak) }}
+        </div>
+      </div>
+      
+      <!-- Indicateur mobile -->
+      <div class="d-md-none ms-2">
+        <i class="fas fa-chevron-right text-muted"></i>
+      </div>
+    </li>
+
+    <!-- Message si aucune conversation -->
+    <li *ngIf="conversationUsers.length === 0" 
+        class="list-group-item text-center py-4 border-0">
+      <div class="text-muted">
+        <i class="fas fa-comments fa-2x mb-3"></i>
+        <p class="mb-0">Aucune conversation</p>
+        <small>Démarrez une nouvelle discussion</small>
+      </div>
+    </li>
+  </ul>
+</div>
       </div>
     </div>
 

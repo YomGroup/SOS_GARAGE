@@ -45,6 +45,10 @@ export class MessageComponent implements OnInit, OnDestroy {
   disponiblesGaragistes: any[] = [];
   disponiblesAdmins: any[] = [];
   isLoadingAllUsers = false;
+  // Nouvelles propriétés
+  unreadMessagesByUser = new Map<string, number>();
+  lastMessagesByUser = new Map<string, any>();
+  private unreadMessagesSubscription!: Subscription;
 
   constructor(
     private messageService: MessageService,
@@ -68,18 +72,20 @@ export class MessageComponent implements OnInit, OnDestroy {
         return;
       }
 
+      // Charger les derniers messages pour chaque conversation
+      const lastMessages = await this.messageService.getLastMessageForConversations(this.senderId, userIds);
+      this.lastMessagesByUser = lastMessages;
+
       if (this.isAssure) {
-        // Si c'est un assuré, on récupère les infos des garagistes ET des admins
+        // Logique existante pour les assurés...
         const newConversationUsers = await Promise.all(
           userIds.map(async (id) => {
             try {
-              // Essayer d'abord de récupérer comme garagiste
               const reparateur = await this.reparateurService.getReparateurByKeycloakId(id).toPromise();
               if (reparateur) {
                 return reparateur;
               }
 
-              // Si ce n'est pas un garagiste, créer un objet pour l'admin
               return {
                 id: 0,
                 name: 'Administrateur',
@@ -103,7 +109,6 @@ export class MessageComponent implements OnInit, OnDestroy {
               };
             } catch (error) {
               console.error(`Erreur lors de la récupération de l'utilisateur ${id}:`, error);
-              // Si erreur, supposons que c'est un admin
               return {
                 id: 0,
                 name: 'Administrateur',
@@ -129,26 +134,25 @@ export class MessageComponent implements OnInit, OnDestroy {
           })
         );
 
-        // Filtrer les résultats valides
         const validUsers = newConversationUsers.filter(user => !!user);
 
-        // Mettre à jour seulement si la liste a changé
+        // Trier les utilisateurs : messages non lus en premier, puis par timestamp du dernier message
+        const sortedUsers = this.sortConversationUsers(validUsers);
+
         const currentIds = this.conversationUsers.map(u => u.useridKeycloak).sort().join(',');
-        const newIds = validUsers.map(u => u.useridKeycloak).sort().join(',');
+        const newIds = sortedUsers.map(u => u.useridKeycloak).sort().join(',');
 
         if (currentIds !== newIds) {
           this.ngZone.run(() => {
-            this.conversationUsers = validUsers;
+            this.conversationUsers = sortedUsers;
             this.cdRef.detectChanges();
           });
         }
-        // await this.calculateUnreadMessages();
       } else {
-        // Pour les garagistes/admins, traiter les IDs des assurés
+        // Logique existante pour les garagistes/admins...
         const newConversationUsers = await Promise.all(
           userIds.map(async (id) => {
             try {
-              // Essayer de récupérer les infos de l'assuré
               const assure = await this.assureService.getAssurerID(id).toPromise() as Assure;
               if (assure) {
                 return {
@@ -174,7 +178,7 @@ export class MessageComponent implements OnInit, OnDestroy {
             } catch (error) {
               console.error(`Erreur lors de la récupération de l'assuré ${id}:`, error);
             }
-            // Fallback si on ne trouve pas l'assuré
+
             return {
               id: 0,
               name: 'Administrateur',
@@ -187,7 +191,7 @@ export class MessageComponent implements OnInit, OnDestroy {
               ville: '',
               commission: 0,
               siret: '',
-              nomDuGarage: 'Assuré',
+              nomDuGarage: 'Administrateur',
               servicePropose: [],
               missions: [],
               anneeExperience: 0,
@@ -199,12 +203,15 @@ export class MessageComponent implements OnInit, OnDestroy {
           })
         );
 
+        // Trier les utilisateurs
+        const sortedUsers = this.sortConversationUsers(newConversationUsers);
+
         const currentIds = this.conversationUsers.map(u => u.useridKeycloak).sort().join(',');
-        const newIds = newConversationUsers.map(u => u.useridKeycloak).sort().join(',');
+        const newIds = sortedUsers.map(u => u.useridKeycloak).sort().join(',');
 
         if (currentIds !== newIds) {
           this.ngZone.run(() => {
-            this.conversationUsers = newConversationUsers;
+            this.conversationUsers = sortedUsers;
             this.cdRef.detectChanges();
           });
         }
@@ -214,31 +221,116 @@ export class MessageComponent implements OnInit, OnDestroy {
       console.error('Erreur lors du chargement des utilisateurs de conversation:', error);
     }
   }
+  // Nouvelle méthode pour trier les conversations
+  private sortConversationUsers(users: any[]): any[] {
+    return users.sort((a, b) => {
+      const unreadA = this.unreadMessagesByUser.get(a.useridKeycloak) || 0;
+      const unreadB = this.unreadMessagesByUser.get(b.useridKeycloak) || 0;
+
+      // D'abord par messages non lus (décroissant)
+      if (unreadA !== unreadB) {
+        return unreadB - unreadA;
+      }
+
+      // Ensuite par timestamp du dernier message (plus récent en premier)
+      const lastMessageA = this.lastMessagesByUser.get(a.useridKeycloak);
+      const lastMessageB = this.lastMessagesByUser.get(b.useridKeycloak);
+
+      if (lastMessageA && lastMessageB) {
+        const timestampA = lastMessageA.timestamp?.toMillis() || 0;
+        const timestampB = lastMessageB.timestamp?.toMillis() || 0;
+        return timestampB - timestampA;
+      }
+
+      // Si pas de dernier message, mettre à la fin
+      if (lastMessageA && !lastMessageB) return -1;
+      if (!lastMessageA && lastMessageB) return 1;
+
+      // Enfin par nom alphabétique
+      return (a.name + ' ' + a.prenom).localeCompare(b.name + ' ' + b.prenom);
+    });
+  }
+  // Méthode pour obtenir le nombre de messages non lus pour un utilisateur
+  getUnreadCount(userId: string): number {
+    return this.unreadMessagesByUser.get(userId) || 0;
+  }
+  // Méthode pour obtenir le texte du dernier message
+  getLastMessageText(userId: string): string {
+    const lastMessage = this.lastMessagesByUser.get(userId);
+    if (lastMessage) {
+      // Limiter la longueur du texte affiché
+      const text = lastMessage.text || 'Message';
+      return text.length > 30 ? text.substring(0, 30) + '...' : text;
+    }
+    return 'Aucun message';
+  }
+  // Méthode pour obtenir le timestamp du dernier message formaté
+  getLastMessageTime(userId: string): string {
+    const lastMessage = this.lastMessagesByUser.get(userId);
+    if (lastMessage && lastMessage.timestamp) {
+      const date = lastMessage.timestamp.toDate();
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const minutes = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days = Math.floor(diff / 86400000);
+
+      if (minutes < 1) return 'À l\'instant';
+      if (minutes < 60) return `Il y a ${minutes}min`;
+      if (hours < 24) return `Il y a ${hours}h`;
+      if (days < 7) return `Il y a ${days}j`;
+
+      return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit'
+      });
+    }
+    return '';
+  }
+
 
   // NOUVELLE MÉTHODE : Écouter les nouveaux messages entrants
   private setupIncomingMessageListener(): void {
     if (!this.senderId) return;
 
+    // Écouter les messages non lus en temps réel
+    this.unreadMessagesSubscription = this.messageService
+      .listenToUnreadMessagesByConversation(this.senderId)
+      .subscribe({
+        next: (unreadMap) => {
+          this.ngZone.run(() => {
+            this.unreadMessagesByUser = unreadMap;
+            // Retriez les conversations à chaque mise à jour des messages non lus
+            this.conversationUsers = this.sortConversationUsers([...this.conversationUsers]);
+            this.cdRef.detectChanges();
+          });
+        },
+        error: (err) => {
+          console.error('Erreur lors de l\'écoute des messages non lus:', err);
+        }
+      });
 
     this.conversationsSub = this.messageService
       .listenToIncomingMessages(this.senderId)
       .subscribe({
         next: async (message) => {
-
-          // Vérifier si c'est un nouveau contact
           const existingUser = this.conversationUsers.find(u => u.useridKeycloak === message.senderId);
 
           if (!existingUser) {
             await this.loadConversationUsers();
-
             this.ngZone.run(() => {
+              this.cdRef.detectChanges();
+            });
+          } else {
+            // Mettre à jour le dernier message et retriez
+            this.lastMessagesByUser.set(message.senderId, message);
+            this.ngZone.run(() => {
+              this.conversationUsers = this.sortConversationUsers([...this.conversationUsers]);
               this.cdRef.detectChanges();
             });
           }
 
-          // Si on a une conversation active avec cet expéditeur, marquer comme lu
           if (this.receiverId === message.senderId) {
-            // Marquer automatiquement comme lu si on est dans la conversation active
             setTimeout(async () => {
               await this.messageNotificationService.markConversationAsRead(message.senderId);
               this.scrollToBottom();
@@ -298,21 +390,23 @@ export class MessageComponent implements OnInit, OnDestroy {
       this.cdRef.detectChanges();
     }
   }
-
   selectUser(userId: string): void {
     console.log('Sélection de l\'utilisateur:', userId);
     this.receiverId = userId;
     this.selectedUser = this.conversationUsers.find(u => u.useridKeycloak === userId);
 
-    // MODIFIÉ : Utiliser le service global pour marquer comme lu
+    // Marquer comme lu et mettre à jour le compteur local
     this.messageNotificationService.markConversationAsRead(userId);
+    this.unreadMessagesByUser.set(userId, 0);
 
-    // Arrêter l'ancienne souscription si elle existe
+    // Retriez après marquage comme lu
+    this.conversationUsers = this.sortConversationUsers([...this.conversationUsers]);
+    this.cdRef.detectChanges();
+
     if (this.messagesSub) {
       this.messagesSub.unsubscribe();
     }
 
-    // Démarrer l'écoute des messages
     this.setupMessageListener();
   }
 
@@ -738,7 +832,6 @@ export class MessageComponent implements OnInit, OnDestroy {
       }
     }, 100);
   }
-
   ngOnDestroy(): void {
     if (this.messagesSub) {
       this.messagesSub.unsubscribe();
@@ -746,9 +839,12 @@ export class MessageComponent implements OnInit, OnDestroy {
     if (this.currentUserSub) {
       this.currentUserSub.unsubscribe();
     }
-    // NOUVEAU : Nettoyer la subscription des nouvelles conversations
     if (this.conversationsSub) {
       this.conversationsSub.unsubscribe();
+    }
+    // Nouveau : nettoyer la subscription des messages non lus
+    if (this.unreadMessagesSubscription) {
+      this.unreadMessagesSubscription.unsubscribe();
     }
   }
 }

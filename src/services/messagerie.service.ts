@@ -45,6 +45,70 @@ export class MessageService {
             return () => unsubscribe();
         });
     }
+    // Méthode pour écouter les messages non lus par conversation en temps réel
+    listenToUnreadMessagesByConversation(userId: string): Observable<Map<string, number>> {
+        return new Observable(observer => {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
+                where('receiverId', '==', userId),
+                where('read', '==', false)
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                const unreadByUser = new Map<string, number>();
+
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const senderId = data['senderId'];
+                    const currentCount = unreadByUser.get(senderId) || 0;
+                    unreadByUser.set(senderId, currentCount + 1);
+                });
+
+                observer.next(unreadByUser);
+            }, (error) => {
+                observer.error(error);
+            });
+
+            return () => unsubscribe();
+        });
+    }
+    // Méthode pour obtenir le dernier message de chaque conversation
+    async getLastMessageForConversations(userId: string, userIds: string[]): Promise<Map<string, any>> {
+        const lastMessages = new Map<string, any>();
+
+        for (const otherUserId of userIds) {
+            try {
+                const messagesRef = collection(db, 'messages');
+                const q = query(
+                    messagesRef,
+                    or(
+                        and(
+                            where('senderId', '==', userId),
+                            where('receiverId', '==', otherUserId)
+                        ),
+                        and(
+                            where('senderId', '==', otherUserId),
+                            where('receiverId', '==', userId)
+                        )
+                    ),
+                    orderBy('timestamp', 'desc'),
+                    limit(1)
+                );
+
+                const snapshot = await getDocs(q);
+                if (!snapshot.empty) {
+                    const lastMessage = snapshot.docs[0].data();
+                    lastMessages.set(otherUserId, lastMessage);
+                }
+            } catch (error) {
+                console.error(`Erreur lors de la récupération du dernier message pour ${otherUserId}:`, error);
+            }
+        }
+
+        return lastMessages;
+    }
+
     async getUnreadMessagesByConversation(userId: string): Promise<Map<string, number>> {
         try {
             const messagesRef = collection(db, 'messages');
