@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, ActivatedRoute } from '@angular/router';
-import { filter, takeUntil, distinctUntilChanged } from 'rxjs/operators';
+import { filter, takeUntil, distinctUntilChanged, debounceTime } from 'rxjs/operators';
 import { Subject, combineLatest } from 'rxjs';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission } from '../../../../../services/models-api.interface';
@@ -116,6 +116,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     combineLatest([
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd),
+        debounceTime(150),
         distinctUntilChanged()
       ),
       this.route.url

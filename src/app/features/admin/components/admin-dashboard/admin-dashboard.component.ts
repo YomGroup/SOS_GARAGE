@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -13,6 +13,7 @@ import { RoleManagementComponent } from '../role-management/role-management.comp
 import { LineChartComponent, BarChartComponent, DoughnutChartComponent } from '../../../../shared/components/charts';
 import { RecentActivityComponent } from '../../../../shared/components/recent-activity/recent-activity.component';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter, debounceTime } from 'rxjs/operators';
 import { PerformanceChartComponent } from '../charts/performance-chart.component';
 import { DistributionChartComponent } from '../charts/distribution-chart.component';
 import { EvolutionChartComponent } from '../charts/evolution-chart.component';
@@ -49,7 +50,8 @@ import { ReparateurService } from '../../../../../services/reparateur.service';
     HttpClientModule
   ],
   standalone: true,
-  providers: [AdminService, MissionService, ReparateurService]
+  providers: [AdminService, MissionService, ReparateurService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
@@ -81,11 +83,12 @@ export class AdminDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        this.loadData();
-      }
-    });
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        debounceTime(150)
+      )
+      .subscribe(() => this.loadData());
   }
 
   private loadData(): void {

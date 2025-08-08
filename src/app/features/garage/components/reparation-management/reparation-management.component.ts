@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -42,6 +42,8 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   dataSource: MatTableDataSource<Mission>;
   isCardView: boolean = true;
   filtreStatut: string = '';
+  rechercheTexte: string = '';
+  clientFiltre: string = '';
   missions: Mission[] = [];
   dossiersNonTraites: Dossier[] = []; // Ajout pour les dossiers non-traités
   missionSelectionnee: Mission | null = null;
@@ -57,6 +59,11 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   private missionFilterService = inject(MissionFilterService);
   vehiculesMap: Map<number, Vehicule> = new Map();
   filtreActuel: 'nouvelles' | 'enCours' | 'terminees' | 'toutes' = 'toutes';
+
+  // Pagination unifiée (cartes et tableau)
+  pageIndex: number = 0;
+  pageSize: number = 10;
+  pageSizeOptions: number[] = [5, 10, 20, 50];
 
   get missionsNouvelles() {
     return this.missions.filter(m => m.statut && m.statut.toUpperCase() === 'ASSIGNEE');
@@ -112,6 +119,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     this.missionFilterService.filtre$.subscribe(filtre => {
       this.filtreActuel = filtre;
       this.dataSource.data = this.missionsFiltres;
+      this.pageIndex = 0;
       this.cdr.detectChanges();
     });
   }
@@ -191,37 +199,14 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     this.dataSource.sort = this.sort;
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    // On filtre sur missionsFiltres (déjà filtré par le sidebar)
-    const filtered = this.missionsFiltres.filter(mission => {
-      const matchText =
-        mission.sinistre?.vehicule.immatriculation?.toLowerCase().includes(filterValue) ||
-        mission.statut?.toLowerCase().includes(filterValue) ||
-        mission.devis?.toString().includes(filterValue) ||
-        mission.factureFinale?.toString().includes(filterValue);
-      // On applique aussi le filtre statut si présent
-      const matchStatut = this.filtreStatut ? mission.statut === this.filtreStatut : true;
-      return matchStatut && matchText;
-    });
-    this.dataSource.data = filtered;
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  onToolbarFiltersChanged(): void {
+    this.pageIndex = 0;
     this.cdr.detectChanges();
   }
 
-  // Appelé lors du changement de statut dans le select
-  onStatutChange(): void {
-    // On applique le filtre statut sur missionsFiltres
-    const filtered = this.missionsFiltres.filter(mission => {
-      const matchStatut = this.filtreStatut ? mission.statut === this.filtreStatut : true;
-      return matchStatut;
-    });
-    this.dataSource.data = filtered;
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.cdr.detectChanges();
   }
 
@@ -342,6 +327,16 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     return this.vehiculesMap.get(mission.id!) || null;
   }
 
+  // Données dérivées pour filtres dropdown (clients)
+  get clientsDisponibles(): string[] {
+    const noms = new Set<string>();
+    this.missions.forEach(m => {
+      const assure = (m.assureName || '').toString().trim();
+      if (assure) noms.add(assure);
+    });
+    return Array.from(noms);
+  }
+
   // Nouvelles méthodes pour le style et la gestion des statuts
   getStatutClass(statut: string): string {
     switch (statut.toLowerCase()) {
@@ -372,6 +367,59 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
       default:
         return statut;
     }
+  }
+
+  // Filtres avancés et pagination unifiée
+  private normalizeString(value: string): string {
+    return (value || '')
+      .toString()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}+/gu, '')
+      .replace(/[_-]+/g, ' ')
+      .trim();
+  }
+
+  private matchSearch(m: Mission, query: string): boolean {
+    if (!query) return true;
+    const q = this.normalizeString(query);
+    const veh = this.getVehiculeForMission(m) || (m.sinistre?.vehicule as any) || {};
+    const immat = this.normalizeString(veh.immatriculation || m.sinistre?.vehicule.immatriculation || '');
+    const marque = this.normalizeString(veh.marque || '');
+    const modele = this.normalizeString(veh.modele || '');
+    const assure = this.normalizeString(m.assureName || '');
+    const statut = this.normalizeString(m.statut || '');
+    const devis = this.normalizeString((m.devis ?? '').toString());
+    const facture = this.normalizeString((m.factureFinale ?? '').toString());
+    return (
+      immat.includes(q) ||
+      marque.includes(q) ||
+      modele.includes(q) ||
+      assure.includes(q) ||
+      statut.includes(q) ||
+      devis.includes(q) ||
+      facture.includes(q)
+    );
+  }
+
+  private matchStatut(m: Mission, statut: string): boolean {
+    if (!statut) return true;
+    return (m.statut || '') === statut;
+  }
+
+  private matchClient(m: Mission, client: string): boolean {
+    if (!client) return true;
+    return (m.assureName || '') === client;
+  }
+
+  missionsFiltresFiltrageAvance(): Mission[] {
+    return this.missionsFiltres.filter(m => this.matchStatut(m, this.filtreStatut) && this.matchClient(m, this.clientFiltre) && this.matchSearch(m, this.rechercheTexte));
+  }
+
+  get missionsFiltresPagine(): Mission[] {
+    const all = this.missionsFiltresFiltrageAvance();
+    const start = this.pageIndex * this.pageSize;
+    return all.slice(start, start + this.pageSize);
   }
 
   // Les méthodes d'édition ont été déplacées dans le composant mission-view

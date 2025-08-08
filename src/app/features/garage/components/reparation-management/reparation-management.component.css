@@ -233,6 +233,11 @@
   border-bottom: 1px solid #e9ecef;
 }
 
+/* Espacement des boutons d'action dans la vue tableau */
+.table .d-flex.gap-2 .btn {
+  min-width: 36px;
+}
+
 .table tbody tr:hover {
   background-color: rgba(30, 77, 184, 0.05);
 }

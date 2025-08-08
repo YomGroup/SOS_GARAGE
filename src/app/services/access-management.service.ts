@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpContext } from '@angular/common/http';
+import { Observable, catchError, throwError, forkJoin, map } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CACHE_TTL } from '../core/interceptors/cache.interceptor';
 
 export interface Invitation {
   id?: number;
@@ -72,7 +73,7 @@ export class AccessManagementService {
     
     if (invitation.role === 'Assuré') {
       const assure = {
-        nom: invitation.nom,
+        name: invitation.nom,
         prenom: invitation.prenom,
         email: invitation.email,
         telephone: invitation.telephone || '',
@@ -83,7 +84,7 @@ export class AccessManagementService {
         useridKeycloak: ''
       };
       
-      return this.http.post(`${this.baseUrl}/api/assure`, assure).pipe(
+      return this.http.post(`${this.baseUrl}/assure`, assure).pipe(
         catchError(this.handleError)
       );
     } else {
@@ -97,7 +98,7 @@ export class AccessManagementService {
         isvalids: true
       };
       
-      return this.http.post(`${this.baseUrl}/api/reparateurs`, reparateur).pipe(
+      return this.http.post(`${this.baseUrl}/reparateurs`, reparateur).pipe(
         catchError(this.handleError)
       );
     }
@@ -105,65 +106,50 @@ export class AccessManagementService {
 
   // Récupérer tous les utilisateurs avec leurs accès
   getUsersAccess(): Observable<UserAccess[]> {
-    return new Observable(observer => {
-      // Récupérer les assurés
-      this.http.get<any[]>(`${this.baseUrl}/api/assure`).subscribe({
-        next: (assures) => {
-          console.log('Assurés récupérés:', assures);
-          
-          // Récupérer les réparateurs
-          this.http.get<any[]>(`${this.baseUrl}/api/reparateurs`).subscribe({
-            next: (reparateurs) => {
-              console.log('Réparateurs récupérés:', reparateurs);
-              
-              const users: UserAccess[] = [];
-              
-              // Convertir les assurés
-              assures.forEach(assure => {
-                users.push({
-                  id: assure.id,
-                  nom: assure.nom,
-                  prenom: assure.prenom,
-                  email: assure.email,
-                  role: 'Assuré',
-                  derniereConnexion: new Date().toLocaleString(), // Simulé
-                  actif: true, // Par défaut actif
-                  telephone: assure.telephone,
-                  adresse: assure.adresse
-                });
-              });
-              
-              // Convertir les réparateurs
-              reparateurs.forEach(reparateur => {
-                users.push({
-                  id: reparateur.id,
-                  nom: reparateur.name,
-                  prenom: reparateur.prenom,
-                  email: reparateur.email,
-                  role: 'Réparateur',
-                  derniereConnexion: new Date().toLocaleString(), // Simulé
-                  actif: reparateur.isvalids,
-                  telephone: reparateur.telephone,
-                  adresse: reparateur.adresse
-                });
-              });
-              
-              console.log('Utilisateurs combinés:', users);
-              observer.next(users);
-              observer.complete();
-            },
-            error: (error) => {
-              console.error('Erreur récupération réparateurs:', error);
-              observer.error(error);
-            }
-          });
-        },
-        error: (error) => {
-          console.error('Erreur récupération assurés:', error);
-          observer.error(error);
+    const ctx = new HttpContext().set(CACHE_TTL, 30_000);
+    const assures$ = this.http.get<any[]>(`${this.baseUrl}/assure`, { context: ctx });
+    const reparateurs$ = this.http.get<any[]>(`${this.baseUrl}/reparateurs`, { context: ctx });
+
+    return forkJoin({ assures: assures$, reparateurs: reparateurs$ }).pipe(
+      map(({ assures, reparateurs }) => {
+        const users: UserAccess[] = [];
+
+        if (Array.isArray(assures)) {
+          for (const assure of assures) {
+            users.push({
+              id: assure.id,
+              nom: assure.name,
+              prenom: assure.prenom,
+              email: assure.email,
+              role: 'Assuré',
+              derniereConnexion: assure.lastLoginAt ? new Date(assure.lastLoginAt).toLocaleString() : new Date().toLocaleString(),
+              actif: true,
+              telephone: assure.telephone,
+              adresse: assure.adresse
+            });
+          }
         }
-      });
-    });
+
+        if (Array.isArray(reparateurs)) {
+          for (const reparateur of reparateurs) {
+            users.push({
+              id: reparateur.id,
+              nom: reparateur.name,
+              prenom: reparateur.prenom,
+              email: reparateur.email,
+              role: 'Réparateur',
+              derniereConnexion: reparateur.lastLoginAt ? new Date(reparateur.lastLoginAt).toLocaleString() : new Date().toLocaleString(),
+              actif: !!reparateur.isvalids,
+              telephone: reparateur.telephone,
+              adresse: reparateur.adresse
+            });
+          }
+        }
+
+        return users;
+      }),
+      catchError(this.handleError)
+    );
   }
 
   // Réinitialiser le mot de passe d'un utilisateur
@@ -189,7 +175,7 @@ export class AccessManagementService {
   // Désactiver un utilisateur
   desactiverUtilisateur(id: number, role: 'Assuré' | 'Réparateur'): Observable<any> {
     if (role === 'Réparateur') {
-      return this.http.put(`${this.baseUrl}/api/reparateurs/${id}`, { isvalids: false }).pipe(
+      return this.http.put(`${this.baseUrl}/reparateurs/${id}`, { isvalids: false }).pipe(
         catchError(this.handleError)
       );
     } else {
@@ -204,7 +190,7 @@ export class AccessManagementService {
   // Activer un utilisateur
   activerUtilisateur(id: number, role: 'Assuré' | 'Réparateur'): Observable<any> {
     if (role === 'Réparateur') {
-      return this.http.put(`${this.baseUrl}/api/reparateurs/${id}`, { isvalids: true }).pipe(
+      return this.http.put(`${this.baseUrl}/reparateurs/${id}`, { isvalids: true }).pipe(
         catchError(this.handleError)
       );
     } else {
@@ -229,7 +215,7 @@ export class AccessManagementService {
   verifierEmail(email: string): Observable<boolean> {
     return new Observable(observer => {
       // Vérifier dans les assurés
-      this.http.get<any[]>(`${this.baseUrl}/api/assure`).subscribe({
+      this.http.get<any[]>(`${this.baseUrl}/assure`).subscribe({
         next: (assures) => {
           const emailExiste = assures.some(assure => assure.email === email);
           if (emailExiste) {
@@ -237,7 +223,7 @@ export class AccessManagementService {
             observer.complete();
           } else {
             // Vérifier dans les réparateurs
-            this.http.get<any[]>(`${this.baseUrl}/api/reparateurs`).subscribe({
+            this.http.get<any[]>(`${this.baseUrl}/reparateurs`).subscribe({
               next: (reparateurs) => {
                 const emailExisteRep = reparateurs.some(rep => rep.email === email);
                 observer.next(emailExisteRep);

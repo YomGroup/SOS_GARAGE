@@ -25,7 +25,7 @@
              [routerLinkActiveOptions]="{exact: false}"
              [class.active]="isParentActive(item)"
              class="nav-link-title"
-             (click)="toggleSubmenu(item)">
+             (click)="toggleSubmenu(item, $event)">
             <i [ngClass]="item.icon"></i>
             <span>{{ item.title }}</span>
             <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>
@@ -33,7 +33,7 @@
           <div *ngIf="!item.route"
                class="nav-link-title"
                [class.active]="isParentActive(item)"
-               (click)="toggleSubmenu(item)">
+               (click)="toggleSubmenu(item, $event)">
             <i [ngClass]="item.icon"></i>
             <span>{{ item.title }}</span>
             <i class="bi ms-2" [ngClass]="item.expanded ? 'bi-chevron-down' : 'bi-chevron-right'"></i>

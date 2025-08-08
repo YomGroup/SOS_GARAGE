@@ -18,6 +18,7 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   private initialized = false;
   private routerSub: Subscription | undefined;
+  isLoadingVehicules: boolean = false;
 
   // Pagination
   currentPage = 1;
@@ -48,6 +49,7 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   }
 
   loadVehiclesPage(): void {
+    this.isLoadingVehicules = true;
     this.vehiculeService.getVehiculesPage(this.currentPage, this.pageSize).subscribe({
       next: (res: any) => {
         // On suppose que l'API retourne { data: Vehicle[], total: number }
@@ -62,6 +64,10 @@ export class VehiculesComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         console.error('Erreur lors de la récupération des véhicules :', err);
+      },
+      complete: () => {
+        this.isLoadingVehicules = false;
+        this.cdr.detectChanges();
       }
     });
   }

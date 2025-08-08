@@ -1,8 +1,8 @@
 // dossier-management.component.ts
-import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, ViewChild, ViewContainerRef, ComponentRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, Input, ViewChild, ViewContainerRef, ComponentRef, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSortModule, MatSort } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -11,9 +11,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
+import { FormsModule } from '@angular/forms';
 import { DossiersService, Dossier as APIDossier } from '../../../../../services/dossiers.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { filter, debounceTime } from 'rxjs/operators';
 import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, Vehicule } from '../../../../../services/models-api.interface';
@@ -43,9 +45,11 @@ export interface DossierAffichage extends Dossier {
     MatChipsModule,
     MatTooltipModule,
     MatSelectModule,
+    FormsModule,
     DossierViewComponent,
     RouterModule,
-  ]
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DossierManagementComponent implements OnInit, AfterViewInit, OnChanges {
   displayedColumns: string[] = ['numero', 'type', 'statut', 'dateCreation', 'documents', 'actions'];
@@ -74,9 +78,20 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
   suppressionEnCours: boolean = false;
   vehiculesEnChargement: Set<number> = new Set();
+  isLoadingDossiers: boolean = false;
 
   onglet: 'nouveaux' | 'nonTraites' | 'termines' = 'nouveaux';
   filtreActuel: 'nouveaux' | 'nonTraites' | 'enCours' | 'termines' | 'tous' = 'tous';
+
+  // Filtres Toolbar
+  statutFiltre: '' | 'en_cours' | 'termine' | 'en_attente' = '';
+  clientFiltre: string = '';
+  rechercheTexte: string = '';
+
+  // Pagination (appliquée aux deux vues)
+  pageIndex: number = 0;
+  pageSize: number = 10;
+  pageSizeOptions: number[] = [5, 10, 20, 50];
 
   // Dossiers nouveaux : ceux qui n'ont pas encore de mission
   get dossiersNouveaux() {
@@ -142,14 +157,21 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     });
     this.loadData();
     this.detecterFiltreActuel();
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        debounceTime(150)
+      )
+      .subscribe(() => {
         this.loadData();
         this.detecterFiltreActuel();
-      }
-    });
+        this.pageIndex = 0;
+        this.onToolbarFiltersChanged();
+      });
     this.dossierFilterService.filtre$.subscribe(filtre => {
       this.filtreActuel = filtre;
+      this.pageIndex = 0;
+      this.onToolbarFiltersChanged();
       this.cdr.detectChanges();
     });
   }
@@ -171,6 +193,16 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     } else {
       this.filtreActuel = 'tous';
     }
+  }
+
+  // Données dérivées pour filtres dropdown
+  get clientsDisponibles(): string[] {
+    const noms = new Set<string>();
+    this.dataSource.data.forEach(d => {
+      const fullName = `${(d as any).nom ?? ''} ${(d as any).prenom ?? ''}`.trim();
+      if (fullName) noms.add(fullName);
+    });
+    return Array.from(noms);
   }
 
   getTitreFiltre(): string {
@@ -213,6 +245,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
 
   private loadData() {
+    this.isLoadingDossiers = true;
     this.dossiersService.getDossiers().subscribe(apiDossiers => {
       // Traiter chaque dossier pour récupérer les informations de véhicule
       const dossiersAvecVehicules = apiDossiers.map(d => ({
@@ -228,6 +261,16 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
       // Initialiser les données avec les informations de véhicule disponibles
       this.dataSource.data = dossiersAvecVehicules;
       this.totalDossiers = apiDossiers.length;
+      // Configurer filtre custom pour MatTable (pour la vue tableau et recherche)
+      this.dataSource.filterPredicate = (data: DossierAffichage, filter: string) => {
+        const f = JSON.parse(filter || '{}');
+        const matchesRecherche = this.matchesRecherche(data, f.q || '');
+        const matchesStatut = this.matchesStatutAffichage(data, f.statut || '');
+        const matchesClient = this.matchesClient(data, f.client || '');
+        // Respecter le filtreActuel principal (nouveaux/enCours/termines)
+        const inFiltreActuel = this.isInFiltreActuel(data);
+        return matchesRecherche && matchesStatut && matchesClient && inFiltreActuel;
+      };
       
       // Dossiers non traités : pas de mission associée
       this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
@@ -257,12 +300,89 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
         }
       });
       
+      this.isLoadingDossiers = false;
       this.cdr.detectChanges();
     });
     this.missionService.getAllMissions().subscribe(missions => {
       this.missions = missions;
       this.cdr.detectChanges();
     });
+  }
+
+  private isInFiltreActuel(dossier: DossierAffichage): boolean {
+    switch (this.filtreActuel) {
+      case 'nouveaux':
+        return this.dossiersNouveaux.includes(dossier);
+      case 'nonTraites':
+      case 'enCours':
+        return this.dossiersEnCours.includes(dossier);
+      case 'termines':
+        return this.dossiersTermines.includes(dossier);
+      default:
+        return true;
+    }
+  }
+
+  private matchesRecherche(dossier: DossierAffichage, query: string): boolean {
+    if (!query) return true;
+    const q = query.toLowerCase();
+    const veh = this.getVehiculeInfo(dossier);
+    return (
+      (dossier.numero || '').toLowerCase().includes(q) ||
+      (dossier.type || '').toLowerCase().includes(q) ||
+      (dossier.assurance || '').toLowerCase().includes(q) ||
+      (veh.marque || '').toLowerCase().includes(q) ||
+      (veh.modele || '').toLowerCase().includes(q) ||
+      (veh.immatriculation || '').toLowerCase().includes(q)
+    );
+  }
+
+  private matchesStatutAffichage(dossier: DossierAffichage, statut: string): boolean {
+    if (!statut) return true;
+    const s = this.getStatutAffichage(dossier).toLowerCase();
+    if (statut === 'en_cours') return s === 'en cours';
+    if (statut === 'termine') return s === 'terminé';
+    if (statut === 'en_attente') return s === 'non traité';
+    return true;
+  }
+
+  private matchesClient(dossier: DossierAffichage, client: string): boolean {
+    if (!client) return true;
+    const fullName = `${(dossier as any).nom ?? ''} ${(dossier as any).prenom ?? ''}`.trim();
+    return fullName === client;
+  }
+
+  onToolbarFiltersChanged(): void {
+    // Appliquer via MatTable filter pour synchroniser vue tableau
+    const filterObj = { q: this.rechercheTexte, statut: this.statutFiltre, client: this.clientFiltre };
+    this.dataSource.filter = JSON.stringify(filterObj);
+    this.pageIndex = 0;
+    if (this.paginator) this.paginator.firstPage();
+    if (this.dataSource.paginator) this.dataSource.paginator.firstPage();
+    // Forcer CD pour vue cartes
+    this.cdr.detectChanges();
+  }
+
+  onPageChange(event: PageEvent) {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.cdr.detectChanges();
+  }
+
+  // Sous-ensemble paginé selon la vue cartes
+  get dossiersFiltresPagine(): DossierAffichage[] {
+    // Reproduire la même logique de filtre que dataSource.filterPredicate
+    const all = this.dossiersFiltresFiltrageAvance();
+    const start = this.pageIndex * this.pageSize;
+    return all.slice(start, start + this.pageSize);
+  }
+
+  dossiersFiltresFiltrageAvance(): DossierAffichage[] {
+    const filterObj = { q: this.rechercheTexte, statut: this.statutFiltre, client: this.clientFiltre };
+    const q = (d: DossierAffichage) => this.matchesRecherche(d, filterObj.q);
+    const s = (d: DossierAffichage) => this.matchesStatutAffichage(d, filterObj.statut);
+    const c = (d: DossierAffichage) => this.matchesClient(d, filterObj.client);
+    return this.dossiersFiltres.filter(d => q(d) && s(d) && c(d));
   }
 
   ngAfterViewInit() {

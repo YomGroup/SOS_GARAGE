@@ -1,19 +1,22 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AccessManagementService, Invitation, UserAccess } from '../../../../../services/access-management.service';
+import { Observable, of } from 'rxjs';
+import { catchError, finalize, shareReplay, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-access-management',
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './access-management.component.html',
-  styleUrls: ['./access-management.component.css']
+  styleUrls: ['./access-management.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AccessManagementComponent implements OnInit {
   invitation: Partial<Invitation> = {};
   invitations: Invitation[] = [];
-  utilisateurs: UserAccess[] = [];
+  utilisateurs$!: Observable<UserAccess[]>;
   isLoading = false;
   errorMessage = '';
   successMessage = '';
@@ -42,31 +45,21 @@ export class AccessManagementComponent implements OnInit {
   loadUsers(): void {
     this.isLoading = true;
     this.errorMessage = '';
-    
-    // Charger les utilisateurs existants
-    this.accessManagementService.getUsersAccess().subscribe({
-      next: (users) => {
-        console.log('Utilisateurs chargés:', users);
-        this.utilisateurs = users.map(user => ({
-          id: user.id,
-          nom: user.nom,
-          prenom: user.prenom,
-          email: user.email,
-          role: user.role,
-          derniereConnexion: new Date().toLocaleString(), // Simulé pour l'instant
-          actif: user.actif || true,
-          telephone: user.telephone || '',
-          adresse: user.adresse || '',
-          reset: false
-        }));
-        this.isLoading = false;
-      },
-      error: (error) => {
+    // Charger les utilisateurs existants (observable + async pipe)
+    this.utilisateurs$ = this.accessManagementService.getUsersAccess().pipe(
+      tap(() => {
+        this.errorMessage = '';
+      }),
+      catchError((error) => {
         console.error('Erreur lors du chargement des utilisateurs:', error);
-        this.errorMessage = 'Erreur lors du chargement des utilisateurs';
+        this.errorMessage = error?.message || 'Erreur lors du chargement des utilisateurs';
+        return of([] as UserAccess[]);
+      }),
+      finalize(() => {
         this.isLoading = false;
-      }
-    });
+      }),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   envoyerInvitation(): void {
@@ -181,5 +174,13 @@ export class AccessManagementComponent implements OnInit {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return password;
+  }
+
+  trackByUserId(index: number, user: UserAccess): number {
+    return user.id;
+  }
+
+  trackByInvitation(index: number, inv: Invitation): string {
+    return `${inv.email}-${inv.date}`;
   }
 } 

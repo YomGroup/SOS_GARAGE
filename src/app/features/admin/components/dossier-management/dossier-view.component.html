@@ -1208,6 +1208,10 @@
                   </div>
                 </div>
               </div>
+              <div class="actions-grid">
+                <button type="button" class="btn btn-secondary" (click)="close()">Fermer</button>
+                <button type="button" class="btn btn-primary" (click)="lancerEdition()" *ngIf="canEditDossier()">Modifier</button>
+              </div>
             </ng-template>
           </div>
         </div>
@@ -1231,14 +1235,56 @@
                   <h5>
                     <i class="fas fa-file-pdf me-2"></i>Documents du sinistre ({{ documents.length }})
                   </h5>
-                  <div class="documents-list">
-                    <div *ngFor="let doc of documents">
-                      <i class="fas fa-file-pdf me-2"></i>
-                      {{ doc.type }} :
-                      <a [href]="doc.fichier" target="_blank" rel="noopener">Télécharger</a>
-                      <span *ngIf="doc.signatureElectronique">
-                        | Signature : {{ doc.signatureElectronique }}
-                      </span>
+                  <div class="documents-grid">
+                    <div class="document-item" *ngFor="let doc of documents">
+                      <div class="document-meta">
+                        <i class="fas fa-file-pdf"></i>
+                        <span class="doc-title">{{ getDocName(doc) }}</span>
+                      </div>
+                      <div class="document-actions">
+                        <a class="btn btn-sm btn-outline-primary" [href]="getDocUrl(doc)" target="_blank" rel="noopener">
+                          <i class="fas fa-download me-1"></i>Télécharger
+                        </a>
+                        <a *ngIf="isDocViewable(doc)"
+                           class="btn btn-sm btn-outline-secondary"
+                           [href]="getDocUrl(doc)"
+                           target="_blank" rel="noopener">
+                          <i class="fas fa-eye me-1"></i>Voir
+                        </a>
+                        <span class="signature-badge" *ngIf="getDocSignature(doc) as sign">
+                          <i class="fas fa-signature me-1"></i>{{ sign }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+
+              <!-- Documents de la mission (lecture seule) -->
+              <div *ngIf="!editionEnCours && mission?.documentsAssurance as missionDocs">
+                <ng-container *ngIf="missionDocs.length > 0">
+                  <h5 class="mt-3">
+                    <i class="fas fa-file-contract me-2"></i>Documents de la mission ({{ missionDocs.length }})
+                  </h5>
+                  <div class="documents-grid">
+                    <div class="document-item" *ngFor="let mdoc of missionDocs">
+                      <div class="document-meta">
+                        <i class="fas fa-file-pdf"></i>
+                        <span class="doc-title">{{ getDocName(mdoc) }}</span>
+                      </div>
+                      <div class="document-actions">
+                        <a class="btn btn-sm btn-outline-primary"
+                           [href]="getDocUrl(mdoc)"
+                           target="_blank" rel="noopener">
+                          <i class="fas fa-download me-1"></i>Télécharger
+                        </a>
+                        <a *ngIf="isDocViewable(mdoc)"
+                           class="btn btn-sm btn-outline-secondary"
+                           [href]="getDocUrl(mdoc)"
+                           target="_blank" rel="noopener">
+                          <i class="fas fa-eye me-1"></i>Voir
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </ng-container>
@@ -1260,7 +1306,7 @@
                     class="document-item"
                   >
                     <i class="fas fa-file-pdf me-2"></i>
-                    {{ getFileNameFromUrl(doc && doc.url ? doc.url : doc) }}
+                    {{ getDocName(doc) }}
                     <button
                       type="button"
                       class="btn btn-sm btn-primary ms-2"

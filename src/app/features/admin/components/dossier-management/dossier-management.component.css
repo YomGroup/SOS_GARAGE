@@ -181,6 +181,10 @@
     vertical-align: middle;
 }
 
+.table .d-flex.gap-2 .btn {
+    min-width: 36px;
+}
+
 .table tbody tr:hover {
     background-color: rgba(0, 74, 173, 0.05);
 }

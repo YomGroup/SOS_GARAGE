@@ -986,7 +986,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
 
   isImageOrPdf(url: string): boolean {
-    return /\.(pdf|jpg|jpeg|png)$/i.test(url);
+    return /\.(pdf|jpg|jpeg|png)$/i.test(url); 
   }
 
 
@@ -1075,5 +1075,33 @@ getJoursRestants(): number | null {
   }
   openTel(tel: string) {
     window.open('tel:' + tel, '_blank');
+  }
+
+  // Affiche le bouton "Modifier" uniquement si une mission est disponible
+  canEditDossier(): boolean {
+    return !!this.mission;
+  }
+
+  // --- Helpers documents (sinistre et mission) ---
+  getDocUrl(doc: any): string {
+    if (!doc) return '';
+    if (typeof doc === 'string') return doc;
+    return doc.url || doc.fichier || '';
+  }
+
+  getDocName(doc: any): string {
+    if (!doc) return 'document.pdf';
+    if (typeof doc === 'string') return this.getFileNameFromUrl(doc);
+    return doc.type || this.getFileNameFromUrl(doc.url || doc.fichier || 'document.pdf');
+  }
+
+  isDocViewable(doc: any): boolean {
+    const url = this.getDocUrl(doc);
+    return this.isImageOrPdf(url);
+  }
+
+  getDocSignature(doc: any): string | null {
+    if (!doc || typeof doc === 'string') return null;
+    return doc.signatureElectronique || null;
   }
 }

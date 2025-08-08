@@ -134,11 +134,28 @@ export class SidebarComponent implements OnInit {
     return []; // Retourne un menu vide si aucun rôle ne correspond
   }
 
-  toggleSubmenu(item: MenuItem) {
-    item.expanded = !item.expanded;
-    if (item.route && !item.expanded) {
-      // Navigue seulement si on ferme le sous-menu (optionnel)
-      this.router.navigate([item.route]);
+  toggleSubmenu(item: MenuItem, event?: MouseEvent) {
+    // Empêche la navigation du routerLink sur le parent et ne garde que le toggle + navigation programmée
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    // Toujours ouvrir le parent au clic
+    item.expanded = true;
+    if (item.route) {
+      const currentUrl = this.router.url;
+      const isSameRoute = currentUrl === item.route || currentUrl.startsWith(item.route + '/');
+      // Revenir au filtre global quand on clique sur le parent
+      if (item.title === 'Dossiers') {
+        this.dossierFilterService.setFiltre('tous' as any);
+      } else if (item.title === 'Gestion des réparations') {
+        this.missionFilterService.setFiltre('toutes' as any);
+      }
+      if (isSameRoute) {
+        this.router.navigate([item.route], { queryParams: { refresh: Date.now() } });
+      } else {
+        this.router.navigate([item.route]);
+      }
     }
   }
 
