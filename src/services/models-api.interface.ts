@@ -12,7 +12,9 @@ export interface Message {
   receiverId: string;
   text: string;
   timestamp?: any;
+
 }
+
 
 export interface Reparation {
   // À compléter selon vos besoins
