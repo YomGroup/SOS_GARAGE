@@ -33,13 +33,19 @@ export class HttpCacheInterceptor implements HttpInterceptor {
 
   // Policy table: set TTL or bypass based on URL patterns
   private readonly policies: Array<{ pattern: RegExp; ttlMs?: number; bypass?: boolean }> = [
-    { pattern: /\/missions(\/|\?|$)/i, ttlMs: 5_000 },
-    { pattern: /\/sinistre(\/|\?|$)/i, ttlMs: 10_000 },
-    { pattern: /\/vehicule\/all(\?|$)/i, ttlMs: 30_000 },
-    { pattern: /\/missions\/[0-9]+\/vehicule(\?|$)/i, ttlMs: 15_000 },
-    { pattern: /\/sinistre\/[0-9]+\/vehicule(\?|$)/i, ttlMs: 30_000 },
-    { pattern: /\/reparateurs(\/|\?|$)/i, ttlMs: 30_000 },
-    { pattern: /\/assure(\/|\?|$)/i, ttlMs: 30_000 }
+    // Missions list changes relatively often but not every second
+    { pattern: /\/missions(\/|\?|$)/i, ttlMs: 60_000 },
+    // Sinistre data
+    { pattern: /\/sinistre(\/|\?|$)/i, ttlMs: 120_000 },
+    // All vehicles listing
+    { pattern: /\/vehicule\/all(\?|$)/i, ttlMs: 300_000 },
+    // Mission-specific vehicle
+    { pattern: /\/missions\/[0-9]+\/vehicule(\?|$)/i, ttlMs: 120_000 },
+    // Sinistre-specific vehicle
+    { pattern: /\/sinistre\/[0-9]+\/vehicule(\?|$)/i, ttlMs: 180_000 },
+    // Reparateurs and assure rarely change
+    { pattern: /\/reparateurs(\/|\?|$)/i, ttlMs: 300_000 },
+    { pattern: /\/assure(\/|\?|$)/i, ttlMs: 300_000 }
   ];
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

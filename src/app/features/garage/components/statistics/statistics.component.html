@@ -100,20 +100,21 @@
           </h4>
           <div class="stats-detail-content">
             <div class="stat-item">
+              <span class="stat-label">En attente de réparation</span>
+              <span class="stat-value">{{ missionStats.pending }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.pending, missionStats.total) }}%)</span>
+            </div>
+            <div class="stat-item">
               <span class="stat-label">En cours</span>
-              <span class="stat-value">{{ missionStats.assigned }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.assigned, missionStats.total) }}%)</span>
+              <span class="stat-value">{{ missionStats.inProgress }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.inProgress, missionStats.total) }}%)</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Refusées</span>
-              <span class="stat-value">{{ missionStats.refused }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.refused, missionStats.total) }}%)</span>
+              <span class="stat-label">Terminées</span>
+              <span class="stat-value">{{ missionStats.completed }}</span>
+              <span class="stat-percentage">({{ getPercentage(missionStats.completed, missionStats.total) }}%)</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-label">Épaves</span>
-              <span class="stat-value">{{ missionStats.epave }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.epave, missionStats.total) }}%)</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -133,8 +134,8 @@
               <span class="stat-value">{{ formatCurrency(financialStats.averageFacture) }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Taux de commission</span>
-              <span class="stat-value">{{ getCommissionLabel() }}</span>
+              <span class="stat-label">Commission moyenne</span>
+              <span class="stat-value">{{ formatCurrency(financialStats.averageCommission) }}</span>
             </div>
           </div>
         </div>
@@ -150,12 +151,12 @@
             <tr>
               <th>Mission</th>
               <th>Date</th>
-              <th>Assuré</th>
               <th>Véhicule</th>
               <th>Type</th>
               <th>Statut</th>
               <th>Devis</th>
               <th>Facture</th>
+              <th>Commission</th>
             </tr>
           </thead>
           <tbody>
@@ -167,11 +168,6 @@
                 <div class="mission-title">{{ mission.title }}</div>
               </td>
               <td>{{ mission.date }}</td>
-              <td>
-                <div class="assure-info">
-                  <span class="assure-name">{{ mission.assureName }}</span>
-                </div>
-              </td>
               <td>
                 <div class="vehicule-info">
                   <span class="vehicule-details">{{ mission.vehiculeInfo }}</span>
@@ -194,6 +190,10 @@
               <td>
                 <span class="amount" *ngIf="mission.facture > 0">{{ formatCurrency(mission.facture) }}</span>
                 <span class="no-amount" *ngIf="mission.facture === 0">-</span>
+              </td>
+              <td>
+                <span class="amount" *ngIf="mission.montantCommission > 0">{{ formatCurrency(mission.montantCommission) }}</span>
+                <span class="no-amount" *ngIf="mission.montantCommission === 0">-</span>
               </td>
             </tr>
           </tbody>

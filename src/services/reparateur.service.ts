@@ -29,6 +29,20 @@ export class ReparateurService {
         return this.http.put<Reparateur>(this.apiUrl.replace('{id}', id.toString()), reparateur);
     }
 
+    // Some endpoints may return an empty body or plain text; use this to avoid JSON parse errors
+    updateReparateurText(id: number, reparateur: Partial<Reparateur>) {
+        return this.http.put(this.apiUrl.replace('{id}', id.toString()), reparateur, { responseType: 'text' });
+    }
+
+    // PATCH variants (some backends expect partial updates via PATCH)
+    updateReparateurPatch(id: number, reparateur: Partial<Reparateur>) {
+        return this.http.patch<Reparateur>(this.apiUrl.replace('{id}', id.toString()), reparateur);
+    }
+
+    updateReparateurPatchText(id: number, reparateur: Partial<Reparateur>) {
+        return this.http.patch(this.apiUrl.replace('{id}', id.toString()), reparateur, { responseType: 'text' });
+    }
+
     deleteReparateur(id: number) {
         return this.http.delete(this.apiUrl.replace('{id}', id.toString()));
     }

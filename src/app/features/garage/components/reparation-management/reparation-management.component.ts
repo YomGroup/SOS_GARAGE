@@ -135,7 +135,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
         const payload: any = JSON.parse(atob(token.split('.')[1]));
         const keycloakId = payload.sub;
 
-        // Charger les missions
+        // Charger les missions (bénéficie du cache service + HTTP)
         this.missionService.getAllMissions().subscribe({
           next: (missions: Mission[]) => {
             this.missions = missions.filter((m: Mission) =>
@@ -145,7 +145,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
             );
             console.log('missions après filtrage réparateur', this.missions);
             this.dataSource.data = this.missionsFiltres;
-            // Charger les véhicules pour chaque mission
+            // Charger les véhicules pour chaque mission (appel mis en cache au niveau service)
             this.missions.forEach(mission => {
               this.missionService.getVehiculeByMissionId(mission.id!).subscribe({
                 next: (vehicule) => {

@@ -41,6 +41,7 @@ export enum TypeSinistre {
 export enum StatutAvancementSinistre {
   EN_ATTENTE_TRAITEMENT = 'EN_ATTENTE_TRAITEMENT',
   EN_ATTENTE_EXPERTISE = 'EN_ATTENTE_EXPERTISE',
+  EN_ATTENTE_REPARATION = 'EN_ATTENTE_REPARATION',
   EN_COURS_REPARATION = 'EN_COURS_REPARATION',
   REPARATION_TERMINEE = 'REPARATION_TERMINEE'
 }
@@ -93,6 +94,7 @@ export interface Mission {
   // Ajout pour gestion des travaux garage
   dateDebutTravaux?: string; // ISO
   delaiEstime?: number; // en jours
+  dateFinTravaux?: string; // ISO
 }
 
 // Interface Reparateur

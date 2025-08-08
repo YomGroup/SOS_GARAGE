@@ -81,11 +81,11 @@
         <div class="row g-3 align-items-end">
           <div class="col-xl-2 col-md-4 col-sm-6">
             <label class="form-label small text-muted mb-1">Client</label>
-            <input class="form-control" type="text" [(ngModel)]="filterNom" name="filterNom" placeholder="Nom du client...">
+            <input class="form-control" type="text" [(ngModel)]="filterNom" name="filterNom" placeholder="Nom du client..." (ngModelChange)="onFiltersChanged()">
           </div>
           <div class="col-xl-2 col-md-4 col-sm-6">
             <label class="form-label small text-muted mb-1">Statut</label>
-            <select class="form-select" [(ngModel)]="filterStatut" name="filterStatut">
+            <select class="form-select" [(ngModel)]="filterStatut" name="filterStatut" (ngModelChange)="onFiltersChanged()">
               <option value="">Tous les statuts</option>
               <option value="payée">Payée</option>
               <option value="non payée">Non payée</option>
@@ -93,19 +93,19 @@
           </div>
           <div class="col-xl-1 col-md-3 col-sm-6">
             <label class="form-label small text-muted mb-1">Devis min</label>
-            <input class="form-control" type="number" [(ngModel)]="filterDevisMin" name="filterDevisMin" placeholder="Min">
+            <input class="form-control" type="number" [(ngModel)]="filterDevisMin" name="filterDevisMin" placeholder="Min" (ngModelChange)="onFiltersChanged()">
           </div>
           <div class="col-xl-1 col-md-3 col-sm-6">
             <label class="form-label small text-muted mb-1">Devis max</label>
-            <input class="form-control" type="number" [(ngModel)]="filterDevisMax" name="filterDevisMax" placeholder="Max">
+            <input class="form-control" type="number" [(ngModel)]="filterDevisMax" name="filterDevisMax" placeholder="Max" (ngModelChange)="onFiltersChanged()">
           </div>
           <div class="col-xl-1 col-md-3 col-sm-6">
             <label class="form-label small text-muted mb-1">Facture min</label>
-            <input class="form-control" type="number" [(ngModel)]="filterFactureMin" name="filterFactureMin" placeholder="Min">
+            <input class="form-control" type="number" [(ngModel)]="filterFactureMin" name="filterFactureMin" placeholder="Min" (ngModelChange)="onFiltersChanged()">
           </div>
           <div class="col-xl-1 col-md-3 col-sm-6">
             <label class="form-label small text-muted mb-1">Facture max</label>
-            <input class="form-control" type="number" [(ngModel)]="filterFactureMax" name="filterFactureMax" placeholder="Max">
+            <input class="form-control" type="number" [(ngModel)]="filterFactureMax" name="filterFactureMax" placeholder="Max" (ngModelChange)="onFiltersChanged()">
           </div>
           <div class="col-xl-2 col-md-4 col-sm-6">
             <button type="button" class="btn btn-reset-filters w-100" (click)="resetFilters()">
@@ -136,7 +136,7 @@
               <td>{{ mission.id }}</td>
               <td>
                 <div class="assure-info">
-                  <span class="assure-name">{{ mission.assureName }}</span>
+                  <span class="assure-name">{{ mission.assureName || assureNameBySinistre(mission.sinistre?.id) }}</span>
                 </div>
               </td>
               <td>{{ mission.devis | number:'1.2-2' }} €</td>

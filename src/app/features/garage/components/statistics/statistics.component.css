@@ -208,6 +208,37 @@ color: white;
 display: inline-block;
 }
 
+/* Support des classes générées par getStatusColor (status-success, -warning, -info, -secondary, -danger, -primary) */
+.status-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+}
+
+.status-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+  color: #333;
+}
+
+.status-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #00bcd4 100%);
+  color: #fff;
+}
+
+.status-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+  color: #fff;
+}
+
+.status-secondary {
+  background: #6c757d;
+  color: #fff;
+}
+
+.status-primary {
+  background: #007bff;
+  color: #fff;
+}
+
 .status-completed {
 background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
 }

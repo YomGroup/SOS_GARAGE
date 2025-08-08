@@ -21,9 +21,9 @@
         <div class="statut-avancement-display-admin">
           <span
             class="badge-statut-admin"
-            [ngClass]="getStatutAvancementClass(mission?.sinistre?.statut)"
+            [ngClass]="getStatutAvancementClass(mission?.sinistre?.statut || dossier?.statut || sinistre?.statut)"
           >
-            {{ getStatutAvancementLabel(mission?.sinistre?.statut) }}
+            {{ getStatutAvancementLabel(mission?.sinistre?.statut || dossier?.statut || sinistre?.statut) }}
           </span>
         </div>
         <div class="col-md-12" *ngIf="getJoursRestants() !== null">

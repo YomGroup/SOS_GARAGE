@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, from } from 'rxjs';
 import { storage } from '../main';
 import { ref, uploadBytes, getDownloadURL, deleteObject, uploadBytesResumable } from "firebase/storage";
-import { last, switchMap } from 'rxjs/operators'; // <-- Import RxJS operators
+import { switchMap } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root'
 })
@@ -24,6 +24,23 @@ export class FirebaseStorageService {
 
   uploadDevisFile(file: File, missionId: number): Observable<string> {
     return from(this.uploadToFirebase(file, missionId, 'devis'));
+  }
+
+  // === Garage specific uploads ===
+  // Upload the garage logo to Firebase Storage and return the public URL
+  uploadGarageLogo(file: File, garageId: number): Observable<string> {
+    const safeName = encodeURIComponent(file.name);
+    const filePath = `garages/${garageId}/logo/${Date.now()}_${safeName}`;
+    const fileRef = ref(storage, filePath);
+    return from(uploadBytes(fileRef, file)).pipe(switchMap(() => getDownloadURL(fileRef)));
+  }
+
+  // Upload a garage image (reparation or gallery) and return the public URL
+  uploadGarageImage(file: File, garageId: number): Observable<string> {
+    const safeName = encodeURIComponent(file.name);
+    const filePath = `garages/${garageId}/images/${Date.now()}_${safeName}`;
+    const fileRef = ref(storage, filePath);
+    return from(uploadBytes(fileRef, file)).pipe(switchMap(() => getDownloadURL(fileRef)));
   }
 
   uploadFactureFile(file: File, missionId: number): Observable<string> {
@@ -88,6 +105,12 @@ export class FirebaseStorageService {
     return from(this.deleteFromFirebase(filePath));
   }
 
+  // Supprimer un fichier à partir d'une URL de téléchargement Firebase
+  deleteFileByUrl(downloadUrl: string): Observable<void> {
+    const path = this.extractPathFromDownloadUrl(downloadUrl);
+    return from(this.deleteFromFirebase(path));
+  }
+
   private async deleteFromFirebase(filePath: string): Promise<void> {
     try {
       const fileRef = ref(storage, filePath);
@@ -97,6 +120,24 @@ export class FirebaseStorageService {
       console.error('Erreur lors de la suppression:', error);
       throw error;
     }
+  }
+
+  private extractPathFromDownloadUrl(downloadUrl: string): string {
+    // Formats supportés: https URL (firebasestorage), gs://, ou chemin direct
+    if (!downloadUrl) return '';
+    if (downloadUrl.startsWith('gs://')) {
+      // Convert gs://bucket/path -> path
+      const withoutScheme = downloadUrl.replace(/^gs:\/\//, '');
+      const parts = withoutScheme.split('/');
+      parts.shift(); // remove bucket
+      return parts.join('/');
+    }
+    if (downloadUrl.startsWith('http')) {
+      const afterO = downloadUrl.split('/o/')[1] || '';
+      const beforeQuery = afterO.split('?')[0] || '';
+      return decodeURIComponent(beforeQuery);
+    }
+    return downloadUrl; // assume already a relative path
   }
 }
 

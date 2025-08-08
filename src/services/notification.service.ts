@@ -151,9 +151,17 @@ export class NotificationService {
         this.updateUnreadCount(newCount);
     }
 
-    // Réinitialiser les notifications
-    markAllAsRead(): void {
-        this.updateUnreadCount(0);
+    // Réinitialiser les notifications (met aussi à jour Firebase)
+    async markAllAsRead(): Promise<void> {
+        try {
+            if (this.currentUserId) {
+                await this.messageService.markAllMessagesAsRead(this.currentUserId);
+            }
+        } catch (error) {
+            console.error('Erreur lors du marquage de tous les messages comme lus:', error);
+        } finally {
+            this.updateUnreadCount(0);
+        }
     }
 
     // Marquer une conversation spécifique comme lue

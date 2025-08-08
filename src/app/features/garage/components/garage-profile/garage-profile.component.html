@@ -86,6 +86,11 @@
                                 <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.siret" placeholder="SIRET">
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label class="form-label">Années d'expérience</label>
+                                <input *ngIf="!isEditing" type="number" class="readonly-input" [value]="reparateur.anneeExperience" readonly>
+                                <input *ngIf="isEditing" type="number" class="form-control" [(ngModel)]="reparateur.anneeExperience" placeholder="Années d'expérience">
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Commission</label>
                                 <input type="text" class="readonly-input" [value]="reparateur.commission" readonly>
                             </div>
@@ -130,7 +135,7 @@
                         </div>
                         <div *ngIf="isEditing">
                             <label class="form-label">Liste des services (séparés par une virgule)</label>
-                            <textarea class="form-control" [(ngModel)]="reparateur.servicePropose" rows="2" placeholder="Ex: Réparation mécanique, Carrosserie, ..."></textarea>
+                            <textarea class="form-control" [(ngModel)]="serviceProposeString" rows="2" placeholder="Ex: Réparation mécanique, Carrosserie, ..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -143,8 +148,13 @@
                         <h6 class="mb-0"><i class="fas fa-camera me-2"></i>Logo du garage</h6>
                     </div>
                     <div class="card-body text-center">
-                        <div class="profile-avatar-large mb-3">
-                            <i class="fas fa-warehouse"></i>
+                        <div class="profile-avatar-large mb-3" style="overflow:hidden;">
+                            <ng-container *ngIf="reparateur.logo; else defaultLogoIcon">
+                                <img [src]="reparateur.logo" alt="Logo" style="width:120px;height:120px;object-fit:cover;border-radius:50%;" />
+                            </ng-container>
+                            <ng-template #defaultLogoIcon>
+                                <i class="fas fa-warehouse"></i>
+                            </ng-template>
                         </div>
                         <div *ngIf="!isEditing">
                             <div *ngIf="reparateur.logo">
@@ -153,14 +163,17 @@
                             <div *ngIf="!reparateur.logo" class="text-muted">Aucun logo enregistré</div>
                         </div>
                         <div *ngIf="isEditing">
-                            <input type="text" class="form-control mb-2" [(ngModel)]="reparateur.logo" placeholder="URL du logo ou nom de fichier" />
-                            <div *ngIf="reparateur.logo">
-                                <img [src]="reparateur.logo" alt="Logo du garage" style="max-width:120px;max-height:120px;" />
+                            <div class="mb-2">
+                                <button type="button" class="btn btn-sm btn-outline-primary" (click)="changeLogo()">
+                                    <i class="fas fa-upload me-2"></i>Téléverser un logo
+                                </button>
                             </div>
                         </div>
-                        <button class="btn btn-outline-custom" (click)="changeLogo()" *ngIf="!isEditing">
-                            <i class="fas fa-upload me-2"></i>Changer le logo
-                        </button>
+                        <div *ngIf="!isEditing">
+                            <button class="btn btn-outline-custom" (click)="changeLogo()">
+                                <i class="fas fa-upload me-2"></i>Changer le logo
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <!-- Statistiques du garage -->
@@ -226,9 +239,19 @@
             <h6 class="mb-0"><i class="fas fa-images me-2"></i>Images de réparations</h6>
         </div>
         <div class="card-body">
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-sm btn-outline-primary" type="button" (click)="addRepairImages()">
+                    <i class="fas fa-images me-2"></i>Ajouter des images
+                </button>
+            </div>
             <ng-container *ngIf="reparateur?.imagesReparations?.length; else aucuneImage">
                 <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                    <img *ngFor="let img of reparateur?.imagesReparations" [src]="img" alt="Image réparation" style="max-width:70px;max-height:70px;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+                    <div *ngFor="let img of reparateur?.imagesReparations; let i = index" style="position:relative;">
+                        <img [src]="img" alt="Image réparation" style="width:90px;height:90px;object-fit:cover;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+                        <button type="button" class="btn btn-sm btn-danger" (click)="removeRepairImage(i)" style="position:absolute;top:-6px;right:-6px;border-radius:50%;padding:2px 6px;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
             </ng-container>
             <ng-template #aucuneImage><span class="text-muted">Aucune image</span></ng-template>

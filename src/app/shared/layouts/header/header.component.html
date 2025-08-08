@@ -11,15 +11,29 @@
       <div class="header-date">{{ getCurrentDate() }}</div>
     </div>
     <div class="user-info">
-      <span class="icon-envelope" [matMenuTriggerFor]="messageMenu" style="cursor:pointer;">
+      <span class="icon-envelope" [matMenuTriggerFor]="messageMenu" style="cursor:pointer; position: relative;">
         <i class="bi bi-envelope-fill"></i>
+        <span class="notification-badge" *ngIf="messageUnreadCount() > 0">+{{ messageUnreadCount() }}</span>
       </span>
       <mat-menu #messageMenu="matMenu">
-        <span class="empty-message" style="padding: 8px 16px; display: block; color: gray;">Aucun message</span>
+        <ng-container *ngIf="messageUnreadCount() > 0; else noMessages">
+          <div style="padding: 8px 16px; font-weight: 600;">{{ messageUnreadCount() }} messages non lus</div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="navigateToMessages()">
+            <mat-icon>mail</mat-icon>
+            <span>Voir les messages</span>
+          </button>
+          <button mat-menu-item (click)="markAllMessagesAsRead()">
+            <mat-icon>done_all</mat-icon>
+            <span>Tout marquer comme lu</span>
+          </button>
+        </ng-container>
+        <ng-template #noMessages>
+          <span class="empty-message" style="padding: 8px 16px; display: block; color: gray;">Aucun message</span>
+        </ng-template>
       </mat-menu>
       <span class="icon-bell" [matMenuTriggerFor]="notificationMenu" style="cursor:pointer;">
         <i class="bi bi-bell-fill"></i>
-        <span class="notification-badge" *ngIf="notificationCount() > 0">+{{ notificationCount() }}</span>
       </span>
       <mat-menu #notificationMenu="matMenu">
         <ng-container *ngIf="notifications().length; else noNotif">

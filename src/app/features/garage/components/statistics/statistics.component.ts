@@ -29,6 +29,7 @@ interface FinancialStats {
   netBalance: number;
   averageDevis: number;
   averageFacture: number;
+  averageCommission: number;
 }
 
 interface RecentMission {
@@ -45,6 +46,7 @@ interface RecentMission {
   vehiculeInfo: string;
   assureInfo: any;
   vehicule: any;
+  montantCommission: number;
 }
 
 @Component({
@@ -75,7 +77,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     totalCommissions: 0,
     netBalance: 0,
     averageDevis: 0,
-    averageFacture: 0
+    averageFacture: 0,
+    averageCommission: 0
   };
 
   recentMissions: RecentMission[] = [];
@@ -92,6 +95,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   private currentRoute: string = '';
   private isInitialized: boolean = false;
   private hasLoadedData: boolean = false;
+  private lastLoadedAt: number = 0;
   private cdr: ChangeDetectorRef;
   private checkDataIntervalId: any = null;
 
@@ -130,8 +134,9 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       if (currentUrl.includes('/garage/statistiques') || currentUrl.includes('/garage/statistics')) {
         console.log('Page statistiques détectée, vérification des données...');
         
-        // Si on n'a pas encore chargé de données ou si on revient sur la page
-        if (!this.hasLoadedData || this.reparateurMissions.length === 0) {
+        // Si on n'a pas encore chargé ou si le dernier chargement > 60s
+        const now = Date.now();
+        if (!this.hasLoadedData || this.reparateurMissions.length === 0 || (now - this.lastLoadedAt) > 60_000) {
           console.log('Rechargement des données...');
           this.loadStatistics();
         }
@@ -164,17 +169,10 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }, 200);
 
-    if (!this.checkDataIntervalId) {
-      this.checkDataIntervalId = setInterval(() => {
-        if (!this.hasLoadedData && !this.loading) {
-          console.log('Vérification périodique: rechargement des données...');
-          this.loadStatistics();
-        } else if (this.hasLoadedData && !this.loading) {
-          // Arrêter la vérification, même si la liste est vide
-          clearInterval(this.checkDataIntervalId);
-          this.checkDataIntervalId = null;
-        }
-      }, 1000);
+    // Désactivation du polling agressif
+    if (this.checkDataIntervalId) {
+      clearInterval(this.checkDataIntervalId);
+      this.checkDataIntervalId = null;
     }
   }
 
@@ -224,6 +222,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       await this.calculateStatistics();
       
       this.hasLoadedData = true;
+      this.lastLoadedAt = Date.now();
       this.cdr.detectChanges();
       console.log('Statistiques chargées avec succès');
       
@@ -272,7 +271,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       totalCommissions: totalCommissions,
       netBalance: totalFactures - totalCommissions,
       averageDevis: missionsWithDevis.length > 0 ? totalDevis / missionsWithDevis.length : 0,
-      averageFacture: missionsWithFacture.length > 0 ? totalFactures / missionsWithFacture.length : 0
+      averageFacture: missionsWithFacture.length > 0 ? totalFactures / missionsWithFacture.length : 0,
+      averageCommission: missionsWithFacture.length > 0 ? totalCommissions / missionsWithFacture.length : 0
     };
 
     // Optimisation : cache local pour éviter les appels multiples pour le même sinistre
@@ -291,25 +291,57 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
         let vehiculeObj: any = null;
         if (mission.sinistre && mission.sinistre.id) {
           try {
-            // Utiliser le cache local pour l'assuré
+            // Utiliser le cache local pour l'assuré (via API mission-service)
             let assure = assureCache.get(mission.sinistre.id);
             if (!assure) {
-              assure = await firstValueFrom(this.assureService.getAssureBySinistreId(mission.sinistre.id));
-              if (assure) assureCache.set(mission.sinistre.id, assure);
+              try {
+                assure = await firstValueFrom(this.missionService.getAssureBySinistreId(mission.sinistre.id));
+                if (assure) assureCache.set(mission.sinistre.id, assure);
+              } catch (e) {
+                // ignore, on garde N/A
+              }
             }
             if (assure) {
               assureObj = assure;
               assureName = (assure.nom && assure.prenom) ? `${assure.nom} ${assure.prenom}` : (assure.name && assure.prenom) ? `${assure.name} ${assure.prenom}` : assure.name || assure.nom || 'N/A';
-              // Utiliser le cache local pour le véhicule
-              let vehicule = vehiculeCache.get(mission.sinistre.id);
-              if (!vehicule) {
-                vehicule = this.assureService.getVehiculeBySinistreId(assure, mission.sinistre.id);
-                if (vehicule) vehiculeCache.set(mission.sinistre.id, vehicule);
+            }
+
+            // Récupérer le véhicule indépendamment de l'assuré
+            let vehicule = vehiculeCache.get(mission.sinistre.id);
+            if (!vehicule) {
+              try {
+                vehicule = await firstValueFrom(this.missionService.getVehiculeBySinistreId(mission.sinistre.id));
+                if (vehicule) {
+                  vehiculeCache.set(mission.sinistre.id, vehicule);
+                }
+              } catch (e) {
+                console.warn('Impossible de récupérer le véhicule pour le sinistre', mission.sinistre.id, e);
               }
+            }
+            // Fallback: essayer par ID de mission
+            if (!vehicule && mission.id) {
+              try {
+                vehicule = await firstValueFrom(this.missionService.getVehiculeByMissionId(mission.id));
+              } catch (e) {
+                console.warn('Impossible de récupérer le véhicule pour la mission', mission.id, e);
+              }
+            }
+            // Essai via l'assuré (parcours local) si toujours rien
+            if (!vehicule && assure) {
+              vehicule = this.assureService.getVehiculeBySinistreId(assure, mission.sinistre.id);
               if (vehicule) {
-                vehiculeObj = vehicule;
-                vehiculeInfo = `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`;
+                vehiculeCache.set(mission.sinistre.id, vehicule);
               }
+            }
+            // Dernier recours: données embarquées dans le sinistre
+            if (!vehicule && mission.sinistre.vehicule) {
+              vehicule = mission.sinistre.vehicule as any;
+            }
+            if (vehicule) {
+              vehiculeObj = vehicule;
+              const designation = [vehicule.marque, vehicule.modele].filter(Boolean).join(' ').trim();
+              const immat = vehicule.immatriculation ? ` (${vehicule.immatriculation})` : '';
+              vehiculeInfo = designation ? `${designation}${immat}` : (vehicule.immatriculation || 'N/A');
             }
           } catch (error) {
             console.error(`Erreur lors de la récupération des détails pour la mission ${mission.id}:`, error);
@@ -328,7 +360,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
           assureName: assureName,
           vehiculeInfo: vehiculeInfo,
           assureInfo: assureObj,
-          vehicule: vehiculeObj
+          vehicule: vehiculeObj,
+          montantCommission: mission.montantCommission || 0
         };
       })
     );
@@ -377,7 +410,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'MAD'
+      currency: 'EUR'
     }).format(amount);
   }
 
@@ -436,4 +469,4 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     }
     this.cdr.detectChanges();
   }
-} 
+}

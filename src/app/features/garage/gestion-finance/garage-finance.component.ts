@@ -44,6 +44,7 @@ export class GarageFinanceComponent implements OnInit {
   // Cache pour optimiser les performances
   private _filteredMissionsCache: { key: string, value: Mission[] } | null = null;
   private _paginatedMissionsCache: Mission[] | null = null;
+  private assureNamesMap: Map<number, string> = new Map();
 
   constructor(
     private missionService: MissionService,
@@ -66,6 +67,7 @@ export class GarageFinanceComponent implements OnInit {
       this._missions = allMissions.filter(m => 
         m.reparateur && m.reparateur.useridKeycloak === keycloakId
       );
+      await this.populateAssureNames(this._missions);
       this.calculateKPIs();
       this._clearCache();
       this.cdr.detectChanges();
@@ -122,10 +124,12 @@ export class GarageFinanceComponent implements OnInit {
   }
 
   private _calculateFilteredMissions(): Mission[] {
-    let filtered = this._missions.filter(m =>
-      (!this.filterStatut || (m.commissionStatut && m.commissionStatut.toLowerCase().includes(this.filterStatut.toLowerCase()))) &&
-      (!this.filterNom || (m.assureName && m.assureName.toLowerCase().includes(this.filterNom.toLowerCase())))
-    );
+    let filtered = this._missions.filter(m => {
+      const statutOk = !this.filterStatut || (m.commissionStatut && m.commissionStatut.toLowerCase().includes(this.filterStatut.toLowerCase()));
+      const nameCandidate = (m.assureName || this.assureNamesMap.get(m.sinistre?.id as any) || '').toLowerCase();
+      const nomOk = !this.filterNom || nameCandidate.includes(this.filterNom.toLowerCase());
+      return statutOk && nomOk;
+    });
     
     if (this.filterDevisMin !== null) {
       filtered = filtered.filter(m => (m.devis || 0) >= this.filterDevisMin!);
@@ -155,6 +159,37 @@ export class GarageFinanceComponent implements OnInit {
   private _clearCache(): void {
     this._filteredMissionsCache = null;
     this._paginatedMissionsCache = null;
+  }
+
+  onFiltersChanged(): void {
+    this.page = 1;
+    this._clearCache();
+    this.cdr.detectChanges();
+  }
+
+  private async populateAssureNames(missions: Mission[]): Promise<void> {
+    const toFetch = new Set<number>();
+    missions.forEach(m => {
+      const sinistreId = m.sinistre?.id;
+      if (sinistreId && !m.assureName && !this.assureNamesMap.get(sinistreId)) {
+        toFetch.add(sinistreId);
+      }
+    });
+    for (const sinId of Array.from(toFetch)) {
+      try {
+        const assure = await firstValueFrom(this.missionService.getAssureBySinistreId(sinId));
+        const name = [(assure as any).nom || assure.name || '', assure.prenom || ''].filter(Boolean).join(' ').trim();
+        this.assureNamesMap.set(sinId, name);
+        const m = this._missions.find(x => x.sinistre?.id === sinId);
+        if (m && !m.assureName) m.assureName = name;
+      } catch {}
+    }
+    this._clearCache();
+  }
+
+  assureNameBySinistre(id: number | undefined): string {
+    if (!id) return '';
+    return this.assureNamesMap.get(id) || '';
   }
 
   openMissionView(missionId: number): void {

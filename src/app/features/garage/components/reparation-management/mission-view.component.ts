@@ -103,6 +103,8 @@ export class MissionViewComponent implements OnChanges {
   currentImageIndex: number = 0;
   currentImageUrl: string = '';
   showImageModal: boolean = false;
+  // Date de fin des travaux (local si le backend ne la renvoie pas)
+  dateFinTravauxLocal: string | null = null;
 
   constructor(
     private missionService: MissionService, 
@@ -294,9 +296,11 @@ export class MissionViewComponent implements OnChanges {
       missionUpdate.statut = this.missionEdit.statut;
     }
 
-    // Inclure les documents d'assurance (URLs Firebase)
+    // Inclure les documents d'assurance (convertir en URLs si objets)
     if (this.missionEdit.documentsAssurance) {
-      missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance;
+      missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance.map((doc: any) =>
+        (doc && typeof doc === 'object' && doc.url) ? doc.url : doc
+      );
     }
 
     // Champs financiers ajoutés
@@ -452,8 +456,8 @@ export class MissionViewComponent implements OnChanges {
         ];
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        const typeLabel = type ? ` (${type})` : '';
-        alert(`Document${typeLabel} uploadé avec succès !`);
+        // Feedback UI léger, éviter alert bloquante
+        console.log('Upload terminé. Type:', type);
       })
       .catch((error) => {
         console.error('Erreur lors de l\'upload:', error);
@@ -512,24 +516,21 @@ export class MissionViewComponent implements OnChanges {
 
   supprimerDocument(index: number) {
     if (!this.missionEdit.documentsAssurance) return;
-    
-    const documentUrl = this.missionEdit.documentsAssurance[index];
-    
-    // Supprimer de Firebase si c'est une URL Firebase
-    if (documentUrl && documentUrl.includes('firebasestorage.googleapis.com')) {
-      this.firebaseService.deletePdfFile(documentUrl).subscribe({
+    const doc = this.missionEdit.documentsAssurance[index];
+    const url = (doc && typeof doc === 'object' && doc.url) ? doc.url : doc;
+    if (url && typeof url === 'string' && url.includes('firebasestorage.googleapis.com')) {
+      // Utiliser la méthode dédiée pour URL complète
+      this.firebaseService.deleteFileByUrl(url).subscribe({
         next: () => {
           console.log('Document supprimé de Firebase');
           this.supprimerDocumentLocal(index);
         },
         error: (error) => {
           console.error('Erreur lors de la suppression de Firebase:', error);
-          // Supprimer localement même si Firebase échoue
           this.supprimerDocumentLocal(index);
         }
       });
     } else {
-      // Supprimer directement si ce n'est pas une URL Firebase
       this.supprimerDocumentLocal(index);
     }
   }
@@ -547,50 +548,29 @@ export class MissionViewComponent implements OnChanges {
       alert('URL de document invalide');
       return;
     }
-    // Si c'est une URL Firebase, télécharger via le service
-    if (url.includes('firebasestorage.googleapis.com')) {
-      this.firebaseService.downloadPdfFile(url).subscribe({
-        next: (blob: Blob) => {
-          const downloadUrl = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = this.getFileNameFromUrl(url);
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            window.URL.revokeObjectURL(downloadUrl);
-            document.body.removeChild(a);
-          }, 0);
-        },
-        error: (error) => {
-          console.error('Erreur lors du téléchargement:', error);
-          alert(`Erreur lors du téléchargement: ${error.message || 'Erreur lors du téléchargement du fichier'}`);
-        }
-      });
-    } else {
-      // Téléchargement direct si ce n'est pas Firebase
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = this.getFileNameFromUrl(url);
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    // Téléchargement direct via ancre; si CORS empêche le fetch, on laisse le navigateur gérer
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = this.getFileNameFromUrl(url);
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   public isImageOrPdf(url: string): boolean {
     return /\.(pdf|jpg|jpeg|png)$/i.test(url);
   }
 
-  public getFileNameFromUrl(url: string): string {
+  public getFileNameFromUrl(docOrUrl: any): string {
     try {
-      // Prend la partie après le dernier slash
+      const url = (docOrUrl && typeof docOrUrl === 'object' && docOrUrl.url) ? docOrUrl.url : docOrUrl;
+      if (typeof url !== 'string') return '';
       let fileName = url.split('/').pop() || '';
-      // Retire les paramètres d’URL éventuels (après le ?)
       fileName = fileName.split('?')[0];
       return decodeURIComponent(fileName);
     } catch {
-      return url;
+      return typeof docOrUrl === 'string' ? docOrUrl : '';
     }
   }
 
@@ -632,6 +612,8 @@ export class MissionViewComponent implements OnChanges {
         return 'En attente de traitement';
       case 'EN_ATTENTE_EXPERTISE':
         return 'En attente d\'expertise';
+      case 'EN_ATTENTE_REPARATION':
+        return 'En attente de réparation';
       case 'EN_COURS_REPARATION':
         return 'En cours de réparation';
       case 'REPARATION_TERMINEE':
@@ -646,6 +628,7 @@ export class MissionViewComponent implements OnChanges {
     switch (statut) {
       case 'EN_ATTENTE_TRAITEMENT':
       case 'EN_ATTENTE_EXPERTISE':
+      case 'EN_ATTENTE_REPARATION':
         return 'statut-attente';
       case 'EN_COURS_REPARATION':
         return 'statut-encours';
@@ -802,6 +785,19 @@ export class MissionViewComponent implements OnChanges {
         if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
           this.mission!.expertises[0] = updatedExpertise;
         }
+        // Après enregistrement, si expertiseEffectuee est true, passer le sinistre en EN_ATTENTE_REPARATION
+        if (updatedExpertise?.expertiseEffectuee && this.mission?.sinistre?.id) {
+          const sinistreId = this.mission.sinistre.id;
+          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_REPARATION').subscribe({
+            next: () => {
+              this.mission!.sinistre.statut = 'EN_ATTENTE_REPARATION';
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              console.error('Erreur mise à jour statut après expertise:', err);
+            }
+          });
+        }
         this.editionEnCours = false;
       },
       error: (err) => {
@@ -918,9 +914,9 @@ export class MissionViewComponent implements OnChanges {
         // 2. Mettre à jour le statut d'avancement du sinistre (restreint aux 4 statuts)
         const sinistreId = this.mission!.sinistre?.id;
         if (sinistreId) {
-          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_EXPERTISE').subscribe({
+          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_REPARATION').subscribe({
             next: () => {
-              this.mission!.sinistre.statut = 'EN_ATTENTE_EXPERTISE';
+              this.mission!.sinistre.statut = 'EN_ATTENTE_REPARATION';
               this.cdr.detectChanges();
             },
             error: (err) => {
@@ -937,9 +933,13 @@ export class MissionViewComponent implements OnChanges {
 
   debutTravauxPossible(): boolean {
     if (!this.mission) return false;
-    return this.mission.statut !== 'terminée' &&
-      this.mission.statut !== 'TERMINEE' &&
-      (!this.mission.dateDebutTravaux || this.mission.statut !== 'EN_COURS_REPARATION');
+    const statutMission = this.mission.statut;
+    const statutSinistre = this.mission.sinistre?.statut;
+    const isTerminee = statutMission === 'REPARATION_TERMINEE' || statutMission === 'terminée' || statutMission === 'TERMINEE' || statutSinistre === 'REPARATION_TERMINEE';
+    const enCours = statutMission === 'EN_COURS_REPARATION' || statutSinistre === 'EN_COURS_REPARATION';
+    if (isTerminee) return false;
+    if (enCours) return false;
+    return !this.mission.dateDebutTravaux;
   }
 
   lancerDebutTravaux() {
@@ -968,6 +968,41 @@ export class MissionViewComponent implements OnChanges {
       },
       error: (error) => {
         alert('Erreur lors du démarrage des travaux : ' + error.message);
+      }
+    });
+  }
+
+  terminerReparation() {
+    if (!this.mission) return;
+    this.dateFinTravauxLocal = new Date().toISOString();
+    const missionUpdate: MissionUpdate = {
+      statut: 'REPARATION_TERMINEE'
+    };
+    this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
+      next: (updatedMission) => {
+        this.mission = updatedMission;
+        // Mettre aussi à jour le statut du sinistre pour l'affichage unifié
+        const sinistreId = this.mission?.sinistre?.id;
+        if (sinistreId) {
+          this.dossiersService.updateStatutSinistre(sinistreId, 'REPARATION_TERMINEE').subscribe({
+            next: () => {
+              if (this.mission) {
+                this.mission.sinistre = { ...this.mission.sinistre, statut: 'REPARATION_TERMINEE' } as any;
+              }
+              this.cdr.detectChanges();
+              this.missionUpdated.emit(this.mission!);
+            },
+            error: () => {
+              // Même si la mise à jour du sinistre échoue, on émet la mission mise à jour
+              this.missionUpdated.emit(this.mission!);
+            }
+          });
+        } else {
+          this.missionUpdated.emit(this.mission);
+        }
+      },
+      error: (error) => {
+        alert('Erreur lors de la clôture des travaux : ' + error.message);
       }
     });
   }

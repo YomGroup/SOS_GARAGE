@@ -27,6 +27,7 @@
               <option [ngValue]="null">Sélectionner un statut</option>
               <option value="EN_ATTENTE_TRAITEMENT">En attente de traitement</option>
               <option value="EN_ATTENTE_EXPERTISE">En attente d'expertise</option>
+              <option value="EN_ATTENTE_REPARATION">En attente de réparation</option>
               <option value="EN_COURS_REPARATION">En cours de réparation</option>
               <option value="REPARATION_TERMINEE">Réparation terminée</option>
             </select>
@@ -71,6 +72,17 @@
       <div class="travaux-infos mt-3" *ngIf="mission?.dateDebutTravaux">
         <span><i class="fas fa-calendar me-1"></i>Début des travaux : {{ mission?.dateDebutTravaux | date:'dd/MM/yyyy HH:mm' }}</span>
         <span *ngIf="mission?.delaiEstime"> | <i class="fas fa-hourglass-half me-1"></i>Délai estimé : {{ mission?.delaiEstime }} jour(s)</span>
+        <span *ngIf="mission?.statut === 'REPARATION_TERMINEE' || mission?.sinistre?.statut === 'REPARATION_TERMINEE' || dateFinTravauxLocal" class="ms-2">
+          | <i class="fas fa-flag-checkered me-1"></i>Travaux finis :
+          {{ (dateFinTravauxLocal || mission?.dateFinTravaux) | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <!-- Action: Terminer la réparation (affiché en dehors du bloc démarrage) -->
+      <div class="mt-3" *ngIf="mission?.statut === 'EN_COURS_REPARATION' || mission?.sinistre?.statut === 'EN_COURS_REPARATION'">
+        <button class="btn btn-outline-danger btn-lg" (click)="terminerReparation()">
+          <i class="fas fa-stop me-2"></i>Terminer la réparation
+        </button>
       </div>
 
       <!-- Informations principales (toujours visible, tout en haut) -->
@@ -609,11 +621,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="actions-grid mt-3" *ngIf="canEditMission() && expertiseCourante && !expertiseCourante.expertiseEffectuee">
-                  <button type="button" class="btn btn-success" (click)="confirmerPassageExpert()">
-                    <i class="fas fa-check me-2"></i>Confirmer le passage de l'expert
-                  </button>
-              </div>
+                <!-- Retiré: confirmation séparée. L'enregistrement des détails déclenche l'étape suivante -->
               <div class="actions-grid" *ngIf="canEditMission()">
                   <button type="button" class="btn btn-primary" (click)="lancerEditionExpertise()">Modifier les détails</button>
             </div>
@@ -639,17 +647,18 @@
               <ng-container *ngIf="editionEnCours">
                 <ng-container *ngIf="missionEdit.documentsAssurance && missionEdit.documentsAssurance.length > 0; else noDocEdit">
                   <div *ngFor="let doc of missionEdit.documentsAssurance; let i = index" class="document-item">
-                    <i class="fas fa-file-pdf me-2"></i>
-                    {{ getFileNameFromUrl(doc) }}
-                    <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
-                    <button type="button" class="btn btn-sm btn-danger ms-2" (click)="supprimerDocument(i)">Supprimer</button>
-                    <!-- AJOUT : Boutons envoyer par mail -->
-                    <button type="button" class="btn btn-outline-warning btn-sm ms-2" (click)="envoyerDocumentParMail(doc, 'assurance')">
-                      <i class="fas fa-envelope me-1"></i>Envoyer à l'assurance
-                    </button>
-                    <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc, 'expert')">
-                      <i class="fas fa-envelope me-1"></i>Envoyer à l'expert
-                    </button>
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="doc-name" [title]="getFileNameFromUrl(doc)">{{ getFileNameFromUrl(doc) }}</span>
+                    <div class="doc-actions">
+                      <button type="button" class="btn btn-sm btn-primary" (click)="telechargerDocument(doc)">Télécharger</button>
+                      <button type="button" class="btn btn-sm btn-danger" (click)="supprimerDocument(i)">Supprimer</button>
+                      <button type="button" class="btn btn-outline-warning btn-sm" (click)="envoyerDocumentParMail(doc, 'assurance')">
+                        <i class="fas fa-envelope me-1"></i>Assurance
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm" (click)="envoyerDocumentParMail(doc, 'expert')">
+                        <i class="fas fa-envelope me-1"></i>Expert
+                      </button>
+                    </div>
                   </div>
                 </ng-container>
                 <ng-template #noDocEdit>
@@ -667,16 +676,17 @@
               <ng-container *ngIf="!editionEnCours">
                 <ng-container *ngIf="mission && mission.documentsAssurance && mission.documentsAssurance.length > 0; else noDocRead">
                   <div *ngFor="let doc of mission.documentsAssurance; let i = index" class="document-item">
-                    <i class="fas fa-file-pdf me-2"></i>
-                    {{ getFileNameFromUrl(doc) }}
-                    <button type="button" class="btn btn-sm btn-primary ms-2" (click)="telechargerDocument(doc)">Télécharger</button>
-                    <!-- AJOUT : Boutons envoyer par mail -->
-                    <button type="button" class="btn btn-outline-warning btn-sm ms-2" (click)="envoyerDocumentParMail(doc, 'assurance')">
-                      <i class="fas fa-envelope me-1"></i>Envoyer à l'assurance
-                    </button>
-                    <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="envoyerDocumentParMail(doc, 'expert')">
-                      <i class="fas fa-envelope me-1"></i>Envoyer à l'expert
-                    </button>
+                    <i class="fas fa-file-pdf"></i>
+                    <span class="doc-name" [title]="getFileNameFromUrl(doc)">{{ getFileNameFromUrl(doc) }}</span>
+                    <div class="doc-actions">
+                      <button type="button" class="btn btn-sm btn-primary" (click)="telechargerDocument(doc)">Télécharger</button>
+                      <button type="button" class="btn btn-outline-warning btn-sm" (click)="envoyerDocumentParMail(doc, 'assurance')">
+                        <i class="fas fa-envelope me-1"></i>Assurance
+                      </button>
+                      <button type="button" class="btn btn-outline-info btn-sm" (click)="envoyerDocumentParMail(doc, 'expert')">
+                        <i class="fas fa-envelope me-1"></i>Expert
+                      </button>
+                    </div>
                   </div>
                 </ng-container>
                 <ng-template #noDocRead>

@@ -145,8 +145,16 @@ export class LayoutComponent implements OnInit {
   navigateToMessages(): void {
     console.log('Navigation vers les messages...');
 
-    // Naviguer vers la page des messages
-    this.router.navigate(['/clientDashboard/message']);
+    let target = '/clientDashboard/message';
+    if (this.authService.hasRole('ROLE_GARAGISTE')) {
+      target = '/garage/message';
+    } else if (this.authService.hasRole('ROLE_ADMIN')) {
+      target = '/admin/message';
+    } else if (this.authService.hasRole('ROLE_ASSURE')) {
+      target = '/clientDashboard/message';
+    }
+
+    this.router.navigate([target]);
 
   }
 

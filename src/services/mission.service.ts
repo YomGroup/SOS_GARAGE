@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, of, forkJoin, throwError } from 'rxjs';
-import { switchMap, map, catchError } from 'rxjs/operators';
+import { switchMap, map, catchError, tap, shareReplay } from 'rxjs/operators';
 import { Mission, Assure, Vehicule , Sinistre, Reparateur, DocumentsSinistre, Notification, Avantage, Reparation, Message, MissionUpdate} from './models-api.interface';
 import { environment } from '../environments/environment';
 
@@ -10,11 +10,26 @@ import { environment } from '../environments/environment';
 })
 export class MissionService {
   private apiUrl = environment.apiUrl;
+  // Simple in-memory caches with TTL
+  private missionsCache?: { data: Mission[]; addedAt: number; ttl: number };
+  private vehiculeByMissionCache = new Map<number, { data: Vehicule; addedAt: number; ttl: number }>();
+  private vehiculeBySinistreCache = new Map<number, { data: Vehicule; addedAt: number; ttl: number }>();
+  private assureBySinistreCache = new Map<number, { data: Assure; addedAt: number; ttl: number }>();
+  private readonly ttlMissionsMs = 60_000; // 1 min
+  private readonly ttlVehiculeMs = 180_000; // 3 min
+  private readonly ttlAssureMs = 180_000; // 3 min
 
   constructor(private http: HttpClient) { }
 
   getAllMissions(): Observable<Mission[]> {
-    return this.http.get<Mission[]>(`${this.apiUrl}/missions`);
+    const now = Date.now();
+    if (this.missionsCache && now - this.missionsCache.addedAt < this.missionsCache.ttl) {
+      return of(this.missionsCache.data);
+    }
+    return this.http.get<Mission[]>(`${this.apiUrl}/missions`).pipe(
+      tap(data => (this.missionsCache = { data, addedAt: Date.now(), ttl: this.ttlMissionsMs })),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   getAllMissionsByReparateur(reparateurId: number): Observable<Mission[]> {
@@ -34,7 +49,15 @@ export class MissionService {
   }
 
   getAssureBySinistreId(sinistreId: number): Observable<Assure> {
-    return this.http.get<Assure>(`${this.apiUrl}/assure/assure/${sinistreId}`);
+    const cached = this.assureBySinistreCache.get(sinistreId);
+    const now = Date.now();
+    if (cached && now - cached.addedAt < this.ttlAssureMs) {
+      return of(cached.data);
+    }
+    return this.http.get<Assure>(`${this.apiUrl}/assure/assure/${sinistreId}`).pipe(
+      tap(data => this.assureBySinistreCache.set(sinistreId, { data, addedAt: Date.now(), ttl: this.ttlAssureMs })),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   getAssureurNameFromMission(mission: Mission): Observable<string> {
@@ -59,11 +82,27 @@ export class MissionService {
   }
 
   getVehiculeByMissionId(missionId: number): Observable<Vehicule> {
-    return this.http.get<Vehicule>(`${this.apiUrl}/missions/${missionId}/vehicule`);
+    const cached = this.vehiculeByMissionCache.get(missionId);
+    const now = Date.now();
+    if (cached && now - cached.addedAt < this.ttlVehiculeMs) {
+      return of(cached.data);
+    }
+    return this.http.get<Vehicule>(`${this.apiUrl}/missions/${missionId}/vehicule`).pipe(
+      tap(data => this.vehiculeByMissionCache.set(missionId, { data, addedAt: Date.now(), ttl: this.ttlVehiculeMs })),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   getVehiculeBySinistreId(sinistreId: number): Observable<Vehicule> {
-    return this.http.get<Vehicule>(`${this.apiUrl}/sinistre/${sinistreId}/vehicule`);
+    const cached = this.vehiculeBySinistreCache.get(sinistreId);
+    const now = Date.now();
+    if (cached && now - cached.addedAt < this.ttlVehiculeMs) {
+      return of(cached.data);
+    }
+    return this.http.get<Vehicule>(`${this.apiUrl}/sinistre/${sinistreId}/vehicule`).pipe(
+      tap(data => this.vehiculeBySinistreCache.set(sinistreId, { data, addedAt: Date.now(), ttl: this.ttlVehiculeMs })),
+      shareReplay({ bufferSize: 1, refCount: true })
+    );
   }
 
   updateMissionReparateur(id: number, reparateur: Reparateur) {

@@ -218,8 +218,11 @@
 }
 
 .document-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
+  column-gap: 10px;
+  row-gap: 8px;
   padding: 12px 15px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
   border: 1px solid #dee2e6;
@@ -236,8 +239,7 @@
   text-decoration: none;
 }
 
-.document-item i:last-child {
-  margin-left: auto;
+.document-item i:first-child {
   color: #6c757d;
 }
 
@@ -754,33 +756,40 @@
 }
 
 .uploaded-document-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  justify-content: space-between;
   background: #f8f9fa;
   border: 1px solid #e3e6ea;
   border-radius: 8px;
   padding: 10px 16px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  gap: 10px;
 }
 
 .doc-info {
   display: flex;
   align-items: center;
+  min-width: 0; /* pour permettre le text-overflow sur l'enfant */
   font-weight: 500;
   color: #2c3e50;
 }
 
 .doc-name {
   margin-left: 6px;
-  font-size: 1rem;
-  word-break: break-all;
+  font-size: 0.95rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 .doc-actions {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 } 
 
 .photos-grid {

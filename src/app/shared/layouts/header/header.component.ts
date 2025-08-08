@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -11,6 +11,8 @@ import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../../services/auth.service';
 import { Notification, NotificationType } from '../../models/notification.model';
 import { NotificationService } from '../../../../services/notification.service';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -28,7 +30,7 @@ import { NotificationService } from '../../../../services/notification.service';
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
+export class HeaderComponent implements OnInit, OnDestroy {
   @Input() sidebarCollapsed: boolean = false;
   @Input() isMobile: boolean = false;
   @Input() sidebarOpened: boolean = false;
@@ -39,7 +41,9 @@ export class HeaderComponent implements OnInit {
   userAvatar = 'assets/images/avatar.png';
   userName = signal('Chargement...');
   userEmail = signal('Chargement...');
-  notificationCount = signal(3);
+  // Compteur de messages non lus (enveloppe)
+  messageUnreadCount = signal(0);
+  hasNewMessages = signal(false);
   notifications = signal<Notification[]>([
     {
       type: 'info',
@@ -61,6 +65,9 @@ export class HeaderComponent implements OnInit {
   private themeService: ThemeService;
   isDarkMode;
 
+  private router = inject(Router);
+  private subscriptions: Subscription[] = [];
+
   constructor(
     themeService: ThemeService,
     private authService: AuthService,
@@ -73,6 +80,17 @@ export class HeaderComponent implements OnInit {
   ngOnInit(): void {
     this.loadUserInfo();
     this.loadNotifications();
+    // S'abonner aux flux de notifications de messages
+    this.subscriptions.push(
+      this.notificationService.unreadMessagesCount$.subscribe(count => {
+        this.messageUnreadCount.set(count);
+      })
+    );
+    this.subscriptions.push(
+      this.notificationService.hasNewMessages$.subscribe(has => {
+        this.hasNewMessages.set(has);
+      })
+    );
   }
 
   private loadUserInfo(): void {
@@ -135,5 +153,25 @@ export class HeaderComponent implements OnInit {
 
   onToggleSidebar() {
     this.toggleSidebar.emit();
+  }
+
+  navigateToMessages(): void {
+    let target = '/clientDashboard/message';
+    if (this.authService.hasRole('ROLE_GARAGISTE')) {
+      target = '/garage/message';
+    } else if (this.authService.hasRole('ROLE_ADMIN')) {
+      target = '/admin/message';
+    } else if (this.authService.hasRole('ROLE_ASSURE')) {
+      target = '/clientDashboard/message';
+    }
+    this.router.navigate([target]);
+  }
+
+  markAllMessagesAsRead(): void {
+    this.notificationService.markAllAsRead();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 }

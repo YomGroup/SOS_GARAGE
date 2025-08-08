@@ -26,7 +26,7 @@ import { ReparateurService } from '../../../../../services/reparateur.service';
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.css',
+  styleUrls: ['./admin-dashboard.component.css'],
   imports: [
     CommonModule,
     MatTabsModule,
@@ -89,6 +89,15 @@ export class AdminDashboardComponent implements OnInit {
         debounceTime(150)
       )
       .subscribe(() => this.loadData());
+  }
+
+  getStatusClass(statut: any): { [klass: string]: boolean } {
+    const raw = (statut ?? '').toString().toLowerCase();
+    return {
+      'status-pending': raw.includes('attente') || raw.includes('assign'),
+      'status-progress': raw.includes('cours') || raw.includes('progres') || raw.includes('progress'),
+      'status-closed': raw.includes('termin') || raw.includes('fin') || raw.includes('termine')
+    };
   }
 
   private loadData(): void {

@@ -13,7 +13,7 @@ import { VehicleService, Vehicle } from '../../../../../services/vehicle.service
   imports: [CommonModule, FormsModule],
 })
 export class VehiculesComponent implements OnInit, OnDestroy {
-  selectedVehicle: any = null;
+  selectedVehicle: Vehicle | null = null;
   vehicles: Vehicle[] = [];
   searchTerm: string = '';
   private initialized = false;
@@ -24,6 +24,7 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   currentPage = 1;
   pageSize = 12;
   totalVehicles = 0;
+  pageSizes: number[] = [6, 12, 24, 48];
 
   constructor(
     private vehiculeService: VehicleService,
@@ -86,6 +87,21 @@ export class VehiculesComponent implements OnInit, OnDestroy {
     return Math.ceil(this.totalVehicles / this.pageSize);
   }
 
+  get pages(): number[] {
+    const count = this.totalPages;
+    return Array.from({ length: count }, (_, i) => i + 1);
+  }
+
+  get pageRangeStart(): number {
+    if (this.totalVehicles === 0) return 0;
+    return (this.currentPage - 1) * this.pageSize + 1;
+    }
+
+  get pageRangeEnd(): number {
+    const end = this.currentPage * this.pageSize;
+    return end > this.totalVehicles ? this.totalVehicles : end;
+  }
+
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
@@ -104,5 +120,17 @@ export class VehiculesComponent implements OnInit, OnDestroy {
       this.currentPage--;
       this.loadVehiclesPage();
     }
+  }
+
+  onPageSizeChange(newSize: number | string): void {
+    const parsed = typeof newSize === 'string' ? parseInt(newSize, 10) : newSize;
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+    this.pageSize = parsed as number;
+    this.currentPage = 1;
+    this.loadVehiclesPage();
+  }
+
+  trackByVehicleId(index: number, vehicle: Vehicle): string | number {
+    return vehicle.id || index;
   }
 }

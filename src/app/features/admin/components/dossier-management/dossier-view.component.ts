@@ -833,12 +833,14 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   public getStatutAvancementLabel(statut: string | undefined): string {
-    if (!statut) return 'Non défini';
+    if (!statut) return 'En attente de traitement';
     switch (statut) {
       case 'EN_ATTENTE_TRAITEMENT':
         return 'En attente de traitement';
       case 'EN_ATTENTE_EXPERTISE':
         return 'En attente d\'expertise';
+      case 'EN_ATTENTE_REPARATION':
+        return 'En attente de réparation';
       case 'EN_COURS_REPARATION':
         return 'En cours de réparation';
       case 'REPARATION_TERMINEE':
@@ -849,10 +851,11 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   public getStatutAvancementClass(statut: string | undefined): string {
-    if (!statut) return 'statut-default';
+    if (!statut) return 'statut-attente';
     switch (statut) {
       case 'EN_ATTENTE_TRAITEMENT':
       case 'EN_ATTENTE_EXPERTISE':
+      case 'EN_ATTENTE_REPARATION':
         return 'statut-attente';
       case 'EN_COURS_REPARATION':
         return 'statut-encours';

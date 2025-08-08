@@ -14,9 +14,25 @@
         />
       </div>
     </div>
+    <div class="col-12 col-md-6 col-lg-4 mt-3 mt-md-0 d-flex align-items-center">
+      <label class="me-2 text-muted">Éléments par page:</label>
+      <select class="form-select w-auto" [ngModel]="pageSize" (ngModelChange)="onPageSizeChange($event)">
+        <option *ngFor="let size of pageSizes" [ngValue]="size">{{ size }}</option>
+      </select>
+      <div class="ms-auto small text-muted d-none d-md-block">
+        {{ pageRangeStart }}–{{ pageRangeEnd }} sur {{ totalVehicles }}
+      </div>
+    </div>
+        <!-- État de chargement -->
+        <div *ngIf="isLoadingVehicules" class="text-center p-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-3">Chargement des véhicules...</p>
+        </div>
   </div>
   <div class="row g-3">
-    <div class="col-12 col-md-6 col-lg-4" *ngFor="let vehicle of filteredVehicles">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let vehicle of filteredVehicles; trackBy: trackByVehicleId">
       <div class="card h-100 shadow-sm border-0 overflow-hidden">
         <div class="position-relative bg-light" style="height: 180px;">
           <img *ngIf="vehicle.imgUrl; else defaultIcon" [src]="vehicle.imgUrl" class="h-100 w-100 object-fit-cover" alt="Image véhicule">
@@ -48,8 +64,8 @@
   <!-- Pagination -->
   <div class="d-flex justify-content-center align-items-center mt-4" *ngIf="totalPages > 1">
     <button class="btn btn-outline-primary rounded-pill mx-1" (click)="prevPage()" [disabled]="currentPage === 1">&laquo;</button>
-    <ng-container *ngFor="let page of [].constructor(totalPages); let i = index">
-      <button class="btn btn-sm mx-1" [ngClass]="{'btn-primary': currentPage === (i+1), 'btn-outline-primary': currentPage !== (i+1)}" (click)="goToPage(i+1)">{{ i+1 }}</button>
+    <ng-container *ngFor="let page of pages">
+      <button class="btn btn-sm mx-1" [ngClass]="{'btn-primary': currentPage === page, 'btn-outline-primary': currentPage !== page}" (click)="goToPage(page)">{{ page }}</button>
     </ng-container>
     <button class="btn btn-outline-primary rounded-pill mx-1" (click)="nextPage()" [disabled]="currentPage === totalPages">&raquo;</button>
   </div>
