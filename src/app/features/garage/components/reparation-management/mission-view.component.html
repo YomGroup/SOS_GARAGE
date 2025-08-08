@@ -27,11 +27,8 @@
               <option [ngValue]="null">Sélectionner un statut</option>
               <option value="EN_ATTENTE_TRAITEMENT">En attente de traitement</option>
               <option value="EN_ATTENTE_EXPERTISE">En attente d'expertise</option>
-              <option value="EN_ATTENTE_VALIDATION_ASSURANCE">En attente de validation assurance</option>
-              <option value="VEHICULE_EPAVE">Véhicule épave</option>
               <option value="EN_COURS_REPARATION">En cours de réparation</option>
               <option value="REPARATION_TERMINEE">Réparation terminée</option>
-              <option value="FACTURE">Facturé</option>
             </select>
           </div>
           <div class="statut-actions">
@@ -254,7 +251,7 @@
               </div>
               <div class="actions-grid">
                 <button type="button" class="btn btn-secondary" (click)="close()">Fermer</button>
-                <button type="button" class="btn btn-primary" (click)="lancerEdition()" *ngIf="canEditMission()">Modifier la mission</button>
+                <button type="button" class="btn btn-primary" (click)="lancerEdition()" *ngIf="canEditMission()">Modifier</button>
               </div>
             </ng-template>
           </div>

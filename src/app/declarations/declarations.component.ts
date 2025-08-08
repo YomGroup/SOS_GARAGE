@@ -489,7 +489,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         lieu: this.lieuSinistre,
         imgUrl: savedFiles.photosUrls,
         idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
-        statut: 'EN_ATTENTE_EXPERTISE',
+        statut: 'EN_ATTENTE_TRAITEMENT',
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT'

@@ -72,19 +72,15 @@ export class SinistreComponent implements OnInit {
     return [
       'EN_ATTENTE_TRAITEMENT',
       'EN_ATTENTE_EXPERTISE',
-      'EN_ATTENTE_VALIDATION_ASSURANCE',
       'EN_COURS_REPARATION'
     ].includes(statut);
   }
 
   isCloture(statut: string): boolean {
-    return [
-      'REPARATION_TERMINEE',
-      'VEHICULE_EPAVE'
-    ].includes(statut);
+    return [ 'REPARATION_TERMINEE' ].includes(statut);
   }
   isEnAttente(statut: string): boolean {
-    return statut === 'EN_ATTENTE_RDV';
+    return statut === 'EN_ATTENTE_TRAITEMENT';
   }
 
   private transformApiDataToSinistres(apiData: any): Sinistre[] {
@@ -96,7 +92,7 @@ export class SinistreComponent implements OnInit {
           id: sinistreApi.id.toString(),
           vehicule: `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`,
           date: this.formatDate(sinistreApi.createdAt),
-          statut: sinistreApi.statut,
+          statut: sinistreApi.statut || 'EN_ATTENTE_TRAITEMENT',
           typeVehicule: sinistreApi.type === 'ROULANT' ? 'roulant' : 'non roulant',
           notifications: this.generateNotifications(sinistreApi),
           documents: sinistreApi.documents?.map((doc: any) => doc.fichier) || [],

@@ -632,16 +632,10 @@ export class MissionViewComponent implements OnChanges {
         return 'En attente de traitement';
       case 'EN_ATTENTE_EXPERTISE':
         return 'En attente d\'expertise';
-      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
-        return 'En attente de validation assurance';
-      case 'VEHICULE_EPAVE':
-        return 'Véhicule épave';
       case 'EN_COURS_REPARATION':
         return 'En cours de réparation';
       case 'REPARATION_TERMINEE':
         return 'Réparation terminée';
-      case 'FACTURE':
-        return 'Facturé';
       default:
         return statut;
     }
@@ -652,16 +646,11 @@ export class MissionViewComponent implements OnChanges {
     switch (statut) {
       case 'EN_ATTENTE_TRAITEMENT':
       case 'EN_ATTENTE_EXPERTISE':
-      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
         return 'statut-attente';
-      case 'VEHICULE_EPAVE':
-        return 'statut-epave';
       case 'EN_COURS_REPARATION':
         return 'statut-encours';
       case 'REPARATION_TERMINEE':
         return 'statut-terminee';
-      case 'FACTURE':
-        return 'statut-facture';
       default:
         return 'statut-default';
     }
@@ -926,12 +915,12 @@ export class MissionViewComponent implements OnChanges {
         if (this.mission && this.mission.expertises && this.mission.expertises.length > 0) {
           this.mission.expertises[0] = updatedExpertise;
         }
-        // 2. Mettre à jour le statut d'avancement du sinistre
+        // 2. Mettre à jour le statut d'avancement du sinistre (restreint aux 4 statuts)
         const sinistreId = this.mission!.sinistre?.id;
         if (sinistreId) {
-          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_VALIDATION_ASSURANCE').subscribe({
+          this.dossiersService.updateStatutSinistre(sinistreId, 'EN_ATTENTE_EXPERTISE').subscribe({
             next: () => {
-              this.mission!.sinistre.statut = 'EN_ATTENTE_VALIDATION_ASSURANCE';
+              this.mission!.sinistre.statut = 'EN_ATTENTE_EXPERTISE';
               this.cdr.detectChanges();
             },
             error: (err) => {

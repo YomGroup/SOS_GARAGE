@@ -839,16 +839,10 @@ export class DossierViewComponent implements OnChanges, OnInit {
         return 'En attente de traitement';
       case 'EN_ATTENTE_EXPERTISE':
         return 'En attente d\'expertise';
-      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
-        return 'En attente validation assurance';
-      case 'VEHICULE_EPAVE':
-        return 'Véhicule épave';
       case 'EN_COURS_REPARATION':
         return 'En cours de réparation';
       case 'REPARATION_TERMINEE':
         return 'Réparation terminée';
-      case 'FACTURE':
-        return 'Facturé';
       default:
         return statut;
     }
@@ -859,16 +853,11 @@ export class DossierViewComponent implements OnChanges, OnInit {
     switch (statut) {
       case 'EN_ATTENTE_TRAITEMENT':
       case 'EN_ATTENTE_EXPERTISE':
-      case 'EN_ATTENTE_VALIDATION_ASSURANCE':
         return 'statut-attente';
-      case 'VEHICULE_EPAVE':
-        return 'statut-epave';
       case 'EN_COURS_REPARATION':
         return 'statut-encours';
       case 'REPARATION_TERMINEE':
         return 'statut-terminee';
-      case 'FACTURE':
-        return 'statut-default';
       default:
         return 'statut-default';
     }
