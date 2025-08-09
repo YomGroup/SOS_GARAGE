@@ -1,3 +1,5 @@
+
+
 /* 1. Correction du progress indicator - cercles séparés par des lignes */
 .progress-indicator {
     display: flex;
@@ -855,13 +857,30 @@ body {
     margin-bottom: 2rem;
 }
 
-.form-label {
-    display: block;
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 16px;
-    margin-bottom: 8px;
+.form-row {
+  display: flex;
+  gap: 20px; /* espace entre les champs */
+  margin-bottom: 20px; /* espace entre les lignes */
+  margin-top: 30px; /* espace au-dessus de la première ligne */
+  flex-wrap: wrap; /* permet aux champs de passer à la ligne si l'espace est insuffisant */
 }
+
+.form-group {
+  flex: 1; /* chaque champ prend la même largeur */
+}
+
+.form-label {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.form-label.required::after {
+  content: " *";
+  color: red;
+}
+
+
 
 .form-select,
 .form-control {
@@ -1100,8 +1119,7 @@ body {
 /* Sections description et upload */
 .description-section,
 .upload-section {
-    max-width: 700px;
-    margin: 0 auto;
+    flex: 1;
     background: white;
     border-radius: 20px;
     padding: 30px;
@@ -1156,6 +1174,20 @@ body {
     min-height: 150px;
     resize: vertical;
     line-height: 1.6;
+}
+.description-upload-container {
+    display: flex;
+    gap: 20px; /* espace entre les deux blocs */
+    align-items: flex-start; /* aligne en haut */
+}
+
+/* Bloc description */
+.description-section {
+    flex: 1;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    border: 2px solid #f3f4f6;
 }
 
 /* Zone d'upload simplifiée */

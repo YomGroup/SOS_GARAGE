@@ -5,8 +5,11 @@
     <!-- Filtres et actions -->
     <div class="card mb-4">
       <div class="card-body">
-        <div class="row align-items-center g-2">
-          <div class="col-md-3">
+          <h2 class="mb-3 fw-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filtres
+          </h2>
+          <div class="row align-items-center g-2">
+            <div class="col-md-3">
             <select class="form-select" [(ngModel)]="filtreStatut" (ngModelChange)="onToolbarFiltersChanged()">
               <option value="">Tous les statuts</option>
               <option value="EN_COURS">En cours</option>
@@ -24,7 +27,7 @@
           <div class="col-md-4">
             <div class="input-group">
               <span class="input-group-text"><i class="fas fa-search"></i></span>
-              <input type="text" class="form-control" placeholder="Rechercher une réparation (immat, marque, modèle, assuré, statut)..." [(ngModel)]="rechercheTexte" (ngModelChange)="onToolbarFiltersChanged()" (input)="onToolbarFiltersChanged()">
+              <input type="text" class="form-control" placeholder="Rechercher une réparation (immat, marque, modèle, assuré, statut)..." [(ngModel)]="rechercheTexte" (ngModelChange)="onToolbarFiltersChanged()">
             </div>
           </div>
         </div>
@@ -173,9 +176,9 @@
                     <button class="btn btn-sm btn-outline-success" title="Valider facture" (click)="validerFacture(mission)">
                       <i class="fas fa-check"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(mission)">
+                    <!-- <button class="btn btn-sm btn-outline-danger" title="Déclarer épave" (click)="declarerEpave(mission)">
                       <i class="fas fa-car-crash"></i>
-                    </button>
+                    </button> -->
                   </ng-container>
                 </div>
               </td>

@@ -163,36 +163,89 @@
 
 /* Styles pour le tableau */
 .table {
-    background: white;
-    border-radius: 15px;
-    overflow: hidden;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  margin: 1.5rem 0;
+  animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .table thead th {
-    background: var(--primary-blue);
-    color: white;
-    border: none;
-    padding: 1rem;
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 1.5rem 1.25rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 .table tbody td {
-    padding: 1rem;
-    vertical-align: middle;
+  padding: 1.5rem 1.25rem;
+  vertical-align: middle;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #2d3748;
+  line-height: 1.6;
 }
 
 .table .d-flex.gap-2 .btn {
-    min-width: 36px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0 0.25rem;
+  border-radius: 8px;
+  font-weight: 600;
 }
 
 .table tbody tr:hover {
-    background-color: rgba(0, 74, 173, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 20px rgba(0, 0, 0, 0.08);
 }
 
 .badge {
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.badge.statut-valide {
+  background: linear-gradient(135deg, #28a745, #20c997);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+.badge.statut-attente {
+  background: linear-gradient(135deg, #ffc107, #e0a800);
+  color: #2d3748;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  font-weight: 700;
+}
+
+.badge.statut-rejete {
+  background: linear-gradient(135deg, #dc3545, #e83e8c);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.badge.statut-cours {
+  background: linear-gradient(135deg, #3e0db1, #a10f8e);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(113, 8, 122, 0.3);
 }
 
 /* Styles pour les boutons */
@@ -744,10 +797,14 @@
   color: white;
   transition: transform 0.3s ease;
   box-shadow: var(--card-shadow);
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideInUp 0.6s ease-out;
 }
 .stats-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--hover-shadow);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite
 }
 .stats-title {
   font-size: 1rem;
@@ -760,15 +817,60 @@
   font-weight: bold;
   margin-bottom: 0;
 }
+/* Icône redesignée */
 .stats-icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  
+  /* Effet de profondeur */
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.stats-icon:hover {
+  transform: rotate(10deg) scale(1.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Effet de pulsation pour l'icône */
+.stats-icon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+  border-radius: 22px;
+  z-index: -1;
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Améliorations pour mobile - Cartes de statistiques compactes */

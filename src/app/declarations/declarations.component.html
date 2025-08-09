@@ -56,7 +56,7 @@
 
   <!-- Assurance selection (only shown for non-rolling vehicles) -->
   <div class="assurance-selection" *ngIf="showAssuranceStep && selectedVehicle">
-    <h2>Sélectionnez votre assurance</h2>
+    <h2>Sélectionnez votre com assurance</h2>
     
     <div class="vehicle-dropdown" 
          [class.open]="isAssuranceDropdownOpen"
@@ -79,32 +79,44 @@
         <!-- Step 3: Constat -->
      <div class="step-content" *ngIf="currentStep === 3">
    <h2>Déclaration de l'incident</h2>
-  <div class="mb-4">
-  <label for="typeAssuranceSelect" class="form-label fw-semibold text-secondary">
-    Type d'incident :
-  </label>
-  <select id="typeAssuranceSelect"
-          class="form-select shadow-sm  rounded"
-          [(ngModel)]="selectedTypeAssurance"
-          name="typeAssurance">
-    <option value="" disabled selected>-- Choisissez un type --</option>
-    <option *ngFor="let type of typeassurance" [value]="type">
-      {{ type }}
-    </option>
-  </select>
+<div class="form-row">
+  <!-- Type d'incident -->
+  <div class="form-group">
+    <label for="typeAssuranceSelect" class="form-label fw-semibold text-secondary">
+      Type de sinistre <span class="text-danger">*</span> :
+    </label>
+    <select id="typeAssuranceSelect"
+            class="form-select shadow-sm rounded"
+            [(ngModel)]="selectedTypeAssurance"
+            name="typeAssurance"
+            required>
+      <option value="" disabled selected>-- Choisissez un type --</option>
+      <option *ngFor="let type of typeassurance" [value]="type">
+        {{ type }}
+      </option>
+    </select>
+  </div>
+
+  <!-- Lieu du sinistre -->
+  <div class="form-group">
+    <label for="lieuSinistre" class="form-label fw-semibold text-secondary">
+      Code Postal <span class="text-danger">*</span> :
+    </label>
+    <input type="text" id="lieuSinistre"
+           class="form-control shadow-sm rounded"
+           [(ngModel)]="lieuSinistre"
+           name="lieuSinistre"
+           placeholder="Entrez le Code Postal"
+           required />
+  </div>
 </div>
-<div class="mb-4">
-  <label for="lieuSinistre" class="form-label fw-semibold text-secondary">
-    Lieu du sinistre :
-  </label>
-  <input type="text" id="lieuSinistre" class="form-control shadow-sm rounded"
-         [(ngModel)]="lieuSinistre" name="lieuSinistre" placeholder="Entrez le lieu du sinistre" />
-</div>
+
+
 
   <div class="choices-container" *ngIf="!hasChosenDeclarationMethod">
     <div class="choice-card" (click)="selectDeclarationMethod('describe')">
       <i class="bi bi-text-paragraph"></i>
-      <h3>Décrire l'incident</h3>
+      <h3>Décrire l'incident et ajouter les photos</h3>
       <p>Racontez ce qui s'est passé en détail</p>
     </div>
     <!-- 
@@ -117,66 +129,44 @@
   </div>
 
   <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
+  <div class="row">
+  <!-- Colonne gauche : Description -->
+  <div class="col-md-6">
     <div class="section-header">
       <button class="btn-back" (click)="resetDeclarationMethod()">
         <i class="bi bi-arrow-left"></i> Retour
       </button>
       <h3><i class="bi bi-text-paragraph"></i> Description de l'incident</h3>
     </div>
-    
-    <textarea class="form-control" rows="6" 
-              [(ngModel)]="incidentDescription" 
-              placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)"></textarea>
-    <p class="help-text">Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.</p>
-    <hr class="section-divider" />
 
-       <h3><i class="bi bi-camera"></i> Photos du véhicule accidenté</h3>
+    <textarea class="form-control" rows="10"
+              [(ngModel)]="incidentDescription"
+              placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)">
+    </textarea>
+    <p class="help-text">
+      Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.
+    </p>
+  </div>
+
+  <!-- Colonne droite : Photos -->
+  <div class="col-md-6">
+    <h3><i class="bi bi-camera"></i> Photos du véhicule accidenté</h3>
 
     <!-- Étape en cours -->
-  <ul class="nav nav-pills justify-content-center my-4">
-    <li class="nav-item" (click)="setPhotoStep(1)" style="cursor:pointer;">
-      <a class="nav-link" [class.active]="currentPhotoStep === 1">
-        Avant
-      </a>
-    </li>
-    <li class="nav-item" (click)="setPhotoStep(2)" style="cursor:pointer;">
-      <a class="nav-link" [class.active]="currentPhotoStep === 2">
-        Immatriculation
-      </a>
-    </li>
-    <li class="nav-item" (click)="setPhotoStep(3)" style="cursor:pointer;">
-      <a class="nav-link" [class.active]="currentPhotoStep === 3">
-        Côté
-      </a>
-    </li>
-    <li class="nav-item" (click)="setPhotoStep(4)" style="cursor:pointer;">
-      <a class="nav-link" [class.active]="currentPhotoStep === 4">
-        Dégâts
-      </a>
-    </li>
-  </ul>
-
-    <!-- Instructions spécifiques -->
-    <div class="step-instructions">
-      <div *ngIf="currentPhotoStep === 1">
-        <h3><i class="bi bi-camera"></i> Photo de l'avant du  véhicule</h3>
-      </div>
-      
-      <div *ngIf="currentPhotoStep === 2">
-        <h3><i class="bi bi-123"></i> Plaque d'immatriculation</h3>
-      </div>
-      
-      <div *ngIf="currentPhotoStep === 3">
-  <h3>
-    <i class="bi bi-car-front me-2"></i> Photo latérale du véhicule
-  </h3>
-
-      </div>
-      
-      <div *ngIf="currentPhotoStep === 4">
-        <h3><i class="bi bi-exclamation-triangle"></i> Zones endommagées</h3>
-      </div>
-    </div>
+    <ul class="nav nav-pills justify-content-center my-4">
+      <li class="nav-item" (click)="setPhotoStep(1)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 1">Avant</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(2)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 2">Immatriculation</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(3)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 3">Côté</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(4)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 4">Dégâts</a>
+      </li>
+    </ul>
 
     <!-- Zone d'upload -->
     <div class="photo-upload-area" (click)="photoInput.click()">
@@ -185,9 +175,9 @@
         <p>Ajouter une photo pour cette étape</p>
         <p class="photo-count">{{ getCurrentStepPhotos().length }} photo(s) ajoutée(s)</p>
       </div>
-      <input #photoInput type="file" accept="image/jpeg,image/png" 
-            (change)="onPhotoSelect($event, currentPhotoStep)" 
-            style="display: none;" 
+      <input #photoInput type="file" accept="image/jpeg,image/png"
+            (change)="onPhotoSelect($event, currentPhotoStep)"
+            style="display: none;"
             [multiple]="currentPhotoStep === 4">
     </div>
 
@@ -204,6 +194,9 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
 
     <!-- Navigation entre étapes -->
     <div class="step-navigation">

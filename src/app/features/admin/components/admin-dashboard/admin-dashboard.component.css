@@ -6,6 +6,16 @@
   --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   --card-height: 200px;
   --stats-card-height: 140px;
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --border-radius: 16px;
+  --animation-speed: 0.3s;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
 }
 
 .min-h-screen {
@@ -67,13 +77,19 @@
 }
 
 .card-header {
-  background: transparent;
-  padding: 20px 25px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 25px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .card-header h5 {
@@ -97,11 +113,17 @@
 }
 
 .list-group-item {
-  border: none;
-  padding: 15px 20px;
+   border: none;
+  padding: 18px 25px;
   background: transparent;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+  margin: 5px 15px;
+  border-radius: 12px;
+  transition: all var(--animation-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  animation: slide-in-up 0.6s ease forwards;
 }
 
 .list-group-item:last-child {
@@ -110,12 +132,25 @@
 
 .list-group-item:hover {
   background-color: rgba(0, 0, 0, 0.02);
+    background: rgba(255, 255, 255, 0.8);
+  border-left-color: #667eea;
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+  backdrop-filter: blur(10px);
 }
 
 /* Cartes des listes récentes avec hauteur adaptative */
 .card.recent-list-card {
   height: auto;
   min-height: var(--card-height);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius);
+  box-shadow: var(--card-shadow);
+  transition: all var(--animation-speed) cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
 .card.recent-list-card .card-body {
@@ -195,49 +230,94 @@
 }
 
 .stats-card {
-  flex: 1;
+  flex: 1 1 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  height: var(--stats-card-height);
-  min-height: var(--stats-card-height);
+  height: 100%;
+  min-height: 140px;
   background: var(--gradient);
   border-radius: 15px;
   padding: 1.5rem;
   color: white;
   transition: transform 0.3s ease;
   box-shadow: var(--card-shadow);
-  cursor: pointer;
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideInUp 0.6s ease-out;
 }
-
 .stats-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--hover-shadow);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite
 }
-
 .stats-title {
   font-size: 1rem;
   font-weight: 500;
   margin-bottom: 0.5rem;
   opacity: 0.9;
 }
-
 .stats-number {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 0;
 }
-
+/* Icône redesignée */
 .stats-icon {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  
+  /* Effet de profondeur */
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.2);
 }
+
+.stats-icon:hover {
+  transform: rotate(10deg) scale(1.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Effet de pulsation pour l'icône */
+.stats-icon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+  border-radius: 22px;
+  z-index: -1;
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 
 .btn-outline-primary {
   border: 2px solid #1e4db8;

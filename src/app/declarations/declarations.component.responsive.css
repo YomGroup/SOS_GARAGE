@@ -1,3 +1,14 @@
+.form-label {
+  display: block;
+  font-size: 1rem; /* Taille de police */
+  font-weight: 600; /* Texte un peu gras */
+  color: #555; /* Couleur gris foncé */
+  margin-bottom: 8px; /* Espacement avec le champ */
+  letter-spacing: 0.5px; /* Espacement des lettres */
+  text-align: left; /* Aligné à gauche */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .custom-checkbox {

@@ -477,27 +477,27 @@
             <ng-container *ngIf="expertiseCourante; else pasExpertAttribue">
               <div class="form-grid">
                 <div class="form-group">
-                  <label>Nom de l'expert</label>
+                  <label>Cabinet d'expertise</label>
                   <div class="readonly-field">{{ expertiseCourante?.nomExpert || 'Non renseigné' }}</div>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                   <label>Prénom de l'expert</label>
                   <div class="readonly-field">{{ expertiseCourante?.prenomExpert || 'Non renseigné' }}</div>
                 </div>
                 <div class="form-group">
                   <label>Institution</label>
                   <div class="readonly-field">{{ expertiseCourante?.institutionExpert || 'Non renseigné' }}</div>
-                </div>
+                </div> -->
                 <div class="form-group">
                   <label>Date d'expertise prévue</label>
                   <div class="readonly-field">{{ expertiseCourante?.dateExpertisePrevue ? (expertiseCourante?.dateExpertisePrevue | date:'dd/MM/yyyy') : 'Non renseigné' }}</div>
                 </div>
                 <div class="form-group">
-                  <label>Contact de l'expert</label>
+                  <label>Téléphone</label>
                   <div class="readonly-field">{{ expertiseCourante?.contactExpert || 'Non renseigné' }}</div>
                 </div>
                 <div class="form-group">
-                  <label>Email de l'expert</label>
+                  <label>Email</label>
                   <div class="readonly-field">{{ expertiseCourante?.mailExpert || 'Non renseigné' }}</div>
                 </div>
               </div>
@@ -556,10 +556,19 @@
                     <option [ngValue]="false">Non</option>
                   </select>
                 </div>
-                <div class="form-group">
-                  <label>Observations de l'expert</label>
-                  <textarea class="form-control" [(ngModel)]="expertiseEdit.observationsExpert" name="observationsExpert" rows="3"></textarea>
-                  </div>
+                    <div class="form-group">
+                      <label>Observations de l'expert</label>
+                      <select
+                        class="form-select"
+                        [(ngModel)]="expertiseEdit.observationsExpert"
+                        name="observationsExpert"
+                      >
+                        <option value="">-- Sélectionner --</option>
+                        <option value="RIV">RIV</option>
+                        <option value="VE">VE</option>
+                        <option value="VEI">VEI</option>
+                      </select>
+                    </div>
                   <div class="form-group">
                     <label>Rapport d'expertise</label>
                     <div class="d-flex align-items-center gap-2">

@@ -7,7 +7,7 @@
     <div class="min-h-screen">
       <div class="container-fluid px-4">
         <!-- Statistics -->
-        <div class="row mb-4 stats-row">
+        <div class="row mb-4 mt-5 stats-row">
           <div class="col-12 col-sm-6 col-lg-3 mb-4">
             <div class="stats-card" (click)="onStatsCardClick('vehicules')" tabindex="0">
               <div class="d-flex justify-content-between align-items-center">
@@ -75,7 +75,7 @@
               <li class="list-group-item" *ngFor="let item of recentActivity" (click)="onRecentActivityClick(item)" tabindex="0">
                 <i [ngClass]="item.icon"></i>
                 <span class="ms-2">{{ item.label }}</span>
-                <small class="text-muted float-end">{{ item.date | date:'short' }}</small>
+                <small class="text-muted float-end">{{ item.date | date:'dd/MM/yyyy --- HH:mm' }}</small>
               </li>
             </ul>
           </div>
@@ -128,7 +128,7 @@
                     <div class="sinistre-details">
                       <i class="fas fa-car me-2 text-primary"></i>
                       <span class="opacity-90">{{ sinistre.contactAssistance }}</span>
-                      <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'shortDate') : '' }}</small>
+                      <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'dd/MM/yyyy à HH:mm') : '' }}</small>
                     </div>
                   </li>
                 </ul>

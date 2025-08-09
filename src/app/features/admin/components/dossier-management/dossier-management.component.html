@@ -69,6 +69,9 @@
     <!-- Filtres -->
     <div class="card mb-4">
       <div class="card-body">
+        <h2 class="mb-3 fw-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filtres
+          </h2>
         <div class="row align-items-center g-2">
           <div class="col-md-3">
             <select class="form-select" [(ngModel)]="statutFiltre" (ngModelChange)="onToolbarFiltersChanged()">
@@ -87,7 +90,10 @@
           <div class="col-md-4">
             <div class="input-group">
               <span class="input-group-text"><i class="fas fa-search"></i></span>
-              <input type="text" class="form-control" placeholder="Rechercher un dossier (numéro, type, assurance, marque, modèle, immat)..." [(ngModel)]="rechercheTexte" (ngModelChange)="onToolbarFiltersChanged()" (input)="onToolbarFiltersChanged()" (keyup.enter)="onToolbarFiltersChanged()" />
+              <input type="text" class="form-control" placeholder="Rechercher un dossier (numéro, type, assurance, marque, modèle, immat)..." [(ngModel)]="rechercheTexte" (ngModelChange)="onToolbarFiltersChanged()"/>
+              
+              <!-- Cette partie était la suite de la ligne au dessus mais j'ai mis en bas pour commenter parce que ca donnais une erreur sur le code.
+              (input)="onToolbarFiltersChanged()" (keyup.enter)="onToolbarFiltersChanged()"  -->
             </div>
           </div>
         </div>
