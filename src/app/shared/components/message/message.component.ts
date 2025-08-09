@@ -178,7 +178,12 @@ export class MessageComponent implements OnInit, OnDestroy {
             } catch (error) {
               console.error(`Erreur lors de la récupération de l'assuré ${id}:`, error);
             }
-
+            if (this.isAdmin) {
+              const reparateur = await this.reparateurService.getReparateurByKeycloakId(id).toPromise();
+              if (reparateur) {
+                return reparateur;
+              }
+            }
             return {
               id: 0,
               name: 'Administrateur',

@@ -144,9 +144,16 @@ export class LayoutComponent implements OnInit {
   // Naviguer vers les messages et réinitialiser les notifications
   navigateToMessages(): void {
     console.log('Navigation vers les messages...');
+    if (this.authService.hasRole('ROLE_ADMIN')) {
+      // Logique spécifique pour les administrateurs
+      this.router.navigate(['/admin/message']);
+
+    } else {
+      this.router.navigate(['/garage/message']);
+
+    }
 
     // Naviguer vers la page des messages
-    this.router.navigate(['/clientDashboard/message']);
 
   }
 
