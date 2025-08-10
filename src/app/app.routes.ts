@@ -17,6 +17,11 @@ import { MessageComponent } from './shared/components/message/message.component'
 import { AuthGuard } from './app/auth-guard.service';
 
 export const routes: Routes = [
+  // Page publique pour comptes garages non validés
+  {
+    path: 'garage-pending',
+    loadComponent: () => import('./garage-pending/garage-pending.component').then(m => m.GaragePendingComponent)
+  },
   {
     path: 'admin',
     component: LayoutComponent,
