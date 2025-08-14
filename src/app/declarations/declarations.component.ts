@@ -13,6 +13,8 @@ import { PDFDocument, rgb } from 'pdf-lib';
 import { firstValueFrom } from 'rxjs';
 import { FirebaseStorageService } from '../../services/firebase-storage.service';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { YousignService } from '../../services/yousign.service';
+
 
 interface Document {
   id: number;
@@ -89,6 +91,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   showAssuranceStep = false;
   currentPhotoStep: number = 1;
   lieuSinistre: string = '';
+  // Ajoutez ces propriétés à votre component
+  private documentSignatureRequests: Map<number, string> = new Map();
+  private documentSignerIds: Map<number, string> = new Map();
+
 
   photoSteps: any = {
     1: [], // Photos d'ensemble
@@ -115,6 +121,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private sinistreService = inject(SinistreService);
   private documentService = inject(DocumentService);
   private firebaseStorageService = inject(FirebaseStorageService);
+  private yousignService = inject(YousignService);
   constructor(@Inject(DOCUMENT) private document: Document) {
 
   }
@@ -149,6 +156,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     if (this.constatPreviewUrl) {
       URL.revokeObjectURL(this.constatPreviewUrl);
     }
+    // Nouveau : Clear les Maps
+    this.documentSignatureRequests.clear();
+    this.documentSignerIds.clear();
   }
 
   private loadUserData(): void {
@@ -169,7 +179,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.vehiculeService.listAssuranceVehicules().subscribe({
       next: (data: any) => {
         this.assurances = data;
-        console.log('Assurances chargées:', this.assurances);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des assurances', err);
@@ -189,44 +198,390 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     }
   }
+  private async generatePersonalizedDocument(docId: number): Promise<Blob> {
+    const docMeta = this.documents.find(d => d.id === docId);
+    if (!docMeta) throw new Error(`Document ${docId} introuvable`);
 
-  private async modifyPdfWithUserData(pdfPath: string): Promise<Blob> {
-    const response = await fetch(pdfPath);
+    // D'abord charger le PDF
+    const response = await fetch(docMeta.fichier);
     const pdfBytes = await response.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
     const firstPage = pages[0];
-    const lastPage = pages[pages.length - 1]; // 👈 page 2 (index 1)
+    const lastPage = pages[pages.length - 1];
+
+    // Récupérer les dimensions de la page
+    const pageWidth = firstPage.getWidth();
+    const pageHeight = firstPage.getHeight();
+
+
+    // Options de texte
+    const textOptions = { size: 10, color: rgb(0, 0, 0) };
+    const smallTextOptions = { size: 9, color: rgb(0, 0, 0) };
 
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
-    const vehicule = this.vehiclesAll.find(v => v.marque === this.selectedVehicle);
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
 
-    const textOptions = { size: 11, color: rgb(0, 0, 0) };
+    // Remplir selon le type de document - utiliser docMeta.nom ou docMeta.fichier
+    if (docMeta.nom?.includes('Cession_Creance') || docMeta.fichier?.includes('Cession_Creance')) {
+      this.fillCessionCreanceForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else if (docMeta.nom?.includes('Mandat_Gestion') || docMeta.fichier?.includes('Mandat_Gestion')) {
+      this.fillMandatGestionForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else if (docMeta.nom?.includes('Ordre_Reparation') || docMeta.fichier?.includes('Ordre_Reparation')) {
+      this.fillOrdreReparationForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else {
+      // Fallback : remplissage générique avec les coordonnées fixes que vous aviez
+      firstPage.drawText(`${prenom ?? ''}`, { x: 200, y: 680, ...textOptions });
+      firstPage.drawText(telephone ?? '', { x: 200, y: 640, ...textOptions });
+      firstPage.drawText(email ?? '', { x: 200, y: 620, ...textOptions });
 
-    // Page 1
-    firstPage.drawText(` ${prenom ?? ''}`, { x: 200, y: 680, ...textOptions });
-    firstPage.drawText(telephone ?? '', { x: 200, y: 640, ...textOptions });
-    firstPage.drawText(email ?? '', { x: 200, y: 620, ...textOptions });
-
-    if (vehicule) {
-      firstPage.drawText(vehicule.immatriculation ?? '', { x: 200, y: 600, ...textOptions });
-      firstPage.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, { x: 200, y: 580, ...textOptions });
+      if (vehicule) {
+        firstPage.drawText(vehicule.immatriculation ?? '', { x: 200, y: 600, ...textOptions });
+        firstPage.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, { x: 200, y: 580, ...textOptions });
+      }
     }
 
-    // Page 2 : bas du document
-    const city = 'Casablanca';
-    const today = new Date().toLocaleDateString('fr-FR');
+    // Date/heure unique pour éviter les conflits (seulement si pas déjà ajouté dans les fonctions spécialisées)
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR');
+    const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
-    lastPage.drawText(`Fait à ${city}, le ${today}`, {
-      x: 150,
-      y: 100, // ajuste ici si besoin
-      ...textOptions
+    // Ajouter la signature en bas seulement si c'est un document générique
+    if (!docMeta.nom?.includes('Cession_Creance') &&
+      !docMeta.nom?.includes('Mandat_Gestion') &&
+      !docMeta.nom?.includes('Ordre_Reparation') &&
+      !docMeta.fichier?.includes('Cession_Creance') &&
+      !docMeta.fichier?.includes('Mandat_Gestion') &&
+      !docMeta.fichier?.includes('Ordre_Reparation')) {
+
+      lastPage.drawText(`Fait à Casablanca, le ${dateStr} à ${timeStr}`, {
+        x: 150,
+        y: 100,
+        ...textOptions
+      });
+    }
+
+    // ID unique invisible (toujours ajouter)
+    lastPage.drawText(`ID: ${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, {
+      x: 400,
+      y: 20,
+      size: 6,
+      color: rgb(0.8, 0.8, 0.8)
     });
 
     const modifiedPdfBytes = await pdfDoc.save();
     return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
   }
+  private async modifyPdfWithUserData(pdfPath: string, documentName?: string): Promise<Blob> {
+    const response = await fetch(pdfPath);
+    const pdfBytes = await response.arrayBuffer();
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pages = pdfDoc.getPages();
+    const firstPage = pages[0];
 
+    // Récupérer les dimensions de la page
+    const pageWidth = firstPage.getWidth();
+    const pageHeight = firstPage.getHeight();
+
+
+    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+
+    // Options de texte standard
+    const textOptions = { size: 10, color: rgb(0, 0, 0) };
+    const smallTextOptions = { size: 9, color: rgb(0, 0, 0) };
+
+    // Remplir selon le type de document
+    if (documentName?.includes('Cession_Creance') || pdfPath.includes('Cession_Creance')) {
+      this.fillCessionCreanceForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else if (documentName?.includes('Mandat_Gestion') || pdfPath.includes('Mandat_Gestion')) {
+      this.fillMandatGestionForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else if (documentName?.includes('Ordre_Reparation') || pdfPath.includes('Ordre_Reparation')) {
+      this.fillOrdreReparationForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+    }
+    else {
+      // Remplissage générique si le type n'est pas reconnu
+      this.fillGenericForm(firstPage, pageWidth, pageHeight, textOptions);
+    }
+
+    const modifiedPdfBytes = await pdfDoc.save();
+    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+  }
+  private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
+    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+
+    // Nom & Prénom (ligne 3 environ)
+    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+      x: pageWidth * 0.28, // Après "Nom & Prénom : "
+      y: pageHeight - (pageHeight * 0.12),
+      ...textOptions
+    });
+
+    // Adresse (ligne 4)
+    if (adressePostale) {
+      page.drawText(adressePostale, {
+        x: pageWidth * 0.18, // Après "Adresse : "
+        y: pageHeight - (pageHeight * 0.15),
+        ...textOptions
+      });
+    }
+
+    // Téléphone (ligne 5)
+    if (telephone) {
+      page.drawText(telephone, {
+        x: pageWidth * 0.22, // Après "Téléphone : "
+        y: pageHeight - (pageHeight * 0.18),
+        ...textOptions
+      });
+    }
+
+    // E-mail (ligne 6)
+    if (email) {
+      page.drawText(email, {
+        x: pageWidth * 0.18, // Après "E-mail : "
+        y: pageHeight - (pageHeight * 0.21),
+        ...textOptions
+      });
+    }
+
+    // Immatriculation du véhicule (ligne 7)
+
+    page.drawText(vehicule?.immatriculation, {
+      x: pageWidth * 0.33,
+
+      y: pageHeight - (pageHeight * 0.26),
+      ...textOptions
+    });
+
+
+    // Marque / Modèle (ligne 8)
+    if (vehicule) {
+      page.drawText(vehicule?.marque, {
+        x: pageWidth * 0.33,
+        y: pageHeight - (pageHeight * 0.29),
+        ...textOptions
+      });
+    }
+
+    // Date et lieu en bas du document
+    const city = 'Casablanca';
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR');
+
+    // "Fait à" (avant-dernière ligne)
+    /*
+    page.drawText(city, {
+      x: pageWidth * 0.22, // Après "Fait à : "
+      y: pageHeight - (pageHeight * 0.85),
+      ...textOptions
+    });
+      */
+    // Date (avant-dernière ligne)
+    page.drawText(dateStr.replace(/\//g, ' / '), {
+      x: pageWidth * 0.55, // Après "le"
+      y: pageHeight - (pageHeight * 0.85),
+      ...textOptions
+    });
+  }
+
+  private fillMandatGestionForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
+    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+
+    // Section "Le Mandant"
+    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+      x: pageWidth * 0.28,
+      y: pageHeight - (pageHeight * 0.18),
+      ...textOptions
+    });
+
+    // Adresse
+    if (adressePostale) {
+      page.drawText(adressePostale, {
+        x: pageWidth * 0.18,
+        y: pageHeight - (pageHeight * 0.18),
+        ...textOptions
+      });
+    }
+
+    // Téléphone
+    if (telephone) {
+      page.drawText(telephone, {
+        x: pageWidth * 0.22,
+        y: pageHeight - (pageHeight * 0.23),
+        ...textOptions
+      });
+    }
+
+    // E-mail
+    if (email) {
+      page.drawText(email, {
+        x: pageWidth * 0.18,
+        y: pageHeight - (pageHeight * 0.26),
+        ...textOptions
+      });
+    }
+
+    // Immatriculation
+    if (vehicule?.immatriculation) {
+      page.drawText(vehicule.immatriculation, {
+        x: pageWidth * 0.35,
+        y: pageHeight - (pageHeight * 0.29),
+        ...textOptions
+      });
+    }
+
+    // Marque/Modèle
+    if (vehicule) {
+      page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
+        x: pageWidth * 0.22,
+        y: pageHeight - (pageHeight * 0.32),
+        ...textOptions
+      });
+    }
+
+    // Date et lieu en bas
+    const city = 'Casablanca';
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR');
+    /*
+        page.drawText(city, {
+          x: pageWidth * 0.22,
+          y: pageHeight - (pageHeight * 0.99),
+          ...textOptions
+        });
+          */
+    page.drawText(dateStr.replace(/\//g, ' / '), {
+      x: pageWidth * 0.55,
+      y: pageHeight - (pageHeight * 0.99),
+      ...textOptions
+    });
+  }
+
+  private fillOrdreReparationForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
+    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+
+    // Section "Client (Donneur d'ordre)"
+    // Nom & Prénom
+    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+      x: pageWidth * 0.28,
+      y: pageHeight - (pageHeight * 0.18),
+      ...textOptions
+    });
+
+    // Adresse
+    if (adressePostale) {
+      page.drawText(adressePostale, {
+        x: pageWidth * 0.18,
+        y: pageHeight - (pageHeight * 0.18),
+        ...textOptions
+      });
+    }
+
+    // Téléphone
+    if (telephone) {
+      page.drawText(telephone, {
+        x: pageWidth * 0.22,
+        y: pageHeight - (pageHeight * 0.23),
+        ...textOptions
+      });
+    }
+
+    // E-mail
+    if (email) {
+      page.drawText(email, {
+        x: pageWidth * 0.18,
+        y: pageHeight - (pageHeight * 0.26),
+        ...textOptions
+      });
+    }
+
+    // Immatriculation
+    if (vehicule?.immatriculation) {
+      page.drawText(vehicule.immatriculation, {
+        x: pageWidth * 0.35,
+        y: pageHeight - (pageHeight * 0.29),
+        ...textOptions
+      });
+    }
+
+    // Marque / Modèle
+    if (vehicule) {
+      page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
+        x: pageWidth * 0.22,
+        y: pageHeight - (pageHeight * 0.32),
+        ...textOptions
+      });
+    }
+
+    // Nom du client dans la section autorisation
+    page.drawText(`${prenom ?? ''} ${nom ?? ''}`, {
+      x: pageWidth * 0.30, // Après "Je soussigné(e),"
+      y: pageHeight - (pageHeight * 0.77),
+      ...textOptions
+    });
+
+    // Date et lieu en bas
+    const city = 'Casablanca';
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR');
+    /*
+    page.drawText(city, {
+      x: pageWidth * 0.22,
+      y: pageHeight - (pageHeight * 0.99),
+      ...textOptions
+    });
+    */
+    page.drawText(dateStr.replace(/\//g, ' / '), {
+      x: pageWidth * 0.55,
+      y: pageHeight - (pageHeight * 0.99),
+      ...textOptions
+    });
+  }
+
+  private fillGenericForm(page: any, pageWidth: number, pageHeight: number, textOptions: any): void {
+    // Remplissage générique pour les documents non identifiés
+    const { nom, prenom, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque === this.selectedVehicle);
+
+    // Informations de base en haut de page
+    page.drawText(`${prenom ?? ''} ${nom ?? ''}`, {
+      x: pageWidth * 0.25,
+      y: pageHeight - 100,
+      ...textOptions
+    });
+
+    if (telephone) {
+      page.drawText(telephone, {
+        x: pageWidth * 0.25,
+        y: pageHeight - 130,
+        ...textOptions
+      });
+    }
+
+    if (email) {
+      page.drawText(email, {
+        x: pageWidth * 0.25,
+        y: pageHeight - 160,
+        ...textOptions
+      });
+    }
+
+    if (vehicule) {
+      page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''} - ${vehicule.immatriculation ?? ''}`, {
+        x: pageWidth * 0.25,
+        y: pageHeight - 190,
+        ...textOptions
+      });
+    }
+  }
 
   getPdfPath(filename: string): string {
     const doc = this.documents.find(d => d.fichier === filename);
@@ -241,7 +596,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       next: (data: any) => {
         this.vehiclesAll = data;
         this.vehicles = data.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
-
       },
       error: (err) => {
         console.error('Erreur lors de l’appel API :', err);
@@ -293,31 +647,307 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.currentStep--;
     }
   }
-  // Logique de signature
-  signDocument(): void {
-    if (this.isCurrentDocumentSigned || this.isSigning || !this.isChecked) {
+
+  // Dans votre DeclarationsComponent, modifiez la méthode signDocument() :
+  async signDocument(): Promise<void> {
+    if (this.isCurrentDocumentSigned || this.isSigning || !this.isChecked) return;
+    this.isSigning = true;
+    try {
+      // 1) Générer le document personnalisé
+      const docMeta = this.documents.find(d => d.id === this.currentDocument);
+      if (!docMeta) throw new Error('Document introuvable');
+      const personalizedBlob = await this.generatePersonalizedDocument(this.currentDocument);
+
+      // 2) Créer signature request
+      const sr = await firstValueFrom(
+        this.yousignService.createSignatureRequest(
+          `${docMeta.nom}_${this.userData?.prenom || 'User'}_${Date.now()}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+          { deliveryMode: 'none' }
+        )
+      );
+
+      const currentSignatureRequestId = sr.id;
+      this.documentSignatureRequests.set(this.currentDocument, currentSignatureRequestId);
+
+      // 3) Upload document
+      const uploaded = await firstValueFrom(
+        this.yousignService.uploadDocument(
+          currentSignatureRequestId,
+          personalizedBlob,
+          `${docMeta.nom}_${Date.now()}.pdf`
+        )
+      );
+
+      // 4) Ajouter signataire
+      const firstName = this.userData?.prenom?.trim() || '';
+      const lastName = this.userData?.name?.trim() || '';
+      const email = this.userData?.email?.trim() || this.email?.trim() || '';
+
+      const signerResp = await firstValueFrom(
+        this.yousignService.addSignerWithField(
+          currentSignatureRequestId,
+          { firstName, lastName, email, phone_number: '', locale: 'fr' },
+          { documentId: uploaded.id, page: 2, x: 350, y: 100 }
+        )
+      );
+
+      this.documentSignerIds.set(this.currentDocument, signerResp.id);
+
+      // 5) Activer
+      await firstValueFrom(
+        this.yousignService.activateSignatureRequest(currentSignatureRequestId)
+      );
+
+      // 6) Récupérer le lien et ouvrir la signature
+      const signer = await firstValueFrom(
+        this.yousignService.getSigner(currentSignatureRequestId, signerResp.id)
+      );
+
+      const signingUrl = signer.signature_link || signer.embedded_url;
+      if (!signingUrl) throw new Error('Aucun lien de signature trouvé');
+
+      // Stocker le blob pour plus tard
+      docMeta.fileBlob = personalizedBlob;
+
+      // 7) Ouvrir la fenêtre et commencer la surveillance
+      this.startSignatureProcess(signingUrl, currentSignatureRequestId, signerResp.id);
+
+    } catch (error) {
+      alert(`Erreur lors de la signature: ${(error as any)?.message || error}`);
+      this.isSigning = false;
+    }
+  }
+  private startSignatureProcess(signingUrl: string, signatureRequestId: string, signerId: string): void {
+    // Ouvrir la fenêtre
+    const signatureWindow = window.open(signingUrl, '_blank', 'width=900,height=700');
+
+    if (!signatureWindow) {
+      alert('Impossible d\'ouvrir la fenêtre de signature. Veuillez réessayer.');
+      this.isSigning = false;
       return;
     }
 
-    this.isSigning = true;
+    // Variables pour éviter les boucles infinies
+    let isProcessComplete = false;
+    let checkCount = 0;
+    const maxChecks = 150;
 
-    setTimeout(() => {
-      this.signedDocuments.add(this.currentDocument);
-      this.isSigning = false;
-      this.isChecked = false;
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth' // Pour un défilement doux
-      });
+    // Fonction de vérification
+    const checkStatus = async () => {
+      if (isProcessComplete) return;
 
-      if (this.signedDocuments.size === this.documents.length) {
-        this.allDocumentsSigned = true;
-        this.submitSinistre();
-      } else {
-        this.currentDocument++;
+      checkCount++;
+
+      try {
+        // 1. Vérifier si la fenêtre est fermée
+        if (signatureWindow.closed) {
+          await this.handleWindowClosed(signatureRequestId, signerId);
+          return;
+        }
+
+        // 2. Vérifier le statut via API (moins fréquent pour éviter le spam)
+        if (checkCount % 5 === 0) {
+          const status = await firstValueFrom(
+            this.yousignService.getSigner(signatureRequestId, signerId)
+          );
+
+          if (status.status === 'signed') {
+            isProcessComplete = true;
+            signatureWindow.close();
+            this.handleSignatureSuccess();
+            return;
+          }
+        }
+
+        // 3. Continuer la surveillance si pas encore fini
+        if (checkCount < maxChecks && !isProcessComplete) {
+          setTimeout(checkStatus, 2000);
+        } else if (checkCount >= maxChecks) {
+          isProcessComplete = true;
+          signatureWindow.close();
+          this.handleSignatureTimeout();
+        }
+
+      } catch (error) {
+        console.error('Erreur lors de la vérification:', error);
+        if (checkCount < maxChecks && !isProcessComplete) {
+          setTimeout(checkStatus, 3000);
+        }
       }
-    }, 1000);
+    };
+
+    // Démarrer la surveillance
+    setTimeout(checkStatus, 3000);
   }
+  private async handleWindowClosed(signatureRequestId: string, signerId: string): Promise<void> {
+    try {
+
+      // Attendre un peu avant de vérifier (délai pour la synchronisation)
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      const finalStatus = await firstValueFrom(
+        this.yousignService.getSigner(signatureRequestId, signerId)
+      );
+
+      if (finalStatus.status === 'signed') {
+        this.handleSignatureSuccess();
+      } else {
+        this.handleSignatureCancel();
+      }
+
+    } catch (error) {
+      this.handleSignatureCancel();
+    }
+  }
+  private handleSignatureSuccess(): void {
+
+    // Marquer comme signé
+    this.signedDocuments.add(this.currentDocument);
+    this.isChecked = false;
+    this.isSigning = false;
+
+    // Vérifier si c'est terminé
+    if (this.signedDocuments.size >= this.documents.length) {
+      this.allDocumentsSigned = true;
+      setTimeout(() => this.submitSinistre(), 1000);
+    } else {
+      // Passer au document suivant
+      this.moveToNextDocument();
+    }
+  }
+
+  // Gérer l'annulation
+  private handleSignatureCancel(): void {
+    this.isSigning = false;
+    this.isChecked = false;
+
+    // Optionnel : afficher un message à l'utilisateur
+    alert('Signature annulée. Veuillez réessayer.');
+  }
+
+  // Gérer le timeout
+  private handleSignatureTimeout(): void {
+    this.isSigning = false;
+    this.isChecked = false;
+
+    alert('Délai de signature dépassé. Veuillez réessayer.');
+  }
+  private moveToNextDocument(): void {
+    const nextDocId = this.findNextUnsignedDocument();
+
+    if (nextDocId !== null) {
+      this.currentDocument = nextDocId;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      this.allDocumentsSigned = true;
+      setTimeout(() => this.submitSinistre(), 1000);
+    }
+  }
+
+  // Trouver le prochain document non signé
+  private findNextUnsignedDocument(): number | null {
+    for (const doc of this.documents) {
+      if (!this.signedDocuments.has(doc.id)) {
+        return doc.id;
+      }
+    }
+    return null; // Tous signés
+  }
+  private async openSignatureAndWaitForCompletion(
+    signingUrl: string,
+    signatureRequestId: string,
+    signerId: string
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Ouvrir la fenêtre de signature
+      const signatureWindow = window.open(signingUrl, '_blank', 'width=800,height=600');
+
+      if (!signatureWindow) {
+        reject(new Error('Impossible d\'ouvrir la fenêtre de signature. Vérifiez vos paramètres de popup.'));
+        return;
+      }
+
+      // Vérifier périodiquement le statut de la signature
+      const checkSignatureStatus = async () => {
+        try {
+          // Vérifier si la fenêtre a été fermée
+          if (signatureWindow.closed) {
+
+            // Vérifier le statut final
+            const finalStatus = await this.checkFinalSignatureStatus(signatureRequestId, signerId);
+
+            if (finalStatus) {
+              // Signature réussie
+              this.onSignatureCompleted();
+              resolve();
+            } else {
+              // Signature échouée ou annulée
+              reject(new Error('Signature annulée ou échouée'));
+            }
+            return;
+          }
+
+          // Vérifier le statut via API
+          const status = await firstValueFrom(
+            this.yousignService.getSigner(signatureRequestId, signerId)
+          );
+
+          if (status.status === 'signed') {
+            signatureWindow.close();
+            this.onSignatureCompleted();
+            resolve();
+          }
+
+        } catch (error) {
+          console.error('Erreur lors de la vérification du statut:', error);
+        }
+      };
+
+      // Vérifier toutes les 2 secondes
+      const statusInterval = setInterval(checkSignatureStatus, 2000);
+
+      // Nettoyer l'interval après un timeout
+      setTimeout(() => {
+        clearInterval(statusInterval);
+        if (!signatureWindow.closed) {
+          signatureWindow.close();
+        }
+        reject(new Error('Timeout de signature atteint'));
+      }, 300000); // 5 minutes timeout
+    });
+  }
+
+  // NOUVELLE MÉTHODE : Vérifier le statut final de la signature
+  private async checkFinalSignatureStatus(signatureRequestId: string, signerId: string): Promise<boolean> {
+    try {
+      const status = await firstValueFrom(
+        this.yousignService.getSigner(signatureRequestId, signerId)
+      );
+
+      return status.status === 'signed';
+    } catch (error) {
+      console.error('Erreur lors de la vérification du statut final:', error);
+      return false;
+    }
+  }
+
+  // NOUVELLE MÉTHODE : Actions à effectuer quand la signature est complétée
+  private onSignatureCompleted(): void {
+    // Marquer comme signé
+    this.signedDocuments.add(this.currentDocument);
+    this.isChecked = false;
+
+    // Vérifier si tous les documents sont signés
+    if (this.signedDocuments.size === this.documents.length) {
+      this.allDocumentsSigned = true;
+      setTimeout(() => this.submitSinistre(), 2000);
+    } else {
+      // Passer au document suivant
+      this.currentDocument++;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
   // Ajoutez à vos propriétés
   isAssuranceDropdownOpen = false;
 
@@ -346,7 +976,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
     this.loadAssurances();
-    console.log('Véhicule sélectionné:', this.vehicleStatus);
 
     // Check if vehicle is non-rolling and show assurance step
     if (this.vehicleStatus === 'not-rolling') {
@@ -468,7 +1097,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }*/
 
   get isCurrentDocumentSigned(): boolean {
-    return this.signedDocuments.has(this.currentDocument);
+    const isSigned = this.signedDocuments.has(this.currentDocument);
+    return isSigned;
   }
 
   getSigningProgress(): number {
@@ -477,9 +1107,21 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Soumission du sinistre
   async submitSinistre(): Promise<void> {
     try {
+      // Vérifier que toutes les signatures sont complétées
+
+      for (const docId of this.signedDocuments) {
+        const signatureRequestId = this.documentSignatureRequests.get(docId);
+        if (signatureRequestId) {
+          const isCompleted = await this.waitForSignatureCompletion(signatureRequestId);
+          if (!isCompleted) {
+            console.warn(`⚠️ Signature non complétée pour le document ${docId}`);
+            // Vous pouvez décider de continuer ou d'arrêter ici
+          }
+        }
+      }
+
       const savedFiles = await this.saveFilesToAssets();
 
-      // 2. Construire le payload avec les noms de fichiers
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
@@ -494,60 +1136,132 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT'
       };
-      console.log('Payload envoyé:', sinistrePayload);
 
-      // 1. Envoyer d'abord le sinistre (comme avant)
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
         next: async (sinistreResponse: any) => {
           const sinistreId = sinistreResponse.id;
-          console.log(sinistreResponse);
 
-          // 2. Envoyer les documents avec juste le nom du fichier
+          // Envoyer les documents signés
           await this.sendSignedDocuments(sinistreId);
 
           this.currentStep = 5;
         },
         error: (error) => {
-          console.error('Erreur création sinistre:', error);
+          console.error('❌ Erreur création sinistre:', error);
         }
       });
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error('❌ Erreur générale:', error);
     }
   }
-
   private async sendSignedDocuments(sinistreId: number): Promise<void> {
     for (const docId of this.signedDocuments) {
       const doc = this.documents.find(d => d.id === docId);
       if (!doc) continue;
 
-      if (!doc.fileBlob) {
-        console.error(`Aucun fichier Blob trouvé pour le document ${doc.nom}`);
+      // Récupérer les IDs stockés
+      const signatureRequestId = this.documentSignatureRequests.get(docId);
+      if (!signatureRequestId) {
+        console.error(`Aucune signature request trouvée pour le document ${doc.nom}`);
         continue;
       }
 
       try {
-        // Upload the PDF Blob - using toString() conversion
+        // 1. Vérifier d'abord le statut de la signature (optionnel)
+        const statusResponse = await firstValueFrom(
+          this.yousignService.getSignatureRequestStatus(signatureRequestId)
+        );
+
+
+        // 2. Récupérer la liste des documents de cette signature request
+        const documentsResponse = await firstValueFrom(
+          this.yousignService.getSignatureRequest(signatureRequestId)
+        );
+
+        // Trouver le document ID (normalement il n'y en a qu'un par request)
+        const documentId = (documentsResponse as any).documents?.[0]?.id;
+
+        if (!documentId) {
+          console.error(`Aucun document ID trouvé pour ${doc.nom}`);
+          continue;
+        }
+
+        // 3. Télécharger le document SIGNÉ
+        const signedDocumentBlob = await firstValueFrom(
+          this.yousignService.downloadSignedDocument(signatureRequestId, documentId)
+        );
+
+        // 4. Upload du document SIGNÉ vers Firebase
         const downloadURL = await this.firebaseStorageService.uploadPdfFile(
-          doc.fileBlob,
-          sinistreId //Convert number to string
+          signedDocumentBlob, // Utiliser le document signé au lieu de doc.fileBlob
+          sinistreId
         ).toPromise();
 
-        console.log(`Fichier uploadé avec URL: ${downloadURL}`);
 
+        // 5. Enregistrer en base
         const documentPayload = {
           type: this.getDocumentType(doc.nom),
           fichier: downloadURL,
-          signatureElectronique: [],
+          signatureElectronique: [], // Vous pouvez ajouter des métadonnées de signature ici
           idsinistre: sinistreId
         };
 
         await this.documentService.addDocumentPost(documentPayload).toPromise();
-        console.log(`Document ${doc.nom} envoyé à l'API`);
+
       } catch (error) {
-        console.error(`Erreur lors du traitement du document ${doc.nom}`, error);
+        console.error(` Erreur lors du traitement du document signé ${doc.nom}:`, error);
+
+        // Fallback : utiliser le document personnalisé si le téléchargement échoue
+        if (doc.fileBlob) {
+          console.log(`Utilisation du document personnalisé comme fallback pour ${doc.nom}`);
+          try {
+            const fallbackURL = await this.firebaseStorageService.uploadPdfFile(
+              doc.fileBlob,
+              sinistreId
+            ).toPromise();
+
+            const fallbackPayload = {
+              type: this.getDocumentType(doc.nom),
+              fichier: fallbackURL,
+              signatureElectronique: [],
+              idsinistre: sinistreId
+            };
+
+            await this.documentService.addDocumentPost(fallbackPayload).toPromise();
+          } catch (fallbackError) {
+            console.error(` Échec du fallback pour ${doc.nom}:`, fallbackError);
+          }
+        }
       }
     }
+  }
+  private async waitForSignatureCompletion(signatureRequestId: string, maxWaitTime = 300000): Promise<boolean> {
+    const startTime = Date.now();
+
+    while (Date.now() - startTime < maxWaitTime) {
+      try {
+        const status = await firstValueFrom(
+          this.yousignService.getSignatureRequestStatus(signatureRequestId)
+        );
+
+        const signatureStatus = (status as any).status;
+        console.log(`Statut actuel: ${signatureStatus}`);
+
+        if (signatureStatus === 'done') {
+          return true;
+        } else if (signatureStatus === 'canceled' || signatureStatus === 'expired') {
+          return false;
+        }
+
+        // Attendre 2 secondes avant de vérifier à nouveau
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error) {
+        console.error('Erreur lors de la vérification du statut:', error);
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+
+    return false; // Timeout
   }
 
   private getDocumentType(nomDocument: string): string {
@@ -592,7 +1306,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const constatRef = ref(storage, constatPath);
       await uploadBytes(constatRef, this.constatFile);
       const constatURL = await getDownloadURL(constatRef);
-      console.log(`✅ Constat téléversé : ${constatURL}`);
       // Tu peux aussi ajouter `constatURL` à un autre tableau si nécessaire
     }
 
@@ -600,3 +1313,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
 }
+
+
+
+
+
+
+
+
