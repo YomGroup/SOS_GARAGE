@@ -65,6 +65,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   declarationMethod: 'describe' | 'upload' | null = null;
   currentStep = 1;
   vehicleStatus = '';
+
   selectedVehicle = '';
   currentDocument = 1;
   signedDocuments = new Set<number>();
@@ -122,12 +123,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private documentService = inject(DocumentService);
   private firebaseStorageService = inject(FirebaseStorageService);
   private yousignService = inject(YousignService);
+  currentCity: string = 'Casablanca';
   constructor(@Inject(DOCUMENT) private document: Document) {
 
   }
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
 
+    // Récupérer la géolocalisation
+    this.getCurrentCity();
     if (this.userid) {
       this.assureService.getAssurerID(this.userid).subscribe({
         next: (data: any) => {
@@ -174,6 +178,43 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
 
   }
+  // 2. Méthode pour récupérer la ville actuelle
+  private getCurrentCity(): void {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const latitude = position.coords.latitude;
+          const longitude = position.coords.longitude;
+          this.getCityFromCoordinates(latitude, longitude);
+        },
+        (error) => {
+          console.warn('Géolocalisation non disponible:', error);
+          // Garder la valeur par défaut
+        },
+        { timeout: 10000, enableHighAccuracy: false }
+      );
+    }
+  }
+  // 3. Méthode pour convertir les coordonnées en nom de ville
+  private async getCityFromCoordinates(latitude: number, longitude: number): Promise<void> {
+    try {
+      // Utiliser l'API de géocodage inversé gratuite
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=fr`
+      );
+      const data = await response.json();
+
+      if (data.city) {
+        this.currentCity = data.city;
+      } else if (data.locality) {
+        this.currentCity = data.locality;
+      }
+    } catch (error) {
+      console.warn('Erreur lors de la récupération de la ville:', error);
+      // Garder la valeur par défaut
+    }
+  }
+
   // Add this new method to load assurances
   private loadAssurances(): void {
     this.vehiculeService.listAssuranceVehicules().subscribe({
@@ -224,13 +265,29 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
     // Remplir selon le type de document - utiliser docMeta.nom ou docMeta.fichier
     if (docMeta.nom?.includes('Cession_Creance') || docMeta.fichier?.includes('Cession_Creance')) {
-      this.fillCessionCreanceForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
+
+
     }
     else if (docMeta.nom?.includes('Mandat_Gestion') || docMeta.fichier?.includes('Mandat_Gestion')) {
-      this.fillMandatGestionForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
+
     }
     else if (docMeta.nom?.includes('Ordre_Reparation') || docMeta.fichier?.includes('Ordre_Reparation')) {
-      this.fillOrdreReparationForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
+
     }
     else {
       // Fallback : remplissage générique avec les coordonnées fixes que vous aviez
@@ -296,13 +353,25 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
     // Remplir selon le type de document
     if (documentName?.includes('Cession_Creance') || pdfPath.includes('Cession_Creance')) {
-      this.fillCessionCreanceForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
     }
     else if (documentName?.includes('Mandat_Gestion') || pdfPath.includes('Mandat_Gestion')) {
-      this.fillMandatGestionForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillMandatGestionForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
     }
     else if (documentName?.includes('Ordre_Reparation') || pdfPath.includes('Ordre_Reparation')) {
-      this.fillOrdreReparationForm(firstPage, pageWidth, pageHeight, textOptions, smallTextOptions);
+      pages.forEach((page, index) => {
+        const pageWidth = page.getWidth();
+        const pageHeight = page.getHeight();
+        this.fillOrdreReparationForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+      });
     }
     else {
       // Remplissage générique si le type n'est pas reconnu
@@ -312,167 +381,180 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     const modifiedPdfBytes = await pdfDoc.save();
     return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
   }
-  private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
+  private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+    if (pageIndex === 0) {
 
-    // Nom & Prénom (ligne 3 environ)
-    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
-      x: pageWidth * 0.28, // Après "Nom & Prénom : "
-      y: pageHeight - (pageHeight * 0.12),
-      ...textOptions
-    });
-
-    // Adresse (ligne 4)
-    if (adressePostale) {
-      page.drawText(adressePostale, {
-        x: pageWidth * 0.18, // Après "Adresse : "
-        y: pageHeight - (pageHeight * 0.15),
+      // Nom & Prénom (ligne 3 environ)
+      page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+        x: pageWidth * 0.28, // Après "Nom & Prénom : "
+        y: pageHeight - (pageHeight * 0.12),
         ...textOptions
       });
-    }
 
-    // Téléphone (ligne 5)
-    if (telephone) {
-      page.drawText(telephone, {
-        x: pageWidth * 0.22, // Après "Téléphone : "
-        y: pageHeight - (pageHeight * 0.18),
-        ...textOptions
-      });
-    }
+      // Adresse (ligne 4)
+      if (adressePostale) {
+        page.drawText(adressePostale, {
+          x: pageWidth * 0.18, // Après "Adresse : "
+          y: pageHeight - (pageHeight * 0.15),
+          ...textOptions
+        });
+      }
 
-    // E-mail (ligne 6)
-    if (email) {
-      page.drawText(email, {
-        x: pageWidth * 0.18, // Après "E-mail : "
-        y: pageHeight - (pageHeight * 0.21),
-        ...textOptions
-      });
-    }
+      // Téléphone (ligne 5)
+      if (telephone) {
+        page.drawText(telephone, {
+          x: pageWidth * 0.22, // Après "Téléphone : "
+          y: pageHeight - (pageHeight * 0.18),
+          ...textOptions
+        });
+      }
 
-    // Immatriculation du véhicule (ligne 7)
+      // E-mail (ligne 6)
+      if (email) {
+        page.drawText(email, {
+          x: pageWidth * 0.18, // Après "E-mail : "
+          y: pageHeight - (pageHeight * 0.21),
+          ...textOptions
+        });
+      }
 
-    page.drawText(vehicule?.immatriculation, {
-      x: pageWidth * 0.33,
+      // Immatriculation du véhicule (ligne 7)
 
-      y: pageHeight - (pageHeight * 0.26),
-      ...textOptions
-    });
-
-
-    // Marque / Modèle (ligne 8)
-    if (vehicule) {
-      page.drawText(vehicule?.marque, {
+      page.drawText(vehicule?.immatriculation, {
         x: pageWidth * 0.33,
-        y: pageHeight - (pageHeight * 0.29),
-        ...textOptions
-      });
-    }
 
-    // Date et lieu en bas du document
-    const city = 'Casablanca';
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-FR');
-
-    // "Fait à" (avant-dernière ligne)
-    /*
-    page.drawText(city, {
-      x: pageWidth * 0.22, // Après "Fait à : "
-      y: pageHeight - (pageHeight * 0.85),
-      ...textOptions
-    });
-      */
-    // Date (avant-dernière ligne)
-    page.drawText(dateStr.replace(/\//g, ' / '), {
-      x: pageWidth * 0.55, // Après "le"
-      y: pageHeight - (pageHeight * 0.85),
-      ...textOptions
-    });
-  }
-
-  private fillMandatGestionForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
-    const { nom, prenom, adressePostale, telephone, email } = this.userData;
-    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-
-    // Section "Le Mandant"
-    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
-      x: pageWidth * 0.28,
-      y: pageHeight - (pageHeight * 0.18),
-      ...textOptions
-    });
-
-    // Adresse
-    if (adressePostale) {
-      page.drawText(adressePostale, {
-        x: pageWidth * 0.18,
-        y: pageHeight - (pageHeight * 0.18),
-        ...textOptions
-      });
-    }
-
-    // Téléphone
-    if (telephone) {
-      page.drawText(telephone, {
-        x: pageWidth * 0.22,
-        y: pageHeight - (pageHeight * 0.23),
-        ...textOptions
-      });
-    }
-
-    // E-mail
-    if (email) {
-      page.drawText(email, {
-        x: pageWidth * 0.18,
         y: pageHeight - (pageHeight * 0.26),
         ...textOptions
       });
-    }
 
-    // Immatriculation
-    if (vehicule?.immatriculation) {
-      page.drawText(vehicule.immatriculation, {
-        x: pageWidth * 0.35,
-        y: pageHeight - (pageHeight * 0.29),
-        ...textOptions
-      });
-    }
 
-    // Marque/Modèle
-    if (vehicule) {
-      page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
-        x: pageWidth * 0.22,
-        y: pageHeight - (pageHeight * 0.32),
-        ...textOptions
-      });
-    }
-
-    // Date et lieu en bas
-    const city = 'Casablanca';
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-FR');
-    /*
-        page.drawText(city, {
-          x: pageWidth * 0.22,
-          y: pageHeight - (pageHeight * 0.99),
+      // Marque / Modèle (ligne 8)
+      if (vehicule) {
+        page.drawText(vehicule?.marque, {
+          x: pageWidth * 0.33,
+          y: pageHeight - (pageHeight * 0.29),
           ...textOptions
         });
-          */
-    page.drawText(dateStr.replace(/\//g, ' / '), {
-      x: pageWidth * 0.55,
-      y: pageHeight - (pageHeight * 0.99),
-      ...textOptions
-    });
+      }
+    }
+    if (pageIndex === 1) {
+
+      // Date et lieu en bas du document
+      const city = 'Casablanca';
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('fr-FR');
+
+      // "Fait à" (avant-dernière ligne)
+
+      page.drawText(this.currentCity, {
+        x: pageWidth * 0.22, // Après "Fait à : "
+        y: pageHeight - (pageHeight * 0.85),
+        ...textOptions
+      });
+    }
+    if (pageIndex === 2) {
+      /*
+      
+            // Date (avant-dernière ligne)
+            page.drawText(dateStr.replace(/\//g, ' / '), {
+              x: pageWidth * 0.55, // Après "le"
+              y: pageHeight - (pageHeight * 0.85),
+              ...textOptions
+            });
+            */
+    }
   }
 
-  private fillOrdreReparationForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any): void {
+  private fillMandatGestionForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
+    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+    const adress = 'oulfa'
+    if (pageIndex === 0) {
+
+      // Section "Le Mandant"
+      page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+        x: pageWidth * 0.30,
+        y: pageHeight - (pageHeight * 0.41),
+        ...textOptions
+      });
+
+      // Adresse
+      if (adress) {
+        page.drawText(adress, {
+          x: pageWidth * 0.60,
+          y: pageHeight - (pageHeight * 0.41),
+          ...textOptions
+        });
+      }
+      console.log(this.lieuSinistre);
+      // Téléphone
+      if (this.lieuSinistre) {
+        page.drawText(this.lieuSinistre, {
+          x: pageWidth * 0.22,
+          y: pageHeight - (pageHeight * 0.23),
+          ...textOptions
+        });
+      }
+
+      // E-mail
+      /*
+      if (email) {
+        page.drawText(email, {
+          x: pageWidth * 0.18,
+          y: pageHeight - (pageHeight * 0.26),
+          ...textOptions
+        });
+      }*/
+
+      // Immatriculation
+      if (vehicule?.immatriculation) {
+        page.drawText(vehicule.immatriculation, {
+          x: pageWidth * 0.23,
+          y: pageHeight - (pageHeight * 0.45),
+          ...textOptions
+        });
+      }
+
+      // Marque/Modèle
+      if (vehicule) {
+        page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
+          x: pageWidth * 0.32,
+          y: pageHeight - (pageHeight * 0.43),
+          ...textOptions
+        });
+      }
+    }
+    if (pageIndex === 1) {
+
+      // Date et lieu en bas
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('fr-FR');
+
+      page.drawText(this.currentCity, {
+        x: pageWidth * 0.30,
+        y: pageHeight - (pageHeight * 0.60),
+        ...textOptions
+      });
+
+      page.drawText(dateStr.replace(/\//g, ' / '), {
+        x: pageWidth * 0.28,
+        y: pageHeight - (pageHeight * 0.53),
+        ...textOptions
+      });
+    }
+  }
+
+  private fillOrdreReparationForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
 
     // Section "Client (Donneur d'ordre)"
     // Nom & Prénom
     page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
-      x: pageWidth * 0.28,
-      y: pageHeight - (pageHeight * 0.18),
+      x: pageWidth * 0.30,
+      y: pageHeight - (pageHeight * 0.35),
       ...textOptions
     });
 
@@ -546,7 +628,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
   }
 
-  private fillGenericForm(page: any, pageWidth: number, pageHeight: number, textOptions: any): void {
+  private fillGenericForm(page: any, pageWidth: number, pageHeight: number, textOptions: any,): void {
     // Remplissage générique pour les documents non identifiés
     const { nom, prenom, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque === this.selectedVehicle);
@@ -654,6 +736,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.isSigning = true;
     try {
       // 1) Générer le document personnalisé
+
       const docMeta = this.documents.find(d => d.id === this.currentDocument);
       if (!docMeta) throw new Error('Document introuvable');
       const personalizedBlob = await this.generatePersonalizedDocument(this.currentDocument);
@@ -973,7 +1056,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
   selectVehicle(vehicle: string): void {
-    this.selectedVehicle = vehicle;
+    // this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
     this.loadAssurances();
 
