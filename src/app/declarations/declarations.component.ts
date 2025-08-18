@@ -170,7 +170,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.userData = data;
-        //this.prepareDocumentTemplates();
+        // this.prepareDocumentTemplates();
+        if (this.selectedVehicle) {
+          this.prepareDocumentTemplates();
+        }
       },
       error: (err) => {
         console.error('Erreur lors du chargement des données utilisateur', err);
@@ -230,6 +233,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     for (const doc of this.documents) {
       try {
         const modifiedBlob = await this.modifyPdfWithUserData(doc.fichier);
+        if (doc.modifiedBlobUrl) {
+          URL.revokeObjectURL(doc.modifiedBlobUrl);
+        }
         doc.modifiedBlobUrl = URL.createObjectURL(modifiedBlob);
         doc.fileBlob = modifiedBlob;  // <-- stocker le Blob modifié ici
       } catch (error) {
@@ -239,89 +245,64 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     }
   }
+  forceRefreshDocuments(): void {
+    if (this.userData && this.selectedVehicle) {
+      console.log('🔄 Force refresh des documents');
+      this.prepareDocumentTemplates();
+    }
+  }
   private async generatePersonalizedDocument(docId: number): Promise<Blob> {
     const docMeta = this.documents.find(d => d.id === docId);
     if (!docMeta) throw new Error(`Document ${docId} introuvable`);
 
-    // D'abord charger le PDF
     const response = await fetch(docMeta.fichier);
     const pdfBytes = await response.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-    const lastPage = pages[pages.length - 1];
+    console.log('Page index:', pages);
 
-    // Récupérer les dimensions de la page
-    const pageWidth = firstPage.getWidth();
-    const pageHeight = firstPage.getHeight();
-
-
-    // Options de texte
     const textOptions = { size: 10, color: rgb(0, 0, 0) };
     const smallTextOptions = { size: 9, color: rgb(0, 0, 0) };
 
-    const { nom, prenom, adressePostale, telephone, email } = this.userData;
-    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-
-    // Remplir selon le type de document - utiliser docMeta.nom ou docMeta.fichier
+    // Remplir selon le type de document - AVEC L'INDEX DE PAGE
     if (docMeta.nom?.includes('Cession_Creance') || docMeta.fichier?.includes('Cession_Creance')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+        console.log('Page index:', pageIndex);
+
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
       });
-
-
     }
     else if (docMeta.nom?.includes('Mandat_Gestion') || docMeta.fichier?.includes('Mandat_Gestion')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
-      });
+        console.log('Page index:', pageIndex);
 
+        this.fillMandatGestionForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
+      });
     }
     else if (docMeta.nom?.includes('Ordre_Reparation') || docMeta.fichier?.includes('Ordre_Reparation')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
-      });
+        console.log('Page index:', pageIndex);
 
+        this.fillOrdreReparationForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
+      });
     }
     else {
-      // Fallback : remplissage générique avec les coordonnées fixes que vous aviez
-      firstPage.drawText(`${prenom ?? ''}`, { x: 200, y: 680, ...textOptions });
-      firstPage.drawText(telephone ?? '', { x: 200, y: 640, ...textOptions });
-      firstPage.drawText(email ?? '', { x: 200, y: 620, ...textOptions });
+      // Fallback générique - seulement première page
+      const firstPage = pages[0];
+      const pageWidth = firstPage.getWidth();
+      const pageHeight = firstPage.getHeight();
 
-      if (vehicule) {
-        firstPage.drawText(vehicule.immatriculation ?? '', { x: 200, y: 600, ...textOptions });
-        firstPage.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, { x: 200, y: 580, ...textOptions });
-      }
+      this.fillGenericForm(firstPage, pageWidth, pageHeight, textOptions);
     }
 
-    // Date/heure unique pour éviter les conflits (seulement si pas déjà ajouté dans les fonctions spécialisées)
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('fr-FR');
-    const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-
-    // Ajouter la signature en bas seulement si c'est un document générique
-    if (!docMeta.nom?.includes('Cession_Creance') &&
-      !docMeta.nom?.includes('Mandat_Gestion') &&
-      !docMeta.nom?.includes('Ordre_Reparation') &&
-      !docMeta.fichier?.includes('Cession_Creance') &&
-      !docMeta.fichier?.includes('Mandat_Gestion') &&
-      !docMeta.fichier?.includes('Ordre_Reparation')) {
-
-      lastPage.drawText(`Fait à Casablanca, le ${dateStr} à ${timeStr}`, {
-        x: 150,
-        y: 100,
-        ...textOptions
-      });
-    }
-
-    // ID unique invisible (toujours ajouter)
+    // ID unique invisible (toujours sur la dernière page)
+    const lastPage = pages[pages.length - 1];
     lastPage.drawText(`ID: ${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, {
       x: 400,
       y: 20,
@@ -337,45 +318,44 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     const pdfBytes = await response.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
     const pages = pdfDoc.getPages();
-    const firstPage = pages[0];
-
-    // Récupérer les dimensions de la page
-    const pageWidth = firstPage.getWidth();
-    const pageHeight = firstPage.getHeight();
-
-
-    const { nom, prenom, adressePostale, telephone, email } = this.userData;
-    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+    console.log('Page index:', pages);
 
     // Options de texte standard
     const textOptions = { size: 10, color: rgb(0, 0, 0) };
     const smallTextOptions = { size: 9, color: rgb(0, 0, 0) };
 
-    // Remplir selon le type de document
+    // Remplir selon le type de document - AVEC L'INDEX DE PAGE
     if (documentName?.includes('Cession_Creance') || pdfPath.includes('Cession_Creance')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+        console.log('Page index:', pageIndex);
+
+        this.fillCessionCreanceForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
       });
     }
     else if (documentName?.includes('Mandat_Gestion') || pdfPath.includes('Mandat_Gestion')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillMandatGestionForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+        console.log('Page index:', pageIndex);
+
+        this.fillMandatGestionForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
       });
     }
     else if (documentName?.includes('Ordre_Reparation') || pdfPath.includes('Ordre_Reparation')) {
-      pages.forEach((page, index) => {
+      pages.forEach((page, pageIndex) => {
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
-        this.fillOrdreReparationForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, index);
+        console.log('Page index:', pageIndex);
+
+        this.fillOrdreReparationForm(page, pageWidth, pageHeight, textOptions, smallTextOptions, pageIndex);
       });
     }
     else {
       // Remplissage générique si le type n'est pas reconnu
-      this.fillGenericForm(firstPage, pageWidth, pageHeight, textOptions);
+      const firstPage = pages[0];
+      this.fillGenericForm(firstPage, firstPage.getWidth(), firstPage.getHeight(), textOptions);
     }
 
     const modifiedPdfBytes = await pdfDoc.save();
@@ -384,28 +364,32 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-    if (pageIndex === 0) {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('fr-FR');
 
+    // Remplir seulement la première page (page d'index 0)
+    if (pageIndex === 0) {
       // Nom & Prénom (ligne 3 environ)
       page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
-        x: pageWidth * 0.28, // Après "Nom & Prénom : "
-        y: pageHeight - (pageHeight * 0.12),
+        x: pageWidth * 0.30,
+        y: pageHeight - (pageHeight * 0.33),
         ...textOptions
       });
 
       // Adresse (ligne 4)
       if (adressePostale) {
         page.drawText(adressePostale, {
-          x: pageWidth * 0.18, // Après "Adresse : "
+          x: pageWidth * 0.18,
           y: pageHeight - (pageHeight * 0.15),
           ...textOptions
         });
       }
+      /*
 
       // Téléphone (ligne 5)
       if (telephone) {
         page.drawText(telephone, {
-          x: pageWidth * 0.22, // Après "Téléphone : "
+          x: pageWidth * 0.22,
           y: pageHeight - (pageHeight * 0.18),
           ...textOptions
         });
@@ -414,65 +398,75 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       // E-mail (ligne 6)
       if (email) {
         page.drawText(email, {
-          x: pageWidth * 0.18, // Après "E-mail : "
+          x: pageWidth * 0.18,
           y: pageHeight - (pageHeight * 0.21),
           ...textOptions
         });
-      }
+      }*/
 
       // Immatriculation du véhicule (ligne 7)
-
       page.drawText(vehicule?.immatriculation, {
         x: pageWidth * 0.33,
-
-        y: pageHeight - (pageHeight * 0.26),
+        y: pageHeight - (pageHeight * 0.37),
+        ...textOptions
+      });
+      page.drawText(dateStr.replace(/\//g, ' / '), {
+        x: pageWidth * 0.50,
+        y: pageHeight - (pageHeight * 0.44),
         ...textOptions
       });
 
-
+      // Lieu du sinistre
+      if (this.lieuSinistre) {
+        page.drawText(this.lieuSinistre, {
+          x: pageWidth * 0.19,
+          y: pageHeight - (pageHeight * 0.46),
+          ...textOptions
+        });
+      }
       // Marque / Modèle (ligne 8)
       if (vehicule) {
         page.drawText(vehicule?.marque, {
           x: pageWidth * 0.33,
-          y: pageHeight - (pageHeight * 0.29),
+          y: pageHeight - (pageHeight * 0.35),
+          ...textOptions
+        });
+        page.drawText(`${vehicule.nomAssurence ?? ''} `, {
+          x: pageWidth * 0.25,
+          y: pageHeight - (pageHeight * 0.39),
           ...textOptions
         });
       }
     }
-    if (pageIndex === 1) {
 
-      // Date et lieu en bas du document
-      const city = 'Casablanca';
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('fr-FR');
-
-      // "Fait à" (avant-dernière ligne)
+    // Date et lieu - dernière page seulement
+    if (pageIndex === 1) { // Page 2 (index 1)
 
       page.drawText(this.currentCity, {
-        x: pageWidth * 0.22, // Après "Fait à : "
-        y: pageHeight - (pageHeight * 0.85),
+        x: pageWidth * 0.22,
+        y: pageHeight - (pageHeight * 0.32),
+        ...textOptions
+      });
+
+      page.drawText(dateStr.replace(/\//g, ' / '), {
+        x: pageWidth * 0.38,
+        y: pageHeight - (pageHeight * 0.33),
         ...textOptions
       });
     }
-    if (pageIndex === 2) {
-      /*
-      
-            // Date (avant-dernière ligne)
-            page.drawText(dateStr.replace(/\//g, ' / '), {
-              x: pageWidth * 0.55, // Après "le"
-              y: pageHeight - (pageHeight * 0.85),
-              ...textOptions
-            });
-            */
-    }
   }
-
   private fillMandatGestionForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-    const adress = 'oulfa'
-    if (pageIndex === 0) {
+    const adress = 'oulfa';
+    console.log('vehicule:', vehicule);
+    console.log('Page index:', pageIndex);
+    const now = new Date();
 
+    const dateStr = now.toLocaleDateString('fr-FR');
+
+    // Remplir seulement la première page
+    if (pageIndex === 0) {
       // Section "Le Mandant"
       page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
         x: pageWidth * 0.30,
@@ -488,26 +482,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           ...textOptions
         });
       }
-      console.log(this.lieuSinistre);
-      // Téléphone
+
+      // Lieu du sinistre
       if (this.lieuSinistre) {
         page.drawText(this.lieuSinistre, {
-          x: pageWidth * 0.22,
-          y: pageHeight - (pageHeight * 0.23),
+          x: pageWidth * 0.60,
+          y: pageHeight - (pageHeight * 0.53),
           ...textOptions
         });
       }
-
-      // E-mail
-      /*
-      if (email) {
-        page.drawText(email, {
-          x: pageWidth * 0.18,
-          y: pageHeight - (pageHeight * 0.26),
-          ...textOptions
-        });
-      }*/
-
       // Immatriculation
       if (vehicule?.immatriculation) {
         page.drawText(vehicule.immatriculation, {
@@ -516,7 +499,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           ...textOptions
         });
       }
-
+      page.drawText(dateStr.replace(/\//g, ' / '), {
+        x: pageWidth * 0.28,
+        y: pageHeight - (pageHeight * 0.53),
+        ...textOptions
+      });
       // Marque/Modèle
       if (vehicule) {
         page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
@@ -524,23 +511,30 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           y: pageHeight - (pageHeight * 0.43),
           ...textOptions
         });
+        page.drawText(`${vehicule.nomAssurence ?? ''} `, {
+          x: pageWidth * 0.63,
+          y: pageHeight - (pageHeight * 0.45),
+          ...textOptions
+        });
       }
     }
-    if (pageIndex === 1) {
-
-      // Date et lieu en bas
-      const now = new Date();
-      const dateStr = now.toLocaleDateString('fr-FR');
+    // Date et lieu - page spécifique (ajustez selon votre layout)
+    if (pageIndex === 1) { // Page 2 par exemple
 
       page.drawText(this.currentCity, {
-        x: pageWidth * 0.30,
-        y: pageHeight - (pageHeight * 0.60),
+        x: pageWidth * 0.28,
+        y: pageHeight - (pageHeight * 0.48),
         ...textOptions
       });
 
       page.drawText(dateStr.replace(/\//g, ' / '), {
-        x: pageWidth * 0.28,
-        y: pageHeight - (pageHeight * 0.53),
+        x: pageWidth * 0.42,
+        y: pageHeight - (pageHeight * 0.48),
+        ...textOptions
+      });
+      page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+        x: pageWidth * 0.42,
+        y: pageHeight - (pageHeight * 0.69),
         ...textOptions
       });
     }
@@ -549,86 +543,105 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private fillOrdreReparationForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-
-    // Section "Client (Donneur d'ordre)"
-    // Nom & Prénom
-    page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
-      x: pageWidth * 0.30,
-      y: pageHeight - (pageHeight * 0.35),
-      ...textOptions
-    });
-
-    // Adresse
-    if (adressePostale) {
-      page.drawText(adressePostale, {
-        x: pageWidth * 0.18,
-        y: pageHeight - (pageHeight * 0.18),
-        ...textOptions
-      });
-    }
-
-    // Téléphone
-    if (telephone) {
-      page.drawText(telephone, {
-        x: pageWidth * 0.22,
-        y: pageHeight - (pageHeight * 0.23),
-        ...textOptions
-      });
-    }
-
-    // E-mail
-    if (email) {
-      page.drawText(email, {
-        x: pageWidth * 0.18,
-        y: pageHeight - (pageHeight * 0.26),
-        ...textOptions
-      });
-    }
-
-    // Immatriculation
-    if (vehicule?.immatriculation) {
-      page.drawText(vehicule.immatriculation, {
-        x: pageWidth * 0.35,
-        y: pageHeight - (pageHeight * 0.29),
-        ...textOptions
-      });
-    }
-
-    // Marque / Modèle
-    if (vehicule) {
-      page.drawText(`${vehicule.marque ?? ''} ${vehicule.modele ?? ''}`, {
-        x: pageWidth * 0.22,
-        y: pageHeight - (pageHeight * 0.32),
-        ...textOptions
-      });
-    }
-
-    // Nom du client dans la section autorisation
-    page.drawText(`${prenom ?? ''} ${nom ?? ''}`, {
-      x: pageWidth * 0.30, // Après "Je soussigné(e),"
-      y: pageHeight - (pageHeight * 0.77),
-      ...textOptions
-    });
-
-    // Date et lieu en bas
-    const city = 'Casablanca';
     const now = new Date();
+
     const dateStr = now.toLocaleDateString('fr-FR');
-    /*
-    page.drawText(city, {
-      x: pageWidth * 0.22,
-      y: pageHeight - (pageHeight * 0.99),
-      ...textOptions
-    });
-    */
-    page.drawText(dateStr.replace(/\//g, ' / '), {
-      x: pageWidth * 0.55,
-      y: pageHeight - (pageHeight * 0.99),
-      ...textOptions
-    });
+    // Première page - informations client
+    if (pageIndex === 0) {
+      // Section "Client (Donneur d'ordre)"
+      page.drawText(`${nom ?? ''} ${prenom ?? ''}`, {
+        x: pageWidth * 0.30,
+        y: pageHeight - (pageHeight * 0.37),
+        ...textOptions
+      });
+
+      // Adresse
+      if (adressePostale) {
+        page.drawText(adressePostale, {
+          x: pageWidth * 0.18,
+          y: pageHeight - (pageHeight * 0.18),
+          ...textOptions
+        });
+      }/*
+
+      // Téléphone
+      if (telephone) {
+        page.drawText(telephone, {
+          x: pageWidth * 0.22,
+          y: pageHeight - (pageHeight * 0.23),
+          ...textOptions
+        });
+      }
+
+      // E-mail
+      if (email) {
+        page.drawText(email, {
+          x: pageWidth * 0.18,
+          y: pageHeight - (pageHeight * 0.26),
+          ...textOptions
+        });
+      }
+*/
+      // Immatriculation
+      if (vehicule?.immatriculation) {
+        page.drawText(vehicule.immatriculation, {
+          x: pageWidth * 0.30,
+          y: pageHeight - (pageHeight * 0.52),
+          ...textOptions
+        });
+      }
+
+      // Marque / Modèle
+
+      if (vehicule) {
+        page.drawText(`${vehicule.nomAssurence ?? ''} `, {
+          x: pageWidth * 0.62,
+          y: pageHeight - (pageHeight * 0.37),
+          ...textOptions
+        });
+        page.drawText(`${vehicule.marque ?? ''} `, {
+          x: pageWidth * 0.30,
+          y: pageHeight - (pageHeight * 0.48),
+          ...textOptions
+        });
+        page.drawText(`${vehicule.modele ?? ''}`, {
+          x: pageWidth * 0.30,
+          y: pageHeight - (pageHeight * 0.50),
+          ...textOptions
+        });
+        page.drawText(`${vehicule.kilometrage ?? ''}`, {
+          x: pageWidth * 0.30,
+          y: pageHeight - (pageHeight * 0.52),
+          ...textOptions
+        });
+      }
+    }
+
+    // Deuxième page - section autorisation
+    if (pageIndex === 1) {
+      page.drawText(this.currentCity, {
+        x: pageWidth * 0.28,
+        y: pageHeight - (pageHeight * 0.62),
+        ...textOptions
+      });
+
+      page.drawText(dateStr.replace(/\//g, ' / '), {
+        x: pageWidth * 0.42,
+        y: pageHeight - (pageHeight * 0.62),
+        ...textOptions
+      });
+      // Nom du client dans la section autorisation
+      page.drawText(`${prenom ?? ''} ${nom ?? ''}`, {
+        x: pageWidth * 0.30,
+        y: pageHeight - (pageHeight * 0.71),
+        ...textOptions
+      });
+    }
+
+
   }
 
-  private fillGenericForm(page: any, pageWidth: number, pageHeight: number, textOptions: any,): void {
+  private fillGenericForm(page: any, pageWidth: number, pageHeight: number, textOptions: any): void {
     // Remplissage générique pour les documents non identifiés
     const { nom, prenom, telephone, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque === this.selectedVehicle);
@@ -716,11 +729,39 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       return '';
     }
   }
+  private async prepareDocumentsWithAllData(): Promise<void> {
+    console.log('📋 Vérification des données avant préparation:');
+    console.log('- Véhicule:', this.selectedVehicle);
+    console.log('- Lieu sinistre:', this.lieuSinistre);
+    console.log('- Type assurance:', this.selectedTypeAssurance);
+    console.log('- Description:', this.incidentDescription);
+    console.log('- Données utilisateur:', !!this.userData);
 
+    if (!this.userData) {
+      console.error('❌ Données utilisateur non disponibles');
+      return;
+    }
+
+    if (!this.selectedVehicle) {
+      console.error('❌ Aucun véhicule sélectionné');
+      return;
+    }
+
+    if (!this.lieuSinistre) {
+      console.warn('⚠️ Lieu du sinistre non renseigné');
+    }
+
+    // Maintenant préparer les documents avec toutes les informations
+    await this.prepareDocumentTemplates();
+  }
   // Navigation entre étapes
   nextStep(): void {
     if (this.canProceed()) {
       this.currentStep++;
+    }
+    if (this.currentStep === 4) {
+      console.log('📝 Préparation des documents avec toutes les informations...');
+      this.prepareDocumentsWithAllData();
     }
   }
 
@@ -1038,6 +1079,13 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   toggleAssuranceDropdown(): void {
     this.isAssuranceDropdownOpen = !this.isAssuranceDropdownOpen;
   }
+  private hasRequiredPhotos(): boolean {
+    // Vérifier qu'au moins une photo est présente dans chaque étape requise
+    return this.photoSteps[1].length > 0 && // Au moins une photo avant
+      this.photoSteps[2].length > 0 && // Au moins une photo immatriculation
+      this.photoSteps[3].length > 0 && // Au moins une photo côté
+      this.photoSteps[4].length > 0;   // Au moins une photo dégâts
+  }
 
   selectAssurance(assurance: any): void {
     this.selectedAssurance = assurance;
@@ -1047,16 +1095,19 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   canProceed(): boolean {
     switch (this.currentStep) {
       case 1:
-        return true;//!!this.selectedVehicle;
-      case 2: return true;//return !!this.vehicleStatus;
+        return !!this.selectedVehicle;
+      case 2: return true; //return !!this.vehicleStatus;
 
-      case 3: case 4: return true;
+      case 3: return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
+        (!!this.incidentDescription || !!this.constatFile);
+      case 4: return this.hasRequiredPhotos();
       case 5: return false;
       default: return false;
     }
   }
+
   selectVehicle(vehicle: string): void {
-    // this.selectedVehicle = vehicle;
+    this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
     this.loadAssurances();
 
@@ -1067,9 +1118,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     } else {
       this.showAssuranceStep = false;
     }
+    /*
     if (this.userData) {
       this.prepareDocumentTemplates();
-    }
+    }*/
     this.nextStep();
   }
   onStatusChange() {
