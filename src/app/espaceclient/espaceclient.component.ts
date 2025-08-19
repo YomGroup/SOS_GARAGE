@@ -197,13 +197,10 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
 
   // Naviguer vers les messages et réinitialiser les notifications
   navigateToMessages(): void {
-    console.log('Navigation vers les messages...');
+
 
     // Naviguer vers la page des messages
     this.router.navigate(['/clientDashboard/message']);
-
-    // Note: On ne marque pas tous les messages comme lus ici,
-    // c'est le MessageComponent qui s'en chargera quand une conversation sera sélectionnée
   }
 
   // Méthodes existantes inchangées

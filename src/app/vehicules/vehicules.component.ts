@@ -7,10 +7,11 @@ import { inject } from '@angular/core';
 import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-vehicules',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterLink],
   templateUrl: './vehicules.component.html',
   styleUrl: './vehicules.component.css'
 })
