@@ -131,13 +131,15 @@
 }
 
 .logo-container {
-    margin-bottom: 30px;
-    position: relative;
+  display: flex;
+  justify-content: center; /* Centre horizontalement */
+  align-items: center;     /* Centre verticalement (si hauteur définie) */
+  margin-bottom: 8px;
 }
 
 .logo {
-    width: 140px;
-    height: 140px;
+    width: 250px;
+    height: 250px;
     object-fit: contain;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.2));
     animation: float 3s ease-in-out infinite;
@@ -155,7 +157,7 @@
     }
 }
 
-.brand-text h1 {
+/* .brand-text h1 {
     font-size: 42px;
     font-weight: 800;
     margin-bottom: 15px;
@@ -164,8 +166,8 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
-    letter-spacing: -1px;
-}
+    letter-spacing: 1px;
+} */
 
 .brand-text p {
     color: rgba(255, 255, 255, 0.9);

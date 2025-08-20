@@ -3,16 +3,16 @@
   <div class="container">
     <div class="nav-brand">
       <div class="logo">
-        <img src="assets/logo_sos.png" alt="Logo SOS MON GARAGE" class="logo-img"/>
+        <img src="assets/logo.png" alt="Logo SOS MON GARAGE" class="logo-img"/>
         <!-- <span class="logo-text">SOS MON GARAGE</span> -->
       </div>
     </div>
-    <nav class="nav-menu">
+    <!-- <nav class="nav-menu">
       <a href="#" class="nav-link">Services</a>
       <a href="#" class="nav-link">Comment ça marche</a>
       <a href="#" class="nav-link">À propos</a>
       <a href="#" class="nav-link">Contact</a>
-    </nav>
+    </nav> -->
     <div class="auth-buttons">
       <!-- <a routerLink="/login" class="btn-outline">Se connecter</a> -->
       <a routerLink="/clientDashboard" class="btn-primary">Se connecter</a>
@@ -50,7 +50,7 @@
       
       <div class="hero-buttons">
         <button class="btn-primary btn-large">Déclarer un sinistre</button>
-        <a href="#services" class="btn-secondary">Découvrir nos services</a>
+        <a href="#services" class="btn-primary">Découvrir nos services</a>
       </div>
       
       <div class="stats-container">
@@ -157,7 +157,9 @@
             <li>✓ Expert dédié</li>
             <li>✓ Support 7j/7</li>
           </ul>
-          <button class="btn-primary btn-full">Créer un compte client</button>
+          <button class="btn-primary btn-full" [routerLink]="['/register']">
+            Créer un compte client
+          </button>
         </div>
         
         <div class="registration-card registration-featured">
@@ -170,7 +172,7 @@
             <li>✓ Outils de gestion</li>
             <li>✓ Formation incluse</li>
           </ul>
-          <button class="btn-secondary btn-full">Devenir partenaire</button>
+          <button class="btn-secondary btn-full" [routerLink]="['/register']">Devenir partenaire</button>
         </div>
       </div>
     </div>

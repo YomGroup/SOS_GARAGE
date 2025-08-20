@@ -5,7 +5,7 @@
   [class.hide]="isMobile && !isOpen">
   <div class="sidebar-header" style="position: relative;">
     <div class="sidebar-logo" (click)="onLogoClick()" style="cursor: pointer;">
-      <img src="assets/logo_sos.png" alt="Logo" />
+      <img src="assets/logo.png" alt="Logo" />
     </div>
     <button *ngIf="!isMobile" class="sidebar-toggle-btn" [class.collapsed]="collapsed" (click)="closeSidebar.emit()" aria-label="Replier la barre latérale">
       <span class="chevron">&#x2039;</span>
