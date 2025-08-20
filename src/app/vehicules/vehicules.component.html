@@ -153,6 +153,7 @@
                        name="dateMiseEnCirculation" required
                        [readonly]="!isEditMode">
               </div>
+            
             </div>
           </div>
         </div>
@@ -161,7 +162,8 @@
            <!-- Étape 2: Sélection de l'assurance -->
 <div *ngIf=" currentStep === 2" class="fade-in">  
 <div class="assurance-selection-container">
-    <h2 class="main-title">Sélectionnez votre compagnie d'assurance</h2>
+    <h2 class="main-title">Sélectionnez votre assurance</h2>
+    
     <div class="vehicle-dropdown" 
          [class.open]="isAssuranceDropdownOpen"
          (click)="toggleAssuranceDropdown()" >
@@ -211,19 +213,17 @@
     </div>
         <!-- Footer avec boutons de navigation -->
         <div class="modal-footer">
-            <div *ngIf="currentStep === 1" style="display: flex; gap: 10px;">
-              <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
-              <button type="button" class="btn btn-primary"
-                      [ngStyle]="{
-                        background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
-                        border: 'none'
-                      }"
-                      [disabled]="!vehicleForm.valid || (!scrappingReussi && !isEditMode)"
-                      (click)="nextStep()">
-                Suivant
-              </button>
-            </div>
-
+          <div *ngIf="currentStep === 1">
+            <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
+            <button type="button" class="btn btn-primary" [ngStyle]="{
+                      background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
+                      border: 'none'
+                    }"
+                    [disabled]="!vehicleForm.valid || (!scrappingReussi && !isEditMode)"
+                    (click)="nextStep()">
+              Suivant
+            </button>
+          </div>
           
           <div *ngIf="currentStep === 2">
             <button type="button" class="btn btn-secondary" (click)="prevStep()">Précédent</button>
@@ -259,12 +259,6 @@
         </ng-template>
         
 
-        
-        <!-- Bouton favoris
-        <button class="btn btn-sm position-absolute top-0 end-0 m-2 bg-white rounded-circle p-1 shadow-sm">
-          <i class="bi bi-heart text-muted" style="font-size: 0.8rem;"></i>
-        </button>
-        
       </div>
 
       <div class="card-body p-3">
