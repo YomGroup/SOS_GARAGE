@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { map, tap, switchMap } from 'rxjs/operators';
+import { Observable, BehaviorSubject } from 'rxjs';
+import { map, switchMap, shareReplay } from 'rxjs/operators';
 import { Vehicule, Assure, Expert } from './models-api.interface';
 import { environment } from '../environments/environment';
 
@@ -40,8 +40,19 @@ export interface Dossier {
 })
 export class DossiersService {
   private apiUrl = `${environment.apiUrl}/sinistre`;
+  private allVehicules$: Observable<Vehicule[]>;
+  private refreshVehicules$ = new BehaviorSubject<void>(undefined);
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.allVehicules$ = this.refreshVehicules$.pipe(
+      switchMap(() => this.http.get<Vehicule[]>(`${environment.apiUrl}/vehicule/all`)),
+      shareReplay(1)
+    );
+  }
+
+  public refreshVehiculesCache(): void {
+    this.refreshVehicules$.next(undefined);
+  }
 
   getDossiers(): Observable<Dossier[]> {
     return this.http.get<Dossier[]>(this.apiUrl);
@@ -52,16 +63,12 @@ export class DossiersService {
   }
 
   getVehiculeFromSinistreId(sinistreId: number): Observable<Vehicule | null> {
-    return this.getSinistreById(sinistreId).pipe(
-      switchMap(sinistre => {
-        return this.http.get<Vehicule[]>(`${this.apiUrl.replace('/sinistre', '/vehicule/all')}`).pipe(
-          map(vehicules => {
-            const vehicule = vehicules.find(v => 
-              v.sinistres && v.sinistres.some(s => s.id === sinistreId)
-            );
-            return vehicule || null;
-          })
+    return this.allVehicules$.pipe(
+      map(vehicules => {
+        const vehicule = vehicules.find(v => 
+          v.sinistres && v.sinistres.some(s => s.id === sinistreId)
         );
+        return vehicule || null;
       })
     );
   }
