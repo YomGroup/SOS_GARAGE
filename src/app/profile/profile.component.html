@@ -8,14 +8,16 @@
                         <i class="bi bi-person me-2"></i>Informations personnelles
                     </h5>
                     <div>
-                        <button *ngIf="!isEditing" class="btn btn-sm text-white"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);" (click)="editProfile()">
-                            <i class="bi bi-pencil me-2"></i>Modifier
+                        <button *ngIf="!isEditing" class="btn btn-sm btn-modifier" (click)="editProfile()">
+                        <i class="bi bi-pencil me-2"></i>Modifier
                         </button>
+
                         <button *ngIf="isEditing" class="btn btn-success btn-sm me-2" (click)="saveProfile()">
-                            <i class="bi bi-check me-2"></i>Enregistrer
+                        <i class="bi bi-check me-2"></i>Enregistrer
                         </button>
+
                         <button *ngIf="isEditing" class="btn btn-secondary btn-sm" (click)="cancelEdit()">
-                            <i class="bi bi-x me-2"></i>Annuler
+                        <i class="bi bi-x me-2"></i>Annuler
                         </button>
                     </div>
                 </div>

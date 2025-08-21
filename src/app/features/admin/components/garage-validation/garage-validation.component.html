@@ -1,3 +1,4 @@
+
 <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-6">
 
   <!-- Gestion des Garages -->
@@ -64,6 +65,9 @@
       <!-- Filtres et recherche -->
       <div class="card mb-4">
         <div class="card-body">
+                  <h2 class="mb-3 fw-bold text-primary">
+            <i class="fas fa-filter me-2"></i>Filtres
+          </h2>
           <div class="row align-items-center">
             <div class="col-md-3">
               <select class="form-select" [(ngModel)]="selectedStatus" (change)="loadData()">

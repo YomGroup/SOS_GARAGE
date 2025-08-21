@@ -1,5 +1,666 @@
+/* Variables CSS pour cohérence */
+:root {
+  --primary-blue: #004AAD;
+  --gradient: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
+  --card-shadow: 0 8px 32px rgba(0, 74, 173, 0.08), 0 2px 16px rgba(0, 0, 0, 0.04);
+  --hover-shadow: 0 12px 40px rgba(0, 74, 173, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
+  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Container principal */
+.container-fluid {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animations keyframes */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Cartes de statistiques redesignées */
+.card.shadow-sm {
+  background: var(--gradient);
+  border: none !important;
+  border-radius: 20px;
+  color: white;
+  transition: var(--transition);
+  box-shadow: var(--card-shadow);
+  animation: slideInUp 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.card.shadow-sm::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card.shadow-sm:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--hover-shadow);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
+}
+
+.card.shadow-sm:hover::before {
+  opacity: 1;
+}
+
+/* Icônes des statistiques redesignées */
+.card.shadow-sm .rounded-circle {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%) !important;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 20px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+.card.shadow-sm .rounded-circle::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+  border-radius: 22px;
+  z-index: -1;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.card.shadow-sm:hover .rounded-circle {
+  transform: rotate(10deg) scale(1.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%) !important;
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Textes des statistiques */
+.card.shadow-sm h5 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card.shadow-sm .text-muted {
+  color: rgba(255,255,255,0.8) !important;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  font-size: large;
+  padding-top: 10px;
+}
+
+/* Liste des sinistres - Carte principale */
+.card.shadow-sm.border-0:not(.col-md-6 .card):not(.col-lg-3 .card) {
+  background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+  color: inherit;
+  border-radius: 28px;
+  overflow: visible;
+  box-shadow: var(--card-shadow);
+  border: 2px solid rgba(0, 74, 173, 0.06);
+  backdrop-filter: blur(10px);
+}
+
+/* En-tête de la liste */
+.card-header {
+  padding: 2.5rem 2.5rem 2rem !important;
+  background: linear-gradient(135deg, rgba(0, 74, 173, 0.02) 0%, rgba(255, 255, 255, 0.8) 100%) !important;
+  border-radius: 28px 28px 0 0 !important;
+  border-bottom: none !important;
+  position: relative;
+  z-index: 2;
+}
+
+.card-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 2.5rem;
+  right: 2.5rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg, 
+    transparent, 
+    rgba(0, 74, 173, 0.2), 
+    transparent
+  );
+}
+
+.card-header h5 {
+  color: var(--primary-blue);
+  font-weight: 700;
+  font-size: 1.4rem;
+  margin-bottom: 0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  letter-spacing: -0.02em;
+}
+
+.card-header i {
+  color: var(--primary-blue);
+  font-size: 1.2rem;
+}
+
+/* Items de la liste des sinistres */
+.list-group-item {
+  border: none !important;
+  padding: 2rem !important;
+  margin-bottom: 1rem;
+  border-radius: 20px !important;
+  background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+  box-shadow: 0 4px 16px rgba(0, 74, 173, 0.06);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.list-group-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 74, 173, 0.05), transparent);
+  transition: left 0.6s ease;
+}
+
+.list-group-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 74, 173, 0.12);
+  background: linear-gradient(145deg, #ffffff 0%, #f0f4ff 100%);
+}
+
+.list-group-item:hover::before {
+  left: 100%;
+}
+
 .list-group-item.active {
-    background-color: transparent !important;
-    color: inherit;
-    border-color: transparent;
+  background: linear-gradient(135deg, rgba(0, 74, 173, 0.08) 0%, rgba(139, 46, 184, 0.08) 100%);
+  border-left: 4px solid var(--primary-blue);
+  box-shadow: var(--hover-shadow);
+}
+
+/* Icône véhicule dans la liste */
+.list-group-item .bg-primary {
+  background: var(--gradient) !important;
+  border-radius: 16px !important;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 74, 173, 0.25);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  font-size: 1.3rem;
+  z-index: 1; /* Ajouté */
+}
+.list-group-item .bg-primary i {
+  color: rgb(255, 0, 0);
+}
+
+.list-group-item .bg-primary > * {
+  position: relative;
+  z-index: 2; /* L'icône au-dessus du ::before */
+}
+
+.list-group-item .bg-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+  border-radius: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1; /* Arrière-plan */
+}
+
+/* Titres des véhicules */
+.list-group-item h6 {
+  color: var(--primary-blue);
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+/* Cache UNIQUEMENT la pastille ronde à droite (état roulant / non roulant) */
+.list-group-item .d-flex.justify-content-between > .d-flex:last-child .rounded-circle {
+  display: none !important;
+}
+
+/* Badges de statut améliorés */
+.badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+
+.badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.badge:hover {
+  transform: translateY(-2px) scale(1.05);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.badge:hover::before {
+  left: 100%;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, #ff9500 0%, #fd7e14 100%) !important;
+  color: white;
+  box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+  color: white;
+  box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+.badge.bg-secondary {
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+  color: white;
+  box-shadow: 0 4px 16px rgba(108, 117, 125, 0.3);
+}
+
+.badge.bg-light {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  color: var(--primary-blue);
+  border: 2px solid rgba(0, 74, 173, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* État du véhicule (roulant/non roulant) */
+.list-group-item .bg-success,
+.list-group-item .bg-danger {
+  padding: 0.6rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  transition: var(--transition);
+  border: 2px solid transparent;
+}
+
+.list-group-item .bg-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+}
+
+.list-group-item .bg-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%) !important;
+}
+
+.list-group-item .bg-success:hover,
+.list-group-item .bg-danger:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Chevron indicateur */
+.bi-chevron-down,
+.bi-chevron-up {
+  color: var(--primary-blue);
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.list-group-item:hover .bi-chevron-down,
+.list-group-item:hover .bi-chevron-up {
+  transform: scale(1.2);
+}
+
+/* Section des détails expandus */
+.border-top {
+  border-top: 1px solid rgba(0, 74, 173, 0.1) !important;
+  padding-top: 1.5rem !important;
+  margin-top: 1.5rem !important;
+  
+}
+
+.text-primary {
+  color: var(--primary-blue) !important;
+  font-weight: 600;
+}
+
+.text-primary i {
+  color: var(--primary-blue);
+  margin-right: 0.5rem;
+}
+.text1 {
+  color: #a00015;
+  font-size: medium;
+  padding-top: 10px;
+}
+
+/* État vide */
+.list-group-item.text-center {
+  background: linear-gradient(145deg, #ffffff 0%, #fafbff 100%);
+  border: 2px dashed rgba(0, 74, 173, 0.2);
+  color: #6c757d;
+}
+
+.list-group-item.text-center i {
+  color: rgba(0, 74, 173, 0.3);
+}
+
+.list-group-item.text-center .btn {
+  background: var(--gradient);
+  border: none;
+  color: white;
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(0, 74, 173, 0.3);
+}
+
+.list-group-item.text-center .btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 74, 173, 0.4);
+  color: white;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .card.shadow-sm {
+    margin-bottom: 1rem;
+  }
+  
+  .card.shadow-sm .rounded-circle {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .card.shadow-sm h5 {
+    font-size: 1.5rem;
+  }
+  
+  .list-group-item {
+    padding: 1.5rem !important;
+  }
+  
+  .list-group-item .bg-primary {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .card-header {
+    padding: 1.5rem !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .card.shadow-sm h5 {
+    font-size: 1.2rem;
+  }
+  
+  .list-group-item {
+    padding: 1rem !important;
+  }
+  
+  .badge {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.7rem;
+  }
+}
+
+
+/* Responsive pour mobile */
+@media (max-width: 576px) {
+  .rounded-circle.p-2.text-white {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .bi-car-front,
+  .bi-p-circle {
+    font-size: 1.1rem;
+  }
+  
+  .badge.bg-light.text-dark {
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}
+
+
+@keyframes pulse-danger {
+  0% {
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  }
+  50% {
+    box-shadow: 0 4px 20px rgba(220, 53, 69, 0.6);
+  }
+  100% {
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+  }
+}
+/* ===========================
+   RESPONSIVE ONLY (ADD-ON)
+   =========================== */
+
+/* <= 992px : resserrer un peu les espaces */
+@media (max-width: 992px) {
+  .card-header {
+    padding: 2rem 2rem 1.5rem !important;
+  }
+
+  .list-group-item {
+    padding: 1.5rem !important;
+  }
+
+  .list-group-item .bg-primary {
+    width: 54px;
+    height: 54px;
+    font-size: 1.1rem;
+  }
+
+  .list-group-item h6 {
+    font-size: 1.1rem;
+  }
+
+  .badge {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* <= 768px : basculer l’item de sinistre en mode colonne, badges sur 2 lignes au besoin */
+@media (max-width: 768px) {
+  /* Le bloc principal de chaque item passe en colonne */
+  .list-group-item > .d-flex.align-items-center.justify-content-between {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+  }
+
+  /* Le bloc gauche (icône + textes) garde l’alignement horizontal */
+  .list-group-item > .d-flex.align-items-center.justify-content-between > .d-flex.align-items-center:first-child {
+    gap: 0.75rem;
+  }
+
+  /* Le bloc droit (id + chevron) passe en ligne sous les infos */
+  .list-group-item > .d-flex.align-items-center.justify-content-between > .d-flex:last-child {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .list-group-item .bg-primary {
+    width: 50px;
+    height: 50px;
+    font-size: 1.05rem;
+  }
+
+  .list-group-item h6 {
+    font-size: 1.05rem;
+  }
+
+  /* Badges lisibles et qui peuvent revenir à la ligne */
+  .list-group-item .d-flex.align-items-center { 
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+  }
+
+  .badge {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.76rem;
+  }
+
+  /* Badge technique (statut brut) un peu plus compact */
+  .badge.bg-light.text-dark {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .card.shadow-sm .rounded-circle {
+    width: 56px;
+    height: 56px;
+  }
+
+  .card.shadow-sm h5 {
+    font-size: 1.35rem;
+  }
+}
+
+/* <= 576px : compacter encore, garder aération lisible */
+@media (max-width: 576px) {
+  .container-fluid {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .card-header {
+    padding: 1.25rem 1.25rem 1rem !important;
+  }
+
+  .list-group-item {
+    padding: 1.1rem !important;
+    margin-bottom: 0.85rem;
+  }
+
+  .list-group-item .bg-primary {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px !important;
+    font-size: 1rem;
+  }
+
+  .list-group-item h6 {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .badge {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.74rem;
+  }
+
+  .badge i {
+    font-size: 0.95rem;
+  }
+
+  /* ID + chevron sur une petite ligne propre */
+  .list-group-item > .d-flex.align-items-center.justify-content-between > .d-flex:last-child .badge.bg-light.text-dark {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.55rem;
+  }
+
+  .bi-chevron-down,
+  .bi-chevron-up {
+    font-size: 1rem;
+  }
+
+  /* Padding détails */
+  .border-top {
+    padding-top: 1rem !important;
+    margin-top: 1rem !important;
+  }
+}
+
+/* Ultra compact pour très petits écrans (ex: 360px) */
+@media (max-width: 380px) {
+  .badge {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.72rem;
+  }
+
+  .list-group-item .bg-primary {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+
+  .card.shadow-sm h5 {
+    font-size: 1.1rem;
+  }
 }

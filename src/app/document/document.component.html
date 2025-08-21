@@ -41,7 +41,7 @@
     <!-- Liste des documents -->
     <div class="row">
       <div *ngFor="let item of filteredDocuments" class="col-md-6 col-lg-4 mb-4">
-        <div class="document-card">
+        <div class="document-card" [attr.data-type]="item.doc.type">
           <div class="document-icon">
             <i [class]="getDocumentIconClass(item.doc.type)"></i>
           </div>

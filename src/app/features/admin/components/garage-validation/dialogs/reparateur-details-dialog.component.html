@@ -1,3 +1,4 @@
+
 <div class="dialog-container">
   <div class="dialog-header">
     <h2 mat-dialog-title>
@@ -77,20 +78,27 @@
     </div>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-raised-button color="warn" (click)="rejeterReparateur()" [disabled]="loading" *ngIf="reparateur.isvalids !== 'rejetée' && reparateur.isvalids !== 'valide'">
-      <i class="fas fa-times me-2"></i>Rejeter
-    </button>
-    <button mat-raised-button color="primary" (click)="validerReparateur()" [disabled]="loading" *ngIf="reparateur.isvalids !== 'valide'">
-      <i class="fas fa-check me-2"></i>Valider
-    </button>
-    <button mat-raised-button color="accent" (click)="envoyerMessage()" [disabled]="loading">
-      <i class="fas fa-envelope me-2"></i>Envoyer un message
-    </button>
-    <button mat-raised-button color="warn" (click)="suspendreCompte()" [disabled]="loading" *ngIf="reparateur.isvalids === 'valide'">
-      <i class="fas fa-pause me-2"></i>Suspendre le compte
-    </button>
-  </mat-dialog-actions>
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="warn" (click)="rejeterReparateur()" [disabled]="loading"
+          *ngIf="reparateur.isvalids !== 'rejetée' && reparateur.isvalids !== 'valide'">
+    <i class="fas fa-times me-2"></i>Rejeter
+  </button>
+
+  <button mat-raised-button color="primary" (click)="validerReparateur()" [disabled]="loading"
+          *ngIf="reparateur.isvalids !== 'valide'">
+    <i class="fas fa-check me-2"></i>Valider
+  </button>
+
+  <button mat-raised-button color="accent" (click)="envoyerMessage()" [disabled]="loading">
+    <i class="fas fa-envelope me-2"></i>Envoyer un message
+  </button>
+
+  <button mat-raised-button class="suspendre-btn" (click)="suspendreCompte()" [disabled]="loading"
+          *ngIf="reparateur.isvalids === 'valide'">
+    <i class="fas fa-pause me-2"></i>Suspendre le compte
+  </button>
+</mat-dialog-actions>
+
 
   <div class="loading-overlay" *ngIf="loading">
     <div class="loading-spinner">
