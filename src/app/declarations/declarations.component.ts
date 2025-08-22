@@ -487,9 +487,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
   private fillMandatGestionForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
-    const { nom, prenom, adressePostale, telephone, email } = this.userData;
+    const { nom, prenom, adressePostale, adresse, email } = this.userData;
     const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
-    const adress = 'oulfa';
+    const adress = 'N/A';
     console.log('vehicule:', vehicule);
     console.log('Page index:', pageIndex);
     const now = new Date();
@@ -1131,7 +1131,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       case 3: return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
         (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
-      case 4: return false;
+      case 4: return !!this.constatFile;
       case 5: return this.nomAssure !== '' && this.adresseAssure !== '' && this.telephoneAssure !== '' && this.prenomAssure !== '';
       default: return false;
     }
