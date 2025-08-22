@@ -88,6 +88,7 @@ export class VehiculesComponent implements OnInit {
 
   // Dans ta classe
   loadVehicles(assureId: number): void {
+    console.log('Chargement des véhicules pour l’assure ID :', assureId);
     this.vehiculeService.getVehiculesDataById(assureId).subscribe({
       next: (data: any) => {
         this.vehicles = data;
@@ -338,7 +339,7 @@ export class VehiculesComponent implements OnInit {
         },
         error: (err) => {
           console.error('Erreur lors de l’ajout du véhicule :', err);
-          showError(err);
+          //showError(err);
           finalCallback();
 
         }

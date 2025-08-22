@@ -15,6 +15,7 @@ import { FirebaseStorageService } from '../../services/firebase-storage.service'
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { YousignService } from '../../services/yousign.service';
 
+import { Router } from '@angular/router'
 
 interface Document {
   id: number;
@@ -92,6 +93,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   showAssuranceStep = false;
   currentPhotoStep: number = 1;
   lieuSinistre: string = '';
+  nomAssure: string = '';
+  adresseAssure: string = '';
+  telephoneAssure: string = '';
+  prenomAssure: string = '';
+
   // Ajoutez ces propriétés à votre component
   private documentSignatureRequests: Map<number, string> = new Map();
   private documentSignerIds: Map<number, string> = new Map();
@@ -123,8 +129,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private documentService = inject(DocumentService);
   private firebaseStorageService = inject(FirebaseStorageService);
   private yousignService = inject(YousignService);
+  showProfileAlert = false;
+
   currentCity: string = 'Casablanca';
-  constructor(@Inject(DOCUMENT) private document: Document) {
+  constructor(@Inject(DOCUMENT) private document: Document, private router: Router) {
 
   }
   ngOnInit(): void {
@@ -138,15 +146,25 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           this.assureId = data.id; // adapte selon ta réponse
           this.loadVehicles(this.assureId);
           this.loadUserData();
+
           this.email = this.authService.getToken()?.name || '';
         },
         error: (err) => {
           console.error('Erreur lors de la récupération de l’assure  ID :', err);
         }
       });
+      this.checkProfileCompleteness();
     }
   }
+  checkProfileCompleteness(): boolean {
+    const isProfileComplete = this.nomAssure !== '' &&
+      this.adresseAssure !== '' &&
+      this.telephoneAssure !== '' &&
+      this.prenomAssure !== '';
 
+    this.showProfileAlert = !isProfileComplete;
+    return isProfileComplete;
+  }
   ngOnDestroy() {
     // Nettoyage des URLs blob
     this.documents.forEach(doc => {
@@ -164,13 +182,26 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.documentSignatureRequests.clear();
     this.documentSignerIds.clear();
   }
+  goToProfile() {
+    // Remplacez par votre logique de navigation
+    this.router.navigate(['clientDashboard/profiles']);
+  }
 
+  // Méthode pour fermer l'alerte
+  closeAlert() {
+    this.showProfileAlert = false;
+  }
   private loadUserData(): void {
 
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.userData = data;
         // this.prepareDocumentTemplates();
+        this.nomAssure = data.name || '';
+        this.adresseAssure = data.adresse || '';
+        this.telephoneAssure = data.telephone || '';
+        this.prenomAssure = data.prenom || '';
+
         if (this.selectedVehicle) {
           this.prepareDocumentTemplates();
         }
@@ -1096,12 +1127,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     switch (this.currentStep) {
       case 1:
         return !!this.selectedVehicle;
-      case 2: return true; //return !!this.vehicleStatus;
+      case 2: return !!this.vehicleStatus;
 
       case 3: return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
-        (!!this.incidentDescription || !!this.constatFile);
-      case 4: return this.hasRequiredPhotos();
-      case 5: return false;
+        (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
+      case 4: return false;
+      case 5: return this.nomAssure !== '' && this.adresseAssure !== '' && this.telephoneAssure !== '' && this.prenomAssure !== '';
       default: return false;
     }
   }

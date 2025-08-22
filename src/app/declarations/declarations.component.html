@@ -1,5 +1,23 @@
 <div class="claim-declaration">
       <div class="container">
+        <div class="alert alert-warning alert-dismissible fade show profile-alert" 
+     *ngIf="showProfileAlert" 
+     role="alert">
+  <div class="d-flex align-items-center">
+    <i class="bi bi-exclamation-triangle-fill me-3"></i>
+    <div class="flex-grow-1">
+      <strong>Profil incomplet !</strong>
+      <p class="mb-0">Veuillez mettre à jour votre profil avant de déclarer un sinistre. 
+         Informations manquantes : nom, prénom, adresse ou téléphone.</p>
+    </div>
+    <div class="ms-3">
+      <button type="button" class="btn btn-outline-warning btn-sm me-2" (click)="goToProfile()">
+        <i class="bi bi-person-gear"></i> Mettre à jour le profil
+      </button>
+      <button type="button" class="btn-close" (click)="closeAlert()" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
         <h1>Déclarez un sinistre</h1>
         <p class="instruction">Veillez remplir l'ensemble du formulaire</p>
 
