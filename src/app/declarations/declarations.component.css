@@ -1,5 +1,3 @@
-
-
 /* 1. Correction du progress indicator - cercles séparés par des lignes */
 .progress-indicator {
     display: flex;
@@ -858,26 +856,32 @@ body {
 }
 
 .form-row {
-  display: flex;
-  gap: 20px; /* espace entre les champs */
-  margin-bottom: 20px; /* espace entre les lignes */
-  margin-top: 30px; /* espace au-dessus de la première ligne */
-  flex-wrap: wrap; /* permet aux champs de passer à la ligne si l'espace est insuffisant */
+    display: flex;
+    gap: 20px;
+    /* espace entre les champs */
+    margin-bottom: 20px;
+    /* espace entre les lignes */
+    margin-top: 30px;
+    /* espace au-dessus de la première ligne */
+    flex-wrap: wrap;
+    /* permet aux champs de passer à la ligne si l'espace est insuffisant */
 }
 
 .form-group {
-  flex: 1; /* chaque champ prend la même largeur */
+    flex: 1;
+    /* chaque champ prend la même largeur */
 }
 
 .form-label {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin-bottom: 6px;
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 6px;
 }
+
 .form-label.required::after {
-  content: " *";
-  color: red;
+    content: " *";
+    color: red;
 }
 
 
@@ -1175,10 +1179,13 @@ body {
     resize: vertical;
     line-height: 1.6;
 }
+
 .description-upload-container {
     display: flex;
-    gap: 20px; /* espace entre les deux blocs */
-    align-items: flex-start; /* aligne en haut */
+    gap: 20px;
+    /* espace entre les deux blocs */
+    align-items: flex-start;
+    /* aligne en haut */
 }
 
 /* Bloc description */
@@ -1639,5 +1646,63 @@ body {
         font-size: 20px;
         flex-direction: column;
         gap: 8px;
+    }
+}
+
+/* CSS pour l'alerte profil - À ajouter dans votre fichier CSS */
+.profile-alert {
+    margin-bottom: 20px;
+    border-left: 4px solid #ffc107;
+    background-color: #fff9e6;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-alert .alert-warning {
+    color: #664d03;
+    background-color: #fff9e6;
+    border-color: #ffc107;
+}
+
+.profile-alert i.bi-exclamation-triangle-fill {
+    color: #ffc107;
+    font-size: 1.5rem;
+}
+
+.profile-alert .btn-outline-warning {
+    border-color: #ffc107;
+    color: #664d03;
+    transition: all 0.3s ease;
+}
+
+.profile-alert .btn-outline-warning:hover {
+    background-color: #ffc107;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.profile-alert .btn-close {
+    background-color: transparent;
+    opacity: 0.7;
+}
+
+.profile-alert .btn-close:hover {
+    opacity: 1;
+}
+
+/* Animation d'entrée pour l'alerte */
+.profile-alert.fade.show {
+    animation: slideInDown 0.5s ease-out;
+}
+
+@keyframes slideInDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

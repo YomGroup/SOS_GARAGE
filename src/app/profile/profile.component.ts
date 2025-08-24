@@ -96,6 +96,7 @@ export class ProfileComponent {
     // Ici, ajouter la logique pour sauvegarder les modifications
     this.isEditing = false;
     this.originalData = { ...this.userData };
+    console.log("user", this.originalData);
     this.assureService.updateAssurer(this.userData).subscribe({
       next: (data) => {
         console.log('Profil mis à jour avec succès:', data);

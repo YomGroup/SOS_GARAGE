@@ -33,12 +33,12 @@ export class RegisterComponent {
         email: [''],
         telephone: [''],
         adresse: [''],
-        adressePostale: [''],
-        numeroPermis: [''],
-        typePermis: [''],
-        datePermis: [''],
-        dateObtentionPermis: [''],
-        typeGarantie: [''],
+        // adressePostale: [''],
+        // numeroPermis: [''],
+        // typePermis: [''],
+        // datePermis: [''],
+        // dateObtentionPermis: [''],
+        // typeGarantie: [''],
         password: [''],
         // ... autres champs véhicule
       });
