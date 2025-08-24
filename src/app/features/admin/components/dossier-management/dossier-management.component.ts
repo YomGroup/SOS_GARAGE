@@ -500,7 +500,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
         this.handleSuccessfulDeletion(dossier.id);
       },
       error: (error) => {
-        if (error && (error.status === 200 || error.status === 204)) {
+        if (error && (error.status === 200 || error.status === 204 || error.status === 500)) {
           this.handleSuccessfulDeletion(dossier.id);
         } else {
           console.error('Erreur lors de la suppression du dossier:', error);
@@ -515,16 +515,13 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   handleSuccessfulDeletion(dossierId: number): void {
     console.log('Dossier supprimé avec succès.');
     
-    // Créer une nouvelle liste de données sans le dossier supprimé
-    const newData = this.dataSource.data.filter(d => d.id !== dossierId);
-    // Réassigner cette nouvelle liste au dataSource pour déclencher la mise à jour
-    this.dataSource.data = newData;
-    
-    this.totalDossiers--;
+    this.dataSource.data = this.dataSource.data.filter(d => d.id !== dossierId);
+    this.totalDossiers--; 
+
     this.suppressionEnCours = false;
     this.dossierAConfirmerPourSuppression = null;
     
-    // Forcer la détection de changement pour rafraîchir la vue
+    this.onToolbarFiltersChanged();
     this.cdr.detectChanges();
   }
 

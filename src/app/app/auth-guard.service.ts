@@ -34,30 +34,7 @@ export class AuthGuard implements CanActivate {
       return false;
     }
 
-    // Règle supplémentaire: pour les routes garagiste, vérifier le statut du compte
-    if (requiredRoles.includes('ROLE_GARAGISTE')) {
-      try {
-        const token = await this.keycloakService.getToken();
-        const decoded: any = jwtDecode(token);
-        const keycloakId: string | undefined = decoded?.sub;
-
-        if (keycloakId) {
-          const reparateur = await firstValueFrom(this.reparateurService.getReparateurByKeycloakId(keycloakId));
-          const rawStatus = (reparateur?.isvalids ?? reparateur?.isValids ?? '').toString().toLowerCase();
-          const isValid = rawStatus === 'valide' || rawStatus === 'true';
-
-          if (!isValid) {
-            await this.keycloakService.logout(window.location.origin + '/garage-pending');
-            return false;
-          }
-        }
-      } catch (error) {
-        // En cas d'erreur (ex: non trouvé), par sécurité on bloque l'accès garage
-        console.error('Vérification statut garage échouée:', error);
-        await this.keycloakService.logout(window.location.origin + '/garage-pending');
-        return false;
-      }
-    }
+    
 
     return true;
   }
