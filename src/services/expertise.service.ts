@@ -20,10 +20,34 @@ export class ExpertiseService {
   }
 
   createExpertise(expertise: Expertise): Observable<Expertise> {
+    // --- Notification admin temporaire via Formspree ---
+    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
+    const notificationPayload = {
+        subject: '[SOS Garage] Nouvelle Expertise Créée',
+        message: 'Une nouvelle expertise a été créée.',
+        details: 'Contenu: ' + JSON.stringify(expertise, null, 2)
+    };
+    this.http.post(formspreeUrl, notificationPayload).subscribe({
+        next: () => console.log('Notification temporaire (création expertise) envoyée.'),
+        error: (err) => console.error('Erreur notification temporaire:', err)
+    });
+    // --- Fin de la notification temporaire ---
     return this.http.post<Expertise>(this.apiUrl, expertise);
   }
 
   updateExpertise(expertise: Expertise): Observable<Expertise> {
+    // --- Notification admin temporaire via Formspree ---
+    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
+    const notificationPayload = {
+        subject: '[SOS Garage] Mise à Jour Expertise',
+        message: 'L\'expertise ID ' + expertise.id + ' a été mise à jour.',
+        details: 'Contenu: ' + JSON.stringify(expertise, null, 2)
+    };
+    this.http.post(formspreeUrl, notificationPayload).subscribe({
+        next: () => console.log('Notification temporaire (MAJ expertise) envoyée.'),
+        error: (err) => console.error('Erreur notification temporaire:', err)
+    });
+    // --- Fin de la notification temporaire ---
     return this.http.put<Expertise>(`${this.apiUrl}/${expertise.id}`, expertise);
   }
 
