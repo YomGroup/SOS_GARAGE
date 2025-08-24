@@ -479,28 +479,53 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     // TODO: Implémenter l'attribution à un sinistre
   }
 
+  dossierAConfirmerPourSuppression: DossierAffichage | null = null;
+
   supprimerDossier(dossier: DossierAffichage): void {
-    if (this.suppressionEnCours) return; // Éviter les clics multiples
-    
-    if (confirm(`Êtes-vous sûr de vouloir supprimer le dossier N°${dossier.numero} ?`)) {
-      this.suppressionEnCours = true;
-      
-      this.dossiersService.deleteDossier(dossier.id).subscribe({
-        next: () => {
-          console.log('Dossier supprimé avec succès');
-          this.dataSource.data = this.dataSource.data.filter(d => d.id !== dossier.id);
-          this.dataSource._updateChangeSubscription();
-          this.totalDossiers--;
+    this.dossierAConfirmerPourSuppression = dossier;
+    this.cdr.detectChanges();
+  }
+
+  annulerSuppression(): void {
+    this.dossierAConfirmerPourSuppression = null;
+    this.cdr.detectChanges();
+  }
+
+  confirmerSuppression(dossier: DossierAffichage): void {
+    if (this.suppressionEnCours || !dossier) return;
+
+    this.suppressionEnCours = true;
+    this.dossiersService.deleteDossier(dossier.id).subscribe({
+      next: () => {
+        this.handleSuccessfulDeletion(dossier.id);
+      },
+      error: (error) => {
+        if (error && (error.status === 200 || error.status === 204)) {
+          this.handleSuccessfulDeletion(dossier.id);
+        } else {
+          console.error('Erreur lors de la suppression du dossier:', error);
           this.suppressionEnCours = false;
+          this.dossierAConfirmerPourSuppression = null;
           this.cdr.detectChanges();
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression:', error);
-          alert('Erreur lors de la suppression du dossier');
-          this.suppressionEnCours = false;
         }
-      });
-    }
+      }
+    });
+  }
+
+  handleSuccessfulDeletion(dossierId: number): void {
+    console.log('Dossier supprimé avec succès.');
+    
+    // Créer une nouvelle liste de données sans le dossier supprimé
+    const newData = this.dataSource.data.filter(d => d.id !== dossierId);
+    // Réassigner cette nouvelle liste au dataSource pour déclencher la mise à jour
+    this.dataSource.data = newData;
+    
+    this.totalDossiers--;
+    this.suppressionEnCours = false;
+    this.dossierAConfirmerPourSuppression = null;
+    
+    // Forcer la détection de changement pour rafraîchir la vue
+    this.cdr.detectChanges();
   }
 
   setCardView(isCard: boolean) {

@@ -189,7 +189,15 @@
             <div class="dossier-actions">
               <button class="btn-action btn-voir" title="Voir" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, false)"><span class="btn-text">Voir</span></button>
               <button class="btn-action btn-modifier" title="Modifier" (click)="$event.stopPropagation(); ouvrirDossierView(dossier, true)"><span class="btn-text">Modifier</span></button>
-              <button class="btn-action btn-supprimer" title="Supprimer" (click)="$event.stopPropagation(); supprimerDossier(dossier)"><i class="fas fa-trash"></i></button>
+              
+              <ng-container *ngIf="dossierAConfirmerPourSuppression !== dossier">
+                <button class="btn-action btn-supprimer" title="Supprimer" (click)="$event.stopPropagation(); supprimerDossier(dossier)"><i class="fas fa-trash"></i></button>
+              </ng-container>
+
+              <div *ngIf="dossierAConfirmerPourSuppression === dossier" class="d-flex gap-2 w-100" (click)="$event.stopPropagation()">
+                <button class="btn btn-sm btn-outline-danger w-50" (click)="confirmerSuppression(dossier)">Oui, sûr</button>
+                <button class="btn btn-sm btn-outline-secondary w-50" (click)="annulerSuppression()">Non</button>
+              </div>
             </div>
           </div>
         </div>
@@ -224,6 +232,7 @@
                 <td>{{ formatDate(dossier.dateCreation) }}</td>
                 <td>
                   <div class="d-flex gap-2">
+                    <div class="d-flex gap-2">
                     <button
                       class="btn btn-sm btn-outline-primary"
                       title="Voir"
@@ -238,13 +247,22 @@
                     >
                       <i class="fas fa-edit"></i>
                     </button>
-                    <button
-                      class="btn btn-sm btn-outline-danger"
-                      title="Supprimer"
-                      (click)="supprimerDossier(dossier)"
-                    >
-                      <i class="fas fa-trash"></i>
-                    </button>
+                    
+                    <ng-container *ngIf="dossierAConfirmerPourSuppression !== dossier">
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        title="Supprimer"
+                        (click)="supprimerDossier(dossier)"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </ng-container>
+
+                    <div *ngIf="dossierAConfirmerPourSuppression === dossier" class="d-flex gap-1">
+                      <button class="btn btn-sm btn-danger" (click)="confirmerSuppression(dossier)">Oui</button>
+                      <button class="btn btn-sm btn-secondary" (click)="annulerSuppression()">Non</button>
+                    </div>
+                  </div>
                   </div>
                 </td>
               </tr>

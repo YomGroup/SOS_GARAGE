@@ -82,7 +82,7 @@
                 </div>    
               </div>
               <div class="dossier-numero-badge">
-                <span class="numero-text">M {{ mission.id }}</span>
+                <span class="numero-text">Dossier #{{ mission.sinistre?.id }}</span>
               </div>
             </div>
             <div class="dossier-statut-badge">
@@ -143,6 +143,7 @@
       <table class="table table-hover">
         <thead>
           <tr>
+            <th>Dossier #</th>
             <th>Véhicule</th>
             <th>Statut</th>
             <th>Date réception</th>
@@ -154,6 +155,7 @@
         <tbody>
           <ng-container *ngIf="missionsFiltresFiltrageAvance().length; else noMissionTable">
             <tr *ngFor="let mission of missionsFiltresPagine">
+              <td>{{ mission.sinistre?.id }}</td>
               <td>{{ getVehiculeForMission(mission)?.immatriculation || 'N/A' }}</td>
               <td>
                 <span class="badge" [ngClass]="getStatutClass(mission.statut ?? '')">
