@@ -128,6 +128,12 @@ export interface Reparateur {
     assurance: boolean;
     certification: boolean;
   };
+  nombreVehiculeMois?: number;
+  vehiculesPrets?: string[];
+  agreements?: string[];
+  kbis?: string;
+  rcPro?: string;
+  assuranceRcPro?: string;
 }
 
 // Interface Sinistre

@@ -139,6 +139,81 @@
                         </div>
                     </div>
                 </div>
+                <!-- Engagements et Services -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-handshake me-2"></i>Engagements et Services</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Véhicules de prêt ({{ reparateur.vehiculesPrets?.length || 0 }})</h6>
+                                <div class="d-flex justify-content-end mb-3" *ngIf="isEditing">
+                                    <button class="btn btn-sm btn-outline-primary" type="button" (click)="addVehiculePretImages()">
+                                        <i class="fas fa-images me-2"></i>Ajouter des images
+                                    </button>
+                                </div>
+                                <ng-container *ngIf="reparateur?.vehiculesPrets?.length; else aucuneImageVehiculePret">
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                        <div *ngFor="let img of reparateur?.vehiculesPrets; let i = index" style="position:relative;">
+                                            <img [src]="img" alt="Véhicule de prêt" style="width:90px;height:90px;object-fit:cover;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+                                            <button type="button" class="btn btn-sm btn-danger" (click)="removeVehiculePretImage(i)" style="position:absolute;top:-6px;right:-6px;border-radius:50%;padding:2px 6px;" *ngIf="isEditing">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <ng-template #aucuneImageVehiculePret><span class="text-muted">Aucun véhicule de prêt</span></ng-template>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Agréments</h6>
+                                <div *ngIf="!isEditing">
+                                    <ul>
+                                        <li *ngFor="let agreement of reparateur.agreements">{{ agreement }}</li>
+                                    </ul>
+                                </div>
+                                <div *ngIf="isEditing">
+                                    <label class="form-label">Liste des agréments (séparés par une virgule)</label>
+                                    <textarea class="form-control" [(ngModel)]="agreementsString" rows="2" placeholder="Ex: MAAF, AXA, ..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Informations Légales -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Informations Légales</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Extrait Kbis</label>
+                                <div *ngIf="!isEditing">
+                                    <a *ngIf="reparateur.kbis" [href]="reparateur.kbis" target="_blank">Voir le document</a>
+                                    <span *ngIf="!reparateur.kbis">Non fourni</span>
+                                </div>
+                                <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.kbis" placeholder="Lien vers le Kbis">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">RC Pro</label>
+                                <div *ngIf="!isEditing">
+                                    <a *ngIf="reparateur.rcPro" [href]="reparateur.rcPro" target="_blank">Voir le document</a>
+                                    <span *ngIf="!reparateur.rcPro">Non fourni</span>
+                                </div>
+                                <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.rcPro" placeholder="Lien vers la RC Pro">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Assurance RC Pro</label>
+                                <div *ngIf="!isEditing">
+                                    <a *ngIf="reparateur.assuranceRcPro" [href]="reparateur.assuranceRcPro" target="_blank">Voir le document</a>
+                                    <span *ngIf="!reparateur.assuranceRcPro">Non fourni</span>
+                                </div>
+                                <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.assuranceRcPro" placeholder="Lien vers l'assurance">
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Panel latéral -->
             <div class="col-12 col-md-4">
@@ -156,23 +231,12 @@
                                 <i class="fas fa-warehouse"></i>
                             </ng-template>
                         </div>
-                        <div *ngIf="!isEditing">
-                            <div *ngIf="reparateur.logo">
-                                <img [src]="reparateur.logo" alt="Logo du garage" style="max-width:120px;max-height:120px;" />
-                            </div>
-                            <div *ngIf="!reparateur.logo" class="text-muted">Aucun logo enregistré</div>
-                        </div>
                         <div *ngIf="isEditing">
                             <div class="mb-2">
                                 <button type="button" class="btn btn-sm btn-outline-primary" (click)="changeLogo()">
-                                    <i class="fas fa-upload me-2"></i>Téléverser un logo
+                                    <i class="fas fa-upload me-2"></i>Changer le logo
                                 </button>
                             </div>
-                        </div>
-                        <div *ngIf="!isEditing">
-                            <button class="btn btn-outline-custom" (click)="changeLogo()">
-                                <i class="fas fa-upload me-2"></i>Changer le logo
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -207,6 +271,15 @@
                             <div class="stat-info">
                                 <span class="stat-number">{{ stats.anneesActivite }}</span>
                                 <span class="stat-label">Années d'activité</span>
+                            </div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-icon">
+                                <i class="fas fa-car-side text-success"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-number">{{ reparateur.nombreVehiculeMois || 0 }}</span>
+                                <span class="stat-label">Véhicules / mois</span>
                             </div>
                         </div>
                     </div>
@@ -257,4 +330,4 @@
             <ng-template #aucuneImage><span class="text-muted">Aucune image</span></ng-template>
         </div>
     </div>
-</div> 
+</div>  

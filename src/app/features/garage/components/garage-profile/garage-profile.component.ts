@@ -24,9 +24,12 @@ export class GarageProfileComponent implements OnInit {
   isEditing: boolean = false;
   originalReparateur: Reparateur | null = null;
   serviceProposeString: string = '';
+  agreementsString: string = '';
   uploadingLogo: boolean = false;
   uploadingImages: boolean = false;
   deletingImageIndex: number | null = null;
+  uploadingVehiculePretImages: boolean = false;
+  deletingVehiculePretImageIndex: number | null = null;
 
   stats = {
     vehiculesRepares: 0,
@@ -41,7 +44,7 @@ export class GarageProfileComponent implements OnInit {
     private snackBar: MatSnackBar,
     private cdr: ChangeDetectorRef,
     private storageService: FirebaseStorageService
-  ) {}
+  ){}
 
   ngOnInit(): void {
     this.loadGarageProfile();
@@ -83,6 +86,7 @@ export class GarageProfileComponent implements OnInit {
         this.reparateur = reparateur;
         this.originalReparateur = { ...reparateur };
         this.serviceProposeString = (reparateur.servicePropose || []).join(', ');
+        this.agreementsString = (reparateur.agreements || []).join(', ');
         this.loadStats();
         this.loading = false;
         this.cdr.detectChanges();
@@ -109,6 +113,7 @@ export class GarageProfileComponent implements OnInit {
         this.reparateur = reparateur;
         this.originalReparateur = { ...reparateur };
         this.serviceProposeString = (reparateur.servicePropose || []).join(', ');
+        this.agreementsString = (reparateur.agreements || []).join(', ');
         this.loadStats();
         this.loading = false;
         this.cdr.detectChanges();
@@ -145,6 +150,7 @@ export class GarageProfileComponent implements OnInit {
     this.isEditing = true;
     this.originalReparateur = this.reparateur ? {...this.reparateur} : null;
     this.serviceProposeString = (this.reparateur?.servicePropose || []).join(', ');
+    this.agreementsString = (this.reparateur?.agreements || []).join(', ');
     this.cdr.detectChanges();
   }
 
@@ -152,6 +158,7 @@ export class GarageProfileComponent implements OnInit {
     this.isEditing = false;
     this.reparateur = this.originalReparateur ? {...this.originalReparateur} : null;
     this.serviceProposeString = (this.reparateur?.servicePropose || []).join(', ');
+    this.agreementsString = (this.reparateur?.agreements || []).join(', ');
     this.cdr.detectChanges();
   }
 
@@ -164,7 +171,8 @@ export class GarageProfileComponent implements OnInit {
     // Préparer les données
     const updatedReparateur = this.buildUpdatePayload({
       ...this.reparateur,
-      servicePropose: this.serviceProposeString.split(',').map(s => s.trim()).filter(s => s)
+      servicePropose: this.serviceProposeString.split(',').map(s => s.trim()).filter(s => s),
+      agreements: this.agreementsString.split(',').map(s => s.trim()).filter(s => s)
     } as Reparateur);
 
     this.reparateurService.updateReparateur(this.reparateur.id, updatedReparateur).subscribe({
@@ -297,6 +305,80 @@ export class GarageProfileComponent implements OnInit {
     }
   }
 
+  // Upload and append vehicule pret images to the gallery and persist to backend
+  addVehiculePretImages(): void {
+    if (!this.reparateur?.id) { return; }
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.multiple = true;
+    input.onchange = async (event: any) => {
+      const files: File[] = Array.from(event.target.files || []);
+      if (!files.length) { return; }
+      this.uploadingVehiculePretImages = true; this.cdr.detectChanges();
+      try {
+        const results = await Promise.allSettled(
+          files.map(f => firstValueFrom(this.storageService.uploadVehiculePretImage(f, this.reparateur!.id!)))
+        );
+        const succeeded = results.filter(r => r.status === 'fulfilled') as PromiseFulfilledResult<string>[];
+        const failed = results.filter(r => r.status === 'rejected');
+        if (succeeded.length === 0) {
+          throw new Error('Aucun fichier n\'a pu être uploadé');
+        }
+        const urls = succeeded.map(r => r.value);
+        const existing = Array.isArray(this.reparateur!.vehiculesPrets) ? this.reparateur!.vehiculesPrets : [];
+        const updatedImages = [...existing, ...urls];
+        this.reparateur!.vehiculesPrets = updatedImages;
+        const payload = this.buildUpdatePayload(this.reparateur!);
+        try {
+          await firstValueFrom(this.reparateurService.updateReparateurPatchText(this.reparateur!.id!, payload));
+        } catch {
+          await firstValueFrom(this.reparateurService.updateReparateurText(this.reparateur!.id!, payload));
+        }
+        const msg = failed.length > 0
+          ? `Images ajoutées (${succeeded.length}), ${failed.length} échec(s)`
+          : 'Images ajoutées avec succès';
+        this.snackBar.open(msg, 'Fermer', { duration: 3500 });
+      } catch (e: any) {
+        console.error('Upload vehicule pret images error:', e);
+        const errMsg = (e && e.message) ? e.message : 'Erreur lors de l\'upload des images';
+        this.snackBar.open(errMsg, 'Fermer', { duration: 4000 });
+      } finally {
+        this.uploadingVehiculePretImages = false; this.cdr.detectChanges();
+      }
+    };
+    input.click();
+  }
+
+  async removeVehiculePretImage(index: number): Promise<void> {
+    if (!this.reparateur?.id) { return; }
+    const images = Array.isArray(this.reparateur.vehiculesPrets) ? [...this.reparateur.vehiculesPrets] : [];
+    if (index < 0 || index >= images.length) { return; }
+    const url = images[index];
+    this.deletingVehiculePretImageIndex = index; this.cdr.detectChanges();
+    try {
+      // Try to delete the file from Firebase if possible
+      await firstValueFrom(this.storageService.deleteFileByUrl(url));
+    } catch {
+      // ignore deletion errors; still remove reference
+    }
+    try {
+      const updated = images.filter((_, i) => i !== index);
+      this.reparateur.vehiculesPrets = updated;
+      const payload = this.buildUpdatePayload(this.reparateur);
+      try {
+        await firstValueFrom(this.reparateurService.updateReparateurPatchText(this.reparateur.id!, payload));
+      } catch {
+        await firstValueFrom(this.reparateurService.updateReparateurText(this.reparateur.id!, payload));
+      }
+      this.snackBar.open('Image supprimée', 'Fermer', { duration: 2500 });
+    } catch (e: any) {
+      this.snackBar.open('Erreur lors de la suppression', 'Fermer', { duration: 3000 });
+    } finally {
+      this.deletingVehiculePretImageIndex = null; this.cdr.detectChanges();
+    }
+  }
+
   private buildUpdatePayload(rep: Reparateur): Partial<Reparateur> {
     // Keep only updatable fields; avoid readonly fields and unknown properties
     return {
@@ -320,7 +402,13 @@ export class GarageProfileComponent implements OnInit {
       nombreVehiculeReparee: rep.nombreVehiculeReparee != null ? Number(rep.nombreVehiculeReparee) : 0,
       nombreEmployes: rep.nombreEmployes != null ? Number(rep.nombreEmployes) : 0,
       logo: rep.logo ?? '',
-      imagesReparations: Array.isArray(rep.imagesReparations) ? rep.imagesReparations : []
+      imagesReparations: Array.isArray(rep.imagesReparations) ? rep.imagesReparations : [],
+      nombreVehiculeMois: rep.nombreVehiculeMois != null ? Number(rep.nombreVehiculeMois) : 0,
+      vehiculesPrets: Array.isArray(rep.vehiculesPrets) ? rep.vehiculesPrets : [],
+      agreements: Array.isArray(rep.agreements) ? rep.agreements : [],
+      kbis: rep.kbis ?? '',
+      rcPro: rep.rcPro ?? '',
+      assuranceRcPro: rep.assuranceRcPro ?? ''
     } as Partial<Reparateur>;
   }
 }

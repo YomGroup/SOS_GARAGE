@@ -51,6 +51,7 @@
           <div class="info-item"><span class="label">Année(s) d'expérience :</span><span class="value">{{ reparateur.anneeExperience }}</span></div>
           <div class="info-item"><span class="label">Véhicules réparés :</span><span class="value">{{ reparateur.nombreVehiculeReparee }}</span></div>
           <div class="info-item"><span class="label">Employés :</span><span class="value">{{ reparateur.nombreEmployes }}</span></div>
+          <div class="info-item"><span class="label">Véhicules / mois :</span><span class="value">{{ reparateur.nombreVehiculeMois || 0 }}</span></div>
         </div>
       </div>
       <hr />
@@ -74,6 +75,52 @@
           </mat-chip-listbox>
         </ng-container>
         <ng-template #noServices><span class="value">—</span></ng-template>
+      </div>
+      <hr />
+       <div class="info-section">
+        <h3><i class="fas fa-handshake me-2"></i>Engagements et Services</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">Véhicules de prêt ({{ reparateur.vehiculesPrets?.length || 0 }}):</span>
+                <ng-container *ngIf="reparateur.vehiculesPrets?.length; else aucuneImageVehiculePret">
+                    <div class="mini-gallery" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                        <img *ngFor="let img of reparateur.vehiculesPrets" [src]="img" alt="Véhicule de prêt" style="max-width:70px;max-height:70px;border-radius:4px;box-shadow:0 1px 4px #0001;" />
+                    </div>
+                </ng-container>
+                <ng-template #aucuneImageVehiculePret><span class="text-muted">Aucun véhicule de prêt</span></ng-template>
+            </div>
+            <div class="info-item">
+                <span class="label">Agréments:</span>
+                <span class="value">{{ (reparateur.agreements || []).join(', ') || '—' }}</span>
+            </div>
+        </div>
+      </div>
+      <hr />
+      <div class="info-section">
+        <h3><i class="fas fa-file-alt me-2"></i>Informations Légales</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="label">Extrait Kbis:</span>
+                <span class="value">
+                    <a *ngIf="reparateur.kbis" [href]="reparateur.kbis" target="_blank">Voir le document</a>
+                    <span *ngIf="!reparateur.kbis">Non fourni</span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="label">RC Pro:</span>
+                <span class="value">
+                    <a *ngIf="reparateur.rcPro" [href]="reparateur.rcPro" target="_blank">Voir le document</a>
+                    <span *ngIf="!reparateur.rcPro">Non fourni</span>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="label">Assurance RC Pro:</span>
+                <span class="value">
+                    <a *ngIf="reparateur.assuranceRcPro" [href]="reparateur.assuranceRcPro" target="_blank">Voir le document</a>
+                    <span *ngIf="!reparateur.assuranceRcPro">Non fourni</span>
+                </span>
+            </div>
+        </div>
       </div>
     </div>
   </mat-dialog-content>

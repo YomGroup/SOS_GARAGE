@@ -43,6 +43,14 @@ export class FirebaseStorageService {
     return from(uploadBytes(fileRef, file)).pipe(switchMap(() => getDownloadURL(fileRef)));
   }
 
+  // Upload vehicule pret images and return the public URL
+  uploadVehiculePretImage(file: File, garageId: number): Observable<string> {
+    const safeName = encodeURIComponent(file.name);
+    const filePath = `garages/${garageId}/vehicules-prets/${Date.now()}_${safeName}`;
+    const fileRef = ref(storage, filePath);
+    return from(uploadBytes(fileRef, file)).pipe(switchMap(() => getDownloadURL(fileRef)));
+  }
+
   uploadFactureFile(file: File, missionId: number): Observable<string> {
     return from(this.uploadToFirebase(file, missionId, 'facture'));
   }
