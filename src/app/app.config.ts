@@ -46,11 +46,11 @@ export const appConfig: ApplicationConfig = {
       multi: true,
       deps: [KeycloakService]
     },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: ApiInterceptor,
-      multi: true
-    },
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: ApiInterceptor,
+    //   multi: true
+    // },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpCacheInterceptor,

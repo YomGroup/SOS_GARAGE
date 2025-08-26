@@ -7,6 +7,11 @@ export class ApiInterceptor implements HttpInterceptor {
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // Si l'URL contient notre API externe, on supprime les headers d'authentification
     if (request.url.includes('sosmongarage-production.up.railway.app')) {
+      // Si la requête attend du texte, ne pas forcer les headers JSON
+      if (request.responseType === 'text') {
+        return next.handle(request);
+      }
+
       console.log('API externe détectée, suppression des headers d\'authentification');
       
       // Créer une nouvelle requête sans les headers d'authentification

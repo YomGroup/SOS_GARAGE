@@ -44,7 +44,7 @@ export class RegisterComponent {
       });
     } else if (this.userType === 'garagiste') {
       this.registerForm = this.fb.group({
-        prenom: ['', Validators.required],
+        nomDuGarage: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
         telephone: ['', Validators.required],
         adresse: ['', Validators.required],
@@ -85,14 +85,25 @@ export class RegisterComponent {
         }
       });
     } else if (this.userType === 'garagiste') {
-      const formData = {
-        ...this.registerForm.value,
-        name: this.registerForm.value.prenom, // ou un champ 'nom' à ajouter
-        isvalids: false,
-        missions: []
+      const formValue = this.registerForm.value;
+      const reparateurPayload = {
+        ...formValue,
+        name: formValue.nomDuGarage,
+        prenom: formValue.nomDuGarage,
+        isValids: "En attente",
+        codePostal: "",
+        ville: "",
+        commission: 0,
+        siret: "",
+        servicePropose: [],
+        anneeExperience: 0,
+        nombreVehiculeReparee: 0,
+        nombreEmployes: 0,
+        logo: "",
+        imagesReparations: [],
       };
 
-      this.authService.registerGaragistre(formData).subscribe({
+      this.authService.registerGaragistre(reparateurPayload).subscribe({
         next: () => {
           Swal.fire({
             icon: 'success',
@@ -105,11 +116,13 @@ export class RegisterComponent {
           this.userType = null;
         },
         error: (error) => {
-          console.error('Erreur API :', error.error);
+          console.error('Erreur API :', error); // Log the full error object
+          const errorMessage = error.error?.message || error.message || error.error || error;
+          console.error('Message d\'erreur brut:', errorMessage);
           Swal.fire({
             icon: 'error',
             title: 'Erreur serveur',
-            text: error.error?.message || 'Une erreur est survenue. Veuillez réessayer.',
+            text: 'Une erreur est survenue. ' + (typeof errorMessage === 'string' ? errorMessage : 'Veuillez réessayer.'),
             confirmButtonColor: '#d33'
           });
         }
