@@ -233,13 +233,10 @@
 </div>
 <!-- Step 4: Photos -->
 <div class="step-content" *ngIf="currentStep === 4">
-   <div class="upload-section" >
+ 
+
+  <div class="upload-section">
     <div class="section-header">
-      <!--<button class="btn-back" (click)="resetDeclarationMethod()">
-        <i class="bi bi-arrow-left"></i> Retour
-      <button class="btn-back" (click)="resetDeclarationMethod()">
-        <i class="bi bi-arrow-left"></i> Retour
-      </button>-->
       <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
     </div>
     
@@ -275,48 +272,102 @@
       </p>
     </div>
   </div>
-  
  
+</div>
+
+<!-- Warning étape garage (entre étape 4 et 5) -->
+<div class="step-content warning-step" *ngIf="showGarageWarningStep">
+  <div class="warning-container">
+    <div class="warning-icon">
+      <i class="bi bi-info-circle-fill"></i>
+    </div>
+    <h2>Information importante</h2>
+    <div class="warning-message">
+      <p>Nous vous informons que certaines informations concernant le garage partenaire 
+         (nom, adresse, coordonnées) seront automatiquement renseignées dans vos documents 
+         après votre signature électronique.</p>
+      <p>Ces informations sont nécessaires pour le traitement de votre dossier et 
+         correspondent au garage agréé le plus proche de votre localisation.</p>
+    </div>
+    
+    <div class="warning-actions">
+      <button class="btn-decline" (click)="declineGarageWarning()">
+        <i class="bi bi-x-circle"></i> Retour
+      </button>
+      <button class="btn-accept" (click)="acceptGarageWarning()">
+        <i class="bi bi-check-circle"></i> J'accepte et je continue
+      </button>
+    </div>
+  </div>
 </div>
         <!-- Step 5: Document Signing -->
       <!-- Step 5: Document Signing -->
 <div class="step-content" *ngIf="currentStep === 5">
-  <div class="document-signing" *ngIf="!allDocumentsSigned">
-    
-  <div class="odcument-preview">
-  <p class="text-center fw-semibold text-muted p-2">Veuillez lire attentivement le document avant de le signer.</p>
-
-  <div class="document-content">
-    <pdf-viewer 
-      [src]="currentPdf"
-      [render-text]="true"
-      [show-all]="true"
-      style="width: 100%; height: 70vh; border: 1px solid #ddd;"
-      (error)="currentPdfError = true">
-    </pdf-viewer>
-
-    <div *ngIf="currentPdfError" class="alert alert-danger mt-3">
-      Le document n'a pas pu être chargé. Veuillez réessayer.
+   <!-- Warning avant signature (affiché seulement si pas encore accepté) -->
+  <div class="signature-warning" *ngIf="!hasAcceptedGarageWarning">
+    <div class="warning-container compact">
+      <div class="warning-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <h3>Avant de commencer la signature</h3>
+      <div class="warning-message">
+        <p>Veuillez noter que les informations du garage partenaire 
+           (nom, adresse, coordonnées) seront automatiquement ajoutées 
+           à vos documents après signature.</p>
+      </div>
+      
+      <label class="custom-checkbox">
+        <input type="checkbox" [(ngModel)]="hasAcceptedGarageWarning" />
+        <span class="checkmark"></span>
+        <span class="label-text">J'accepte que les informations du garage soient ajoutées aux documents</span>
+      </label>
     </div>
   </div>
 
-  <div class="signature-controls p-3 text-center">
- <label class="custom-checkbox">
-  <input type="checkbox" [(ngModel)]="isChecked" />
-  <span class="checkmark"></span>
-  <span class="label-text">Je certifie avoir lu et approuvé le document {{ currentDocument }}</span>
-</label>
-
-
-    <button class="btn  btn-sign text-white"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"
-            (click)="signDocument()" 
-            [disabled]="!isChecked || isCurrentDocumentSigned || isSigning">
-      <span *ngIf="!isSigning">Signer le document</span>
-      <span *ngIf="isSigning">Signature en cours...</span>
-    </button>
+  <!-- Section signature (affichée seulement si warning accepté) -->
+  <div class="document-signing" *ngIf="!allDocumentsSigned && hasAcceptedGarageWarning">
+       <!-- Warning intégré à l'étape 4 -->
+  <div class="info-banner">
+    <div class="info-banner-content">
+      <i class="bi bi-info-circle"></i>
+      <div class="info-text">
+        <strong>Information :</strong> Les informations du garage partenaire seront automatiquement 
+        ajoutées à vos documents après signature.
+      </div>
+    </div>
   </div>
-</div>
+    <div class="document-preview">
+      <p class="text-center fw-semibold text-muted p-2">Veuillez lire attentivement le document avant de le signer.</p>
 
+      <div class="document-content">
+        <pdf-viewer 
+          [src]="currentPdf"
+          [render-text]="true"
+          [show-all]="true"
+          style="width: 100%; height: 70vh; border: 1px solid #ddd;"
+          (error)="currentPdfError = true">
+        </pdf-viewer>
+
+        <div *ngIf="currentPdfError" class="alert alert-danger mt-3">
+          Le document n'a pas pu être chargé. Veuillez réessayer.
+        </div>
+      </div>
+
+      <div class="signature-controls p-3 text-center">
+        <label class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="isChecked" />
+          <span class="checkmark"></span>
+          <span class="label-text">Je certifie avoir lu et approuvé le document {{ currentDocument }}</span>
+        </label>
+
+        <button class="btn btn-sign text-white" style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"
+                (click)="signDocument()" 
+                [disabled]="!isChecked || isCurrentDocumentSigned || isSigning">
+          <span *ngIf="!isSigning">Signer le document</span>
+          <span *ngIf="isSigning">Signature en cours...</span>
+        </button>
+      </div>
+    </div>
   </div>
 
 
