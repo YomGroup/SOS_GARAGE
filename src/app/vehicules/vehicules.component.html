@@ -165,11 +165,17 @@
     <h2 class="main-title">Sélectionnez votre assurance</h2>
     
     <div class="vehicle-dropdown" 
-         [class.open]="isAssuranceDropdownOpen"
-         (click)="toggleAssuranceDropdown()" >
-      <span>{{ selectedAssurance || 'Sélectionner une assurance' }}</span>
-      <i class="dropdown-icon bi bi-chevron-down"></i>
-    </div>
+     [class.open]="isAssuranceDropdownOpen"
+     (click)="toggleAssuranceDropdown()">
+  <span>{{ selectedAssurance || 'Sélectionner une assurance' }}</span>
+  <i class="dropdown-icon bi bi-chevron-down"></i>
+</div>
+<input type="hidden" name="selectedAssurance"
+       [(ngModel)]="selectedAssurance" required />
+<div *ngIf="vehicleForm.submitted && !selectedAssurance" class="text-danger small mt-1">
+  Vous devez sélectionner une assurance
+</div>
+
 
     <ul class="dropdown-list" *ngIf="isAssuranceDropdownOpen">
       <li *ngFor="let assurance of assurances" 
@@ -186,21 +192,29 @@
   <div class="formule-container">
   <h6 class="formule-title">Votre formule d'assurance</h6>
   <div class="formule-options">
-    <div class="formule-option" *ngFor="let option of assuranceOptions">
-      <ng-container *ngIf="shouldDisplay(option.id)">
-        <label class="option-label">
-          <input
-            type="checkbox"
-            [checked]="newVehicle.typeAssurence.includes(option.id)"
-            (change)="onToggleAssurance(option.id, $event)"
-            name="assurance-{{option.id}}"
-          />
-          <span class="checkmark"></span>
-          <span class="option-text">{{ option.name }}</span>
-        </label>
-      </ng-container>
-    </div>
+  <div class="formule-option" *ngFor="let option of assuranceOptions">
+    <ng-container *ngIf="shouldDisplay(option.id)">
+      <label class="option-label">
+        <input
+          type="checkbox"
+          [checked]="newVehicle.typeAssurence.includes(option.id)"
+          (change)="onToggleAssurance(option.id, $event)"
+          name="assurance-{{option.id}}"
+        />
+        <span class="checkmark"></span>
+        <span class="option-text">{{ option.name }}</span>
+      </label>
+    </ng-container>
   </div>
+</div>
+<!-- Champ caché obligatoire -->
+<input type="hidden" name="typeAssurence"
+       [(ngModel)]="newVehicle.typeAssurence"
+       required />
+<div *ngIf="vehicleForm.submitted && (!newVehicle.typeAssurence || newVehicle.typeAssurence.length === 0)" 
+     class="text-danger small mt-1">
+  Vous devez choisir au moins une formule d’assurance
+</div>
 </div>
 <div *ngIf="loadingSubmit" class="loader"></div>
 
