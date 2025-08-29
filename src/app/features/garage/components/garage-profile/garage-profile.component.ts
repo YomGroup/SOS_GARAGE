@@ -139,8 +139,11 @@ export class GarageProfileComponent implements OnInit {
   }
 
   private calculateYearsActivity(): number {
+    // Priorité à la valeur saisie/stockée d'expérience si disponible
+    if (this.reparateur?.anneeExperience != null && Number(this.reparateur.anneeExperience) > 0) {
+      return Number(this.reparateur.anneeExperience);
+    }
     if (!this.reparateur?.createdAt) return 1;
-    
     const creationDate = new Date(this.reparateur.createdAt);
     const currentDate = new Date();
     return currentDate.getFullYear() - creationDate.getFullYear() || 1;
@@ -159,6 +162,7 @@ export class GarageProfileComponent implements OnInit {
     this.reparateur = this.originalReparateur ? {...this.originalReparateur} : null;
     this.serviceProposeString = (this.reparateur?.servicePropose || []).join(', ');
     this.agreementsString = (this.reparateur?.agreements || []).join(', ');
+    this.loadStats();
     this.cdr.detectChanges();
   }
 
@@ -175,20 +179,55 @@ export class GarageProfileComponent implements OnInit {
       agreements: this.agreementsString.split(',').map(s => s.trim()).filter(s => s)
     } as Reparateur);
 
-    this.reparateurService.updateReparateur(this.reparateur.id, updatedReparateur).subscribe({
-      next: (response) => {
-        this.reparateur = response;
-        this.isEditing = false;
-        this.snackBar.open('Profil mis à jour avec succès', 'Fermer', { duration: 3000 });
-        this.loading = false;
-        this.cdr.detectChanges();
+    // Essayer PATCH (réponse texte), puis fallback PUT (réponse texte) pour éviter les 500 côté backend
+    this.reparateurService.updateReparateurPatchText(this.reparateur.id, updatedReparateur).subscribe({
+      next: () => {
+        // Recharger le réparateur pour récupérer l’état à jour
+        this.reparateurService.getReparateur(this.reparateur!.id!).subscribe({
+          next: (rep) => {
+            this.reparateur = rep;
+            this.loadStats();
+            this.isEditing = false;
+            this.snackBar.open('Profil mis à jour avec succès', 'Fermer', { duration: 3000 });
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            // Même si le rechargement échoue, on sort du mode édition
+            this.isEditing = false;
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
-      error: (err) => {
-        console.error('Erreur:', err);
-        this.error = err.message;
-        this.snackBar.open('Erreur lors de la mise à jour du profil', 'Fermer', { duration: 3000 });
-        this.loading = false;
-        this.cdr.detectChanges();
+      error: () => {
+        // Fallback PUT texte
+        this.reparateurService.updateReparateurText(this.reparateur!.id!, updatedReparateur).subscribe({
+          next: () => {
+            this.reparateurService.getReparateur(this.reparateur!.id!).subscribe({
+              next: (rep) => {
+                this.reparateur = rep;
+                this.loadStats();
+                this.isEditing = false;
+                this.snackBar.open('Profil mis à jour avec succès', 'Fermer', { duration: 3000 });
+                this.loading = false;
+                this.cdr.detectChanges();
+              },
+              error: () => {
+                this.isEditing = false;
+                this.loading = false;
+                this.cdr.detectChanges();
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Erreur:', err);
+            this.error = err.message;
+            this.snackBar.open('Erreur lors de la mise à jour du profil', 'Fermer', { duration: 3000 });
+            this.loading = false;
+            this.cdr.detectChanges();
+          }
+        });
       }
     });
   }

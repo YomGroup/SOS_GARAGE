@@ -61,16 +61,6 @@
                                 <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.nomDuGarage" placeholder="Nom du garage">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Nom du responsable</label>
-                                <input *ngIf="!isEditing" type="text" class="readonly-input" [value]="reparateur.name" readonly>
-                                <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.name" placeholder="Nom du responsable">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Prénom du responsable</label>
-                                <input *ngIf="!isEditing" type="text" class="readonly-input" [value]="reparateur.prenom" readonly>
-                                <input *ngIf="isEditing" type="text" class="form-control" [(ngModel)]="reparateur.prenom" placeholder="Prénom du responsable">
-                            </div>
-                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
                                 <input *ngIf="!isEditing" type="email" class="readonly-input" [value]="reparateur.email" readonly>
                                 <input *ngIf="isEditing" type="email" class="form-control" [(ngModel)]="reparateur.email" placeholder="Email">
@@ -89,10 +79,6 @@
                                 <label class="form-label">Années d'expérience</label>
                                 <input *ngIf="!isEditing" type="number" class="readonly-input" [value]="reparateur.anneeExperience" readonly>
                                 <input *ngIf="isEditing" type="number" class="form-control" [(ngModel)]="reparateur.anneeExperience" placeholder="Années d'expérience">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Commission</label>
-                                <input type="text" class="readonly-input" [value]="reparateur.commission" readonly>
                             </div>
                         </div>
                     </div>
@@ -251,7 +237,12 @@
                                 <i class="fas fa-car text-primary"></i>
                             </div>
                             <div class="stat-info">
-                                <span class="stat-number">{{ stats.vehiculesRepares }}</span>
+                                <ng-container *ngIf="!isEditing; else editVehiculesRepares">
+                                    <span class="stat-number">{{ stats.vehiculesRepares }}</span>
+                                </ng-container>
+                                <ng-template #editVehiculesRepares>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="reparateur.nombreVehiculeReparee" min="0" />
+                                </ng-template>
                                 <span class="stat-label">Véhicules réparés</span>
                             </div>
                         </div>
@@ -260,7 +251,12 @@
                                 <i class="fas fa-users text-warning"></i>
                             </div>
                             <div class="stat-info">
-                                <span class="stat-number">{{ stats.employes }}</span>
+                                <ng-container *ngIf="!isEditing; else editEmployes">
+                                    <span class="stat-number">{{ stats.employes }}</span>
+                                </ng-container>
+                                <ng-template #editEmployes>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="reparateur.nombreEmployes" min="0" />
+                                </ng-template>
                                 <span class="stat-label">Employés</span>
                             </div>
                         </div>
@@ -269,7 +265,12 @@
                                 <i class="fas fa-calendar text-info"></i>
                             </div>
                             <div class="stat-info">
-                                <span class="stat-number">{{ stats.anneesActivite }}</span>
+                                <ng-container *ngIf="!isEditing; else editAnnees">
+                                    <span class="stat-number">{{ stats.anneesActivite }}</span>
+                                </ng-container>
+                                <ng-template #editAnnees>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="reparateur.anneeExperience" min="0" />
+                                </ng-template>
                                 <span class="stat-label">Années d'activité</span>
                             </div>
                         </div>
@@ -278,7 +279,12 @@
                                 <i class="fas fa-car-side text-success"></i>
                             </div>
                             <div class="stat-info">
-                                <span class="stat-number">{{ reparateur.nombreVehiculeMois || 0 }}</span>
+                                <ng-container *ngIf="!isEditing; else editVehiculeMois">
+                                    <span class="stat-number">{{ reparateur.nombreVehiculeMois || 0 }}</span>
+                                </ng-container>
+                                <ng-template #editVehiculeMois>
+                                    <input type="number" class="form-control form-control-sm" [(ngModel)]="reparateur.nombreVehiculeMois" min="0" />
+                                </ng-template>
                                 <span class="stat-label">Véhicules / mois</span>
                             </div>
                         </div>
