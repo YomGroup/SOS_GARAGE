@@ -429,8 +429,7 @@ export class GarageProfileComponent implements OnInit {
       adresse: rep.adresse ?? '',
       statut: rep.statut,
       // Inclure les deux variantes pour compat backend
-      isvalids: rep.isvalids ?? rep.isValids ?? 'valide',
-      isValids: rep.isvalids ?? rep.isValids ?? 'valide',
+      isValids: rep.isValids ?? 'valide',
       codePostal: rep.codePostal ?? '',
       ville: rep.ville ?? '',
       commission: rep.commission != null ? Number(rep.commission) : 0,

@@ -280,8 +280,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
         console.log('Réparateurs reçus:', reps); // 👈 Inspecte ici
 
         this.reparateursValides = reps.filter(r => {
-          console.log('Champ isvalids:', r.isvalids); // 👈 Que contient ce champ ?
-          return r.isvalids?.toLowerCase() === 'valide';
+          console.log('Champ isValids:', r.isValids); // 👈 Que contient ce champ ?
+          return r.isValids?.toLowerCase() === 'valide';
         });
       },
       error: (err) => {

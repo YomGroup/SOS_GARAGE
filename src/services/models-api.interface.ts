@@ -108,7 +108,6 @@ export interface Reparateur {
   telephone: string;
   adresse: string;
   statut?: string;
-  isvalids?: string;
   isValids?: string;
   codePostal: string;
   ville: string;

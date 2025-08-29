@@ -140,7 +140,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (reparateurs) => {
         this.stats.totalReparateurs = reparateurs.length;
         this.recentReparateurs = reparateurs.slice(0, 3);
-        this.pendingReparateursCount = reparateurs.filter(r => (r.isvalids + '').toLowerCase() === 'false').length;
+        this.pendingReparateursCount = reparateurs.filter(r => (r.isValids + '').toLowerCase() === 'false').length;
         this.updateRecentActivity('reparateur', reparateurs);
         this.cdr.detectChanges();
       },

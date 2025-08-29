@@ -24,15 +24,15 @@
             <div class="col-12 mb-3">
                 <span class="badge"
                       [ngClass]="{
-                        'bg-success': reparateur.isvalids === 'valide',
-                        'bg-warning text-dark': reparateur.isvalids === 'en attente',
-                        'bg-danger': reparateur.isvalids === 'rejetée'
+                        'bg-success': reparateur.isValids === 'valide',
+                        'bg-warning text-dark': reparateur.isValids === 'en attente',
+                        'bg-danger': reparateur.isValids === 'rejetée'
                       }">
                   {{
-                    reparateur.isvalids === 'valide' ? 'Valide' :
-                    reparateur.isvalids === 'en attente' ? 'En attente' :
-                    reparateur.isvalids === 'rejetée' ? 'Rejeté' :
-                    reparateur.isvalids
+                    reparateur.isValids === 'valide' ? 'Valide' :
+                    reparateur.isValids === 'en attente' ? 'En attente' :
+                    reparateur.isValids === 'rejetée' ? 'Rejeté' :
+                    reparateur.isValids
                   }}
                 </span>
             </div>

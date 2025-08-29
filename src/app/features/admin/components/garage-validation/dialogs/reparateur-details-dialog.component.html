@@ -17,9 +17,8 @@
     </div>
     <div class="reparateur-info">
       <div class="info-section">
-        <h3><i class="fas fa-user me-2"></i>Responsable</h3>
+        <h3><i class="fas fa-user me-2"></i>Contact principal</h3>
         <div class="info-grid">
-          <div class="info-item"><span class="label">Nom :</span><span class="value">{{ reparateur.name }} {{ reparateur.prenom }}</span></div>
           <div class="info-item"><span class="label">Email :</span><span class="value">{{ reparateur.email }}</span></div>
           <div class="info-item"><span class="label">Téléphone :</span><span class="value">{{ reparateur.telephone }}</span></div>
         </div>
@@ -127,12 +126,12 @@
 
 <mat-dialog-actions align="end">
   <button mat-raised-button color="warn" (click)="rejeterReparateur()" [disabled]="loading"
-          *ngIf="reparateur.isvalids !== 'rejetée' && reparateur.isvalids !== 'valide'">
+          *ngIf="reparateur.isValids !== 'rejetée' && reparateur.isValids !== 'valide'">
     <i class="fas fa-times me-2"></i>Rejeter
   </button>
 
   <button mat-raised-button color="primary" (click)="validerReparateur()" [disabled]="loading"
-          *ngIf="reparateur.isvalids !== 'valide'">
+          *ngIf="reparateur.isValids !== 'valide'">
     <i class="fas fa-check me-2"></i>Valider
   </button>
 
@@ -141,7 +140,7 @@
   </button>
 
   <button mat-raised-button class="suspendre-btn" (click)="suspendreCompte()" [disabled]="loading"
-          *ngIf="reparateur.isvalids === 'valide'">
+          *ngIf="reparateur.isValids === 'valide'">
     <i class="fas fa-pause me-2"></i>Suspendre le compte
   </button>
 </mat-dialog-actions>
