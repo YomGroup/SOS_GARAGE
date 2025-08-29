@@ -139,6 +139,10 @@
     <i class="fas fa-envelope me-2"></i>Envoyer un message
   </button>
 
+  <button mat-raised-button (click)="envoyerEmail()" [disabled]="loading">
+      <i class="fas fa-at me-2"></i>Envoyer un Email
+  </button>
+
   <button mat-raised-button class="suspendre-btn" (click)="suspendreCompte()" [disabled]="loading"
           *ngIf="reparateur.isValids === 'valide'">
     <i class="fas fa-pause me-2"></i>Suspendre le compte

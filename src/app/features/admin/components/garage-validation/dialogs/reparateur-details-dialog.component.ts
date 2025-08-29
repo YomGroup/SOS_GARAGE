@@ -1,14 +1,14 @@
 import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AdminService } from '../../../../../../services/admin.service';
 import { Reparateur } from '../../../../../../services/models-api.interface';
 import { FormsModule } from '@angular/forms';
 import { ReparateurService } from '../../../../../../services/reparateur.service';
+import { SendMessageDialogComponent } from './send-message-dialog/send-message-dialog.component';
 
 @Component({
   selector: 'app-reparateur-details-dialog',
@@ -27,7 +27,8 @@ export class ReparateurDetailsDialogComponent {
     @Inject(MAT_DIALOG_DATA) public data: { reparateur: Reparateur },
     private dialogRef: MatDialogRef<ReparateurDetailsDialogComponent>,
     private reparateurService: ReparateurService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {
     this.reparateur = data.reparateur;
     this.commissionInput = this.reparateur.commission ?? 0;
@@ -92,11 +93,19 @@ export class ReparateurDetailsDialogComponent {
   }
 
   envoyerMessage(): void {
-    this.snackBar.open('Fonctionnalité d\'envoi de message à implémenter', 'Fermer', {
-      duration: 3000,
-      panelClass: ['info-snackbar']
+    this.dialog.open(SendMessageDialogComponent, {
+      width: '400px',
+      data: { 
+        receiverId: this.reparateur.useridKeycloak, 
+        receiverName: this.reparateur.nomDuGarage 
+      }
     });
-    this.dialogRef.close({ action: 'sendMessage', reparateur: this.reparateur });
+  }
+
+  envoyerEmail(): void {
+    const subject = `Message de la part de SOS Garage`;
+    const body = `Bonjour ${this.reparateur.nomDuGarage},\n\n`;
+    window.location.href = `mailto:${this.reparateur.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   }
 
   suspendreCompte(): void {
