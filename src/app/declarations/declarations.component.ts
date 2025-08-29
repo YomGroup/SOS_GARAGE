@@ -66,6 +66,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   declarationMethod: 'describe' | 'upload' | null = null;
   currentStep = 1;
   vehicleStatus = '';
+  hasAcceptedGarageWarning: boolean = false;
+  showGarageWarningStep: boolean = false;
 
   selectedVehicle = '';
   currentDocument = 1;
@@ -788,14 +790,34 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Navigation entre étapes
   nextStep(): void {
     if (this.canProceed()) {
+      // Si on passe de l'étape 4 vers l'étape 5, montrer d'abord le warning garage
+      if (this.currentStep === 4) {
+        this.showGarageWarningStep = true;
+        return;
+      }
+
       this.currentStep++;
-    }
-    if (this.currentStep === 4) {
-      console.log('📝 Préparation des documents avec toutes les informations...');
-      this.prepareDocumentsWithAllData();
+
+      if (this.currentStep === 5) {
+        console.log('📝 Préparation des documents avec toutes les informations...');
+        this.prepareDocumentsWithAllData();
+      }
     }
   }
+  // Nouvelle méthode pour accepter le warning garage
+  acceptGarageWarning(): void {
+    this.hasAcceptedGarageWarning = true;
+    this.showGarageWarningStep = false;
+    this.currentStep = 5;
+    console.log('📝 Préparation des documents avec toutes les informations...');
+    this.prepareDocumentsWithAllData();
+  }
 
+  // Nouvelle méthode pour refuser le warning garage
+  declineGarageWarning(): void {
+    this.showGarageWarningStep = false;
+    // Reste à l'étape actuelle
+  }
   previousStep(): void {
     if (this.currentStep > 1) {
       this.currentStep--;
@@ -1127,13 +1149,21 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     switch (this.currentStep) {
       case 1:
         return !!this.selectedVehicle;
-      case 2: return !!this.vehicleStatus;
-
-      case 3: return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
-        (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
-      case 4: return !!this.constatFile;
-      case 5: return this.nomAssure !== '' && this.adresseAssure !== '' && this.telephoneAssure !== '' && this.prenomAssure !== '';
-      default: return false;
+      case 2:
+        return !!this.vehicleStatus;
+      case 3:
+        return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
+          (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
+      case 4:
+        return !!this.constatFile;
+      case 5:
+        return this.hasAcceptedGarageWarning &&
+          this.nomAssure !== '' &&
+          this.adresseAssure !== '' &&
+          this.telephoneAssure !== '' &&
+          this.prenomAssure !== '';
+      default:
+        return false;
     }
   }
 
