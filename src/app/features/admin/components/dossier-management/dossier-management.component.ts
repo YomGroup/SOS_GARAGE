@@ -75,6 +75,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   nbDossiersNonTraites = 0;
   dossiersTraites = 0;
   dossiersCommissionPayee = 0;
+  nbDossiersEnCours = 0;
 
   suppressionEnCours: boolean = false;
   vehiculesEnChargement: Set<number> = new Set();
@@ -274,8 +275,17 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
       
       // Dossiers non traités : pas de mission associée
       this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
-      // Dossiers traités : au moins une mission associée
-      this.dossiersTraites = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
+      
+      const dossiersAvecMission = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id));
+      
+      // Dossiers terminés (traités)
+      this.dossiersTraites = dossiersAvecMission.filter(dossier =>
+        this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id && m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase()))
+      ).length;
+
+      // Dossiers en cours
+      this.nbDossiersEnCours = dossiersAvecMission.length - this.dossiersTraites;
+
       // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
       this.dossiersCommissionPayee = apiDossiers.filter(dossier => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
       
