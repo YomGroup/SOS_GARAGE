@@ -18,9 +18,20 @@ import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/ro
 import { filter, debounceTime } from 'rxjs/operators';
 import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
-import { Mission, Vehicule } from '../../../../../services/models-api.interface';
+import { Vehicule } from '../../../../../services/models-api.interface';
 import { Dossier } from '../../../../../services/dossiers.service';
 import { DossierFilterService } from './dossier-filter.service';
+// RxJS
+import { from, of } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
+
+// Services
+import { MessageService } from '../../../../../services/messagerie.service';
+import { AuthService } from '../../../../../services/auth.service';
+
+// Modèles
+import { Reparateur, Mission } from '../../../../../services/models-api.interface';
+
 
 // Étend l'interface Dossier pour l'affichage local
 export interface DossierAffichage extends Dossier {
@@ -146,6 +157,8 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     private route: ActivatedRoute,
     private viewContainerRef: ViewContainerRef,
     private cdr: ChangeDetectorRef,
+    private auth: AuthService,               // ⬅️ AJOUT
+  private messageService: MessageService, // ⬅️ AJOUT
     private dossierFilterService: DossierFilterService
   ) {
     this.dataSource = new MatTableDataSource();
@@ -484,10 +497,110 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
   
 
-  attribuerSinistre(dossier: Dossier): void {
-    console.log('Attribution du dossier à un sinistre:', dossier);
-    // TODO: Implémenter l'attribution à un sinistre
+attribuerSinistre(dossier: Dossier): void {
+  console.log('Attribution du dossier à un sinistre:', dossier);
+
+  // 1) Récupérer missionId, sinistreId et réparateur choisi depuis le dossier
+  const missionId: number | undefined =
+    (dossier as any)?.mission?.id ?? (dossier as any)?.missionId;
+
+  const sinistreId: number | undefined =
+    (dossier as any)?.sinistre?.id ?? (dossier as any)?.sinistreId ?? (dossier as any)?.mission?.sinistre?.id;
+
+  // Réparateur sélectionné (adapte le champ selon ton UI)
+  const reparateur: Reparateur | undefined =
+    (dossier as any)?.reparateurSelectionne ?? (dossier as any)?.reparateur;
+
+  if (!missionId || !reparateur?.id) {
+    console.warn('MissionId ou réparateur manquant pour attribuer le sinistre.');
+    return;
   }
+
+  // 2) Appel API : mise à jour du réparateur de la mission
+  this.missionService.updateMissionReparateur(missionId, reparateur).pipe(
+
+    // 3) S’assurer qu’on a bien les IDs Keycloak (assuré & garage)
+    switchMap((missionMaj: Mission) => {
+      // Essai 1 : extraire depuis la réponse du PATCH
+      const assureIdFromPatch =
+        (missionMaj as any)?.sinistre?.assure?.useridKeycloak ??
+        (missionMaj as any)?.assure?.useridKeycloak;
+
+      const garageIdFromPatch =
+        (missionMaj as any)?.reparateur?.useridKeycloak ??
+        reparateur?.useridKeycloak;
+
+      // Si on a tout, on continue direct
+      if (assureIdFromPatch && garageIdFromPatch) {
+        return of({ mission: missionMaj, assureId: assureIdFromPatch, garageId: garageIdFromPatch });
+      }
+
+      // Sinon, recharger la mission (fallback) pour récupérer les clés
+      return this.missionService.getMissionById(missionId).pipe(
+        map((m2: Mission) => {
+          const assureId =
+            (m2 as any)?.sinistre?.assure?.useridKeycloak ??
+            (m2 as any)?.assure?.useridKeycloak;
+
+          const garageId =
+            (m2 as any)?.reparateur?.useridKeycloak ??
+            reparateur?.useridKeycloak;
+
+          return { mission: m2, assureId, garageId };
+        })
+      );
+    }),
+
+    // 4) Créer la conversation si besoin + envoyer le message système
+    switchMap(({ mission, assureId, garageId }: { mission: Mission; assureId?: string; garageId?: string; }) => {
+
+      if (!assureId || !garageId) {
+        console.warn('Impossible de déterminer assureId/garageId pour ouvrir la messagerie.');
+        return of(mission);
+      }
+
+      // ensureConversation puis sendSystemMessage
+      return from(this.messageService.ensureConversation(assureId, garageId, mission.id, sinistreId)).pipe(
+        switchMap(() =>
+          from(this.messageService.sendSystemMessage(
+            assureId,
+            garageId,
+            `Discussion ouverte pour le suivi du sinistre ${sinistreId ? `#${sinistreId}` : ''}.`
+          ))
+        ),
+        map(() => mission),
+        catchError(err => {
+          console.error('Ouverture auto de la conversation: échec non bloquant', err);
+          // On ne bloque pas le flux : on renvoie quand même la mission
+          return of(mission);
+        })
+      );
+    })
+
+  ).subscribe({
+    next: (mission: Mission) => {
+      // 5) Ouvrir la messagerie sur le bon interlocuteur
+      const assureId =
+        (mission as any)?.sinistre?.assure?.useridKeycloak ??
+        (mission as any)?.assure?.useridKeycloak;
+
+      const garageId =
+        (mission as any)?.reparateur?.useridKeycloak ??
+        reparateur?.useridKeycloak;
+
+      const me    = this.auth.getKeycloakId();
+      const other = me === assureId ? garageId : assureId;
+
+      if (other) {
+        this.router.navigate(['/messagerie'], { queryParams: { receiverId: other } });
+      }
+    },
+    error: (err) => {
+      console.error('Erreur lors de l’attribution au sinistre:', err);
+    }
+  });
+}
+
 
   dossierAConfirmerPourSuppression: DossierAffichage | null = null;
 
