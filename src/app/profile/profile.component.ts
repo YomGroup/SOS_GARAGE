@@ -14,17 +14,17 @@ import { AuthService } from '../../services/auth.service';
 export class ProfileComponent {
   private assureService = inject(AssureService);
   userData: any = {
-    name: '',
+    nom: '',
     prenom: '',
     email: '',
     telephone: '',
     adressePostale: '',
     numeroPermis: '',
     adresse: '',
-    dateNaissance: '',
     dateObtentionPermis: '',
     typePermis: '',
-    typeGarantie: ''
+    typeGarantie: '',
+    datePermis: ''
   };
   // Définissez les types de permis disponibles
   permisTypes = [
@@ -96,7 +96,8 @@ export class ProfileComponent {
     // Ici, ajouter la logique pour sauvegarder les modifications
     this.isEditing = false;
     this.originalData = { ...this.userData };
-    console.log("user", this.originalData);
+    console.log("user", this.userData);
+
     this.assureService.updateAssurer(this.userData).subscribe({
       next: (data) => {
         console.log('Profil mis à jour avec succès:', data);

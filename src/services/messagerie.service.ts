@@ -28,62 +28,64 @@ export class MessageService {
             console.error('Erreur lors de l\'envoi du message:', error);
             throw error;
         }
-        
+
     }
     private conversationId(a: string, b: string) {
-    const [x, y] = [a, b].sort();
-    return `${x}__${y}`;
-  }
+        const [x, y] = [a, b].sort();
+        return `${x}__${y}`;
+    }
 
-  /** Crée le doc `conversations/{id}` si non existant */
-  async ensureConversation(
-  assureId: string,
-  garageId: string,
-  missionId?: number,
-  sinistreId?: number
-): Promise<string> {
-  const id = this.conversationId(assureId, garageId);
-  const ref = doc(db, 'conversations', id);
-  const snap = await getDoc(ref);
+    /** Crée le doc `conversations/{id}` si non existant */
+    async ensureConversation(
+        assureId: string,
+        garageId: string,
+        missionId?: number,
+        sinistreId?: number
+    ): Promise<string> {
+        const id = this.conversationId(assureId, garageId);
+        const ref = doc(db, 'conversations', id);
+        const snap = await getDoc(ref);
 
-  if (!snap.exists()) {
-    await setDoc(ref, {
-      participants: [assureId, garageId].sort(),
-      participantMeta: {
-        [assureId]: { unread: 0, lastReadAt: null },
-        [garageId]: { unread: 0, lastReadAt: null },
-      },
-      missionId: missionId ?? null,   // number OK
-      sinistreId: sinistreId ?? null, // number OK
-      createdAt: serverTimestamp(),
-      lastMessage: null
-    });
-  }
-  return id;
-}
+        if (!snap.exists()) {
+            await setDoc(ref, {
+                participants: [assureId, garageId].sort(),
+                participantMeta: {
+                    [assureId]: { unread: 0, lastReadAt: null },
+                    [garageId]: { unread: 0, lastReadAt: null },
+                },
+                missionId: missionId ?? null,   // number OK
+                sinistreId: sinistreId ?? null, // number OK
+                createdAt: serverTimestamp(),
+                lastMessage: null
+            });
+        }
+        return id;
+    }
 
-async sendSystemMessage(assureId: string, garageId: string, text: string) {
-  const id = this.conversationId(assureId, garageId);
-  const convRef = doc(db, 'conversations', id);
-  const msgsCol = collection(convRef, 'messages');
-  const now = serverTimestamp();
+    async sendSystemMessage(assureId: string, garageId: string, text: string) {
+        this.sendMessage(garageId, assureId, text);
+        /*const id = this.conversationId(assureId, garageId);
+        const convRef = doc(db, 'conversations', id);
+        const msgsCol = collection(convRef, 'messages');
+        const now = serverTimestamp();
 
-  await addDoc(msgsCol, {
-    text,
-    senderId: 'system',
-    receiverId: assureId,
-    timestamp: now,
-    type: 'system'
-  });
+        await addDoc(msgsCol, {
+            text,
+            senderId: 'system',
+            receiverId: assureId,
+            timestamp: now,
+            type: 'system'
+        });
 
-  await setDoc(convRef, { lastMessage: { text, senderId: 'system', timestamp: now } }, { merge: true });
-}
+        await setDoc(convRef, { lastMessage: { text, senderId: 'system', timestamp: now } }, { merge: true });*/
 
-  listenToUnreadMessagesCount(userId: string): Observable<number> {
-    return new Observable(observer => {
-      const messagesRef = collection(db, 'messages');
-      const q = query(
-        messagesRef,
+    }
+
+    listenToUnreadMessagesCount(userId: string): Observable<number> {
+        return new Observable(observer => {
+            const messagesRef = collection(db, 'messages');
+            const q = query(
+                messagesRef,
                 where('receiverId', '==', userId),
                 where('read', '==', false)
             );

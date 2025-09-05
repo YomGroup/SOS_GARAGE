@@ -24,6 +24,8 @@ export class VehiculesComponent implements OnInit {
   showAddForm = false;
   errorMessage = '';
   showErrorToast = false;
+  showSuccessToast = false;
+
   loadingScrap = false;
   isEditMode = false;
   newVehicle: any = {
@@ -61,6 +63,7 @@ export class VehiculesComponent implements OnInit {
   contratFile: File | null = null;
   loadingSubmit: boolean = false;
   nomAssurenceisempty: boolean = true;
+  successMessage: string = '';
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -304,7 +307,11 @@ export class VehiculesComponent implements OnInit {
       this.showErrorToast = true;
       setTimeout(() => this.showErrorToast = false, 5000);
     }
-
+    const showSuccess = (message: string) => {
+      this.successMessage = message;
+      this.showSuccessToast = true;
+      setTimeout(() => this.showSuccessToast = false, 5000);
+    };
 
     if (this.isEditMode && this.newVehicle.id) {
       this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
@@ -332,17 +339,33 @@ export class VehiculesComponent implements OnInit {
       // Mode ajout
       this.vehiculeService.addVehiculesPost(payload).subscribe({
         next: (data) => {
-          this.loadVehicles(this.assureId);
+          this.successMessage = 'Véhicule ajouté avec succès !';
+          this.showSuccessToast = true;   // 🔥 déclenche l’affichage du toast
+          setTimeout(() => this.showSuccessToast = false, 5000);
+          this.vehicles = [...this.vehicles, data as Vehicle];  // laisse le temps au backend de commiter l’ajout
+
           this.cancelAdd();
           finalCallback();
 
         },
         error: (err) => {
-          console.error('Erreur lors de l’ajout du véhicule :', err);
-          //showError(err);
-          finalCallback();
+          console.error('Erreur lors de l’ajout du véhicule :', err.error.message);
 
+          let msg = 'Une erreur s\'est produite. Le véhicule existe déjà.';
+
+          // Vérifier le message d'erreur si dispo
+          const backendMessage = err?.error?.message || '';
+
+          if (backendMessage.includes('duplicate') || backendMessage.includes('existe déjà')) {
+            msg = 'Ce véhicule est déjà enregistré par un autre utilisateur.';
+          }
+
+          this.scrapErrorMessage = msg;
+          showError(msg);
+          finalCallback();
         }
+
+
       });
     }
   }

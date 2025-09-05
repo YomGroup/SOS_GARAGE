@@ -1,5 +1,20 @@
 
 <div class="container-fluid py-4">
+  <div 
+    class="toast align-items-center text-bg-success border-0"
+    role="success"
+    aria-live="assertive"
+    aria-atomic="true"
+    [class.show]="showSuccessToast"
+    [class.hide]="!showSuccessToast"
+    style="opacity: 1; transition: opacity 0.5s ease-in-out;">
+    <div class="d-flex">
+      <div class="toast-body">
+        {{ successMessage }}
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Close" (click)="showSuccessToast = false"></button>
+    </div>
+  </div>
   <div class="d-flex justify-content-end align-items-center mb-4">
     <!-- Bouton Ajouter un véhicule -->
     <button class="btn text-white border-0 px-4 py-2" (click)="showAddForm = true"
@@ -36,6 +51,7 @@
     </div>
   </div>
 </div>
+
 
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
@@ -229,7 +245,7 @@
         <div class="modal-footer">
           <div *ngIf="currentStep === 1">
             <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
-            <button type="button" class="btn btn-primary" [ngStyle]="{
+            <button type="button" class="btn btn-primary ml-5" [ngStyle]="{
                       background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
                       border: 'none'
                     }"
