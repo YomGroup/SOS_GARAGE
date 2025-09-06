@@ -47,7 +47,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nom</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.name" 
+                                <input type="text" class="form-control" [(ngModel)]="userData.nom" 
                                        [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
                             <div class="col-md-6">
@@ -76,7 +76,7 @@
     </div>
     <div class="col-md-6">
         <label class="form-label">Date d'obtention</label>
-        <input type="test" class="form-control" [(ngModel)]="userData.dateObtentionPermis"
+        <input type="date" class="form-control" [(ngModel)]="userData.dateObtentionPermis"
                [class.bg-light]="!isEditing" [readonly]="!isEditing">
     </div>
    <div class="col-12">
@@ -108,12 +108,7 @@
                                 <input type="text" class="form-control" [(ngModel)]="userData.adresse" 
                                        [class.bg-light]="!isEditing" [readonly]="!isEditing">
                             </div>
-                             <div class="col-6">
-                                <label class="form-label">Type de garantie</label>
-                                <input type="text" class="form-control" [(ngModel)]="userData.typeGarantie" 
-                                       [class.bg-light]="!isEditing" [readonly]="!isEditing">
-                            </div>
-                           
+                       
         
                         </div>
                     </div>

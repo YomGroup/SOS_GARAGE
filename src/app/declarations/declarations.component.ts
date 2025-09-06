@@ -132,7 +132,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private firebaseStorageService = inject(FirebaseStorageService);
   private yousignService = inject(YousignService);
   showProfileAlert = false;
-
+  showvehicleAlert = false;
   currentCity: string = 'Casablanca';
   constructor(@Inject(DOCUMENT) private document: Document, private router: Router) {
 
@@ -156,6 +156,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         }
       });
       this.checkProfileCompleteness();
+      this.checkVehiculeCompleteness();
     }
   }
   checkProfileCompleteness(): boolean {
@@ -167,6 +168,13 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.showProfileAlert = !isProfileComplete;
     return isProfileComplete;
   }
+  checkVehiculeCompleteness(): boolean {
+    if (this.vehiclesAll.length === 0) {
+      this.showvehicleAlert = true;
+    }
+    return this.vehiclesAll.length > 0;
+  }
+
   ngOnDestroy() {
     // Nettoyage des URLs blob
     this.documents.forEach(doc => {
@@ -188,16 +196,24 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     // Remplacez par votre logique de navigation
     this.router.navigate(['clientDashboard/profiles']);
   }
+  goToVehicle() {
+    // Remplacez par votre logique de navigation
+    this.router.navigate(['clientDashboard/vehicules']);
+  }
 
   // Méthode pour fermer l'alerte
   closeAlert() {
     this.showProfileAlert = false;
+  }
+  closeAlertvehicule() {
+    this.showvehicleAlert = false;
   }
   private loadUserData(): void {
 
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.userData = data;
+        console.log('Données utilisateur chargées :', this.userData);
         // this.prepareDocumentTemplates();
         this.nomAssure = data.name || '';
         this.adresseAssure = data.adresse || '';
@@ -894,73 +910,66 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.isSigning = false;
     }
   }
+  // Dans votre déclarations.component.ts, remplacez la méthode existante
   private startSignatureProcess(signingUrl: string, signatureRequestId: string, signerId: string): void {
-    // Ouvrir la fenêtre
     const signatureWindow = window.open(signingUrl, '_blank', 'width=900,height=700');
 
     if (!signatureWindow) {
-      alert('Impossible d\'ouvrir la fenêtre de signature. Veuillez réessayer.');
+      alert('Impossible d\'ouvrir la fenêtre de signature.');
       this.isSigning = false;
       return;
     }
 
-    // Variables pour éviter les boucles infinies
-    let isProcessComplete = false;
-    let checkCount = 0;
-    const maxChecks = 150;
+    let isComplete = false;
 
-    // Fonction de vérification
-    const checkStatus = async () => {
-      if (isProcessComplete) return;
-
-      checkCount++;
+    const monitor = async () => {
+      if (isComplete) return;
 
       try {
-        // 1. Vérifier si la fenêtre est fermée
-        if (signatureWindow.closed) {
-          await this.handleWindowClosed(signatureRequestId, signerId);
+        // Vérifier le statut de signature en priorité
+        const signer = await firstValueFrom(
+          this.yousignService.getSigner(signatureRequestId, signerId)
+        );
+
+        if (signer.status === 'signed') {
+          isComplete = true;
+          signatureWindow.close(); // Fermeture automatique immédiate
+          this.handleSignatureSuccess();
           return;
         }
 
-        // 2. Vérifier le statut via API (moins fréquent pour éviter le spam)
-        if (checkCount % 5 === 0) {
-          const status = await firstValueFrom(
-            this.yousignService.getSigner(signatureRequestId, signerId)
-          );
-
-          if (status.status === 'signed') {
-            isProcessComplete = true;
-            signatureWindow.close();
-            this.handleSignatureSuccess();
-            return;
-          }
+        // Vérifier si fermé manuellement (annulation)
+        if (signatureWindow.closed) {
+          isComplete = true;
+          this.handleSignatureCancel();
+          return;
         }
 
-        // 3. Continuer la surveillance si pas encore fini
-        if (checkCount < maxChecks && !isProcessComplete) {
-          setTimeout(checkStatus, 2000);
-        } else if (checkCount >= maxChecks) {
-          isProcessComplete = true;
-          signatureWindow.close();
-          this.handleSignatureTimeout();
-        }
+        // Continuer la surveillance toutes les 2 secondes
+        setTimeout(monitor, 2000);
 
       } catch (error) {
-        console.error('Erreur lors de la vérification:', error);
-        if (checkCount < maxChecks && !isProcessComplete) {
-          setTimeout(checkStatus, 3000);
-        }
+        console.error('Erreur vérification:', error);
+        setTimeout(monitor, 3000);
       }
     };
 
-    // Démarrer la surveillance
-    setTimeout(checkStatus, 3000);
+    // Démarrer la surveillance après 1 seconde
+    setTimeout(monitor, 1000);
+
+    // Timeout de sécurité (2 minutes maximum)
+    setTimeout(() => {
+      if (!isComplete) {
+        isComplete = true;
+        signatureWindow.close();
+        this.handleSignatureTimeout();
+      }
+    }, 120000);
   }
   private async handleWindowClosed(signatureRequestId: string, signerId: string): Promise<void> {
     try {
-
-      // Attendre un peu avant de vérifier (délai pour la synchronisation)
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Délai réduit pour la vérification finale
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 seconde au lieu de 2
 
       const finalStatus = await firstValueFrom(
         this.yousignService.getSigner(signatureRequestId, signerId)
@@ -1303,20 +1312,46 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Soumission du sinistre
   async submitSinistre(): Promise<void> {
     try {
-      // Vérifier que toutes les signatures sont complétées
-
-      for (const docId of this.signedDocuments) {
+      // Créer toutes les promesses de vérification en parallèle
+      const verificationPromises = Array.from(this.signedDocuments).map(async (docId) => {
         const signatureRequestId = this.documentSignatureRequests.get(docId);
         if (signatureRequestId) {
           const isCompleted = await this.waitForSignatureCompletion(signatureRequestId);
-          if (!isCompleted) {
-            console.warn(`⚠️ Signature non complétée pour le document ${docId}`);
-            // Vous pouvez décider de continuer ou d'arrêter ici
-          }
+          return { docId, isCompleted, signatureRequestId };
         }
+        return { docId, isCompleted: false, signatureRequestId: null };
+      });
+
+      // Attendre toutes les vérifications en parallèle avec un timeout global
+      const verificationResults = await Promise.allSettled(
+        verificationPromises.map(promise =>
+          Promise.race([
+            promise,
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('Timeout individuel')), 30000)
+            )
+          ])
+        )
+      );
+
+      // Traiter les résultats
+      const completedSignatures = verificationResults
+        .filter(result => result.status === 'fulfilled')
+        .map(result => (result as any).value)
+        .filter(result => result.isCompleted);
+
+      console.log(`${completedSignatures.length}/${this.signedDocuments.size} signatures vérifiées`);
+
+      // Continuer même si toutes ne sont pas vérifiées (mais logger l'info)
+      if (completedSignatures.length < this.signedDocuments.size) {
+        console.warn('Certaines signatures n\'ont pas pu être vérifiées dans les délais');
       }
 
-      const savedFiles = await this.saveFilesToAssets();
+      // Sauvegarder les fichiers en parallèle avec la création du sinistre
+      const [savedFiles, _] = await Promise.all([
+        this.saveFilesToAssets(),
+        new Promise(resolve => setTimeout(resolve, 0)) // Placeholder pour d'autres opérations async
+      ]);
 
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
@@ -1337,10 +1372,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         next: async (sinistreResponse: any) => {
           const sinistreId = sinistreResponse.id;
 
-          // Envoyer les documents signés
-          await this.sendSignedDocuments(sinistreId);
+          // Envoyer les documents en parallèle (non bloquant)
+          this.sendSignedDocumentsAsync(sinistreId);
 
-          this.currentStep = 5;
+          // Passer à l'étape suivante immédiatement
+          this.currentStep = 6; // ou l'étape de succès
         },
         error: (error) => {
           console.error('❌ Erreur création sinistre:', error);
@@ -1348,6 +1384,86 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       });
     } catch (error) {
       console.error('❌ Erreur générale:', error);
+    }
+  }
+  // 5. Version asynchrone non-bloquante pour l'envoi des documents
+  private async sendSignedDocumentsAsync(sinistreId: number): Promise<void> {
+    // Traiter les documents en parallèle avec un maximum de 3 simultanés
+    const documentPromises = Array.from(this.signedDocuments).map(docId =>
+      this.processSignedDocument(docId, sinistreId)
+    );
+
+    // Traiter par batches de 3
+    for (let i = 0; i < documentPromises.length; i += 3) {
+      const batch = documentPromises.slice(i, i + 3);
+      await Promise.allSettled(batch);
+    }
+  }
+  private async processSignedDocument(docId: number, sinistreId: number): Promise<void> {
+    const doc = this.documents.find(d => d.id === docId);
+    if (!doc) return;
+
+    const signatureRequestId = this.documentSignatureRequests.get(docId);
+    if (!signatureRequestId) {
+      console.error(`Aucune signature request trouvée pour ${doc.nom}`);
+      return;
+    }
+
+    try {
+      // Récupération des infos en parallèle
+      const [statusResponse, documentsResponse] = await Promise.all([
+        firstValueFrom(this.yousignService.getSignatureRequestStatus(signatureRequestId)),
+        firstValueFrom(this.yousignService.getSignatureRequest(signatureRequestId))
+      ]);
+
+      const documentId = (documentsResponse as any).documents?.[0]?.id;
+      if (!documentId) {
+        throw new Error(`Aucun document ID trouvé pour ${doc.nom}`);
+      }
+
+      // Téléchargement et upload en parallèle
+      const signedDocumentBlob = await firstValueFrom(
+        this.yousignService.downloadSignedDocument(signatureRequestId, documentId)
+      );
+
+      const downloadURL = await this.firebaseStorageService.uploadPdfFile(
+        signedDocumentBlob,
+        sinistreId
+      ).toPromise();
+
+      const documentPayload = {
+        type: this.getDocumentType(doc.nom),
+        fichier: downloadURL,
+        signatureElectronique: [],
+        idsinistre: sinistreId
+      };
+
+      await this.documentService.addDocumentPost(documentPayload).toPromise();
+      console.log(`✅ Document ${doc.nom} traité avec succès`);
+
+    } catch (error) {
+      console.error(`❌ Erreur pour ${doc.nom}:`, error);
+
+      // Fallback rapide
+      if (doc.fileBlob) {
+        try {
+          const fallbackURL = await this.firebaseStorageService.uploadPdfFile(
+            doc.fileBlob,
+            sinistreId
+          ).toPromise();
+
+          await this.documentService.addDocumentPost({
+            type: this.getDocumentType(doc.nom),
+            fichier: fallbackURL,
+            signatureElectronique: [],
+            idsinistre: sinistreId
+          }).toPromise();
+
+          console.log(`✅ Fallback réussi pour ${doc.nom}`);
+        } catch (fallbackError) {
+          console.error(`❌ Fallback échoué pour ${doc.nom}:`, fallbackError);
+        }
+      }
     }
   }
   private async sendSignedDocuments(sinistreId: number): Promise<void> {
@@ -1431,17 +1547,20 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       }
     }
   }
-  private async waitForSignatureCompletion(signatureRequestId: string, maxWaitTime = 300000): Promise<boolean> {
+  private async waitForSignatureCompletion(signatureRequestId: string, maxWaitTime = 60000): Promise<boolean> {
     const startTime = Date.now();
+    let attempts = 0;
+    const maxAttempts = 20; // Maximum 20 tentatives
 
-    while (Date.now() - startTime < maxWaitTime) {
+    while (Date.now() - startTime < maxWaitTime && attempts < maxAttempts) {
       try {
+        attempts++;
         const status = await firstValueFrom(
           this.yousignService.getSignatureRequestStatus(signatureRequestId)
         );
 
         const signatureStatus = (status as any).status;
-        console.log(`Statut actuel: ${signatureStatus}`);
+        console.log(`Tentative ${attempts}: Statut ${signatureStatus}`);
 
         if (signatureStatus === 'done') {
           return true;
@@ -1449,15 +1568,16 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           return false;
         }
 
-        // Attendre 2 secondes avant de vérifier à nouveau
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Délai progressif : commence à 1s, augmente graduellement
+        const delay = Math.min(1000 + (attempts * 500), 5000);
+        await new Promise(resolve => setTimeout(resolve, delay));
       } catch (error) {
-        console.error('Erreur lors de la vérification du statut:', error);
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        console.error(`Erreur tentative ${attempts}:`, error);
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
-    return false; // Timeout
+    return false; // Timeout ou max tentatives atteint
   }
 
   private getDocumentType(nomDocument: string): string {
