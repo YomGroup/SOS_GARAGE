@@ -320,7 +320,7 @@ export class GestionFinanceComponent implements OnInit {
   // Méthodes privées d'optimisation
   private _calculateFilteredMissions(): Mission[] {
     return this._missions.filter(m =>
-      (!this.filterStatut || (m.commissionStatut?.toLowerCase().includes(this.filterStatut.toLowerCase()))) &&
+      (!this.filterStatut || (m.commissionStatut?.toLowerCase() === this.filterStatut.toLowerCase())) &&
       (!this.filterNom || (m.assureName?.toLowerCase().includes(this.filterNom.toLowerCase()))) &&
       (this.filterDevisMin === null || (m.devis || 0) >= this.filterDevisMin) &&
       (this.filterDevisMax === null || (m.devis || 0) <= this.filterDevisMax) &&

@@ -125,7 +125,7 @@ export class GarageFinanceComponent implements OnInit {
 
   private _calculateFilteredMissions(): Mission[] {
     let filtered = this._missions.filter(m => {
-      const statutOk = !this.filterStatut || (m.commissionStatut && m.commissionStatut.toLowerCase().includes(this.filterStatut.toLowerCase()));
+      const statutOk = !this.filterStatut || (m.commissionStatut && m.commissionStatut.toLowerCase() === this.filterStatut.toLowerCase());
       const nameCandidate = (m.assureName || this.assureNamesMap.get(m.sinistre?.id as any) || '').toLowerCase();
       const nomOk = !this.filterNom || nameCandidate.includes(this.filterNom.toLowerCase());
       return statutOk && nomOk;
