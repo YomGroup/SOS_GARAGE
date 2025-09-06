@@ -16,6 +16,7 @@ import { DossiersService, Dossier as APIDossier } from '../../../../../services/
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
+import { forkJoin } from 'rxjs';
 import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, Vehicule } from '../../../../../services/models-api.interface';
@@ -247,7 +248,11 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
   private loadData() {
     this.isLoadingDossiers = true;
-    this.dossiersService.getDossiers().subscribe(apiDossiers => {
+    forkJoin({
+      apiDossiers: this.dossiersService.getDossiers(),
+      missions: this.missionService.getAllMissions()
+    }).subscribe(({ apiDossiers, missions }) => {
+      this.missions = missions;
       // Traiter chaque dossier pour récupérer les informations de véhicule
       const dossiersAvecVehicules = apiDossiers.map(d => ({
         ...d,
@@ -311,10 +316,6 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
       });
       
       this.isLoadingDossiers = false;
-      this.cdr.detectChanges();
-    });
-    this.missionService.getAllMissions().subscribe(missions => {
-      this.missions = missions;
       this.cdr.detectChanges();
     });
   }

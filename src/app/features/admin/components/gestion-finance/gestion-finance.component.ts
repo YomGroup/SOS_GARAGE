@@ -3,7 +3,7 @@ import { MissionService } from '../../../../../../src/services/mission.service';
 import { Mission } from '../../../../../../src/services/models-api.interface';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
-import { AssureService } from '../../../../../../src/services/assure.service';
+import { DossiersService } from '../../../../../../src/services/dossiers.service';
 import { ReparateurService } from '../../../../../../src/services/reparateur.service';
 import { Reparateur } from '../../../../../../src/services/models-api.interface';
 import { FormsModule } from '@angular/forms';
@@ -50,13 +50,28 @@ export class GestionFinanceComponent implements OnInit {
 
   constructor(
     private missionService: MissionService,
-    private assureService: AssureService,
     private reparateurService: ReparateurService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dossiersService: DossiersService
   ) {}
 
   async ngOnInit(): Promise<void> {
     await this.loadFinancialData();
+  }
+
+  onFilterChange(): void {
+    this.page = 1;
+    this._clearCache();
+    this.cdr.detectChanges();
+  }
+
+  setPage(page: number): void {
+    if (page < 1 || page > this.totalPages) {
+      return;
+    }
+    this.page = page;
+    this._paginatedMissionsCache = null;
+    this.cdr.detectChanges();
   }
 
   // Méthode loadFinancialData inchangée mais optimisée en interne
@@ -126,7 +141,7 @@ export class GestionFinanceComponent implements OnInit {
     if (sinistreIds.length === 0) return new Map();
 
     const assuresObservables = sinistreIds.map(id => 
-      this.assureService.getAssureBySinistreId(id).pipe(
+      this.dossiersService.getAssureFromSinistreId(id).pipe(
         catchError(err => {
           console.error(`Erreur assuré sinistre ${id}`, err);
           return of(null);

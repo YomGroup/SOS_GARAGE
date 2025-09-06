@@ -192,6 +192,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     this.cdr.detectChanges();
   }
 
+
   private async loadStatistics(): Promise<void> {
     try {
       this.loading = true;
@@ -244,16 +245,63 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   private async calculateStatistics(): Promise<void> {
     const missions = this.reparateurMissions;
     
-    // Calculer les statistiques de mission
+    // Debug: Afficher les statuts réels des missions
+    console.log('=== DEBUG STATISTIQUES ===');
+    console.log('Nombre total de missions:', missions.length);
+    missions.forEach((mission, index) => {
+      console.log(`Mission ${index + 1} (ID: ${mission.id}): statut = "${mission.statut}"`);
+    });
+    console.log('========================');
+    
+    // Fonction helper pour normaliser les statuts
+    const normalizeStatut = (statut: string): string => {
+      if (!statut) return '';
+      return statut.toLowerCase().trim();
+    };
+    
+    // Calculer les statistiques de mission avec gestion des différents formats de statuts
     this.missionStats = {
       total: missions.length,
-      completed: missions.filter(m => m.statut === 'terminée').length,
-      inProgress: missions.filter(m => m.statut === 'en cours').length,
-      pending: missions.filter(m => m.statut === 'en attente').length,
-      assigned: missions.filter(m => m.statut === 'en cours').length,
-      refused: missions.filter(m => m.statut === 'non assignée').length,
-      epave: missions.filter(m => m.statut === 'épave').length
+      completed: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'terminée' || statut === 'terminee' || statut === 'terminé' || statut === 'reparation_terminee';
+      }).length,
+      inProgress: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'en cours' || statut === 'en_cours' || statut === 'assignée' || statut === 'assignee' || 
+               statut === 'en_cours_reparation' || statut === 'en cours de réparation';
+      }).length,
+      pending: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'en attente' || statut === 'en_attente' || statut === 'non traité' || statut === 'non traite' ||
+               statut === 'en_attente_traitement' || statut === 'en_attente_expertise' || statut === 'en_attente_reparation';
+      }).length,
+      assigned: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'assignée' || statut === 'assignee' || statut === 'en cours' || statut === 'en_cours' ||
+               statut === 'en_cours_reparation' || statut === 'en cours de réparation';
+      }).length,
+      refused: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'non assignée' || statut === 'non assignee' || statut === 'refusée' || statut === 'refusee' ||
+               statut === 'rejetée' || statut === 'rejetee';
+      }).length,
+      epave: missions.filter(m => {
+        const statut = normalizeStatut(m.statut);
+        return statut === 'épave' || statut === 'epave' || statut === 'déclarée épave' || statut === 'declaree epave';
+      }).length
     };
+
+    // Debug: Afficher les statistiques calculées
+    console.log('=== STATISTIQUES CALCULÉES ===');
+    console.log('Total:', this.missionStats.total);
+    console.log('Terminées:', this.missionStats.completed);
+    console.log('En cours:', this.missionStats.inProgress);
+    console.log('En attente:', this.missionStats.pending);
+    console.log('Assignées:', this.missionStats.assigned);
+    console.log('Refusées:', this.missionStats.refused);
+    console.log('Épaves:', this.missionStats.epave);
+    console.log('==============================');
 
     // Calculer les statistiques financières
     const missionsWithDevis = missions.filter(m => m.devis && m.devis > 0);

@@ -16,6 +16,23 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   selectedVehicle: Vehicle | null = null;
   vehicles: Vehicle[] = [];
   searchTerm: string = '';
+  get filteredVehicles(): Vehicle[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) {
+      return this.vehicles;
+    }
+    return this.vehicles.filter(vehicle =>
+      (vehicle.immatriculation?.toLowerCase().includes(term) ||
+       vehicle.marque?.toLowerCase().includes(term) ||
+       vehicle.modele?.toLowerCase().includes(term))
+    );
+  }
+
+  get paginatedVehicles(): Vehicle[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.filteredVehicles.slice(start, end);
+  }
   private initialized = false;
   private routerSub: Subscription | undefined;
   isLoadingVehicules: boolean = false;
@@ -23,7 +40,9 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   // Pagination
   currentPage = 1;
   pageSize = 12;
-  totalVehicles = 0;
+  get totalVehicles(): number {
+    return this.filteredVehicles.length;
+  }
   pageSizes: number[] = [6, 12, 24, 48];
 
   constructor(
@@ -51,36 +70,21 @@ export class VehiculesComponent implements OnInit, OnDestroy {
 
   loadVehiclesPage(): void {
     this.isLoadingVehicules = true;
-    this.vehiculeService.getVehiculesPage(this.currentPage, this.pageSize).subscribe({
+    this.vehiculeService.getVehiculesPage(1, 9999).subscribe({ // Fetch all vehicles
       next: (res: any) => {
-        // On suppose que l'API retourne { data: Vehicle[], total: number }
-        if (Array.isArray(res)) {
-          this.vehicles = res;
-          this.totalVehicles = res.length;
-        } else {
-          this.vehicles = res.data || [];
-          this.totalVehicles = res.total || this.vehicles.length;
-        }
+        this.vehicles = Array.isArray(res) ? res : (res.data || []);
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erreur lors de la récupération des véhicules :', err);
+        this.isLoadingVehicules = false;
+        this.cdr.detectChanges();
       },
       complete: () => {
         this.isLoadingVehicules = false;
         this.cdr.detectChanges();
       }
     });
-  }
-
-  get filteredVehicles(): Vehicle[] {
-    const term = this.searchTerm.trim().toLowerCase();
-    if (!term) return this.vehicles;
-    return this.vehicles.filter(vehicle =>
-      (vehicle.immatriculation?.toLowerCase().includes(term) ||
-       vehicle.marque?.toLowerCase().includes(term) ||
-       vehicle.modele?.toLowerCase().includes(term))
-    );
   }
 
   get totalPages(): number {
@@ -105,20 +109,17 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   goToPage(page: number) {
     if (page < 1 || page > this.totalPages) return;
     this.currentPage = page;
-    this.loadVehiclesPage();
   }
 
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.loadVehiclesPage();
     }
   }
 
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.loadVehiclesPage();
     }
   }
 
@@ -127,7 +128,6 @@ export class VehiculesComponent implements OnInit, OnDestroy {
     if (!Number.isFinite(parsed) || parsed <= 0) return;
     this.pageSize = parsed as number;
     this.currentPage = 1;
-    this.loadVehiclesPage();
   }
 
   trackByVehicleId(index: number, vehicle: Vehicle): string | number {

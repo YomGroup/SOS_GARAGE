@@ -65,29 +65,67 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   pageSize: number = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
 
+  // Fonction helper pour normaliser les statuts
+  private normalizeStatut(statut: string): string {
+    if (!statut) return '';
+    return statut.toLowerCase().trim();
+  }
+
   get missionsNouvelles() {
-    return this.missions.filter(m => m.statut && m.statut.toUpperCase() === 'ASSIGNEE');
+    return this.missions.filter(m => {
+      const statut = this.normalizeStatut(m.statut);
+      return statut === 'assignée' || statut === 'assignee' || statut === 'en attente' || statut === 'en_attente' ||
+             statut === 'non traité' || statut === 'non traite' || statut === 'en_attente_traitement' ||
+             statut === 'en_attente_expertise' || statut === 'en_attente_reparation';
+    });
   }
 
   get missionsEnCours() {
-    return this.missions.filter(m => m.statut && m.statut.toUpperCase() === 'EN_COURS');
+    return this.missions.filter(m => {
+      const statut = this.normalizeStatut(m.statut);
+      return statut === 'en cours' || statut === 'en_cours' || statut === 'assignée' || statut === 'assignee' || 
+             statut === 'en_cours_reparation' || statut === 'en cours de réparation';
+    });
   }
 
   get missionsTerminees() {
-    return this.missions.filter(m => m.statut && ['TERMINEE', 'TERMINÉE', 'terminée'].includes(m.statut.toUpperCase()));
+    return this.missions.filter(m => {
+      const statut = this.normalizeStatut(m.statut);
+      return statut === 'terminée' || statut === 'terminee' || statut === 'terminé' || statut === 'reparation_terminee';
+    });
   }
 
   get missionsFiltres() {
+    console.log('=== FILTRAGE DES MISSIONS ===');
+    console.log('Filtre actuel:', this.filtreActuel);
+    console.log('Total des missions:', this.missions.length);
+    
+    // Debug: Afficher les statuts de toutes les missions
+    this.missions.forEach((mission, index) => {
+      console.log(`Mission ${index + 1} (ID: ${mission.id}): statut = "${mission.statut}"`);
+    });
+    
+    let result: Mission[];
     switch (this.filtreActuel) {
       case 'nouvelles':
-        return this.missionsNouvelles;
+        result = this.missionsNouvelles;
+        console.log('Missions nouvelles trouvées:', result.length);
+        break;
       case 'enCours':
-        return this.missionsEnCours;
+        result = this.missionsEnCours;
+        console.log('Missions en cours trouvées:', result.length);
+        break;
       case 'terminees':
-        return this.missionsTerminees;
+        result = this.missionsTerminees;
+        console.log('Missions terminées trouvées:', result.length);
+        break;
       default:
-        return this.missions;
+        result = this.missions;
+        console.log('Toutes les missions:', result.length);
     }
+    
+    console.log('============================');
+    return result;
   }
 
   setFiltreMission(filtre: 'nouvelles' | 'enCours' | 'terminees' | 'toutes') {
@@ -117,6 +155,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   async ngOnInit(): Promise<void> {
     await this.refreshData();
     this.missionFilterService.filtre$.subscribe(filtre => {
+      console.log('Changement de filtre détecté:', filtre);
       this.filtreActuel = filtre;
       this.dataSource.data = this.missionsFiltres;
       this.pageIndex = 0;
