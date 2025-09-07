@@ -315,7 +315,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
       declareCommeEpave: false,
       epaveValideeParAdmin: false,
       dateDeclarationEpave: '',
-      assure: this.assureInfo?.id ?? 0
+      assure: this.assureInfo?.id ?? 0,
+      commissionStatut: 'non payée'
     };
     this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
       next: async (mission) => {

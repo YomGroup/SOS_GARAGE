@@ -32,7 +32,7 @@
         </div>
   </div>
   <div class="row g-3">
-    <div class="col-12 col-md-6 col-lg-4" *ngFor="let vehicle of filteredVehicles; trackBy: trackByVehicleId">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let vehicle of paginatedVehicles; trackBy: trackByVehicleId">
       <div class="card h-100 shadow-sm border-0 overflow-hidden">
         <div class="position-relative bg-light" style="height: 180px;">
           <img *ngIf="vehicle.imgUrl; else defaultIcon" [src]="vehicle.imgUrl" class="h-100 w-100 object-fit-cover" alt="Image véhicule">

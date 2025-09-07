@@ -59,15 +59,15 @@
       <div class="row g-3 align-items-end">
         <div class="col-xl-2 col-md-4 col-sm-6">
           <label class="form-label small text-muted mb-1">Client</label>
-          <input class="form-control" type="text" [(ngModel)]="filterNom" name="filterNom" placeholder="Nom du client...">
+          <input class="form-control" type="text" [(ngModel)]="filterNom" (ngModelChange)="onFilterChange()" name="filterNom" placeholder="Nom du client...">
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
           <label class="form-label small text-muted mb-1">Réparateur</label>
-          <input class="form-control" type="text" [(ngModel)]="filterReparateur" name="filterReparateur" placeholder="Nom du réparateur...">
+          <input class="form-control" type="text" [(ngModel)]="filterReparateur" (ngModelChange)="onFilterChange()" name="filterReparateur" placeholder="Nom du réparateur...">
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
           <label class="form-label small text-muted mb-1">Statut</label>
-          <select class="form-select" [(ngModel)]="filterStatut" name="filterStatut">
+          <select class="form-select" [(ngModel)]="filterStatut" (ngModelChange)="onFilterChange()" name="filterStatut">
             <option value="">Tous les statuts</option>
             <option value="payée">Payée</option>
             <option value="non payée">Non payée</option>
@@ -75,19 +75,19 @@
         </div>
         <div class="col-xl-1 col-md-3 col-sm-6">
           <label class="form-label small text-muted mb-1">Devis min</label>
-          <input class="form-control" type="number" [(ngModel)]="filterDevisMin" name="filterDevisMin" placeholder="Min">
+          <input class="form-control" type="number" [(ngModel)]="filterDevisMin" (ngModelChange)="onFilterChange()" name="filterDevisMin" placeholder="Min">
         </div>
         <div class="col-xl-1 col-md-3 col-sm-6">
           <label class="form-label small text-muted mb-1">Devis max</label>
-          <input class="form-control" type="number" [(ngModel)]="filterDevisMax" name="filterDevisMax" placeholder="Max">
+          <input class="form-control" type="number" [(ngModel)]="filterDevisMax" (ngModelChange)="onFilterChange()" name="filterDevisMax" placeholder="Max">
         </div>
         <div class="col-xl-1 col-md-3 col-sm-6">
           <label class="form-label small text-muted mb-1">Facture min</label>
-          <input class="form-control" type="number" [(ngModel)]="filterFactureMin" name="filterFactureMin" placeholder="Min">
+          <input class="form-control" type="number" [(ngModel)]="filterFactureMin" (ngModelChange)="onFilterChange()" name="filterFactureMin" placeholder="Min">
         </div>
         <div class="col-xl-1 col-md-3 col-sm-6">
           <label class="form-label small text-muted mb-1">Facture max</label>
-          <input class="form-control" type="number" [(ngModel)]="filterFactureMax" name="filterFactureMax" placeholder="Max">
+          <input class="form-control" type="number" [(ngModel)]="filterFactureMax" (ngModelChange)="onFilterChange()" name="filterFactureMax" placeholder="Max">
         </div>
         <div class="col-xl-2 col-md-4 col-sm-6">
           <button type="button" class="btn btn-reset-filters w-100" (click)="resetFilters()">
@@ -198,19 +198,19 @@
       <nav *ngIf="filteredMissions.length > pageSize" class="mt-4">
         <ul class="pagination justify-content-center">
           <li class="page-item" [class.disabled]="page === 1">
-            <button class="page-link" (click)="page = page - 1" [disabled]="page === 1">
+            <button class="page-link" (click)="setPage(page - 1)" [disabled]="page === 1">
               ← Précédent
             </button>
           </li>
           <ng-container *ngIf="filteredMissions.length > 0">
             <ng-container *ngFor="let p of [].constructor(totalPages); let i = index">
               <li class="page-item" [class.active]="page === i + 1" *ngIf="shouldShowPage(i + 1)">
-                <button class="page-link" (click)="page = i + 1">{{ i + 1 }}</button>
+                <button class="page-link" (click)="setPage(i + 1)">{{ i + 1 }}</button>
               </li>
             </ng-container>
           </ng-container>
           <li class="page-item" [class.disabled]="page === totalPages">
-            <button class="page-link" (click)="page = page + 1" [disabled]="page === totalPages">
+            <button class="page-link" (click)="setPage(page + 1)" [disabled]="page === totalPages">
               Suivant →
             </button>
           </li>
