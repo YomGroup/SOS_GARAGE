@@ -153,7 +153,10 @@ export class MessageComponent implements OnInit, OnDestroy {
         const newConversationUsers = await Promise.all(
           userIds.map(async (id) => {
             try {
+              console.log('Assuré récupéré pour IDfkd,sfk,dkf,kls,lnls,n', id,);
+
               const assure = await this.assureService.getAssurerID(id).toPromise() as Assure;
+              console.log('Assuré récupéré pour ID', id, ':', assure);
               if (assure) {
                 return {
                   id: assure.id || 0,

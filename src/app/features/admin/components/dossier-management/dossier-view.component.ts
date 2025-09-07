@@ -12,10 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-
-
-
-
+import { MessageService } from '../../../../../services/messagerie.service';
 interface AssuranceContact {
   nom: string;
   telephone: string;
@@ -118,6 +115,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
     private firebaseService: FirebaseStorageService,
     private cdr: ChangeDetectorRef,
     private expertiseService: ExpertiseService,
+    private messageService: MessageService, // ⬅️ AJOUT
+
     private http: HttpClient
   ) { }
 
@@ -319,10 +318,35 @@ export class DossierViewComponent implements OnChanges, OnInit {
       assure: this.assureInfo?.id ?? 0
     };
     this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
-      next: (mission) => {
+      next: async (mission) => {
         this.attributionEnCours = false;
         this.selectedReparateurId = null;
         alert('Mission créée avec succès !');
+        let KeycloakReparateur: any = null;
+        let KeycloakAssure: any = null;
+
+        this.attributionEnCours = false;
+        this.selectedReparateurId = null;
+        alert('Mission créée avec succès !');
+
+        // Récupération des infos Assuré et Réparateur en parallèle
+        const [assure, reparateur] = await Promise.all([
+          this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
+          this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
+        ]);
+
+        KeycloakAssure = assure;
+        KeycloakReparateur = reparateur;
+
+
+        if (KeycloakReparateur && KeycloakAssure) {
+          this.messageService.sendSystemMessage(
+            KeycloakAssure.useridKeycloak || '',
+            KeycloakReparateur.useridKeycloak || '',
+            "Discussion ouverte pour le suivi du sinistre "
+          );
+        }
+
         this.missionUpdated.emit(mission); // Ajout : notifie le parent pour recharger
       },
       error: () => alert('Erreur lors de la création de la mission')
@@ -790,7 +814,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
         typeMine: dossier.vehicule.typeMine || 'Type mine non spécifié',
         version: dossier.vehicule.version || 'Version non spécifiée',
         carteGrise: dossier.vehicule.carteGrise || 'Carte grise non spécifiée'
-        
+
       };
     }
 
@@ -978,7 +1002,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
 
   isImageOrPdf(url: string): boolean {
-    return /\.(pdf|jpg|jpeg|png)$/i.test(url); 
+    return /\.(pdf|jpg|jpeg|png)$/i.test(url);
   }
 
 
@@ -1045,21 +1069,21 @@ export class DossierViewComponent implements OnChanges, OnInit {
     return 0;
   }
 
-getJoursRestants(): number | null {
-  const debut = this.mission?.dateDebutTravaux ? new Date(this.mission.dateDebutTravaux) : null;
-  const delai = this.mission?.delaiEstime ?? null;
+  getJoursRestants(): number | null {
+    const debut = this.mission?.dateDebutTravaux ? new Date(this.mission.dateDebutTravaux) : null;
+    const delai = this.mission?.delaiEstime ?? null;
 
-  if (!debut || delai === null) return null;
+    if (!debut || delai === null) return null;
 
-  const dateFin = new Date(debut);
-  dateFin.setDate(dateFin.getDate() + delai);
+    const dateFin = new Date(debut);
+    dateFin.setDate(dateFin.getDate() + delai);
 
-  const aujourdHui = new Date();
-  const diffTime = dateFin.getTime() - aujourdHui.getTime();
-  const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const aujourdHui = new Date();
+    const diffTime = dateFin.getTime() - aujourdHui.getTime();
+    const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-  return diffJours;
-}
+    return diffJours;
+  }
 
   // Méthodes utilitaires pour ouvrir mail ou téléphone depuis le template
   openMail(email: string) {

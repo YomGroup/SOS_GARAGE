@@ -61,7 +61,7 @@ export class AssureService {
 
     // Récupérer l'assuré par l'ID du sinistre
     getAssureBySinistreId(sinistreId: number) {
-        return this.http.get<ASSURE>(`${this.apiUrl}/${sinistreId}`);
+        return this.http.get<ASSURE>(`${this.apiUrl}/assure/${sinistreId}`);
     }
 
     // Récupérer le véhicule correspondant à un sinistre

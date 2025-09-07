@@ -150,15 +150,15 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
 
   constructor(
-    private dossiersService: DossiersService, 
+    private dossiersService: DossiersService,
     private missionService: MissionService,
-    private dialog: MatDialog, 
-    private router: Router, 
+    private dialog: MatDialog,
+    private router: Router,
     private route: ActivatedRoute,
     private viewContainerRef: ViewContainerRef,
     private cdr: ChangeDetectorRef,
     private auth: AuthService,               // ⬅️ AJOUT
-  private messageService: MessageService, // ⬅️ AJOUT
+    private messageService: MessageService, // ⬅️ AJOUT
     private dossierFilterService: DossierFilterService
   ) {
     this.dataSource = new MatTableDataSource();
@@ -285,12 +285,12 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
         const inFiltreActuel = this.isInFiltreActuel(data);
         return matchesRecherche && matchesStatut && matchesClient && inFiltreActuel;
       };
-      
+
       // Dossiers non traités : pas de mission associée
       this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
-      
+
       const dossiersAvecMission = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id));
-      
+
       // Dossiers terminés (traités)
       this.dossiersTraites = dossiersAvecMission.filter(dossier =>
         this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id && m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase()))
@@ -301,7 +301,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
       // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
       this.dossiersCommissionPayee = apiDossiers.filter(dossier => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
-      
+
       // Récupérer les informations de véhicule pour les dossiers qui n'en ont pas
       dossiersAvecVehicules.forEach(dossier => {
         if (dossier.id && (!dossier.vehicule || !dossier.vehicule.marque)) {
@@ -322,7 +322,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
           });
         }
       });
-      
+
       this.isLoadingDossiers = false;
       this.cdr.detectChanges();
     });
@@ -495,111 +495,111 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     }
     return date.toLocaleDateString('fr-FR');
   }
-  
 
-attribuerSinistre(dossier: Dossier): void {
-  console.log('Attribution du dossier à un sinistre:', dossier);
 
-  // 1) Récupérer missionId, sinistreId et réparateur choisi depuis le dossier
-  const missionId: number | undefined =
-    (dossier as any)?.mission?.id ?? (dossier as any)?.missionId;
+  attribuerSinistre(dossier: Dossier): void {
+    console.log('Attribution du dossier à un sinistre:', dossier);
 
-  const sinistreId: number | undefined =
-    (dossier as any)?.sinistre?.id ?? (dossier as any)?.sinistreId ?? (dossier as any)?.mission?.sinistre?.id;
+    // 1) Récupérer missionId, sinistreId et réparateur choisi depuis le dossier
+    const missionId: number | undefined =
+      (dossier as any)?.mission?.id ?? (dossier as any)?.missionId;
 
-  // Réparateur sélectionné (adapte le champ selon ton UI)
-  const reparateur: Reparateur | undefined =
-    (dossier as any)?.reparateurSelectionne ?? (dossier as any)?.reparateur;
+    const sinistreId: number | undefined =
+      (dossier as any)?.sinistre?.id ?? (dossier as any)?.sinistreId ?? (dossier as any)?.mission?.sinistre?.id;
 
-  if (!missionId || !reparateur?.id) {
-    console.warn('MissionId ou réparateur manquant pour attribuer le sinistre.');
-    return;
-  }
+    // Réparateur sélectionné (adapte le champ selon ton UI)
+    const reparateur: Reparateur | undefined =
+      (dossier as any)?.reparateurSelectionne ?? (dossier as any)?.reparateur;
 
-  // 2) Appel API : mise à jour du réparateur de la mission
-  this.missionService.updateMissionReparateur(missionId, reparateur).pipe(
-
-    // 3) S’assurer qu’on a bien les IDs Keycloak (assuré & garage)
-    switchMap((missionMaj: Mission) => {
-      // Essai 1 : extraire depuis la réponse du PATCH
-      const assureIdFromPatch =
-        (missionMaj as any)?.sinistre?.assure?.useridKeycloak ??
-        (missionMaj as any)?.assure?.useridKeycloak;
-
-      const garageIdFromPatch =
-        (missionMaj as any)?.reparateur?.useridKeycloak ??
-        reparateur?.useridKeycloak;
-
-      // Si on a tout, on continue direct
-      if (assureIdFromPatch && garageIdFromPatch) {
-        return of({ mission: missionMaj, assureId: assureIdFromPatch, garageId: garageIdFromPatch });
-      }
-
-      // Sinon, recharger la mission (fallback) pour récupérer les clés
-      return this.missionService.getMissionById(missionId).pipe(
-        map((m2: Mission) => {
-          const assureId =
-            (m2 as any)?.sinistre?.assure?.useridKeycloak ??
-            (m2 as any)?.assure?.useridKeycloak;
-
-          const garageId =
-            (m2 as any)?.reparateur?.useridKeycloak ??
-            reparateur?.useridKeycloak;
-
-          return { mission: m2, assureId, garageId };
-        })
-      );
-    }),
-
-    // 4) Créer la conversation si besoin + envoyer le message système
-    switchMap(({ mission, assureId, garageId }: { mission: Mission; assureId?: string; garageId?: string; }) => {
-
-      if (!assureId || !garageId) {
-        console.warn('Impossible de déterminer assureId/garageId pour ouvrir la messagerie.');
-        return of(mission);
-      }
-
-      // ensureConversation puis sendSystemMessage
-      return from(this.messageService.ensureConversation(assureId, garageId, mission.id, sinistreId)).pipe(
-        switchMap(() =>
-          from(this.messageService.sendSystemMessage(
-            assureId,
-            garageId,
-            `Discussion ouverte pour le suivi du sinistre ${sinistreId ? `#${sinistreId}` : ''}.`
-          ))
-        ),
-        map(() => mission),
-        catchError(err => {
-          console.error('Ouverture auto de la conversation: échec non bloquant', err);
-          // On ne bloque pas le flux : on renvoie quand même la mission
-          return of(mission);
-        })
-      );
-    })
-
-  ).subscribe({
-    next: (mission: Mission) => {
-      // 5) Ouvrir la messagerie sur le bon interlocuteur
-      const assureId =
-        (mission as any)?.sinistre?.assure?.useridKeycloak ??
-        (mission as any)?.assure?.useridKeycloak;
-
-      const garageId =
-        (mission as any)?.reparateur?.useridKeycloak ??
-        reparateur?.useridKeycloak;
-
-      const me    = this.auth.getKeycloakId();
-      const other = me === assureId ? garageId : assureId;
-
-      if (other) {
-        this.router.navigate(['/messagerie'], { queryParams: { receiverId: other } });
-      }
-    },
-    error: (err) => {
-      console.error('Erreur lors de l’attribution au sinistre:', err);
+    if (!missionId || !reparateur?.id) {
+      console.warn('MissionId ou réparateur manquant pour attribuer le sinistre.');
+      return;
     }
-  });
-}
+
+    // 2) Appel API : mise à jour du réparateur de la mission
+    this.missionService.updateMissionReparateur(missionId, reparateur).pipe(
+
+      // 3) S’assurer qu’on a bien les IDs Keycloak (assuré & garage)
+      switchMap((missionMaj: Mission) => {
+        // Essai 1 : extraire depuis la réponse du PATCH
+        const assureIdFromPatch =
+          (missionMaj as any)?.sinistre?.assure?.useridKeycloak ??
+          (missionMaj as any)?.assure?.useridKeycloak;
+
+        const garageIdFromPatch =
+          (missionMaj as any)?.reparateur?.useridKeycloak ??
+          reparateur?.useridKeycloak;
+
+        // Si on a tout, on continue direct
+        if (assureIdFromPatch && garageIdFromPatch) {
+          return of({ mission: missionMaj, assureId: assureIdFromPatch, garageId: garageIdFromPatch });
+        }
+
+        // Sinon, recharger la mission (fallback) pour récupérer les clés
+        return this.missionService.getMissionById(missionId).pipe(
+          map((m2: Mission) => {
+            const assureId =
+              (m2 as any)?.sinistre?.assure?.useridKeycloak ??
+              (m2 as any)?.assure?.useridKeycloak;
+
+            const garageId =
+              (m2 as any)?.reparateur?.useridKeycloak ??
+              reparateur?.useridKeycloak;
+
+            return { mission: m2, assureId, garageId };
+          })
+        );
+      }),
+
+      // 4) Créer la conversation si besoin + envoyer le message système
+      switchMap(({ mission, assureId, garageId }: { mission: Mission; assureId?: string; garageId?: string; }) => {
+
+        if (!assureId || !garageId) {
+          console.warn('Impossible de déterminer assureId/garageId pour ouvrir la messagerie.');
+          return of(mission);
+        }
+        console.log(`Assuré ID: ${assureId}, Garage ID: ${garageId}`);
+        // ensureConversation puis sendSystemMessage
+        return from(this.messageService.ensureConversation(assureId, garageId, mission.id, sinistreId)).pipe(
+          switchMap(() =>
+            from(this.messageService.sendSystemMessage(
+              assureId,
+              garageId,
+              `Discussion ouverte pour le suivi du sinistre ${sinistreId ? `#${sinistreId}` : ''}.`
+            ))
+          ),
+          map(() => mission),
+          catchError(err => {
+            console.error('Ouverture auto de la conversation: échec non bloquant', err);
+            // On ne bloque pas le flux : on renvoie quand même la mission
+            return of(mission);
+          })
+        );
+      })
+
+    ).subscribe({
+      next: (mission: Mission) => {
+        // 5) Ouvrir la messagerie sur le bon interlocuteur
+        const assureId =
+          (mission as any)?.sinistre?.assure?.useridKeycloak ??
+          (mission as any)?.assure?.useridKeycloak;
+
+        const garageId =
+          (mission as any)?.reparateur?.useridKeycloak ??
+          reparateur?.useridKeycloak;
+
+        const me = this.auth.getKeycloakId();
+        const other = me === assureId ? garageId : assureId;
+
+        if (other) {
+          this.router.navigate(['/messagerie'], { queryParams: { receiverId: other } });
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de l’attribution au sinistre:', err);
+      }
+    });
+  }
 
 
   dossierAConfirmerPourSuppression: DossierAffichage | null = null;
@@ -637,13 +637,13 @@ attribuerSinistre(dossier: Dossier): void {
 
   handleSuccessfulDeletion(dossierId: number): void {
     console.log('Dossier supprimé avec succès.');
-    
+
     this.dataSource.data = this.dataSource.data.filter(d => d.id !== dossierId);
-    this.totalDossiers--; 
+    this.totalDossiers--;
 
     this.suppressionEnCours = false;
     this.dossierAConfirmerPourSuppression = null;
-    
+
     this.onToolbarFiltersChanged();
     this.cdr.detectChanges();
   }
@@ -654,7 +654,7 @@ attribuerSinistre(dossier: Dossier): void {
 
   getVehicule(sinistreId: number): void {
     console.log('Récupération du véhicule pour le sinistre:', sinistreId);
-    
+
     this.dossiersService.getVehiculeFromSinistreId(sinistreId).subscribe({
       next: (vehicule: Vehicule | null) => {
         if (vehicule) {
@@ -675,7 +675,7 @@ attribuerSinistre(dossier: Dossier): void {
     });
   }
 
-  
+
 
   ouvrirDossierView(dossier: DossierAffichage, edition: boolean = false) {
     const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
@@ -723,7 +723,7 @@ attribuerSinistre(dossier: Dossier): void {
     return {
       marque: dossier.vehicule.marque || 'Marque non spécifiée',
       modele: dossier.vehicule.modele || 'Modèle non spécifié',
-      annee: dossier.vehicule.dateMiseEnCirculation ? 
+      annee: dossier.vehicule.dateMiseEnCirculation ?
         dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
       immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
       assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
@@ -732,9 +732,9 @@ attribuerSinistre(dossier: Dossier): void {
 
   // Méthode pour vérifier si un véhicule a des informations complètes
   hasVehiculeInfo(dossier: DossierAffichage): boolean {
-    return !!(dossier.vehicule && 
-      dossier.vehicule.marque && 
-      dossier.vehicule.modele && 
+    return !!(dossier.vehicule &&
+      dossier.vehicule.marque &&
+      dossier.vehicule.modele &&
       dossier.vehicule.dateMiseEnCirculation);
   }
 

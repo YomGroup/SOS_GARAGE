@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { Observable } from 'rxjs';
 
 
 @Injectable({
@@ -10,8 +11,7 @@ export class SinistreService {
     private apiUrl = `${environment.apiUrl}/sinistre`;
     private http = inject(HttpClient);
 
-
-    addSinistrePost(body: any) {
+    addSinistrePost(body: any): Observable<any> {
         // --- Notification admin temporaire via Formspree ---
         const formspreeUrl = 'https://formspree.io/f/meoljrlp';
         const notificationPayload = {
@@ -20,21 +20,19 @@ export class SinistreService {
             details: 'Contenu: ' + JSON.stringify(body, null, 2)
         };
 
-        // Appel "Fire-and-forget" à Formspree.
+        // Appel "fire-and-forget" (on ne retourne pas l’Observable ici)
         this.http.post(formspreeUrl, notificationPayload).subscribe({
-            next: () => console.log('Notification temporaire de sinistre envoyée à l\'administrateur.'),
-            error: (err) => console.error('Erreur lors de l\'envoi de la notification temporaire:', err)
+            next: () =>
+                console.log('Notification temporaire envoyée à l\'administrateur.'),
+            error: (err) =>
+                console.error('Erreur notification Formspree:', err)
         });
-        // --- Fin de la notification temporaire ---
+        // --- Fin notification ---
 
-        // L\'appel original à l\'API principale reste inchangé.
-        return this.http.post(this.apiUrl, body, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        });
+        // Retourner l’appel principal pour que le composant puisse souscrire
+        return this.http.post(this.apiUrl, body);
     }
+
 
     getsinistreGet(id: number) {
         return this.http.get(`${this.apiUrl}/assure/${id}`);

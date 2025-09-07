@@ -806,11 +806,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   // Navigation entre étapes
   nextStep(): void {
     if (this.canProceed()) {
-      // Si on passe de l'étape 4 vers l'étape 5, montrer d'abord le warning garage
-      if (this.currentStep === 4) {
-        this.showGarageWarningStep = true;
-        return;
-      }
 
       this.currentStep++;
 
@@ -1353,6 +1348,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         new Promise(resolve => setTimeout(resolve, 0)) // Placeholder pour d'autres opérations async
       ]);
 
+      const imageAvant = savedFiles.photosUrls[0] || null;
+      const imageArriere = savedFiles.photosUrls[1] || null;
+      const imageDroite = savedFiles.photosUrls.slice(2);
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
@@ -1360,28 +1358,44 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         conditionsAcceptees: true,
         documents: [],
         lieu: this.lieuSinistre,
-        imgUrl: savedFiles.photosUrls,
-        idVehicule: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0,
+        idVehicule: parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0),
         statut: 'EN_ATTENTE_TRAITEMENT',
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
-        etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT'
+        etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+
       };
+      console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
+
 
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
-        next: async (sinistreResponse: any) => {
+        next: (sinistreResponse: any) => {
+          console.log("✅ Sinistre créé :", sinistreResponse);
+
           const sinistreId = sinistreResponse.id;
-
-          // Envoyer les documents en parallèle (non bloquant)
           this.sendSignedDocumentsAsync(sinistreId);
-
-          // Passer à l'étape suivante immédiatement
-          this.currentStep = 6; // ou l'étape de succès
+          this.currentStep = 6;
         },
         error: (error) => {
-          console.error('❌ Erreur création sinistre:', error);
+          console.error("❌ Erreur création sinistre:", error);
+
+          let msg: string;
+
+          if (typeof error.error === 'string') {
+            // Ici c'est du texte brut venant du serveur
+            msg = error.error;
+          } else if (error.error?.message) {
+            // Cas où le backend renvoie du JSON
+            msg = error.error.message;
+          } else {
+            msg = "Erreur lors de la création du sinistre.";
+          }
+
+          console.warn("ℹ️ Message utilisateur :", msg);
+          alert(msg);
         }
       });
+
     } catch (error) {
       console.error('❌ Erreur générale:', error);
     }
