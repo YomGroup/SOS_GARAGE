@@ -23,6 +23,8 @@ interface Sinistre {
   etat?: string;
   raison?: string;
   lieu?: string;
+  iSsigned?: boolean;
+  isgarageaffected?: boolean;
 
 }
 

@@ -174,7 +174,19 @@
                         <i class="bi bi-headset fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Support</span>
                     </a>
-                    
+                    <!--
+                    <a routerLink="/clientDashboard/pdf" 
+                       routerLinkActive="active"
+                       class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
+                       [class.justify-content-center]="sidebarCollapsed"
+                       style="gap: 12px; transition: all 0.3s ease;">
+                       <i class="bi bi-pen fs-5"></i>
+                       <span [class.d-none]="sidebarCollapsed">Signer document</span>
+                    </a>
+                    -->
+
+
+
                     <a (click)="logout()" 
                        class="nav-link d-flex align-items-center py-2 px-3 rounded-3 text-danger"
                        [class.justify-content-center]="sidebarCollapsed"

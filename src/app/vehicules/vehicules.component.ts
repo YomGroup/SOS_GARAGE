@@ -67,11 +67,12 @@ export class VehiculesComponent implements OnInit {
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
-
+    console.log('bonjour tout le monde');
     if (this.userid) {
       this.assureService.getAssurerID(this.userid).subscribe({
         next: (data: any) => {
           this.assureId = data.id; // adapte selon ta réponse
+          console.log('bonjour tout le monde');
           this.loadVehicles(this.assureId);
           this.loadAssurances();
 

@@ -15,6 +15,7 @@ import { DocumentComponent } from './document/document.component';
 import { ProfileComponent } from './profile/profile.component';
 import { MessageComponent } from './shared/components/message/message.component';
 import { AuthGuard } from './app/auth-guard.service';
+import { DocumentSigningComponent } from './document-signing/document-signing.component';
 
 export const routes: Routes = [
   // Page publique pour comptes garages non validés
@@ -65,6 +66,8 @@ export const routes: Routes = [
       { path: 'notification', component: NotificationComponent, data: { title: 'Notifications' } },
       { path: 'sinistre', component: SinistreComponent, data: { title: 'Mes Sinistres' } },
       { path: 'document', component: DocumentComponent, data: { title: 'Mes Documents' } },
+
+    
       //{ path: 'message', component: MessageComponent, data: { title: 'Mes Messages' } },
       {
           path: 'message',
@@ -73,6 +76,7 @@ export const routes: Routes = [
               .then(m => m.MessageComponent)
         },
       { path: 'profiles', component: ProfileComponent, data: { title: 'Mon Profil' } },
+      { path: 'pdf/:id', component: DocumentSigningComponent }
     ]
   },
 
@@ -84,7 +88,6 @@ export const routes: Routes = [
       { path: '', component: ClientComponent },
     ]
   },
-
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
   //{ path: 'message', component: MessageComponent },
