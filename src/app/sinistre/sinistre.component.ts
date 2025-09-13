@@ -45,6 +45,7 @@ export class SinistreComponent implements OnInit {
   private assureService = inject(AssureService);
 
   ngOnInit(): void {
+    console.log('Component initialized'+this.sinistres);
     this.userid = this.authService.getToken()?.['sub'] ?? null;
     if (this.userid) {
       this.assureService.getAssurerID(this.userid).subscribe({
@@ -90,6 +91,7 @@ export class SinistreComponent implements OnInit {
 
     apiData.vehicules?.forEach((vehicule: any) => {
       vehicule.sinistres?.forEach((sinistreApi: any) => {
+        console.log('Processing sinistre:', sinistreApi);
         const sinistre: Sinistre = {
           id: sinistreApi.id.toString(),
           vehicule: `${vehicule.marque} ${vehicule.modele} (${vehicule.immatriculation})`,
@@ -103,7 +105,9 @@ export class SinistreComponent implements OnInit {
           type: sinistreApi.type || 'aucun',
           etat: sinistreApi.etatvehicule || 'Inconnu',
           raison: sinistreApi.input || 'Aucune raison spécifiée',
-          lieu: sinistreApi.lieu || 'Lieu inconnu'
+          lieu: sinistreApi.lieu || 'Lieu inconnu',
+          iSsigned: sinistreApi.issigned,
+          isgarageaffected: sinistreApi.isgarageaffected,
         };
         sinistres.push(sinistre);
       });

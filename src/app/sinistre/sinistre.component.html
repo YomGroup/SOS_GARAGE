@@ -124,6 +124,7 @@
                   <!--*ngIf="!sinistre.iSsigned && sinistre.isgarageaffected"-->
                   <ng-container >
                   <button 
+                  *ngIf="!sinistre.iSsigned && sinistre.isgarageaffected"
                    [routerLink]="['/clientDashboard/pdf', sinistre.id]" 
                    routerLinkActive="active"
                    class="btn btn-primary ms-2">
