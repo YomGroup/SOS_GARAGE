@@ -140,9 +140,6 @@ async signDocument() {
     // 3️⃣ Ajouter un signataire et récupérer le lien
     const signerResponse: any = await firstValueFrom(
       this.http.post(`${this.apiUrl}signature/${this.signatureRequestId}/signer/url`, {
-        email: "elouafimed2@gmail.com",
-        firstName: "Mohamed",
-        lastName: "Elouafi",
         documentId: this.documentId,
         x: 100,
         y: 600,
