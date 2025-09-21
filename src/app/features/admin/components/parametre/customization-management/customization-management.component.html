@@ -1,0 +1,150 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <h2 class="mb-4"><i class="fas fa-palette me-2 text-primary"></i>Personnalisation</h2>
+    
+    <div class="customization-container">
+      <!-- Thème et couleurs -->
+      <div class="customization-section">
+        <h4 class="section-title">
+          <i class="fas fa-paint-brush me-2 text-primary"></i>Thème et couleurs
+        </h4>
+        <div class="theme-options">
+          <div class="theme-card" *ngFor="let theme of themes" (click)="selectTheme(theme)" [ngClass]="{'selected': selectedTheme === theme.id}">
+            <div class="theme-preview" [style.background]="theme.primaryColor">
+              <div class="theme-header" [style.background]="theme.secondaryColor"></div>
+              <div class="theme-content">
+                <div class="theme-sidebar" [style.background]="theme.sidebarColor"></div>
+                <div class="theme-main"></div>
+              </div>
+            </div>
+            <div class="theme-info">
+              <h6>{{theme.name}}</h6>
+              <p>{{theme.description}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Couleurs personnalisées -->
+      <div class="customization-section">
+        <h4 class="section-title">
+          <i class="fas fa-eye-dropper me-2 text-primary"></i>Couleurs personnalisées
+        </h4>
+        <div class="color-options">
+          <div class="color-group">
+            <label class="form-label">Couleur principale</label>
+            <div class="color-picker">
+              <input type="color" [(ngModel)]="customPrimaryColor" (change)="updateCustomColors()" class="color-input">
+              <span class="color-value">{{customPrimaryColor}}</span>
+            </div>
+          </div>
+          <div class="color-group">
+            <label class="form-label">Couleur secondaire</label>
+            <div class="color-picker">
+              <input type="color" [(ngModel)]="customSecondaryColor" (change)="updateCustomColors()" class="color-input">
+              <span class="color-value">{{customSecondaryColor}}</span>
+            </div>
+          </div>
+          <div class="color-group">
+            <label class="form-label">Couleur de la barre latérale</label>
+            <div class="color-picker">
+              <input type="color" [(ngModel)]="customSidebarColor" (change)="updateCustomColors()" class="color-input">
+              <span class="color-value">{{customSidebarColor}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typographie -->
+      <div class="customization-section">
+        <h4 class="section-title">
+          <i class="fas fa-font me-2 text-primary"></i>Typographie
+        </h4>
+        <div class="typography-options">
+          <div class="form-group">
+            <label for="fontFamily" class="form-label">Famille de police</label>
+            <select id="fontFamily" class="form-control" [(ngModel)]="selectedFontFamily" (change)="updateTypography()">
+              <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI (Par défaut)</option>
+              <option value="'Roboto', sans-serif">Roboto</option>
+              <option value="'Open Sans', sans-serif">Open Sans</option>
+              <option value="'Lato', sans-serif">Lato</option>
+              <option value="'Poppins', sans-serif">Poppins</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fontSize" class="form-label">Taille de police de base</label>
+            <div class="font-size-control">
+              <input type="range" id="fontSize" min="12" max="20" [(ngModel)]="baseFontSize" (input)="updateTypography()" class="font-slider">
+              <span class="font-size-value">{{baseFontSize}}px</span>
+            </div>
+          </div>
+          <div class="font-preview">
+            <h5>Aperçu de la typographie</h5>
+            <p class="preview-text" [style.font-family]="selectedFontFamily" [style.font-size]="baseFontSize + 'px'">
+              Ceci est un exemple de texte avec la police sélectionnée et la taille choisie.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disposition -->
+      <div class="customization-section">
+        <h4 class="section-title">
+          <i class="fas fa-columns me-2 text-primary"></i>Disposition
+        </h4>
+        <div class="layout-options">
+          <div class="layout-card" *ngFor="let layout of layouts" (click)="selectLayout(layout)" [ngClass]="{'selected': selectedLayout === layout.id}">
+            <div class="layout-preview">
+              <div class="layout-sidebar" [ngClass]="layout.sidebarPosition"></div>
+              <div class="layout-header"></div>
+              <div class="layout-content"></div>
+            </div>
+            <div class="layout-info">
+              <h6>{{layout.name}}</h6>
+              <p>{{layout.description}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Animations -->
+      <div class="customization-section">
+        <h4 class="section-title">
+          <i class="fas fa-magic me-2 text-primary"></i>Animations et transitions
+        </h4>
+        <div class="animation-options">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="enableAnimations" [(ngModel)]="enableAnimations" (change)="updateAnimations()">
+            <label class="form-check-label" for="enableAnimations">
+              Activer les animations
+            </label>
+          </div>
+          <div class="form-group" *ngIf="enableAnimations">
+            <label for="animationSpeed" class="form-label">Vitesse des animations</label>
+            <select id="animationSpeed" class="form-control" [(ngModel)]="animationSpeed" (change)="updateAnimations()">
+              <option value="slow">Lente</option>
+              <option value="normal">Normale</option>
+              <option value="fast">Rapide</option>
+            </select>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="enableHoverEffects" [(ngModel)]="enableHoverEffects" (change)="updateAnimations()">
+            <label class="form-check-label" for="enableHoverEffects">
+              Effets de survol
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn btn-outline-secondary me-2" (click)="resetCustomization()">
+          <i class="fas fa-undo me-2"></i>Réinitialiser
+        </button>
+        <button type="button" class="btn btn-primary-custom" (click)="saveCustomization()">
+          <i class="fas fa-save me-2"></i>Appliquer les changements
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

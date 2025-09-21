@@ -1,6 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
+import { ReparateurService } from '../../../services/reparateur.service';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +10,7 @@ import { KeycloakService } from 'keycloak-angular';
 export class RoleRedirectService {
   private keycloakService = inject(KeycloakService);
   private router = inject(Router);
+  private reparateurService = inject(ReparateurService);
   private hasRedirected = false;
 
   async handleLoginRedirect(): Promise<void> {
@@ -22,6 +25,7 @@ export class RoleRedirectService {
       if (roles.includes('ROLE_ADMIN')) {
         this.router.navigate(['/admin']);
       } else if (roles.includes('ROLE_GARAGISTE')) {
+        
         this.router.navigate(['/garage']);
       } else if (roles.includes('ROLE_ASSURE')) {
         this.router.navigate(['/clientDashboard']);

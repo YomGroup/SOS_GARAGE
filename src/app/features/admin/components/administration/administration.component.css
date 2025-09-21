@@ -1,0 +1,90 @@
+/* Styles de base pour la page d'administration */
+.admin-container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(44,62,80,0.07);
+  padding: 32px 24px 24px 24px;
+  margin: 32px auto;
+  max-width: 900px;
+  animation: fadeIn 0.5s;
+}
+
+.admin-section {
+  margin-top: 32px;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 24px;
+  list-style: none;
+  padding: 0;
+  margin-bottom: 0;
+  justify-content: flex-start;
+}
+
+.admin-nav li {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 12px 28px;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 8px rgba(0,74,173,0.04);
+  display: flex;
+  align-items: center;
+}
+
+.admin-nav li:hover {
+  background: #e3f0fc;
+  box-shadow: 0 4px 16px rgba(0,74,173,0.10);
+}
+
+.admin-nav li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 1.13em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color 0.2s;
+}
+
+.admin-nav li a.active {
+  color: var(--primary-blue, #004AAD);
+  border-bottom: 2px solid var(--primary-blue, #004AAD);
+}
+
+.admin-content {
+  margin-top: 24px;
+  min-height: 300px;
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.card-body {
+  padding: 2rem;
+}
+
+h2 {
+  color: var(--primary-blue, #004AAD);
+  font-size: 2.1em;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+/* Pour les icônes FontAwesome */
+.text-primary {
+  color: var(--primary-blue, #004AAD) !important;
+}
+
+/* Icônes modernes (exemple avec emoji, à remplacer par SVG si besoin) */
+.icon-admin::before { content: "\1F4BC"; font-size: 1.2em; }
+.icon-user::before { content: "\1F465"; font-size: 1.1em; }
+.icon-audit::before { content: "\1F50D"; font-size: 1.1em; }
+.icon-access::before { content: "\1F512"; font-size: 1.1em; }
+.icon-stats::before { content: "\1F4CA"; font-size: 1.1em; } 

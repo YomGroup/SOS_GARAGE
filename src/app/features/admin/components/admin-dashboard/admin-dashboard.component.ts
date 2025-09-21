@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -12,15 +12,21 @@ import { EpaveManagementComponent } from '../epave-management/epave-management.c
 import { RoleManagementComponent } from '../role-management/role-management.component';
 import { LineChartComponent, BarChartComponent, DoughnutChartComponent } from '../../../../shared/components/charts';
 import { RecentActivityComponent } from '../../../../shared/components/recent-activity/recent-activity.component';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter, debounceTime } from 'rxjs/operators';
 import { PerformanceChartComponent } from '../charts/performance-chart.component';
 import { DistributionChartComponent } from '../charts/distribution-chart.component';
 import { EvolutionChartComponent } from '../charts/evolution-chart.component';
+import { AdminService } from '../../../../../services/admin.service';
+import { HttpClientModule } from '@angular/common/http';
+import { ChangeDetectorRef } from '@angular/core';
+import { MissionService } from '../../../../../services/mission.service';
+import { ReparateurService } from '../../../../../services/reparateur.service';
 
 @Component({
   selector: 'app-admin-dashboard',
   templateUrl: './admin-dashboard.component.html',
-  styleUrl: './admin-dashboard.component.css',
+  styleUrls: ['./admin-dashboard.component.css'],
   imports: [
     CommonModule,
     MatTabsModule,
@@ -40,43 +46,155 @@ import { EvolutionChartComponent } from '../charts/evolution-chart.component';
     RouterModule,
     PerformanceChartComponent,
     DistributionChartComponent,
-    EvolutionChartComponent
+    EvolutionChartComponent,
+    HttpClientModule
   ],
-  standalone: true
+  standalone: true,
+  providers: [AdminService, MissionService, ReparateurService],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AdminDashboardComponent implements OnInit {
   activeTab = 0;
   currentGraph: 'performance' | 'distribution' | 'evolution' = 'performance';
   
-  // Données temporaires pour le développement
   stats = {
-    totalVehicules: 1243,
-    totalSinistres: 567,
-    enCours: 89,
-    epavesEnAttente: 32
+    totalVehicules: 0,
+    totalSinistres: 0,
+    totalMissions: 0,
+    totalReparateurs: 0
   };
 
-  constructor() { }
+  recentVehicules: any[] = [];
+  recentSinistres: any[] = [];
+  recentMissions: any[] = [];
+  recentReparateurs: any[] = [];
+  recentActivity: any[] = [];
+  pendingMissionsCount = 0;
+  pendingReparateursCount = 0;
+  pendingSinistresCount = 0;
+
+  constructor(
+    private adminService: AdminService,
+    private router: Router,
+    private cdr: ChangeDetectorRef,
+    private missionService: MissionService,
+    private reparateurService: ReparateurService
+  ) { }
 
   ngOnInit(): void {
-    // TODO: À implémenter quand le backend sera disponible
-    // this.loadStats();
+    this.loadData();
+    this.router.events
+      .pipe(
+        filter(event => event instanceof NavigationEnd),
+        debounceTime(150)
+      )
+      .subscribe(() => this.loadData());
   }
 
-  // Méthode à implémenter plus tard avec le backend
-  /*
-  private loadStats(): void {
-    this.adminService.getStats().subscribe({
-      next: (stats) => {
-        this.stats = stats;
+  getStatusClass(statut: any): { [klass: string]: boolean } {
+    const raw = (statut ?? '').toString().toLowerCase();
+    return {
+      'status-pending': raw.includes('attente') || raw.includes('assign'),
+      'status-progress': raw.includes('cours') || raw.includes('progres') || raw.includes('progress'),
+      'status-closed': raw.includes('termin') || raw.includes('fin') || raw.includes('termine')
+    };
+  }
+
+  private loadData(): void {
+    this.adminService.getAllVehicules().subscribe({
+      next: (vehicules) => {
+        this.stats.totalVehicules = vehicules.length;
+        this.recentVehicules = vehicules.slice(0, 3);
+        this.updateRecentActivity('vehicule', vehicules);
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des statistiques:', error);
+        console.error('Erreur lors du chargement des véhicules:', error);
+      }
+    });
+    this.adminService.getSinistre().subscribe({
+      next: (sinistres) => {
+        this.stats.totalSinistres = sinistres.length;
+        this.recentSinistres = sinistres.slice(0, 3);
+        this.pendingSinistresCount = sinistres.filter(s => s.isvalid === false).length;
+        this.updateRecentActivity('sinistre', sinistres);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des sinistres:', error);
+      }
+    });
+    this.missionService.getAllMissions().subscribe({
+      next: (missions) => {
+        this.stats.totalMissions = missions.length;
+        this.recentMissions = missions.slice(0, 3);
+        this.pendingMissionsCount = missions.filter(m => m.statut && m.statut.toLowerCase().includes('attente')).length;
+        this.updateRecentActivity('mission', missions);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des missions:', error);
+      }
+    });
+    this.reparateurService.getAllReparateurs().subscribe({
+      next: (reparateurs) => {
+        this.stats.totalReparateurs = reparateurs.length;
+        this.recentReparateurs = reparateurs.slice(0, 3);
+        this.pendingReparateursCount = reparateurs.filter(r => (r.isValids + '').toLowerCase() === 'false').length;
+        this.updateRecentActivity('reparateur', reparateurs);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des réparateurs:', error);
       }
     });
   }
-  */
 
+  private updateRecentActivity(type: string, items: any[]): void {
+    const mapped = (items || []).map(item => {
+      let date = item.createdAt || item.dateCreation || item.updatedAt || null;
+      return {
+        type,
+        date: date ? new Date(date) : new Date(),
+        label: this.getActivityLabel(type, item),
+        icon: this.getActivityIcon(type)
+      };
+    });
+    this.recentActivity = [...(this.recentActivity || []), ...mapped];
+    this.recentActivity = this.recentActivity
+      .sort((a, b) => b.date.getTime() - a.date.getTime())
+      .slice(0, 10);
+  }
+
+  private getActivityLabel(type: string, item: any): string {
+    switch (type) {
+      case 'vehicule':
+        return `Nouveau véhicule : ${item.marque || item.modele || 'Véhicule'}`;
+      case 'sinistre':
+        return `Nouveau sinistre : ${item.type || 'Sinistre'}`;
+      case 'mission':
+        return `Nouvelle mission : ${item.statut || 'Mission'}`;
+      case 'reparateur':
+        return `Nouveau réparateur : ${item.nomDuGarage || item.name || 'Réparateur'}`;
+      default:
+        return 'Nouvelle activité';
+    }
+  }
+
+  private getActivityIcon(type: string): string {
+    switch (type) {
+      case 'vehicule':
+        return 'fas fa-car text-primary';
+      case 'sinistre':
+        return 'fas fa-file-alt text-danger';
+      case 'mission':
+        return 'fas fa-tasks text-info';
+      case 'reparateur':
+        return 'fas fa-user-cog text-warning';
+      default:
+        return 'fas fa-bell';
+    }
+  }
 
   onTabChange(event: { index: number }): void {
     this.activeTab = event.index;
@@ -85,4 +203,51 @@ export class AdminDashboardComponent implements OnInit {
   showGraph(type: 'performance' | 'distribution' | 'evolution'): void {
     this.currentGraph = type;
   }
-} 
+
+  // Méthodes pour rendre les éléments cliquables
+  onStatsCardClick(type: string): void {
+    switch (type) {
+      case 'vehicules':
+        this.router.navigate(['/admin/vehicules']);
+        break;
+      case 'sinistres':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'missions':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'reparateurs':
+        this.router.navigate(['/admin/garages']);
+        break;
+      default:
+        break;
+    }
+  }
+
+  onRecentActivityClick(item: any): void {
+    // À adapter selon la structure de l'activité
+    console.log('Activité cliquée:', item);
+    // Exemple : navigation ou ouverture d'un détail
+  }
+
+  onTaskClick(type: string): void {
+    switch (type) {
+      case 'missions':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      case 'reparateurs':
+        this.router.navigate(['/admin/garages']);
+        break;
+      case 'sinistres':
+        this.router.navigate(['/admin/dossiers']);
+        break;
+      default:
+        break;
+    }
+  }
+
+  onSinistreClick(sinistre: any): void {
+    // À adapter selon l'ID ou la route de détail sinistre
+    this.router.navigate(['/admin/dossiers', sinistre.id]);
+  }
+}

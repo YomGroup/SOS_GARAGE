@@ -1,0 +1,40 @@
+<div class="add-garage-container min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 p-4">
+  <div class="card w-full max-w-lg p-6 rounded-lg shadow-lg bg-white">
+    <h2 class="text-2xl font-bold mb-6 text-center text-primary">Ajouter un garage</h2>
+    <form [formGroup]="garageForm" (ngSubmit)="onSubmit()">
+      <div class="mb-4">
+        <label class="block font-semibold mb-1">Nom</label>
+        <input type="text" formControlName="name" class="form-control" [ngClass]="{'is-invalid': garageForm.get('name')?.invalid && garageForm.get('name')?.touched}">
+        <div *ngIf="garageForm.get('name')?.invalid && garageForm.get('name')?.touched" class="invalid-feedback">Nom requis</div>
+      </div>
+      <div class="mb-4">
+        <label class="block font-semibold mb-1">Prénom</label>
+        <input type="text" formControlName="prenom" class="form-control" [ngClass]="{'is-invalid': garageForm.get('prenom')?.invalid && garageForm.get('prenom')?.touched}">
+        <div *ngIf="garageForm.get('prenom')?.invalid && garageForm.get('prenom')?.touched" class="invalid-feedback">Prénom requis</div>
+      </div>
+      <div class="mb-4">
+        <label class="block font-semibold mb-1">Email</label>
+        <input type="email" formControlName="email" class="form-control" [ngClass]="{'is-invalid': garageForm.get('email')?.invalid && garageForm.get('email')?.touched}">
+        <div *ngIf="garageForm.get('email')?.invalid && garageForm.get('email')?.touched" class="invalid-feedback">Email valide requis</div>
+      </div>
+      <div class="mb-4">
+        <label class="block font-semibold mb-1">Téléphone</label>
+        <input type="text" formControlName="telephone" class="form-control" [ngClass]="{'is-invalid': garageForm.get('telephone')?.invalid && garageForm.get('telephone')?.touched}">
+        <div *ngIf="garageForm.get('telephone')?.invalid && garageForm.get('telephone')?.touched" class="invalid-feedback">Téléphone requis</div>
+      </div>
+      <div class="mb-4">
+        <label class="block font-semibold mb-1">Adresse</label>
+        <input type="text" formControlName="adresse" class="form-control" [ngClass]="{'is-invalid': garageForm.get('adresse')?.invalid && garageForm.get('adresse')?.touched}">
+        <div *ngIf="garageForm.get('adresse')?.invalid && garageForm.get('adresse')?.touched" class="invalid-feedback">Adresse requise</div>
+      </div>
+      <div class="mb-6">
+        <label class="block font-semibold mb-1">Mot de passe</label>
+        <input type="password" formControlName="password" class="form-control" [ngClass]="{'is-invalid': garageForm.get('password')?.invalid && garageForm.get('password')?.touched}">
+        <div *ngIf="garageForm.get('password')?.invalid && garageForm.get('password')?.touched" class="invalid-feedback">Mot de passe requis</div>
+      </div>
+      <button type="submit" class="btn btn-primary-custom w-full" [disabled]="garageForm.invalid">
+        <i class="fas fa-plus me-2"></i>Ajouter
+      </button>
+    </form>
+  </div>
+</div> 

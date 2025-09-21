@@ -1,5 +1,47 @@
 <div class="claim-declaration">
-      <div class="container">
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show profile-alert" 
+      *ngIf="showProfileAlert" 
+      role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-3"></i>
+          <div class="flex-grow-1">
+          <strong>Profil incomplet !</strong>
+          <p class="mb-0">Veuillez mettre à jour votre profil avant de déclarer un sinistre. 
+          Informations manquantes : nom, prénom, adresse ou téléphone.</p>
+        </div>
+        <div class="ms-3">
+          <button type="button" class="btn btn-outline-warning btn-sm me-2" (click)="goToProfile()">
+         <i class="bi bi-person-gear"></i> Mettre à jour le profil
+        </button>
+          <button type="button" class="btn-close" (click)="closeAlert()" aria-label="Close"></button>
+        </div>
+    
+  </div>
+
+</div>
+<div class="claim-declaration">
+  <div class="container">
+    <div class="alert alert-warning alert-dismissible fade show profile-alert" 
+      *ngIf="showvehicleAlert" 
+      role="alert">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-exclamation-triangle-fill me-3"></i>
+          <div class="flex-grow-1">
+          <strong>Aucun vehicule Ajouté!</strong>
+          <p class="mb-0">Veuillez Ajouter un véhicule avant de déclarer un sinistre. 
+          </p>
+        </div>
+        <div class="ms-3">
+          <button type="button" class="btn btn-outline-warning btn-sm me-2" (click)="goToVehicle()">
+         <i class="bi bi-person-gear"></i>Ajouter un véhicule 
+        </button>
+          <button type="button" class="btn-close" (click)="closeAlert()" aria-label="Close"></button>
+        </div>
+    
+  </div>
+
+</div>
         <h1>Déclarez un sinistre</h1>
         <p class="instruction">Veillez remplir l'ensemble du formulaire</p>
 
@@ -12,28 +54,31 @@
         </div>
 
         <!-- Step 1: Vehicle Status -->
-        <div class="step-content" *ngIf="currentStep === 1">
-          <h2>Information sur le véhicule</h2>
-          <div class="vehicle-status">
-            <div class="radio-group">
-              <input type="radio" id="rolling" name="vehicleStatus" value="rolling" [(ngModel)]="vehicleStatus">
-              <label for="rolling" class="radio-label">
-                <i class="icon-car-ok"></i>
-                Mon véhicule est roulant
-              </label>
-            </div>
-            <div class="radio-group">
-              <input type="radio" id="not-rolling" name="vehicleStatus" value="not-rolling" [(ngModel)]="vehicleStatus">
-              <label for="not-rolling" class="radio-label">
-                <i class="icon-car-damaged"></i>
-                Mon véhicule est Non roulant
-              </label>
-            </div>
-          </div>
-        </div>
+      <div class="step-content" *ngIf="currentStep === 2">
+  <h2>Information sur le véhicule</h2>
+  <div class="vehicle-status">
+    <div class="radio-group">
+      <input type="radio" id="rolling" name="vehicleStatus" value="rolling" 
+             [(ngModel)]="vehicleStatus" (change)="onStatusChange()">
+      <label for="rolling" class="radio-label">
+        <i class="icon-car-ok"></i>
+        Mon véhicule est roulant
+      </label>
+    </div>
+    <div class="radio-group">
+      <input type="radio" id="not-rolling" name="vehicleStatus" value="not-rolling" 
+             [(ngModel)]="vehicleStatus" (change)="onStatusChange()">
+      <label for="not-rolling" class="radio-label">
+        <i class="icon-car-damaged"></i>
+        Mon véhicule est Non roulant
+      </label>
+    </div>
+  </div>
+</div>
 
        <!-- Step 2: Vehicle Selection -->
-<div class="step-content" *ngIf="currentStep === 2">
+<!-- Step 2: Vehicle Selection -->
+<div class="step-content" *ngIf="currentStep === 1">
   <h2>Choisissez votre véhicule accidenté</h2>
 
   <div class="vehicle-selection">
@@ -50,85 +95,285 @@
       </li>
     </ul>
   </div>
+
+  <!-- Assurance selection (only shown for non-rolling vehicles) -->
+  <div class="assurance-selection" *ngIf="showAssuranceStep && selectedVehicle">
+    <h2>Sélectionnez votre com assurance</h2>
+    
+    <div class="vehicle-dropdown" 
+         [class.open]="isAssuranceDropdownOpen"
+         (click)="toggleAssuranceDropdown()">
+      <span>{{ selectedAssurance || 'Sélectionner une assurance' }}</span>
+    </div>
+
+    <ul class="dropdown-list" *ngIf="isAssuranceDropdownOpen">
+      <li *ngFor="let assurance of assurances" 
+          (click)="selectAssurance(assurance)">
+        {{ assurance }}
+      </li>
+    </ul>
+    
+    <div *ngIf="assurances.length === 0" class="no-assurances">
+      <p>Aucune assurance disponible pour ce véhicule</p>
+    </div>
+  </div>
 </div>
         <!-- Step 3: Constat -->
-        <div class="step-content" *ngIf="currentStep === 3">
-          <h2>Constat</h2>
-          <div class="file-upload">
-            <div class="upload-area" (click)="fileInput.click()">
+     <div class="step-content" *ngIf="currentStep === 3">
+   <h2>Déclaration de l'incident</h2>
+<div class="form-row">
+  <!-- Type d'incident -->
+  <div class="form-group">
+    <label for="typeAssuranceSelect" class="form-label fw-semibold text-secondary">
+      Type de sinistre <span class="text-danger">*</span> :
+    </label>
+    <select id="typeAssuranceSelect"
+            class="form-select shadow-sm rounded"
+            [(ngModel)]="selectedTypeAssurance"
+            name="typeAssurance"
+            required>
+      <option value="" disabled selected>-- Choisissez un type --</option>
+      <option *ngFor="let type of typeassurance" [value]="type">
+        {{ type }}
+      </option>
+    </select>
+  </div>
 
-              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé votre constat</p>
-              <input #fileInput type="file" accept=".pdf,.jpg,.png" (change)="onFileSelect($event)" style="display: none;">
-            </div>
-            <p class="help-text">
-              Vous n'avez pas de constat ? <br>
-              Rendez-vous sur<a href="https://www.e-constat.fr" target="_blank"> www.e-constat.fr</a>pour réaliser le vôtre.
-            </p>
-          </div>
-        </div>
+  <!-- Lieu du sinistre -->
+  <div class="form-group">
+    <label for="lieuSinistre" class="form-label fw-semibold text-secondary">
+      Code Postal <span class="text-danger">*</span> :
+    </label>
+    <input type="text" id="lieuSinistre"
+           class="form-control shadow-sm rounded"
+           [(ngModel)]="lieuSinistre"
+           name="lieuSinistre"
+           placeholder="Entrez le Code Postal"
+           required />
+  </div>
+</div>
 
-        <!-- Step 4: Photos -->
-        <div class="step-content" *ngIf="currentStep === 4">
-          <h2>Image du Véhicule accidenté</h2>
-          <div class="photo-upload">
-            <div class="upload-area" (click)="photoInput.click()">
-              
-              <p><i class="bi bi-upload" style="display:inline; margin-right: 8px;"></i>Téléversé Les photos du sinistre</p>
-              <input #photoInput type="file" accept="image/*" multiple (change)="onPhotoSelect($event)" style="display: none;">
-            </div>
-          </div>
-        </div>
 
-        <!-- Step 5: Document Signing -->
-       <!-- Step 5: Document Signing -->
-<div class="step-content" *ngIf="currentStep === 5">
-  <div class="document-signing" *ngIf="!allDocumentsSigned">
-    <h2>Document {{ currentDocument }}</h2>
-    
-    <div class="document-preview">
-      <div class="document-header">
-        <h3>Document {{ currentDocument }}</h3>
+
+  <div class="choices-container" *ngIf="!hasChosenDeclarationMethod">
+    <div class="choice-card" (click)="selectDeclarationMethod('describe')">
+      <i class="bi bi-text-paragraph"></i>
+      <h3>Décrire l'incident et ajouter les photos</h3>
+      <p>Racontez ce qui s'est passé en détail</p>
+    </div>
+    <!-- 
+    <div class="choice-card" (click)="selectDeclarationMethod('upload')">
+      <i class="bi bi-file-earmark-arrow-up"></i>
+      <h3>Téléverser un constat</h3>
+      <p>Uploader votre constat amiable rempli</p>
+    </div> -->
+  
+  </div>
+
+  <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
+  <div class="row">
+  <!-- Colonne gauche : Description -->
+  <div class="col-md-6">
+    <div class="section-header">
+      <button class="btn-back" (click)="resetDeclarationMethod()">
+        <i class="bi bi-arrow-left"></i> Retour
+      </button>
+      <h3><i class="bi bi-text-paragraph"></i> Description de l'incident</h3>
+    </div>
+
+    <textarea class="form-control" rows="10"
+              [(ngModel)]="incidentDescription"
+              placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)">
+    </textarea>
+    <p class="help-text">
+      Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.
+    </p>
+  </div>
+
+  <!-- Colonne droite : Photos -->
+  <div class="col-md-6">
+    <h3><i class="bi bi-camera"></i> Photos du véhicule accidenté</h3>
+
+    <!-- Étape en cours -->
+    <ul class="nav nav-pills justify-content-center my-4">
+      <li class="nav-item" (click)="setPhotoStep(1)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 1">Avant</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(2)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 2">Immatriculation</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(3)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 3">Côté</a>
+      </li>
+      <li class="nav-item" (click)="setPhotoStep(4)" style="cursor:pointer;">
+        <a class="nav-link" [class.active]="currentPhotoStep === 4">Dégâts</a>
+      </li>
+    </ul>
+
+    <!-- Zone d'upload -->
+    <div class="photo-upload-area" (click)="photoInput.click()">
+      <div class="upload-icon">
+        <i class="bi bi-camera"></i>
+        <p>Ajouter une photo pour cette étape</p>
+        <p class="photo-count">{{ getCurrentStepPhotos().length }} photo(s) ajoutée(s)</p>
       </div>
-      
-      <div class="document-content">
-        <div class="document-placeholder">
-          <i class="icon-document"></i>
-          <p>Contenu du document {{ currentDocument }}</p>
-          <p>Veuillez examiner le document avant de le signer</p>
+      <input #photoInput type="file" accept="image/jpeg,image/png"
+            (change)="onPhotoSelect($event, currentPhotoStep)"
+            style="display: none;"
+            [multiple]="currentPhotoStep === 4">
+    </div>
+
+    <!-- Gallery preview -->
+    <div class="photo-gallery" *ngIf="getCurrentStepPhotos().length > 0">
+      <div class="photo-grid">
+        <div class="photo-item" *ngFor="let photo of getCurrentStepPhotos(); let i = index">
+          <img [src]="photo.url" alt="Photo du sinistre">
+          <div class="photo-overlay">
+            <button class="btn-remove" (click)="removePhoto(i, currentPhotoStep); $event.stopPropagation()">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
-    <label class="custom-checkbox">
-  <input type="checkbox" [(ngModel)]="isChecked" (change)="signDocument()" />
-      <span class="checkmark"></span>
-      Je signe le document {{ currentDocument }}
-    </label>
-    <span *ngIf="isSigning">
-        Signature en cours...
-      </span>
-      <span *ngIf="isCurrentDocumentSigned">
-        Document {{ currentDocument }} signé
-      </span>
   </div>
+</div>
+
+
+    <!-- Navigation entre étapes -->
+    <div class="step-navigation">
+      <button class="btn-backs" (click)="prevPhotoStep()" [disabled]="currentPhotoStep === 1">
+        <i class="bi bi-chevron-left"></i> Étape précédente
+      </button>
+      
+      <button class="btn-nexts" (click)="nextPhotoStep()" [disabled]="!canProceedPhotoStep()">
+        {{ currentPhotoStep === 4 ? 'Terminer' : 'Étape suivante' }} 
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>  
+  </div>
+
+ 
+</div>
+<!-- Step 4: Photos -->
+<div class="step-content" *ngIf="currentStep === 4">
+ 
+
+  <div class="upload-section">
+    <div class="section-header">
+      <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
+    </div>
+    
+    <div class="file-upload">
+      <div class="upload-area" (click)="fileInput.click()">
+        <p><i class="bi bi-upload"></i> Téléverser votre constat</p>
+        <input #fileInput type="file" accept=".pdf,.jpg,.png" 
+               (change)="onFileSelect($event)" style="display: none;">
+      </div>
+      
+      <div class="preview-container" *ngIf="constatPreviewUrl">
+        <h4>Prévisualisation :</h4>
+        
+        <div *ngIf="showPdfViewer" class="pdf-preview">
+          <pdf-viewer [src]="constatPreviewUrl" 
+                     [render-text]="true"
+                     style="width: 100%; height: 500px; border: 1px solid #ddd;">
+          </pdf-viewer>
+        </div>
+        
+        <div *ngIf="!showPdfViewer" class="image-preview">
+          <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
+        </div>
+        
+        <button class="btn-remove" (click)="removeConstat()">
+          <i class="bi bi-trash"></i> Supprimer
+        </button>
+      </div>
+      
+      <p class="help-text">
+        Vous n'avez pas de constat ? <br>
+        Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
+      </p>
+    </div>
+  </div>
+ 
+</div>
+
+
+        <!-- Step 5: Document Signing -->
+      <!-- Step 5: Document Signing -->
+<div class="step-content" *ngIf="currentStep === 5">
+
+
+  <!-- Section signature (affichée seulement si warning accepté) -->
+  <div class="document-signing" *ngIf="!allDocumentsSigned">
+       <!-- Warning intégré à l'étape 4 -->
+  <div class="info-banner">
+    <div class="info-banner-content">
+      <i class="bi bi-info-circle"></i>
+      <div class="info-text">
+        <strong>Information :</strong> Les informations du garage partenaire seront automatiquement 
+        ajoutées à vos documents après signature.
+      </div>
+    </div>
+  </div>
+    <div class="document-preview">
+      <p class="text-center fw-semibold text-muted p-2">Veuillez lire attentivement le document avant de le signer.</p>
+
+      <div class="document-content">
+        <pdf-viewer 
+          [src]="currentPdf"
+          [render-text]="true"
+          [show-all]="true"
+          style="width: 100%; height: 70vh; border: 1px solid #ddd;"
+          (error)="currentPdfError = true">
+        </pdf-viewer>
+
+        <div *ngIf="currentPdfError" class="alert alert-danger mt-3">
+          Le document n'a pas pu être chargé. Veuillez réessayer.
+        </div>
+      </div>
+
+      <div class="signature-controls p-3 text-center">
+        <label class="custom-checkbox">
+          <input type="checkbox" [(ngModel)]="isChecked" />
+          <span class="checkmark"></span>
+          <span class="label-text">Je certifie avoir lu et approuvé le document {{ currentDocument }}</span>
+        </label>
+
+        <button class="btn btn-sign text-white" style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"
+                (click)="signDocument()" 
+                [disabled]="!isChecked || isCurrentDocumentSigned || isSigning">
+          <span *ngIf="!isSigning">Signer le document</span>
+          <span *ngIf="isSigning">Signature en cours...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
 
   <!-- Success Message -->
   <div class="success-message" *ngIf="allDocumentsSigned">
     <h2>Votre demande a été prise en compte</h2>
     <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
-    <button class="btn-contact" routerLink="/assistance">
-      Contactez l'assistance
-    </button>
+   
+     <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
+    <p>contactez l'Assistance :</p>
+    <a href="tel:0761841419" class="assistance-number">07 61 84 14 19</a>
+  </div>
   </div>
 </div>
 
-        <!-- Navigation Buttons -->
-        <div class="navigation-buttons" *ngIf="!allDocumentsSigned">
-          <button class="btn-back" (click)="previousStep()" [disabled]="currentStep === 1">
-            Retour
-          </button>
-          <button class="btn-next" (click)="nextStep()" [disabled]="!canProceed()">
-            suivant
-          </button>
-        </div>
-      </div>
-    </div>
+
+<!-- Navigation Buttons -->
+<div class="navigation-buttons" *ngIf="!allDocumentsSigned">
+  <button class="btn-back" (click)="previousStep()" [disabled]="currentStep === 1">
+    Retour
+  </button>
+  <button class="btn-next" (click)="nextStep()" [disabled]="!canProceed()">
+    suivant
+  </button>
+</div>
+</div>
+
+    

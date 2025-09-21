@@ -1,0 +1,12 @@
+{
+  "AXA": {
+    "telephone": "0123456789",
+    "email": "contact@axa.com",
+    "adresse": "Paris, France"
+  },
+  "Allianz": {
+    "telephone": "0987654321",
+    "email": "contact@allianz.com",
+    "adresse": "Lyon, France"
+  }
+}

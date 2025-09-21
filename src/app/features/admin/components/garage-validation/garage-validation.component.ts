@@ -1,29 +1,23 @@
-import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSortModule, MatSort } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
-interface Garage {
-  id: number;
-  nom: string;
-  adresse: string;
-  telephone: string;
-  email: string;
-  statut: 'EN_ATTENTE' | 'VALIDÉ' | 'REJETÉ';
-  documents: {
-    siret: boolean;
-    assurance: boolean;
-    certification: boolean;
-  };
-  commission: number;
-}
+import { MatDialog } from '@angular/material/dialog';
+import { AdminService } from '../../../../../services/admin.service';
+import { HttpClientModule } from '@angular/common/http';
+import { ReparateurDetailsDialogComponent } from './dialogs/reparateur-details-dialog.component';
+import { Router, NavigationEnd } from '@angular/router';
+import { ReparateurService } from '../../../../../services/reparateur.service';
+import { Reparateur } from '../../../../../services/models-api.interface';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-garage-validation',
@@ -40,76 +34,236 @@ interface Garage {
     MatIconModule,
     MatButtonModule,
     MatChipsModule,
-    MatTooltipModule
-  ]
+    MatTooltipModule,
+    HttpClientModule,
+    FormsModule
+  ],
+  providers: [AdminService]
 })
-export class GarageValidationComponent implements OnInit, AfterViewInit {
-  displayedColumns: string[] = ['nom', 'adresse', 'telephone', 'email', 'documents', 'commission', 'actions'];
-  dataSource: MatTableDataSource<Garage>;
+export class GarageValidationComponent implements OnInit {
+  dataSource: MatTableDataSource<Reparateur>;
+  
+  stats = {
+    enAttente: 0,
+    valides: 0,
+    rejetes: 0,
+    total: 0
+  };
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  selectedStatus: string = '';
+  selectedVille: string = '';
+  searchNom: string = '';
+  villesDisponibles: string[] = [];
 
-  constructor() {
+  editedCommissionId: number | null = null;
+  editedCommissionValue: number | null = null;
+
+  // Pagination properties
+  currentPage: number = 1;
+  itemsPerPage: number = 6;
+  totalPages: number = 0;
+  paginatedGarages: Reparateur[] = [];
+
+  constructor(
+    private reparateurService: ReparateurService,
+    private dialog: MatDialog,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
+  ) {
     this.dataSource = new MatTableDataSource();
   }
 
   ngOnInit(): void {
-    this.loadGarages();
-  }
-
-  ngAfterViewInit() {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
-
-  loadGarages(): void {
-    // Données de test
-    const garages: Garage[] = [
-      {
-        id: 1,
-        nom: 'Garage Auto Plus',
-        adresse: '123 rue de la République, Paris',
-        telephone: '01 23 45 67 89',
-        email: 'contact@garageautoplus.fr',
-        statut: 'EN_ATTENTE',
-        documents: {
-          siret: true,
-          assurance: true,
-          certification: false
-        },
-        commission: 15
+    this.loadData();
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        this.loadData();
       }
-    ];
-    this.dataSource.data = garages;
+    });
   }
 
-  applyFilter(event: Event): void {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  loadData(): void {
+    this.reparateurService.getAllReparateurs().subscribe({
+      next: (reparateurs) => {
+        this.villesDisponibles = Array.from(new Set(reparateurs.map(r => r.ville).filter(Boolean)));
+        
+        let filtered = reparateurs;
+        if (this.selectedStatus) {
+          if (this.selectedStatus === 'pending') filtered = filtered.filter(r => r.isValids === 'en attente');
+          else if (this.selectedStatus === 'active') filtered = filtered.filter(r => r.isValids === 'valide');
+          else if (this.selectedStatus === 'rejected') filtered = filtered.filter(r => r.isValids === 'rejetée');
+        }
+        if (this.selectedVille) {
+          filtered = filtered.filter(r => r.ville === this.selectedVille);
+        }
+        if (this.searchNom) {
+          filtered = filtered.filter(r => (r.nomDuGarage || '').toLowerCase().includes(this.searchNom.toLowerCase()));
+        }
+        
+        this.dataSource.data = filtered;
+        this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
+        this.goToPage(1); // Go to first page after loading/filtering
+        this.calculateStats(reparateurs);
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('Erreur lors du chargement des réparateurs:', error);
+      }
+    });
+  }
 
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+  updatePaginatedGarages() {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedGarages = this.dataSource.data.slice(startIndex, endIndex);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.updatePaginatedGarages();
+  }
+
+  nextPage(): void {
+    this.goToPage(this.currentPage + 1);
+  }
+
+  previousPage(): void {
+    this.goToPage(this.currentPage - 1);
+  }
+
+  getPages(): number[] {
+    return Array.from({ length: this.totalPages }, (_, i) => i + 1);
+  }
+
+  calculateStats(reparateurs: Reparateur[]): void {
+    this.stats = {
+      enAttente: reparateurs.filter(r => r.isValids === 'en attente').length,
+      valides: reparateurs.filter(r => r.isValids === 'valide').length,
+      rejetes: reparateurs.filter(r => r.isValids === 'rejetée').length,
+      total: reparateurs.length
+    };
+  }
+
+  validerReparateur(reparateur: Reparateur): void {
+    const updated = { "isValids": "valide" };
+    this.reparateurService.updateReparateurPatch(reparateur.id ?? 0, updated).subscribe({
+      next: () => this.loadData(),
+      error: (error) => console.error('Erreur lors de la validation:', error)
+    });
+  }
+
+  rejeterReparateur(reparateur: Reparateur): void {
+    const updated = { "isValids": "rejetée" };
+    this.reparateurService.updateReparateurPatch(reparateur.id ?? 0, updated).subscribe({
+      next: () => this.loadData(),
+      error: (error) => console.error('Erreur lors du rejet:', error)
+    });
+  }
+
+  modifierCommission(reparateur: Reparateur, nouvelleCommission: number): void {
+    const updated = { "commission": nouvelleCommission, "isValids": "valide" };
+    this.reparateurService.updateReparateurPatchText(reparateur.id ?? 0, updated).subscribe({
+      next: () => {
+        this.snackBar.open('Commission modifiée avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors de la modification de la commission.', 'Fermer', { duration: 3000 });
+        console.error('Erreur lors de la modification de la commission:', error);
+      }
+    });
+  }
+
+  viewDetails(reparateur: Reparateur): void {
+    const dialogRef = this.dialog.open(ReparateurDetailsDialogComponent, {
+      width: '800px',
+      data: { reparateur }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadData();
+      }
+    });
+  }
+
+  ajouterGarage(): void {
+    this.router.navigate(['/admin/garages/nouveau']);
+  }
+
+  openCommissionPrompt(reparateur: Reparateur): void {
+    const input = prompt('Nouvelle commission (%)', reparateur.commission?.toString() ?? '0');
+    if (input !== null) {
+      const value = parseFloat(input);
+      if (!isNaN(value) && value >= 0 && value <= 100) {
+        this.modifierCommission(reparateur, value);
+      } else {
+        alert('Veuillez entrer une commission valide entre 0 et 100.');
+      }
     }
   }
 
-  validerGarage(garage: Garage): void {
-    // TODO: Implémenter la validation du garage
-    console.log('Validation du garage:', garage);
+  startEditCommission(reparateur: Reparateur): void {
+    this.editedCommissionId = reparateur.id ?? 0;
+    this.editedCommissionValue = reparateur.commission ?? 0;
   }
 
-  rejeterGarage(garage: Garage): void {
-    // TODO: Implémenter le rejet du garage
-    console.log('Rejet du garage:', garage);
+  cancelEditCommission(): void {
+    this.editedCommissionId = null;
+    this.editedCommissionValue = null;
   }
 
-  modifierCommission(garage: Garage, nouvelleCommission: number): void {
-    // TODO: Implémenter la modification de la commission
-    console.log('Modification de la commission:', garage, nouvelleCommission);
+  saveEditCommission(reparateur: Reparateur): void {
+    if (this.editedCommissionValue === null || isNaN(this.editedCommissionValue) || this.editedCommissionValue < 0 || this.editedCommissionValue > 100) {
+      this.snackBar.open('Veuillez entrer une commission valide entre 0 et 100.', 'Fermer', { duration: 3000 });
+      return;
+    }
+    const updatedReparateur = { "commission": this.editedCommissionValue, "isValids": "valide" };
+    this.reparateurService.updateReparateurPatchText(reparateur.id ?? 0, updatedReparateur).subscribe({
+      next: () => {
+        this.snackBar.open('Commission modifiée avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
+        this.cancelEditCommission();
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors de la modification de la commission.', 'Fermer', { duration: 3000 });
+        console.error('Erreur lors de la modification de la commission:', error);
+      }
+    });
   }
 
-  viewDetails(): void {
-    // TODO: Implémenter la logique de visualisation des détails
-    console.log('Voir les détails du garage');
+  suspendreReparateur(reparateur: Reparateur): void {
+    const updated = { "isValids": "rejetée" };
+    this.reparateurService.updateReparateurPatchText(reparateur.id ?? 0, updated).subscribe({
+      next: () => {
+        this.snackBar.open('Garage suspendu avec succès.', 'Fermer', { duration: 3000 });
+        this.loadData();
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors de la suspension.', 'Fermer', { duration: 3000 });
+        console.error('Erreur lors de la suspension:', error);
+      }
+    });
   }
-} 
+
+  supprimerReparateur(reparateur: Reparateur): void {
+    if (confirm('Voulez-vous vraiment supprimer ce garage ?')) {
+      this.reparateurService.deleteReparateur(reparateur.id ?? 0).subscribe({
+        next: () => {
+          this.snackBar.open('Garage supprimé avec succès.', 'Fermer', { duration: 3000 });
+          this.loadData();
+        },
+        error: (error) => {
+          this.snackBar.open('Erreur lors de la suppression.', 'Fermer', { duration: 3000 });
+          console.error('Erreur lors de la suppression:', error);
+        }
+      });
+    }
+  }
+
+  get tousLesGarages(): Reparateur[] {
+    return this.paginatedGarages;
+  }
+}

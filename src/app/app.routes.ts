@@ -13,10 +13,16 @@ import { RegisterComponent } from './register/register.component';
 import { SinistreComponent } from './sinistre/sinistre.component';
 import { DocumentComponent } from './document/document.component';
 import { ProfileComponent } from './profile/profile.component';
-import { MessageComponent } from './message/message.component';
+import { MessageComponent } from './shared/components/message/message.component';
 import { AuthGuard } from './app/auth-guard.service';
+import { DocumentSigningComponent } from './document-signing/document-signing.component';
 
 export const routes: Routes = [
+  // Page publique pour comptes garages non validés
+  {
+    path: 'garage-pending',
+    loadComponent: () => import('./garage-pending/garage-pending.component').then(m => m.GaragePendingComponent)
+  },
   {
     path: 'admin',
     component: LayoutComponent,
@@ -40,9 +46,13 @@ export const routes: Routes = [
         path: '',
         loadChildren: () =>
           import('./features/garage/garage.module').then(m => m.GarageModule)
-      }
+        
+      }, 
+
+
     ]
   },
+
   {
     path: 'clientDashboard',
     component: EspaceclientComponent,
@@ -50,18 +60,27 @@ export const routes: Routes = [
     data: { roles: ['ROLE_ASSURE'] }, // Seul l'assuré peut accéder
     children: [
       { path: '', component: HomeComponent },
-      { path: 'vehicules', component: VehiculesComponent },
-      { path: 'declarations', component: DeclarationsComponent },
-      { path: 'support', component: SupportComponent },
-      { path: 'notification', component: NotificationComponent },
-      { path: 'sinistre', component: SinistreComponent },
-      { path: 'document', component: DocumentComponent },
-      { path: 'message', component: MessageComponent },
-      { path: 'profiles', component: ProfileComponent }
+      { path: 'vehicules', component: VehiculesComponent, data: { title: 'Mes Véhicules' } },
+      { path: 'declarations', component: DeclarationsComponent, data: { title: 'Mes Déclarations' } },
+      { path: 'support', component: SupportComponent, data: { title: 'Support' } },
+      { path: 'notification', component: NotificationComponent, data: { title: 'Notifications' } },
+      { path: 'sinistre', component: SinistreComponent, data: { title: 'Mes Sinistres' } },
+      { path: 'document', component: DocumentComponent, data: { title: 'Mes Documents' } },
+
+    
+      //{ path: 'message', component: MessageComponent, data: { title: 'Mes Messages' } },
+      {
+          path: 'message',
+          loadComponent: () =>
+            import('./shared/components/message/message.component')
+              .then(m => m.MessageComponent)
+        },
+      { path: 'profiles', component: ProfileComponent, data: { title: 'Mon Profil' } },
+      { path: 'pdf/:id', component: DocumentSigningComponent }
     ]
   },
 
-  // ✅ Accessible publiquement
+
   {
     path: 'client',
     component: ClientLayoutComponent,
@@ -69,11 +88,9 @@ export const routes: Routes = [
       { path: '', component: ClientComponent },
     ]
   },
-
-  // ✅ pages publiques
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'message', component: MessageComponent },
+  //{ path: 'message', component: MessageComponent },
 
   { path: '', redirectTo: 'client', pathMatch: 'full' }
 ];

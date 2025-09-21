@@ -1,0 +1,93 @@
+<div class="test-container">
+  <div class="test-header">
+    <h2><i class="fas fa-vial me-2"></i>Tests Supabase</h2>
+    <p class="text-muted">Vérification de la configuration Supabase</p>
+  </div>
+
+  <div *ngIf="loading" class="loading-section">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p>Exécution des tests en cours...</p>
+  </div>
+
+  <div *ngIf="!loading && testResults" class="test-results">
+    <!-- Test de connexion -->
+    <div class="test-card">
+      <div class="test-header">
+        <h4><i class="fas fa-wifi me-2"></i>Connexion Supabase</h4>
+        <span class="status-badge" [class.success]="testResults.connection" [class.error]="!testResults.connection">
+          {{ getStatusIcon(testResults.connection) }} {{ getStatusText(testResults.connection) }}
+        </span>
+      </div>
+      <div class="test-details">
+        <p>Vérification de la connexion au service Supabase...</p>
+      </div>
+    </div>
+
+    <!-- Test des buckets -->
+    <div class="test-card" *ngIf="testResults.buckets">
+      <div class="test-header">
+        <h4><i class="fas fa-database me-2"></i>Buckets Storage</h4>
+        <span class="status-badge" [class.success]="testResults.buckets.documents && testResults.buckets.images" [class.error]="!testResults.buckets.documents || !testResults.buckets.images">
+          {{ getStatusIcon(testResults.buckets.documents && testResults.buckets.images) }} Configuration
+        </span>
+      </div>
+      <div class="test-details">
+        <div class="bucket-status">
+          <span class="bucket-name">Bucket "documents":</span>
+          <span class="status-badge small" [class.success]="testResults.buckets.documents" [class.error]="!testResults.buckets.documents">
+            {{ getStatusIcon(testResults.buckets.documents) }} {{ testResults.buckets.documents ? 'Disponible' : 'Manquant' }}
+          </span>
+        </div>
+        <div class="bucket-status">
+          <span class="bucket-name">Bucket "images":</span>
+          <span class="status-badge small" [class.success]="testResults.buckets.images" [class.error]="!testResults.buckets.images">
+            {{ getStatusIcon(testResults.buckets.images) }} {{ testResults.buckets.images ? 'Disponible' : 'Manquant' }}
+          </span>
+        </div>
+        <div *ngIf="!testResults.buckets.documents || !testResults.buckets.images" class="alert alert-warning mt-3">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          <strong>Buckets manquants :</strong> Créez les buckets manquants dans votre dashboard Supabase.
+          <br>
+          <a href="SUPABASE_SETUP.md" target="_blank" class="btn btn-sm btn-outline-warning mt-2">
+            <i class="fas fa-book me-1"></i>Voir les instructions
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Test d'upload -->
+    <div class="test-card" *ngIf="testResults.upload !== undefined">
+      <div class="test-header">
+        <h4><i class="fas fa-upload me-2"></i>Test d'Upload</h4>
+        <span class="status-badge" [class.success]="testResults.upload" [class.error]="!testResults.upload">
+          {{ getStatusIcon(testResults.upload) }} {{ getStatusText(testResults.upload) }}
+        </span>
+      </div>
+      <div class="test-details">
+        <p>Test d'upload d'un fichier de test vers Supabase Storage...</p>
+      </div>
+    </div>
+
+    <!-- Erreur générale -->
+    <div class="test-card error" *ngIf="testResults.error">
+      <div class="test-header">
+        <h4><i class="fas fa-exclamation-circle me-2"></i>Erreur</h4>
+      </div>
+      <div class="test-details">
+        <p class="text-danger">{{ testResults.error }}</p>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="test-actions">
+      <button class="btn btn-primary" (click)="runTests()" [disabled]="loading">
+        <i class="fas fa-redo me-2"></i>Relancer les tests
+      </button>
+      <button class="btn btn-outline-secondary ms-2" (click)="window.open('SUPABASE_SETUP.md', '_blank')">
+        <i class="fas fa-book me-2"></i>Documentation
+      </button>
+    </div>
+  </div>
+</div> 

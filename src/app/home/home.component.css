@@ -14,6 +14,7 @@
     font-size: 28px;
     margin-bottom: 30px;
     color: #333;
+
 }
 
 /* Cartes de statistiques */
@@ -25,16 +26,80 @@
 }
 
 .stat-card {
-    padding: 25px;
-    border-radius: 15px;
-    text-align: left;
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    min-height: 180px;
-    position: relative;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  flex: 1 1 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+  min-height: 140px;
+  background: var(--gradient);
+  border-radius: 15px;
+  padding: 1.5rem;
+  color: white;
+  transition: transform 0.3s ease;
+  box-shadow: var(--card-shadow);
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: slideInUp 0.6s ease-out;
+}
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--hover-shadow);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite
+}
+
+.stat-icon {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 100%);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  transition: all 0.3s ease;
+  
+  /* Effet de profondeur */
+  box-shadow: 
+    0 8px 16px rgba(0,0,0,0.1),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.stat-icon:hover {
+  transform: rotate(10deg) scale(1.1);
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%);
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+}
+
+/* Effet de pulsation pour l'icône */
+.stat-icon::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+  border-radius: 22px;
+  z-index: -1;
+  animation: pulse 3s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .stat-card.vehicles,
@@ -50,8 +115,9 @@
 }
 
 .stat-sous-label {
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 15px;
+
     opacity: 0.9;
 }
 
@@ -262,6 +328,7 @@
         margin-bottom: 20px;
     }
 
+
     .stats-cards {
         grid-template-columns: 1fr;
     }
@@ -295,6 +362,7 @@
     }
 
     .welcome-section h1 {
+
         font-size: 20px;
     }
 
@@ -333,4 +401,182 @@
     .notification-text {
         font-size: 13px;
     }
+
+    .welcome-section {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        margin-top: 20px;
+        order: 2;
+    }
+
+
+    .stats-cards {
+        order: 1;
+    }
+
+    .two-columns {
+        order: 3;
+    }
+
+    .main-title {
+        font-size: 18px;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .welcome-section {
+        padding: 0 4px;
+    }
+
+    .btn-primary,
+    .btn-danger {
+        width: 100%;
+        font-size: 12px;
+        padding: 8px 0;
+    }
+
+    .stat-card svg,
+    .notifications-header svg {
+        width: 28px !important;
+        height: 18px !important;
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+}
+
+:host ::ng-deep .main-title {
+    font-size: 28px !important;
+    font-weight: bold !important;
+    color: #1e4db8 !important;
+    margin-bottom: 18px !important;
+    text-align: center !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+:host ::ng-deep .highlight {
+    color: #ffb300 !important;
+    font-weight: bold !important;
+}
+
+:host ::ng-deep .btn-primary,
+:host ::ng-deep .btn-danger {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border-radius: 25px !important;
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    white-space: nowrap !important;
+}
+
+@media (max-width: 576px) {
+    :host ::ng-deep .main-title {
+        font-size: 18px !important;
+        margin-bottom: 12px !important;
+        text-align: center !important;
+    }
+
+    :host ::ng-deep .welcome-section {
+        padding: 0 4px !important;
+    }
+
+    :host ::ng-deep .btn-primary,
+    :host ::ng-deep .btn-danger {
+        width: 100% !important;
+        font-size: 12px !important;
+        padding: 8px 0 !important;
+    }
+
+    :host ::ng-deep .stat-card svg,
+    :host ::ng-deep .notifications-header svg {
+        width: 28px !important;
+        height: 18px !important;
+        bottom: 8px !important;
+        right: 8px !important;
+    }
+}
+
+
+
+button {
+    margin-top: 0.5rem;
+    background-color: #8b2eb8;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* Styles pour la liste des sinistres */
+.sinistre-info {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+    border-left: 4px solid #007bff;
+}
+
+.sinistre-info:hover {
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(5px);
+}
+
+.sinistre-info:nth-child(odd) {
+    border-left-color: #28a745;
+}
+
+.sinistre-info:nth-child(even) {
+    border-left-color: #dc3545;
+}
+
+.sinistre-id {
+    font-weight: 600;
+    color: #495057;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.sinistre-statut {
+    color: #6c757d;
+    font-size: 0.9rem;
+    background: #e9ecef;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+/* Indicateur pour les sinistres supplémentaires */
+.text-muted {
+    color: #6c757d !important;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+    background: #f1f3f4;
+    border-radius: 6px;
+    margin-top: 15px;
+}
+
+.small {
+    font-size: 0.875rem;
+}
+
+.mt-2 {
+    margin-top: 0.5rem;
+}
+
+.notification-icon.success {
+    background-color: #38b000;
+}
+
+.notification-icon.info {
+    background-color: #0077b6;
 }

@@ -1,0 +1,76 @@
+<!-- Section Sinistres déclarés adaptée à l'interface Sinistre -->
+<div class="col-xl-4 col-lg-12 mb-4">
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
+      <button class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-plus me-2"></i>Nouveau sinistre
+      </button>
+    </div>
+    <div class="card-body p-0">
+      <!-- État de chargement -->
+      <div class="sinistre-loading" *ngIf="loadingSinistres">
+        <div class="text-center py-4">
+          <i class="fas fa-spinner fa-spin text-primary"></i>
+          <p class="mt-2 opacity-75">Chargement des sinistres...</p>
+        </div>
+      </div>
+
+      <!-- État vide -->
+      <div class="sinistre-empty" *ngIf="!loadingSinistres && (!recentSinistres || recentSinistres.length === 0)">
+        <div class="text-center py-4">
+          <i class="fas fa-file-alt text-muted" style="font-size: 2rem;"></i>
+          <p class="mt-2 opacity-75">Aucun sinistre déclaré</p>
+        </div>
+      </div>
+
+      <!-- Liste des sinistres -->
+      <div class="sinistre-item" *ngFor="let sinistre of recentSinistres; trackBy: trackBySinistreId">
+        <div class="sinistre-header">
+          <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
+          <span class="status-badge" 
+                [ngClass]="{
+                  'status-pending': !sinistre.isvalid,
+                  'status-progress': sinistre.isvalid && sinistre.conditionsAcceptees,
+                  'status-closed': sinistre.isvalid && !sinistre.conditionsAcceptees
+                }">
+            {{ !sinistre.isvalid ? 'En attente' : (sinistre.conditionsAcceptees ? 'Validé' : 'Clôturé') }}
+          </span>
+        </div>
+        <div class="sinistre-details">
+          <i class="fas fa-car me-2 text-primary"></i>
+          <span class="opacity-90">{{ sinistre.contactAssistance || 'Contact non spécifié' }}</span>
+          <small class="text-muted opacity-75 d-block">
+            {{ sinistre.createdAt | date:'dd MMM yyyy' || 'Date non disponible' }}
+          </small>
+          <div class="sinistre-info mt-2">
+            <small class="text-muted opacity-75">
+              <i class="fas fa-tag me-1"></i>{{ sinistre.type || 'Type non spécifié' }}
+            </small>
+            <small class="text-muted opacity-75 ms-3" *ngIf="sinistre.documents && sinistre.documents.length > 0">
+              <i class="fas fa-file me-1"></i>{{ sinistre.documents.length }} document(s)
+            </small>
+            <small class="text-muted opacity-75 ms-3" *ngIf="sinistre.imgUrl && sinistre.imgUrl.length > 0">
+              <i class="fas fa-image me-1"></i>{{ sinistre.imgUrl.length }} photo(s)
+            </small>
+          </div>
+        </div>
+        <div class="sinistre-actions mt-2" *ngIf="!sinistre.isvalid">
+          <button class="btn btn-success btn-sm me-2" (click)="validerSinistre(sinistre.id)">
+            <i class="fas fa-check me-1"></i>Valider
+          </button>
+          <button class="btn btn-danger btn-sm" (click)="rejeterSinistre(sinistre.id)">
+            <i class="fas fa-times me-1"></i>Rejeter
+          </button>
+        </div>
+      </div>
+
+      <!-- Bouton "Voir plus" si il y a plus de sinistres -->
+      <div class="text-center py-3" *ngIf="recentSinistres && recentSinistres.length > 0">
+        <button class="btn btn-outline-primary btn-sm">
+          <i class="fas fa-eye me-2"></i>Voir tous les sinistres
+        </button>
+      </div>
+    </div>
+  </div>
+</div> 

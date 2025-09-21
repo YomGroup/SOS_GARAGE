@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Envoyer un message à {{ data.receiverName }}</h1>
+<div mat-dialog-content>
+  <mat-form-field class="w-full">
+    <mat-label>Votre message</mat-label>
+    <textarea matInput [(ngModel)]="messageContent" rows="5"></textarea>
+  </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-button (click)="onNoClick()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="sendMessage()" [disabled]="!messageContent">Envoyer</button>
+</div>

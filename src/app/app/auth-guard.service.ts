@@ -2,11 +2,15 @@ import { isPlatformBrowser } from '@angular/common';
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot, Router } from '@angular/router';
 import { KeycloakService } from 'keycloak-angular';
+import { ReparateurService } from '../../services/reparateur.service';
+import { jwtDecode } from 'jwt-decode';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class AuthGuard implements CanActivate {
   private keycloakService = inject(KeycloakService);
   private router = inject(Router);
+  private reparateurService = inject(ReparateurService);
 
   async canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean> {
     const isLoggedIn = await this.keycloakService.isLoggedIn();
@@ -29,7 +33,9 @@ export class AuthGuard implements CanActivate {
       this.router.navigate(['/']); 
       return false;
     }
+
     
+
     return true;
   }
 }

@@ -5,19 +5,25 @@ import { MissionReceptionComponent } from './components/mission-reception/missio
 import { ReparationManagementComponent } from './components/reparation-management/reparation-management.component';
 import { CommunicationComponent } from './components/communication/communication.component';
 import { StatisticsComponent } from './components/statistics/statistics.component';
-import { MessageComponent } from '../../message/message.component';
+import { MessageComponent } from '../../shared/components/message/message.component';
+import { GarageProfileComponent } from './components/garage-profile/garage-profile.component';
+import { GarageFinanceComponent } from './gestion-finance/garage-finance.component';
+
 
 const routes: Routes = [
   {
     path: '',
     component: GarageComponent,
     children: [
-      { path: 'missions', component: MissionReceptionComponent },
+      { path: 'missions', component: MessageComponent },
       { path: 'reparations', component: ReparationManagementComponent },
       { path: 'communication', component: CommunicationComponent },
       { path: 'statistiques', component: StatisticsComponent },
       { path: 'message', component: MessageComponent },
-      { path: '', redirectTo: 'missions', pathMatch: 'full' }
+      { path: 'profil', component: GarageProfileComponent },
+      { path: 'finance', component: GarageFinanceComponent },
+      { path: '', redirectTo: 'statistiques', pathMatch: 'full' }
+
     ]
   }
 ];

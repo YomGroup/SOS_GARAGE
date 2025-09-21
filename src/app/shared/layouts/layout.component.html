@@ -1,16 +1,48 @@
-<div class="app-layout" [class.dark]="isDarkMode()">
-  <app-sidebar [collapsed]="sidebarCollapsed()" (toggleCollapse)="toggleSidebar()" />
-  
-  <div class="layout-content" [class.sidebar-collapsed]="sidebarCollapsed()">
-    <app-header 
-      [sidebarCollapsed]="sidebarCollapsed()" 
-      (toggleSidebar)="toggleSidebar()"
+<div class="app-layout" [class.dark]="isDarkMode()" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Overlay mobile -->
+  <div class="sidebar-overlay" [class.show]="isMobile && isSidebarOpen" (click)="closeSidebar()"></div>
+  <!-- Sidebar -->
+  <app-sidebar [collapsed]="sidebarCollapsed()" [isMobile]="isMobile" [isOpen]="isSidebarOpen" (closeSidebar)="closeSidebar()"></app-sidebar>
+  <div class="layout-content">
+    <app-header
+      [sidebarCollapsed]="sidebarCollapsed()"
       (toggleTheme)="toggleTheme()"
-    />
-
+      [isMobile]="isMobile"
+      [sidebarOpened]="isSidebarOpen"
+      (openSidebar)="openSidebar()"
+      (closeSidebar)="closeSidebar()"
+    ></app-header>
     <main class="main-content">
       <div class="content-wrapper">
-        <router-outlet />
+        
+        <router-outlet>
+          <!-- Toast de notification pour nouveaux messages -->
+            <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+                <div *ngIf="hasNewMessages" 
+                     class="toast show fade" 
+                     role="alert" 
+                     aria-live="assertive" 
+                     aria-atomic="true"
+                     style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);">
+                    <div class="toast-header bg-transparent text-white border-0">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        <strong class="me-auto">Nouveaux messages</strong>
+                        <button type="button" 
+                                class="btn-close btn-close-white" 
+                                (click)="messageNotificationService.markAllAsRead()"
+                                aria-label="Fermer"></button>
+                    </div>
+                    <div class="toast-body text-white">
+                        Vous avez  des messages non lu 
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-light" (click)="navigateToMessages()">
+                                Voir les messages
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </router-outlet>
       </div>
     </main>
   </div>

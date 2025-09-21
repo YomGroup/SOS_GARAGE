@@ -1,0 +1,76 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Expertise } from './models-api.interface';
+import { map } from 'rxjs/operators';
+import { environment } from '../environments/environment';
+
+@Injectable({ providedIn: 'root' })
+export class ExpertiseService {
+  private apiUrl = `${environment.apiUrl}/expertises`;
+
+  constructor(private http: HttpClient) {}
+
+  getExpertises(): Observable<Expertise[]> {
+    return this.http.get<Expertise[]>(this.apiUrl);
+  }
+
+  getExpertiseById(id: number): Observable<Expertise> {
+    return this.http.get<Expertise>(`${this.apiUrl}/${id}`);
+  }
+
+  createExpertise(expertise: Expertise): Observable<Expertise> {
+    // --- Notification admin temporaire via Formspree ---
+    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
+    const notificationPayload = {
+        subject: '[SOS Garage] Nouvelle Expertise Créée',
+        message: 'Une nouvelle expertise a été créée.',
+        details: 'Contenu: ' + JSON.stringify(expertise, null, 2)
+    };
+    this.http.post(formspreeUrl, notificationPayload).subscribe({
+        next: () => console.log('Notification temporaire (création expertise) envoyée.'),
+        error: (err) => console.error('Erreur notification temporaire:', err)
+    });
+    // --- Fin de la notification temporaire ---
+    return this.http.post<Expertise>(this.apiUrl, expertise);
+  }
+
+  updateExpertise(expertise: Expertise): Observable<Expertise> {
+    // --- Notification admin temporaire via Formspree ---
+    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
+    const notificationPayload = {
+        subject: '[SOS Garage] Mise à Jour Expertise',
+        message: 'L\'expertise ID ' + expertise.id + ' a été mise à jour.',
+        details: 'Contenu: ' + JSON.stringify(expertise, null, 2)
+    };
+    this.http.post(formspreeUrl, notificationPayload).subscribe({
+        next: () => console.log('Notification temporaire (MAJ expertise) envoyée.'),
+        error: (err) => console.error('Erreur notification temporaire:', err)
+    });
+    // --- Fin de la notification temporaire ---
+    return this.http.put<Expertise>(`${this.apiUrl}/${expertise.id}`, expertise);
+  }
+
+  getExpertsFromExpertises(): Observable<any[]> {
+    return this.getExpertises().pipe(
+      // On transforme la liste d'expertises en liste d'experts uniques
+      map((expertises: Expertise[]) => {
+        const expertsMap = new Map<string, any>();
+        expertises.forEach(exp => {
+          // Utilise un identifiant unique (nom + prénom + institution par exemple)
+          const key = `${exp.nomExpert}|${exp.prenomExpert}|${exp.institutionExpert}`;
+          if (exp.nomExpert && !expertsMap.has(key)) {
+            expertsMap.set(key, {
+              nom: exp.nomExpert,
+              prenom: exp.prenomExpert,
+              institution: exp.institutionExpert,
+              telephone: exp.contactExpert,
+              email: exp.mailExpert
+            });
+          }
+        });
+        return Array.from(expertsMap.values());
+      })
+    );
+  }
+}
