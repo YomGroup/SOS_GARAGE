@@ -1373,7 +1373,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         imgUrl: savedFiles.photosUrls,
 
       };
-      console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
+      console.log('🚀 Soumission du sinistre avec payload réadapté:', sinistrePayload);
 
 
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
