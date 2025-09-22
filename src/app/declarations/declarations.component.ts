@@ -1358,7 +1358,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
-        lienConstat: this.constatFile ? this.constatFile.name : '',
+        lienConstat: savedFiles.constatUrl || '',
         conditionsAcceptees: true,
         documents: [],
         lieu: this.lieuSinistre,
@@ -1604,9 +1604,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
-  private async saveFilesToAssets(): Promise<{ photosUrls: string[] }> {
+  private async saveFilesToAssets(): Promise<{ photosUrls: string[], constatUrl: string | null }> {
     const storage = getStorage();
     const photosUrls: string[] = [];
+    let constatUrl: string | null = null;
 
     const baseDir = 'declaration/photos';
 
@@ -1640,11 +1641,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
       const constatRef = ref(storage, constatPath);
       await uploadBytes(constatRef, this.constatFile);
-      const constatURL = await getDownloadURL(constatRef);
-      // Tu peux aussi ajouter `constatURL` à un autre tableau si nécessaire
+      const downloadURL = await getDownloadURL(constatRef);
+      constatUrl = downloadURL;
     }
 
-    return { photosUrls };
+    return { photosUrls, constatUrl };
   }
 
 }
