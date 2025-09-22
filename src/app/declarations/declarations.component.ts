@@ -361,7 +361,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
 
     const modifiedPdfBytes = await pdfDoc.save();
-    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
+    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
+    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
   }
   private async modifyPdfWithUserData(pdfPath: string, documentName?: string): Promise<Blob> {
     const response = await fetch(pdfPath);
@@ -409,7 +411,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
 
     const modifiedPdfBytes = await pdfDoc.save();
-    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
+    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
+    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
   }
   private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
@@ -1357,7 +1361,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
-        lienConstat: this.constatFile ? this.constatFile.name : '',
+        lienConstat: savedFiles.constatUrl || '',
         conditionsAcceptees: true,
         documents: [],
         lieu: this.lieuSinistre,
@@ -1366,6 +1370,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+        imgUrl: savedFiles.photosUrls,
 
       };
       console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
@@ -1602,9 +1607,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
-  private async saveFilesToAssets(): Promise<{ photosUrls: string[] }> {
+  private async saveFilesToAssets(): Promise<{ photosUrls: string[], constatUrl: string | null }> {
     const storage = getStorage();
     const photosUrls: string[] = [];
+    let constatUrl: string | null = null;
 
     const baseDir = 'declaration/photos';
 
@@ -1638,11 +1644,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
       const constatRef = ref(storage, constatPath);
       await uploadBytes(constatRef, this.constatFile);
-      const constatURL = await getDownloadURL(constatRef);
-      // Tu peux aussi ajouter `constatURL` à un autre tableau si nécessaire
+      const downloadURL = await getDownloadURL(constatRef);
+      constatUrl = downloadURL;
     }
 
-    return { photosUrls };
+    return { photosUrls, constatUrl };
   }
 
 }
