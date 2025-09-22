@@ -46,12 +46,13 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       modifiedBlobUrl: null
     },
+    /*
     {
       id: 2,
       nom: 'Ordre de réparation',
       fichier: 'assets/documents/Ordre_Reparation_SOS_Mon_Garage.pdf',
       modifiedBlobUrl: null
-    },
+    },*/
     {
       id: 3,
       nom: 'Cession de créance',
@@ -809,7 +810,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       this.currentStep++;
 
-      if (this.currentStep === 5) {
+      if (this.currentStep === 3) {
         console.log('📝 Préparation des documents avec toutes les informations...');
         this.prepareDocumentsWithAllData();
       }
@@ -819,7 +820,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   acceptGarageWarning(): void {
     this.hasAcceptedGarageWarning = true;
     this.showGarageWarningStep = false;
-    this.currentStep = 5;
+    this.currentStep = 3;
     console.log('📝 Préparation des documents avec toutes les informations...');
     this.prepareDocumentsWithAllData();
   }
@@ -1152,15 +1153,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   canProceed(): boolean {
     switch (this.currentStep) {
       case 1:
-        return !!this.selectedVehicle;
+        return !!this.selectedVehicle && !!this.vehicleStatus;
+      /*case 2:
+        return !!this.vehicleStatus;*/
       case 2:
-        return !!this.vehicleStatus;
-      case 3:
         return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
           (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
-      case 4:
-        return !!this.constatFile;
-      case 5:
+      /* case 4:
+         return !!this.constatFile;*/
+      case 3:
         return this.hasAcceptedGarageWarning &&
           this.nomAssure !== '' &&
           this.adresseAssure !== '' &&
@@ -1262,7 +1263,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       this.currentPhotoStep++;
     } else {
       // Toutes les étapes photos sont complétées
-      this.nextStep(); // Passer à l'étape suivante du formulaire
+      //this.nextStep(); // Passer à l'étape suivante du formulaire
+      this.resetDeclarationMethod();
+
     }
   }
 
@@ -1374,7 +1377,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
           const sinistreId = sinistreResponse.id;
           this.sendSignedDocumentsAsync(sinistreId);
-          this.currentStep = 6;
+          this.currentStep = 4;
         },
         error: (error) => {
           console.error("❌ Erreur création sinistre:", error);
