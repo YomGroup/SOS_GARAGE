@@ -360,7 +360,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
 
     const modifiedPdfBytes = await pdfDoc.save();
-    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
+    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
+    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
   }
   private async modifyPdfWithUserData(pdfPath: string, documentName?: string): Promise<Blob> {
     const response = await fetch(pdfPath);
@@ -408,7 +410,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
 
     const modifiedPdfBytes = await pdfDoc.save();
-    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
+    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
+    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
   }
   private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
@@ -1363,6 +1367,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+        imgUrl: savedFiles.photosUrls,
 
       };
       console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
