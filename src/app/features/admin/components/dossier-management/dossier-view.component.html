@@ -301,11 +301,15 @@
               <div class="form-group">
                 <label>Lien constat</label>
                 <div class="readonly-field">
-                  {{
-                    dossier?.lienConstat ||
-                      mission?.sinistre?.lienConstat ||
-                      "Non renseigné"
-                  }}
+                  <ng-container *ngIf="dossier?.lienConstat || mission?.sinistre?.lienConstat as lienConstat; else pasDeLienConstat">
+                    <a [href]="lienConstat" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-2" style="text-decoration:none;">
+                      <i class="fas fa-file-alt me-1"></i>
+                      Voir le constat
+                    </a>
+                  </ng-container>
+                  <ng-template #pasDeLienConstat>
+                    <span class="text-muted">Non renseigné</span>
+                  </ng-template>
                 </div>
               </div>
               <!-- <div class="form-group">
