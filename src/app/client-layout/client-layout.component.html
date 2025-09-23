@@ -81,57 +81,289 @@
 
 <!-- Services Section -->
 <section id="services" class="services">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Nos services<br><span class="text-gradient">pour vous accompagner</span></h2>
-      <p class="section-subtitle">Une prise en charge complète de votre sinistre </p>
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Nos services<br><span class="text-gradient">pour vous accompagner</span></h2>
+                <p class="section-subtitle">Une prise en charge complète de votre sinistre</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card" (click)="openModal('modal1')">
+                    <div class="service-icon">📱</div>
+                    <h3 class="service-title">Déclaration simplifiée</h3>
+                    <p class="service-desc">Déclarez votre sinistre en quelques clics depuis votre smartphone</p>
+                </div>
+                
+                <div class="service-card service-featured" (click)="openModal('modal2')">
+                    <div class="service-icon">👨‍💼</div>
+                    <h3 class="service-title">Un Gestionnaire dédié</h3>
+                    <p class="service-desc">Un professionnel vous accompagne tout au long du processus</p>
+                </div>
+                
+                <div class="service-card" (click)="openModal('modal3')">
+                    <div class="service-icon">🔧</div>
+                    <h3 class="service-title">Réseau de garages</h3>
+                    <p class="service-desc">Accès à notre réseau de garages partenaires agréés</p>
+                </div>
+                
+                <div class="service-card" (click)="openModal('modal4')">
+                    <div class="service-icon">💰</div>
+                    <h3 class="service-title">Pas d'avance de frais</h3>
+                    <p class="service-desc">Vous n'avez aucune avance de frais tout au long de la gestion de votre sinistre</p>
+                </div>
+                
+                <div class="service-card" (click)="openModal('modal5')">
+                    <div class="service-icon">🚗</div>
+                    <h3 class="service-title">Véhicule de remplacement</h3>
+                    <p class="service-desc">Mise à disposition d'un véhicule pendant les réparations</p>
+                </div>
+                
+                <div class="service-card" (click)="openModal('modal6')">
+                    <div class="service-icon">📄</div>
+                    <h3 class="service-title">Suivi en temps réel</h3>
+                    <p class="service-desc">Suivez l'avancement de votre dossier depuis votre espace personnel</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals -->
+    <!-- Modal 1: Déclaration simplifiée -->
+    <div id="modal1" class="modal"
+     [class.active]="activeModal === 'modal1'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon">📱</div>
+                <h2 class="modal-title">Déclaration simplifiée</h2>
+            </div>
+            <div class="modal-body">
+                <p>Notre processus de déclaration révolutionne la gestion des sinistres automobiles. Fini les formulaires compliqués et les déplacements inutiles !</p>
+                
+                <h4>Comment ça fonctionne :</h4>
+                <ul>
+                    <li>Interface intuitive accessible 24h/24 et 7j/7</li>
+                    <li>Prise de photos directement depuis votre téléphone</li>
+                    <li>Géolocalisation automatique du lieu de l'accident</li>
+                    <li>Assistance vocale pour vous guider étape par étape</li>
+                    <li>Sauvegarde automatique de votre progression</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Gain de temps :</strong> 5 minutes suffisent pour déclarer votre sinistre, contre 30 minutes avec les méthodes traditionnelles.
+                </div>
+
+                <h4>Informations collectées :</h4>
+                <p>Notre système collecte toutes les informations essentielles : circonstances de l'accident, témoins, dégâts matériels, et données des autres véhicules impliqués.</p>
+
+                <button class="btn-modal">Déclarer un sinistre maintenant</button>
+            </div>
+        </div>
     </div>
-    
-    <div class="services-grid">
-      <div class="service-card">
-        <div class="service-icon">📱</div>
-        <h3 class="service-title">Déclaration simplifiée</h3>
-        <p class="service-desc">Déclarez votre sinistre en quelques clics depuis votre smartphone</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
-      
-      <div class="service-card service-featured">
-        <div class="service-icon">👨‍💼</div>
-        <h3 class="service-title">Un Gestionaire dédié</h3>
-        <p class="service-desc">Un professionnel vous accompagne tout au long du processus</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
-      
-      <div class="service-card">
-        <div class="service-icon">🔧</div>
-        <h3 class="service-title">Réseau de garages</h3>
-        <p class="service-desc">Accès à notre réseau de garages partenaires agréés</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
-      
-      <div class="service-card">
-        <div class="service-icon">💰</div>
-        <h3 class="service-title">Pas d'avance de frais</h3>
-        <p class="service-desc">Vous n'avez aucune avance de frais tout au long de la gestion de votre siniste</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
-      
-      <div class="service-card">
-        <div class="service-icon">🚗</div>
-        <h3 class="service-title">Véhicule de remplacement</h3>
-        <p class="service-desc">Mise à disposition d'un véhicule pendant les réparations</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
-      
-      <div class="service-card">
-        <div class="service-icon">📄</div>
-        <h3 class="service-title">Suivi en temps réel</h3>
-        <p class="service-desc">Suivez l'avancement de votre dossier depuis votre espace personnel</p>
-        <!-- <a href="#" class="service-link">En savoir plus →</a> -->
-      </div>
+
+    <!-- Modal 2: Gestionnaire dédié -->
+    <div id="modal2" class="modal"
+     [class.active]="activeModal === 'modal2'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon">👨‍💼</div>
+                <h2 class="modal-title">Un Gestionnaire dédié</h2>
+            </div>
+            <div class="modal-body">
+                <p>Bénéficiez d'un accompagnement personnalisé avec un expert dédié exclusivement à votre dossier. Votre gestionnaire devient votre interlocuteur unique.</p>
+                
+                <h4>Votre expert personnel :</h4>
+                <ul>
+                    <li>Professionnel certifié avec plus de 10 ans d'expérience</li>
+                    <li>Spécialisé dans votre type de sinistre</li>
+                    <li>Disponible par téléphone, email et chat</li>
+                    <li>Suivi proactif de votre dossier</li>
+                    <li>Conseil et accompagnement juridique si nécessaire</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Engagement qualité :</strong> Votre gestionnaire s'engage à vous contacter dans les 2h suivant votre déclaration.
+                </div>
+
+                <h4>Services inclus :</h4>
+                <p>Négociation avec les assurances, coordination avec les garages, gestion des expertises, et suivi jusqu'à la restitution de votre véhicule.</p>
+
+                <button class="btn-modal">Parler à un gestionnaire</button>
+            </div>
+        </div>
     </div>
-  </div>
-</section>
+
+    <!-- Modal 3: Réseau de garages -->
+    <div id="modal3" class="modal"
+     [class.active]="activeModal === 'modal3'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon">🔧</div>
+                <h2 class="modal-title">Réseau de garages</h2>
+            </div>
+            <div class="modal-body">
+                <p>Accédez à notre réseau exclusif de plus de 50 garages partenaires certifiés, sélectionnés pour leur excellence et leur professionnalisme.</p>
+                
+                <h4>Nos critères de sélection :</h4>
+                <ul>
+                    <li>Certification constructeurs et agrément assureurs</li>
+                    <li>Équipements de pointe et technologies récentes</li>
+                    <li>Personnel qualifié et formation continue</li>
+                    <li>Respect des délais et transparence tarifaire</li>
+                    <li>Note de satisfaction client supérieure à 4.5/5</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Couverture nationale :</strong> Un garage partenaire à moins de 15 km de votre domicile, partout en France.
+                </div>
+
+                <h4>Avantages de notre réseau :</h4>
+                <p>Tarifs négociés, garantie des réparations, pièces d'origine, et priorité sur les créneaux de réparation. Chaque garage respecte notre charte qualité.</p>
+
+                <button class="btn-modal">Voir les garages près de chez vous</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Pas d'avance de frais -->
+    <div id="modal4" class="modal"
+     [class.active]="activeModal === 'modal4'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon">💰</div>
+                <h2 class="modal-title">Pas d'avance de frais</h2>
+            </div>
+            <div class="modal-body">
+                <p>Profitez d'une tranquillité financière totale. Nous prenons en charge tous les frais directement auprès de nos partenaires.</p>
+                
+                <h4>Frais pris en charge :</h4>
+                <ul>
+                    <li>Expertise et évaluation des dégâts</li>
+                    <li>Réparations dans nos garages partenaires</li>
+                    <li>Pièces détachées et main d'œuvre</li>
+                    <li>Véhicule de remplacement</li>
+                    <li>Frais administratifs et de dossier</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Simplicité garantie :</strong> Vous ne payez que votre franchise, remboursée si vous n'êtes pas responsable.
+                </div>
+
+                <h4>Comment ça marche :</h4>
+                <p>Nous avons des accords directement avec nos partenaires. Vous signez simplement l'ordre de réparation, et nous nous occupons de toute la gestion financière avec votre assureur.</p>
+
+                <button class="btn-modal">En savoir plus sur la prise en charge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 5: Véhicule de remplacement -->
+    <div id="modal5" class="modal"
+     [class.active]="activeModal === 'modal5'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+    <div class="modal-header">
+      <div class="modal-icon">🚗</div>
+      <h2 class="modal-title">Véhicule de remplacement</h2>
+    </div>
+            <div class="modal-body">
+                <p>Continuez vos activités quotidiennes sans interruption grâce à notre service de véhicule de remplacement premium.</p>
+                
+                <h4>Notre flotte disponible :</h4>
+                <ul>
+                    <li>Véhicules récents (moins de 2 ans)</li>
+                    <li>Gamme adaptée à votre véhicule sinistré</li>
+                    <li>Assurance tous risques incluse</li>
+                    <li>Kilométrage illimité</li>
+                    <li>Assistance 24h/24 en cas de panne</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Service express :</strong> Livraison du véhicule de remplacement dans les 4h, directement à votre domicile ou lieu de travail.
+                </div>
+
+                <h4>Conditions d'attribution :</h4>
+                <p>Selon votre contrat d'assurance et les circonstances du sinistre. Notre gestionnaire vérifie vos droits et organise la mise à disposition immédiatement.</p>
+
+                <button class="btn-modal">Réserver un véhicule de remplacement</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 6: Suivi en temps réel -->
+    <div id="modal6" class="modal"
+     [class.active]="activeModal === 'modal6'"
+     (click)="onBackdropClick($event)">
+  <div class="modal-content">
+    <span class="close" (click)="closeModal()">&times;</span>
+    <div class="modal-header">
+      <div class="modal-icon">📄</div>
+      <h2 class="modal-title">Suivi en temps réel</h2>
+    </div>
+    <div class="modal-body">
+                <p>Restez informé à chaque étape grâce à votre espace personnel et nos notifications automatiques.</p>
+                
+                <h4>Fonctionnalités de suivi :</h4>
+                <ul>
+                    <li>Tableau de bord avec statut en temps réel</li>
+                    <li>Timeline détaillée de votre dossier</li>
+                    <li>Photos avant/pendant/après réparation</li>
+                    <li>Documents numérisés accessibles 24h/24</li>
+                    <li>Messagerie directe avec votre gestionnaire</li>
+                </ul>
+
+                <div class="highlight-box">
+                    <strong>Notifications intelligentes :</strong> SMS et email automatiques à chaque évolution importante de votre dossier.
+                </div>
+
+                <h4>Historique complet :</h4>
+                <p>Accédez à l'historique complet de vos échanges, décisions prises, et documents générés. Parfait pour vos archives personnelles.</p>
+
+                <button class="btn-modal">Accéder à mon espace</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- <script>
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Fermer la modal en cliquant à l'extérieur
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        // Fermer la modal avec la touche Échap
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const activeModal = document.querySelector('.modal.active');
+                if (activeModal) {
+                    activeModal.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
+    </script> -->
 
 <!-- Registration Section -->
 <section class="registration">

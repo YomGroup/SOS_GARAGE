@@ -54,7 +54,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       modifiedBlobUrl: null
     },*/
     {
-      id: 3,
+      id: 2,
       nom: 'Cession de créance',
       fichier: 'assets/documents/Cession_Creance_SOS_Mon_Garage.pdf',
       modifiedBlobUrl: null
