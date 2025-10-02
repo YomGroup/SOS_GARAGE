@@ -49,9 +49,16 @@
   <div class="form-group">
     <input formControlName="email" placeholder="Email" type="email" class="form-control-custom" />
   </div>
-  <div class="form-group">
-    <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom" />
+<div class="form-group phone-group">
+  <div class="phone-input-wrapper">
+    <span class="indicatif">+33</span>
+    <input 
+      formControlName="telephone" 
+      placeholder="Téléphone (ex: 612345678)" 
+      class="form-control-custom phone-input" />
   </div>
+</div>
+
   <div class="form-group">
     <input formControlName="adresse" placeholder="Adresse" class="form-control-custom" />
   </div>
@@ -89,9 +96,15 @@
           <div class="form-group">
             <input formControlName="email" placeholder="Email" type="email" class="form-control-custom">
           </div>
-          <div class="form-group">
-            <input formControlName="telephone" placeholder="Téléphone" class="form-control-custom">
-          </div>
+          <div class="form-group phone-group">
+  <div class="phone-input-wrapper">
+    <span class="indicatif">+33</span>
+    <input 
+      formControlName="telephone" 
+      placeholder="Téléphone (ex: 612345678)" 
+      class="form-control-custom phone-input" />
+  </div>
+</div>
           <div class="form-group">
             <input formControlName="adresse" placeholder="Adresse" class="form-control-custom">
           </div>
