@@ -1,7 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, tap } from 'rxjs';
 import { environment } from '../environments/environment';
+import { AuthService } from './auth.service';
 
 export interface Vehicle {
     id: string;
@@ -39,16 +40,23 @@ export interface TimelineEvent {
 @Injectable({
     providedIn: 'root'
 })
-export class VehicleService {
+export class VehicleService implements OnInit {
     private apiUrl = `${environment.apiUrl}/vehicule/all`;
     private api = `${environment.apiUrlLocale}/vehicule`;
+    private authService = inject(AuthService);
 
+    token = '';
     private apiUrlAdd = `${environment.apiUrl}/vehicule`;
     private apiUrlData = `${environment.apiUrl}/vehicule`;
     private http = inject(HttpClient);
     private vehiculesSubject = new BehaviorSubject<any[]>([]);
     vehicules$ = this.vehiculesSubject.asObservable();
 
+    ngOnInit(): void {
+        this.authService.getKeycloakInstance().then(token => {
+            this.token = token;
+        });
+    }
     getAllVehiculesPost(body: any = {}) {
         return this.http.get(this.apiUrl, body);
     }
