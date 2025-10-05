@@ -125,13 +125,16 @@ export class YousignService {
             signature_level: 'electronic_signature',
             signature_authentication_mode: this.getAuthMode(options?.authMode),
 
-            /*  // Structure redirect_urls (optionnel)
+            /* 
+             // Structure redirect_urls (optionnel)
               ...(options?.redirectSuccessUrl || options?.redirectErrorUrl ? {
                   redirect_urls: {
                       ...(options.redirectSuccessUrl ? { success: options.redirectSuccessUrl } : {}),
                       ...(options.redirectErrorUrl ? { error: options.redirectErrorUrl } : {})
                   }
-              } : {}),*/
+              } : {}),
+
+            */
 
             // Structure fields
             fields: [

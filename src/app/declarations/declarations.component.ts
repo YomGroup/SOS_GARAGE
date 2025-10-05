@@ -10,12 +10,13 @@ import { AssureService } from '../../services/assure.service';
 import { DocumentService } from '../../services/document.service';
 import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, switchMap } from 'rxjs';
 import { FirebaseStorageService } from '../../services/firebase-storage.service';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { YousignService } from '../../services/yousign.service';
 
 import { Router } from '@angular/router'
+import { Vehicule } from '../../services/models-api.interface';
 
 interface Document {
   id: number;
@@ -100,7 +101,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   adresseAssure: string = '';
   telephoneAssure: string = '';
   prenomAssure: string = '';
-
+  token = '';
+  numeroAssurance = '';
   // Ajoutez ces propriétés à votre component
   private documentSignatureRequests: Map<number, string> = new Map();
   private documentSignerIds: Map<number, string> = new Map();
@@ -135,11 +137,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   showProfileAlert = false;
   showvehicleAlert = false;
   currentCity: string = 'Casablanca';
+
   constructor(@Inject(DOCUMENT) private document: Document, private router: Router) {
 
   }
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
+    this.authService.getKeycloakInstance().then(token => {
+      this.token = token;
+    });
 
     // Récupérer la géolocalisation
     this.getCurrentCity();
@@ -270,9 +276,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
   // Add this new method to load assurances
   private loadAssurances(): void {
-    this.vehiculeService.listAssuranceVehicules().subscribe({
+    this.vehiculeService.listAssuranceVehiculesNumero(this.token).subscribe({
       next: (data: any) => {
         this.assurances = data;
+        //console.log('Assurances chargées k,lk,kn,lnk:', this.assurances);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des assurances', err);
@@ -361,9 +368,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     });
 
     const modifiedPdfBytes = await pdfDoc.save();
-    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
-    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
-    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
+    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
   }
   private async modifyPdfWithUserData(pdfPath: string, documentName?: string): Promise<Blob> {
     const response = await fetch(pdfPath);
@@ -411,9 +416,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
 
     const modifiedPdfBytes = await pdfDoc.save();
-    const arrayBuffer = new ArrayBuffer(modifiedPdfBytes.byteLength);
-    new Uint8Array(arrayBuffer).set(modifiedPdfBytes);
-    return new Blob([arrayBuffer as ArrayBuffer], { type: 'application/pdf' });
+    return new Blob([modifiedPdfBytes], { type: 'application/pdf' });
   }
   private fillCessionCreanceForm(page: any, pageWidth: number, pageHeight: number, textOptions: any, smallTextOptions: any, pageIndex: number): void {
     const { nom, prenom, adressePostale, telephone, email } = this.userData;
@@ -810,10 +813,45 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
   // Navigation entre étapes
   nextStep(): void {
+    let vehiculematricule = '';
+    let vehicle: Vehicule | undefined;
+    let assurance: any;
+    if (this.selectedVehicle) {
+      const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+      vehiculematricule = vehicule ? vehicule.immatriculation : '';
+    }
+
     if (this.canProceed()) {
 
       this.currentStep++;
+      if (this.vehicleStatus === 'not-rolling') {
+        this.showAssuranceStep = true;
 
+        this.vehiculeService.getVehiculesMatricule(vehiculematricule).pipe(
+          switchMap((vehicle: any) => {
+            console.log('Données du véhicule récupérées :', vehicle?.nomAssurence);
+            assurance = vehicle?.nomAssurence || '';
+
+            // Retourner le deuxième observable
+            return this.vehiculeService.listAssuranceVehiculesNumero(this.token);
+          })
+        ).subscribe({
+          next: (data: any) => {
+            this.assurances = data;
+
+            this.numeroAssurance = this.assurances.find(a => {
+              const nom = a.split('-')[0].trim().toUpperCase();
+              return nom === assurance.trim().toUpperCase();
+            });
+
+
+          },
+          error: (err) => {
+            console.error('Erreur lors du chargement des assurances', err);
+          }
+        });
+
+      }
       if (this.currentStep === 3) {
         console.log('📝 Préparation des documents avec toutes les informations...');
         this.prepareDocumentsWithAllData();
@@ -1179,12 +1217,13 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   selectVehicle(vehicle: string): void {
     this.selectedVehicle = vehicle;
     this.isDropdownOpen = false;
-    this.loadAssurances();
+    //this.loadAssurances();
 
     // Check if vehicle is non-rolling and show assurance step
     if (this.vehicleStatus === 'not-rolling') {
       this.showAssuranceStep = true;
-      this.loadAssurances();
+      //this.loadAssurances();
+      console.log('Véhicule sélectionné :', this.selectedVehicle);
     } else {
       this.showAssuranceStep = false;
     }
@@ -1265,6 +1304,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   nextPhotoStep(): void {
     if (this.currentPhotoStep < 4) {
       this.currentPhotoStep++;
+
     } else {
       // Toutes les étapes photos sont complétées
       //this.nextStep(); // Passer à l'étape suivante du formulaire
@@ -1361,7 +1401,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
-        lienConstat: savedFiles.constatUrl || '',
+        lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
         documents: [],
         lieu: this.lieuSinistre,
@@ -1370,7 +1410,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
-        imgUrl: savedFiles.photosUrls,
 
       };
       console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
@@ -1607,10 +1646,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       nomDocument.includes('Ordre') ? 'ordre' :
         nomDocument.includes('Cession') ? 'cession' : 'autre';
   }
-  private async saveFilesToAssets(): Promise<{ photosUrls: string[], constatUrl: string | null }> {
+  private async saveFilesToAssets(): Promise<{ photosUrls: string[] }> {
     const storage = getStorage();
     const photosUrls: string[] = [];
-    let constatUrl: string | null = null;
 
     const baseDir = 'declaration/photos';
 
@@ -1644,11 +1682,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
       const constatRef = ref(storage, constatPath);
       await uploadBytes(constatRef, this.constatFile);
-      const downloadURL = await getDownloadURL(constatRef);
-      constatUrl = downloadURL;
+      const constatURL = await getDownloadURL(constatRef);
+      // Tu peux aussi ajouter `constatURL` à un autre tableau si nécessaire
     }
 
-    return { photosUrls, constatUrl };
+    return { photosUrls };
   }
 
 }

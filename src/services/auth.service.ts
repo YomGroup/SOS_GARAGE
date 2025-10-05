@@ -43,7 +43,10 @@ export class AuthService {
         this.decodedToken = jwtDecode<DecodedToken>(token);
         console.log('Decoded Token:', this.decodedToken);
     }
-
+    async getKeycloakInstance(): Promise<any> {
+        const token = await this.keycloakService.getToken();
+        return token;
+    }
     getToken(): DecodedToken | null {
         return this.decodedToken;
     }

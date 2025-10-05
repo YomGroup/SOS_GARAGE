@@ -41,6 +41,7 @@ export interface TimelineEvent {
 })
 export class VehicleService {
     private apiUrl = `${environment.apiUrl}/vehicule/all`;
+    private api = `${environment.apiUrlLocale}/vehicule`;
 
     private apiUrlAdd = `${environment.apiUrl}/vehicule`;
     private apiUrlData = `${environment.apiUrl}/vehicule`;
@@ -53,6 +54,10 @@ export class VehicleService {
     }
     getVehiculesData(immatriculation: string) {
         const url = `${this.apiUrlData}/scraper/${encodeURIComponent(immatriculation)}`;
+        return this.http.get(url);
+    }
+    getVehiculesMatricule(immatriculation: string) {
+        const url = `${this.apiUrlData}/matricule/${encodeURIComponent(immatriculation)}`;
         return this.http.get(url);
     }
     getVehiculesDataById(id: number) {
@@ -76,6 +81,13 @@ export class VehicleService {
     }
     listAssuranceVehicules(body: any = {}) {
         return this.http.get(`${this.apiUrlAdd}/listeAssurance`);
+    }
+    listAssuranceVehiculesNumero(token: any) {
+        return this.http.get(`${this.api}/listeAssurance`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
     }
     deleteVehiculesPost(id: number) {
         return this.http.delete(`${this.apiUrlAdd}?id=${id}`);

@@ -353,11 +353,21 @@
   <div class="success-message" *ngIf="allDocumentsSigned">
     <h2>Votre demande a été prise en compte</h2>
     <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
-   
-     <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
-    <p>contactez l'Assistance :</p>
-    <a href="tel:0761841419" class="assistance-number">07 61 84 14 19</a>
+   <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
+  <p>Contactez l'Assistance :</p>
+  <a href="tel:0761841419" class="assistance-number">07 61 84 14 19</a>
+  
+  <!-- Affichage du numéro d'assurance -->
+  <div class="assurance-info" *ngIf="numeroAssurance">
+    <p><strong>Numéro d'assurance :</strong></p>
+    <p class="numero-assurance">{{ numeroAssurance }}</p>
   </div>
+  
+  <!-- Message de chargement pendant que les données arrivent -->
+  <div class="loading-assurance" *ngIf="showAssuranceStep && !numeroAssurance">
+    <p>Chargement des informations d'assurance...</p>
+  </div>
+</div>
   </div>
 </div>
 
