@@ -1,19 +1,25 @@
+// app.config.ts
 import { APP_INITIALIZER, ApplicationConfig, isDevMode } from '@angular/core';
-import { Router, provideRouter } from '@angular/router';
+import { provideRouter } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideStore } from '@ngrx/store';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi, withFetch } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+  withFetch
+} from '@angular/common/http';
 
 import { routes } from './app.routes';
-import { KeycloakBearerInterceptor, KeycloakService } from 'keycloak-angular';
-import { environment, firebaseConfig } from '../environnement';
+import { KeycloakService, KeycloakBearerInterceptor } from 'keycloak-angular';
+import { firebaseConfig } from '../environnement';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideFirestore, getFirestore } from '@angular/fire/firestore';
-import { ApiInterceptor } from './services/api-interceptor.service';
+import { provideStorage, getStorage } from '@angular/fire/storage';
 import { HttpCacheInterceptor } from './core/interceptors/cache.interceptor';
-import { getStorage } from 'firebase/storage';
-import { provideStorage } from '@angular/fire/storage';
+
+// ✅ Initialisation Keycloak
 function initializeKeycloak(keycloak: KeycloakService) {
   return () =>
     keycloak.init({
@@ -23,6 +29,7 @@ function initializeKeycloak(keycloak: KeycloakService) {
         clientId: 'sosmongaragefront'
       },
       initOptions: {
+        onLoad: 'check-sso',
         checkLoginIframe: false
       }
     });
@@ -36,9 +43,12 @@ export const appConfig: ApplicationConfig = {
     provideStore(),
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideFirestore(() => getFirestore()),
-    // Ensure a single provideHttpClient with DI interceptors enabled and Fetch API backend
-    provideHttpClient(withInterceptorsFromDi(), withFetch()),
     provideStorage(() => getStorage()),
+
+    // ✅ Fournit un seul HttpClient avec DI et Fetch
+    provideHttpClient(withInterceptorsFromDi(), withFetch()),
+
+    // ✅ Services Keycloak
     KeycloakService,
     {
       provide: APP_INITIALIZER,
@@ -46,22 +56,17 @@ export const appConfig: ApplicationConfig = {
       multi: true,
       deps: [KeycloakService]
     },
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: ApiInterceptor,
-    //   multi: true
-    // },
+
+    // ✅ Interceptors globaux
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpCacheInterceptor,
       multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: KeycloakBearerInterceptor,
+      multi: true
     }
-    // Temporairement désactivé pour tester
-    // {
-    //   provide: HTTP_INTERCEPTORS,
-    //   useClass: KeycloakBearerInterceptor,
-    //   multi: true
-    // }
   ]
 };
-
