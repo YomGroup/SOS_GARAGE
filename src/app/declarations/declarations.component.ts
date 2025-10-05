@@ -55,7 +55,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       modifiedBlobUrl: null
     },*/
     {
-      id: 3,
+      id: 2,
       nom: 'Cession de créance',
       fichier: 'assets/documents/Cession_Creance_SOS_Mon_Garage.pdf',
       modifiedBlobUrl: null
@@ -1412,7 +1412,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
 
       };
-      console.log('🚀 Soumission du sinistre avec payload:', sinistrePayload);
+      console.log('🚀 Soumission du sinistre avec payload réadapté:', sinistrePayload);
 
 
       this.sinistreService.addSinistrePost(sinistrePayload).subscribe({

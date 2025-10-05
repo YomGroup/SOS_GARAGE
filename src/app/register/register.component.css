@@ -359,6 +359,35 @@
     align-items: center;
     gap: 10px;
 }
+/* Conteneur déjà existant */
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+/* Style moderne pour l’indicatif */
+.indicatif {
+  padding: 18px 16px;
+  background: rgba(248, 250, 252, 0.8);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-right: none; /* fusion avec l'input */
+  border-top-left-radius: 20px;
+  border-bottom-left-radius: 20px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #4b5563; /* gris foncé */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+}
+
+/* Ajuster l’input pour fusionner avec l’indicatif */
+.phone-input {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
 
 .btn-back:hover {
     background: #667eea;

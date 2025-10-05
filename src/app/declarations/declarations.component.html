@@ -96,11 +96,11 @@
         <p>Racontez ce qui s'est passé en détail</p>
       </div>
       
-      <div class="choice-card" (click)="selectDeclarationMethod('upload')">
+      <!-- <div class="choice-card" (click)="selectDeclarationMethod('upload')">
         <i class="bi bi-file-earmark-arrow-up"></i>
         <h3>Téléverser un constat</h3>
         <p>Uploader votre constat amiable rempli</p>
-      </div>
+      </div> -->
     </div>
 
     <!-- Description + Photos -->
@@ -122,6 +122,46 @@
           <p class="help-text">
             Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.
           </p>
+          <div class="upload-section mt-4" >
+      <div class="section-header">
+        <button class="btn-back" (click)="resetDeclarationMethod()">
+          <i class="bi bi-arrow-left"></i> Retour
+        </button>
+        <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
+      </div>
+      
+      <div class="file-upload">
+        <div class="upload-area" (click)="fileInput.click()">
+          <p><i class="bi bi-upload"></i> Téléverser votre constat</p>
+          <input #fileInput type="file" accept=".pdf,.jpg,.png" 
+                 (change)="onFileSelect($event)" style="display: none;">
+        </div>
+        
+        <div class="preview-container" *ngIf="constatPreviewUrl">
+          <h4>Prévisualisation :</h4>
+          
+          <div *ngIf="showPdfViewer" class="pdf-preview">
+            <pdf-viewer [src]="constatPreviewUrl" 
+                       [render-text]="true"
+                       style="width: 100%; height: 500px; border: 1px solid #ddd;">
+            </pdf-viewer>
+          </div>
+          
+          <div *ngIf="!showPdfViewer" class="image-preview">
+            <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
+          </div>
+          
+          <button class="btn-remove" (click)="removeConstat()">
+            <i class="bi bi-trash"></i> Supprimer
+          </button>
+        </div>
+        
+        <p class="help-text">
+          Vous n'avez pas de constat ? <br>
+          Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
+        </p>
+      </div>
+    </div>
         </div>
 
         <!-- Colonne droite : Photos -->
@@ -187,46 +227,7 @@
     </div>
 
     <!-- Upload de constat -->
-    <div class="upload-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'upload'">
-      <div class="section-header">
-        <button class="btn-back" (click)="resetDeclarationMethod()">
-          <i class="bi bi-arrow-left"></i> Retour
-        </button>
-        <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
-      </div>
-      
-      <div class="file-upload">
-        <div class="upload-area" (click)="fileInput.click()">
-          <p><i class="bi bi-upload"></i> Téléverser votre constat</p>
-          <input #fileInput type="file" accept=".pdf,.jpg,.png" 
-                 (change)="onFileSelect($event)" style="display: none;">
-        </div>
-        
-        <div class="preview-container" *ngIf="constatPreviewUrl">
-          <h4>Prévisualisation :</h4>
-          
-          <div *ngIf="showPdfViewer" class="pdf-preview">
-            <pdf-viewer [src]="constatPreviewUrl" 
-                       [render-text]="true"
-                       style="width: 100%; height: 500px; border: 1px solid #ddd;">
-            </pdf-viewer>
-          </div>
-          
-          <div *ngIf="!showPdfViewer" class="image-preview">
-            <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
-          </div>
-          
-          <button class="btn-remove" (click)="removeConstat()">
-            <i class="bi bi-trash"></i> Supprimer
-          </button>
-        </div>
-        
-        <p class="help-text">
-          Vous n'avez pas de constat ? <br>
-          Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
-        </p>
-      </div>
-    </div>
+    
 </div>
 
        <!-- Step 2: Vehicle Selection -->
@@ -308,10 +309,10 @@
   <div class="info-banner">
     <div class="info-banner-content">
       <i class="bi bi-info-circle"></i>
-      <div class="info-text">
+      <!-- <div class="info-text">
         <strong>Information :</strong> Les informations du garage partenaire seront automatiquement 
         ajoutées à vos documents après signature.
-      </div>
+      </div> -->
     </div>
   </div>
     <div class="document-preview">
@@ -335,7 +336,7 @@
         <label class="custom-checkbox">
           <input type="checkbox" [(ngModel)]="isChecked" />
           <span class="checkmark"></span>
-          <span class="label-text">Je certifie avoir lu et approuvé le document {{ currentDocument }}</span>
+          <span class="label-text">Je certifie avoir lu et approuvé le document numéro {{ currentDocument }}</span>
         </label>
 
         <button class="btn btn-sign text-white" style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);"

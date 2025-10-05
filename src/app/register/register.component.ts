@@ -1,9 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { AuthService, Assure } from '../../services/auth.service';
-import { inject } from '@angular/core';
 import Swal from 'sweetalert2';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -12,13 +12,26 @@ import Swal from 'sweetalert2';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css'
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
   private authService = inject(AuthService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   assure: Assure[] = [];
   registerForm!: FormGroup;
   userType: 'assure' | 'garagiste' | null = null;
+  isForced = false;
 
-  constructor(private fb: FormBuilder) { }
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    const forcedType = this.route.snapshot.data?.['forcedUserType'] as ('assure' | 'garagiste' | undefined);
+    if (forcedType) {
+      this.isForced = true;
+      this.userType = forcedType;
+      this.initForm();
+    }
+  }
 
   selectUserType(type: 'assure' | 'garagiste') {
     this.userType = type;
@@ -33,14 +46,7 @@ export class RegisterComponent {
         email: [''],
         telephone: [''],
         adresse: [''],
-        // adressePostale: [''],
-        // numeroPermis: [''],
-        // typePermis: [''],
-        // datePermis: [''],
-        // dateObtentionPermis: [''],
-        // typeGarantie: [''],
         password: [''],
-        // ... autres champs véhicule
       });
     } else if (this.userType === 'garagiste') {
       this.registerForm = this.fb.group({
@@ -49,12 +55,12 @@ export class RegisterComponent {
         telephone: ['', Validators.required],
         adresse: ['', Validators.required],
         password: ['', [Validators.required, Validators.minLength(8)]],
-        // Les champs suivants ne sont pas dans le formulaire, mais ajoutés à la soumission
         isvalids: [false],
         missions: [[]],
       });
     }
   }
+
   onSubmit() {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -62,6 +68,7 @@ export class RegisterComponent {
     }
 
     const formData = this.registerForm.value;
+    formData.telephone = '+33' + formData.telephone;
 
     if (this.userType === 'assure') {
       this.authService.registerAssure(formData).subscribe({
@@ -71,9 +78,11 @@ export class RegisterComponent {
             title: 'Succès !',
             text: 'Compte assuré créé avec succès.',
             confirmButtonColor: '#3085d6',
-          })
+            }).then(() => {
+              this.router.navigate(['/clientDashboard']);
+            });
           this.registerForm.reset();
-          this.userType = null;
+          if (!this.isForced) this.userType = null;
         },
         error: (error) => {
           console.error(error);
@@ -90,16 +99,16 @@ export class RegisterComponent {
         ...formValue,
         name: formValue.nomDuGarage,
         prenom: formValue.nomDuGarage,
-        isValids: "En attente",
-        codePostal: "",
-        ville: "",
+        isValids: 'En attente',
+        codePostal: '',
+        ville: '',
         commission: 0,
-        siret: "",
+        siret: '',
         servicePropose: [],
         anneeExperience: 0,
         nombreVehiculeReparee: 0,
         nombreEmployes: 0,
-        logo: "",
+        logo: '',
         imagesReparations: [],
       };
 
@@ -113,12 +122,12 @@ export class RegisterComponent {
             confirmButtonText: 'OK'
           });
           this.registerForm.reset();
-          this.userType = null;
+          if (!this.isForced) this.userType = null;
         },
         error: (error) => {
-          console.error('Erreur API :', error); // Log the full error object
+          console.error('Erreur API :', error);
           const errorMessage = error.error?.message || error.message || error.error || error;
-          console.error('Message d\'erreur brut:', errorMessage);
+          console.error("Message d'erreur brut:", errorMessage);
           Swal.fire({
             icon: 'error',
             title: 'Erreur serveur',
@@ -130,10 +139,12 @@ export class RegisterComponent {
     }
   }
 
-
   goBack() {
+    if (this.isForced) {
+      this.router.navigate(['/register']);
+      return;
+    }
     this.userType = null;
     this.registerForm.reset();
   }
-
 }

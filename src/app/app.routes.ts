@@ -90,6 +90,8 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+  { path: 'register/assure', component: RegisterComponent, data: { forcedUserType: 'assure' } },
+  { path: 'register/garagiste', component: RegisterComponent, data: { forcedUserType: 'garagiste' } },
   //{ path: 'message', component: MessageComponent },
 
   { path: '', redirectTo: 'client', pathMatch: 'full' }
