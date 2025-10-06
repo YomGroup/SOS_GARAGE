@@ -30,6 +30,38 @@ interface Reparateur {
  
   }
 
+  interface Vehicule {
+    id: number;
+    immatriculation: string;
+    marque: string;
+    modele: string;
+    cylindree: string;
+    dateMiseEnCirculation: string;
+    carteGrise: string;
+    contratAssurance: string;
+    assure: number;
+    imgUrl: string[];
+    nomAssurence: string;
+    typeAssurence: string;
+    dateDerniereCg: string;
+    energie: string;
+    nomCommerciale: string;
+    puissanceChevaux: string;
+    puissanceFiscale: string;
+    boiteVitesse: string;
+    typeMine: string;
+    version: string;
+  }
+
+  interface PaginatedResponse<T> {
+    content: T[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    empty: boolean;
+  }
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,13 +70,24 @@ export class AdminService {
 
   constructor(private http: HttpClient) { }
 
-  getAllVehicules(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/vehicule/all`);
+  // Méthode pour récupérer tous les véhicules avec pagination
+  getAllVehicules(page: number = 0, size: number = 10): Observable<PaginatedResponse<Vehicule>> {
+    return this.http.get<PaginatedResponse<Vehicule>>(`${this.apiUrl}/vehicule/all?page=${page}&size=${size}`);
   }
 
-  // get sinistre
-  getSinistre(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/sinistre`);
+  // Méthode pour récupérer tous les véhicules sans pagination (pour compatibilité)
+  getAllVehiculesSimple(): Observable<Vehicule[]> {
+    return this.http.get<Vehicule[]>(`${this.apiUrl}/vehicule/all`);
+  }
+
+  // get sinistre avec pagination
+  getSinistre(page: number = 0, size: number = 10): Observable<PaginatedResponse<Sinistre>> {
+    return this.http.get<PaginatedResponse<Sinistre>>(`${this.apiUrl}/sinistre/find_by_page?page=${page}&size=${size}`);
+  }
+
+  // get sinistre sans pagination (pour compatibilité)
+  getSinistreSimple(): Observable<Sinistre[]> {
+    return this.http.get<Sinistre[]>(`${this.apiUrl}/sinistre/find_by_page`);
   }
 
 

@@ -6,29 +6,11 @@ export interface Avantage {
 }
 
 export interface Message {
-  // À compléter selon vos besoins
   id?: string;
   senderId: string;
   receiverId: string;
   text: string;
   timestamp?: any;
-
-}
-
-
-export interface Reparation {
-  // À compléter selon vos besoins
-  id?: number;
-  description?: string;
-  cout?: number;
-}
-
-export interface Vehicule {
-  // À compléter selon vos besoins
-  id?: number;
-  marque?: string;
-  modele?: string;
-
 }
 
 export enum TypeSinistre {
@@ -58,6 +40,12 @@ export interface Notification {
   id?: number;
   message?: string;
   date?: string;
+}
+
+export interface Reparation {
+  id?: number;
+  description?: string;
+  cout?: number;
 }
 
 // Interface Mission
@@ -138,19 +126,39 @@ export interface Reparateur {
 // Interface Sinistre
 export interface Sinistre {
   id?: number;
-  vehicule: Vehicule;
-  type: TypeSinistre;
-  contactAssistance: string;
-  lienConstat: string;
-  conditionsAcceptees: boolean;
-  documents: DocumentsSinistre[];
-  notifications: Notification[];
-  imgUrl: string[];
-  mission: Mission;
-  isvalid: boolean;
-  statut: string;
+  // Certains endpoints renvoient l'id du véhicule séparément
+  vehiculeId?: number;
+  vehiculeImmatriculation?: string;
+  // Ancien champ : tableau d'URL
+  imgUrl?: string[];
+  // Nouveau format : objets avec metadata
+  images?: {
+    id?: number;
+    imageName?: string;
+    imageType?: string;
+    objectStorageUrl?: string;
+    fileSize?: number | null;
+    mimeType?: string | null;
+    displayOrder?: number | null;
+  }[];
+
+  vehicule?: Vehicule;
+  type?: TypeSinistre;
+  contactAssistance?: string;
+  lienConstat?: string | null;
+  conditionsAcceptees?: boolean;
+  documents?: DocumentsSinistre[];
+  notifications?: Notification[];
+  mission?: Mission;
+  // Nouveaux flags explicites
+  signed?: boolean;
+  valid?: boolean;
+  garageAffected?: boolean;
+  // Ancien champ pour compatibilité
+  isvalid?: boolean;
+  statut?: string;
   statutAvancement?: StatutAvancementSinistre;
-  // Propriétés d'assurance ajoutées
+  // Propriétés d'assurance
   compagnieAssurance?: string;
   numeroContrat?: string;
   numeroSinistre?: string;

@@ -391,7 +391,7 @@
         </button>
       
         <div class="accordion-content" *ngIf="showVehiclePhotos">
-          <div class="form-section" *ngIf="mission?.sinistre?.imgUrl as images">
+          <div class="form-section" *ngIf="getSinistreImageUrls() as images">
             <ng-container *ngIf="images.length > 0">
               <h5>
                 <i class="fas fa-images me-2"></i>Photos du sinistre ({{ images.length }})
@@ -412,7 +412,7 @@
             </ng-container>
           </div>
       
-          <div *ngIf="mission?.sinistre?.imgUrl?.length === 0" class="text-center text-muted">
+          <div *ngIf="getSinistreImageUrls().length === 0" class="text-center text-muted">
             Aucune photo d'incident disponible.
           </div>
         </div>
