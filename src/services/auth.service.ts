@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { KeycloakService } from 'keycloak-angular';
 import { jwtDecode } from 'jwt-decode';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { environment } from '../environments/environment';
 
@@ -35,17 +35,17 @@ export class AuthService {
 
     private apiUrlgarage = `${environment.apiUrl}/reparateurs`;
     private http = inject(HttpClient);
+    token = '';
 
     constructor(private keycloakService: KeycloakService) { }
 
     async init(): Promise<void> {
-        const token = await this.keycloakService.getToken();
-        this.decodedToken = jwtDecode<DecodedToken>(token);
+        this.token = await this.keycloakService.getToken();
+        this.decodedToken = jwtDecode<DecodedToken>(this.token);
         console.log('Decoded Token:', this.decodedToken);
     }
     async getKeycloakInstance(): Promise<any> {
-        const token = await this.keycloakService.getToken();
-        return token;
+        return this.token;
     }
     getToken(): DecodedToken | null {
         return this.decodedToken;
@@ -68,11 +68,21 @@ export class AuthService {
     }
 
     registerAssure(payload: any) {
-        return this.http.post(this.apiUrl, payload);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.http.post(this.apiUrl, payload, { headers });
 
     }
     registerGaragistre(payload: any) {
-        return this.http.post(this.apiUrlgarage, payload);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.http.post(this.apiUrlgarage, payload, { headers });
 
     }
 }
