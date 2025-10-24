@@ -213,8 +213,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  private loadVehicles(assureId: number): void {
-    this.vehiculeService.getVehiculesDataById(assureId).subscribe({
+  private async loadVehicles(assureId: number): Promise<void> {
+    (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data;
         this.vehicles = data.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
@@ -244,7 +244,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   // Navigation entre étapes
-  nextStep(): void {
+  async nextStep(): Promise<void> {
     let vehiculematricule = '';
     let assurance: any;
 
@@ -259,7 +259,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       if (this.vehicleStatus === 'not-rolling') {
         this.showAssuranceStep = true;
 
-        this.vehiculeService.getVehiculesMatricule(vehiculematricule).pipe(
+        (await this.vehiculeService.getVehiculesMatricule(vehiculematricule)).pipe(
           switchMap((vehicle: any) => {
             console.log('Données du véhicule récupérées :', vehicle?.nomAssurence);
             assurance = vehicle?.nomAssurence || '';
@@ -470,18 +470,17 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         contactAssistance: this.email,
         lienConstat: this.constatFile ? this.constatFile.name : '',
         conditionsAcceptees: true,
-        documents: [],
         lieu: this.lieuSinistre,
-        idVehicule: parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0),
+        vehiculeId: parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0),
         statut: 'EN_ATTENTE_TRAITEMENT',
-        assurence: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
+        assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
         input: this.incidentDescription || '',
         etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
       };
 
       console.log('🚀 Soumission du sinistre:', sinistrePayload);
 
-      this.sinistreService.addSinistrePost(sinistrePayload).subscribe({
+      (await this.sinistreService.addSinistrePost(sinistrePayload)).subscribe({
         next: (sinistreResponse: any) => {
           console.log("✅ Sinistre créé :", sinistreResponse);
           this.isSubmitting = false;
@@ -502,40 +501,61 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  private async saveFilesToAssets(): Promise<{ photosUrls: string[] }> {
+  private async saveFilesToAssets(): Promise<
+    { imageName: string; imageType: string; objectStorageUrl: string; }[]
+  > {
     const storage = getStorage();
-    const photosUrls: string[] = [];
-    const baseDir = 'declaration/photos';
+    const uploadedImages: {
+      imageName: string;
+      imageType: string;
+      objectStorageUrl: string;
+    }[] = [];
 
+    const baseDir = 'declaration/photos';
     const photoStepDirs: { [key: number]: string } = {
-      1: 'avant',
-      2: 'plaque',
-      3: 'cote',
-      4: 'degats'
+      1: 'AVANT',
+      2: 'PLAQUE',
+      3: 'COTE',
+      4: 'DEGATS'
     };
 
+    // 🔄 Upload de chaque photo dans Firebase
     for (const step in this.photoSteps) {
       const photos = this.photoSteps[step];
-      const dirName = photoStepDirs[+step];
+      const imageType = photoStepDirs[+step];
 
       for (const photo of photos) {
         const file = photo.file;
-        const firebasePath = `${baseDir}/${dirName}/${file.name}`;
+        const firebasePath = `${baseDir}/${imageType}/${file.name}`;
         const fileRef = ref(storage, firebasePath);
 
         await uploadBytes(fileRef, file);
         const downloadURL = await getDownloadURL(fileRef);
-        photosUrls.push(downloadURL);
+
+        uploadedImages.push({
+          imageName: file.name,
+          imageType,
+          objectStorageUrl: downloadURL
+        });
       }
     }
 
+    // 🔄 Upload du constat s’il existe
     if (this.constatFile) {
       const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
       const constatRef = ref(storage, constatPath);
+
       await uploadBytes(constatRef, this.constatFile);
-      await getDownloadURL(constatRef);
+      const constatUrl = await getDownloadURL(constatRef);
+
+      uploadedImages.push({
+        imageName: this.constatFile.name,
+        imageType: 'CONSTAT',
+        objectStorageUrl: constatUrl
+      });
     }
 
-    return { photosUrls };
+    return uploadedImages;
   }
+
 }

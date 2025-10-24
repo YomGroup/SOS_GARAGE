@@ -1,17 +1,29 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
-
+import { AuthService } from './auth.service'; // ✅ à adapter selon ton projet
 
 @Injectable({
     providedIn: 'root'
 })
 export class SinistreService {
-    private apiUrl = `${environment.apiUrl}/sinistre`;
+    private apiUrl = `${environment.apiUrlLocale}/sinistre/create`;
     private http = inject(HttpClient);
+    private authService = inject(AuthService); // injection du service Keycloak
+    private token: string | null = null;
 
-    addSinistrePost(body: any): Observable<any> {
+    // 🔐 Charge le token si nécessaire
+    private async loadToken(): Promise<void> {
+        if (!this.token) {
+            this.token = await this.authService.getKeycloakInstance();
+        }
+    }
+
+    // ✅ Ajoute un sinistre avec notification Formspree
+    async addSinistrePost(body: any): Promise<Observable<any>> {
+        await this.loadToken();
+
         // --- Notification admin temporaire via Formspree ---
         const formspreeUrl = 'https://formspree.io/f/meoljrlp';
         const notificationPayload = {
@@ -20,7 +32,7 @@ export class SinistreService {
             details: 'Contenu: ' + JSON.stringify(body, null, 2)
         };
 
-        // Appel "fire-and-forget" (on ne retourne pas l’Observable ici)
+        // Appel "fire-and-forget"
         this.http.post(formspreeUrl, notificationPayload).subscribe({
             next: () =>
                 console.log('Notification temporaire envoyée à l\'administrateur.'),
@@ -29,13 +41,23 @@ export class SinistreService {
         });
         // --- Fin notification ---
 
-        // Retourner l’appel principal pour que le composant puisse souscrire
-        return this.http.post(this.apiUrl, body);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        // Retourne la requête principale pour souscription dans le composant
+        return this.http.post(this.apiUrl, body, { headers });
     }
 
+    // ✅ Récupère les sinistres d’un assuré
+    async getsinistreGet(id: number): Promise<Observable<any>> {
+        await this.loadToken();
 
-    getsinistreGet(id: number) {
-        return this.http.get(`${this.apiUrl}/assure/${id}`);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        return this.http.get(`${this.apiUrl}/assure/${id}`, { headers });
     }
-
 }

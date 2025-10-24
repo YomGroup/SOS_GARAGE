@@ -44,8 +44,8 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  loadVehicules(assureId: number): void {
-    this.vehiculeService.getVehiculesDataById(assureId).subscribe({
+  async loadVehicules(assureId: number): Promise<void> {
+    (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any[]) => {
         console.log('Véhicules reçus :', data);
 
@@ -66,7 +66,7 @@ export class HomeComponent implements OnInit {
 
         console.log('Véhicules affichés avec sinistre (max 3) :', this.vehiculesDataLimited);
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Erreur lors de l’appel API véhicules :', err);
       }
     });
@@ -88,8 +88,8 @@ export class HomeComponent implements OnInit {
     return past.toLocaleDateString(); // fallback
   }
 
-  private loadSinistre(): void {
-    this.sinistreService.getsinistreGet(this.assureId).subscribe({
+  private async loadSinistre(): Promise<void> {
+    (await this.sinistreService.getsinistreGet(this.assureId)).subscribe({
       next: (data: any) => {
         if (Array.isArray(data)) {
           this.sinistreData = data;
