@@ -94,7 +94,9 @@ export class UserManagementService {
   // Récupérer tous les réparateurs
   getReparateurs(): Observable<Reparateur[]> {
     console.log('Appel API getReparateurs:', `${this.baseUrl}/reparateurs`);
-    return this.http.get<Reparateur[]>(`${this.baseUrl}/reparateurs`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/reparateurs`).pipe(
+      // Normalize paginated response (content) -> array
+      map((res: any) => Array.isArray(res) ? res as Reparateur[] : (res?.content || []) as Reparateur[]),
       catchError(this.handleError)
     );
   }
@@ -106,7 +108,7 @@ export class UserManagementService {
       assures: this.getAssures(),
       reparateurs: this.getReparateurs()
     }).pipe(
-      map(({ assures, reparateurs }) => {
+  map(({ assures, reparateurs }: any) => {
         console.log('Assurés reçus:', assures);
         console.log('Réparateurs reçus:', reparateurs);
         
@@ -131,9 +133,19 @@ export class UserManagementService {
           });
         }
 
-        // Convertir les réparateurs
-        if (reparateurs && Array.isArray(reparateurs)) {
-          reparateurs.forEach((reparateur) => {
+        // Convertir les réparateurs (support paginated responses and multiple validity field shapes)
+        if (reparateurs) {
+          const list: any[] = Array.isArray(reparateurs) ? reparateurs : (reparateurs?.content || []);
+          list.forEach((reparateur: any) => {
+            // Normalize validity: support isvalids (boolean), isValids (string), isValide, isValid, isvalid
+            const rawValid = reparateur.isvalids ?? reparateur.isValids ?? reparateur.isValide ?? reparateur.isValid ?? reparateur.isvalid;
+            let actif = false;
+            if (typeof rawValid === 'boolean') actif = rawValid;
+            else if (rawValid !== undefined && rawValid !== null) {
+              const s = ('' + rawValid).toLowerCase();
+              actif = s === 'true' || s === 'valide' || s.includes('valide');
+            }
+
             users.push({
               id: reparateur.id, // Utiliser le vrai ID
               nom: reparateur.name,
@@ -142,7 +154,7 @@ export class UserManagementService {
               telephone: reparateur.telephone,
               adresse: reparateur.adresse,
               role: 'Réparateur',
-              actif: reparateur.isvalids
+              actif: actif
             });
           });
         }

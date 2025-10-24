@@ -58,10 +58,11 @@ export class GarageValidationComponent implements OnInit {
   editedCommissionId: number | null = null;
   editedCommissionValue: number | null = null;
 
-  // Pagination properties
-  currentPage: number = 1;
+  // Pagination properties (server-side)
+  currentPage: number = 0; // zero-based for API
   itemsPerPage: number = 6;
   totalPages: number = 0;
+  totalItems: number = 0;
   paginatedGarages: Reparateur[] = [];
 
   constructor(
@@ -83,54 +84,47 @@ export class GarageValidationComponent implements OnInit {
     });
   }
 
-  loadData(): void {
-    this.reparateurService.getAllReparateurs().subscribe({
-      next: (reparateurs) => {
-        this.villesDisponibles = Array.from(new Set(reparateurs.map(r => r.ville).filter(Boolean)));
-        
-        let filtered = reparateurs;
-        if (this.selectedStatus) {
-          if (this.selectedStatus === 'pending') filtered = filtered.filter(r => r.isValids === 'en attente');
-          else if (this.selectedStatus === 'active') filtered = filtered.filter(r => r.isValids === 'valide');
-          else if (this.selectedStatus === 'rejected') filtered = filtered.filter(r => r.isValids === 'rejetée');
-        }
-        if (this.selectedVille) {
-          filtered = filtered.filter(r => r.ville === this.selectedVille);
-        }
-        if (this.searchNom) {
-          filtered = filtered.filter(r => (r.nomDuGarage || '').toLowerCase().includes(this.searchNom.toLowerCase()));
-        }
-        
-        this.dataSource.data = filtered;
-        this.totalPages = Math.ceil(filtered.length / this.itemsPerPage);
-        this.goToPage(1); // Go to first page after loading/filtering
-        this.calculateStats(reparateurs);
+  loadData(page: number = 0): void {
+    // Map local filter values to API filter params if your backend supports them
+    const filters: any = {};
+    if (this.selectedStatus) filters.status = this.selectedStatus;
+    if (this.selectedVille) filters.ville = this.selectedVille;
+    if (this.searchNom) filters.q = this.searchNom;
+
+    this.reparateurService.getReparateursPage(page, this.itemsPerPage, filters).subscribe({
+      next: (resp: any) => {
+        const content = resp?.content || [];
+        this.paginatedGarages = content;
+        this.dataSource.data = content;
+        this.currentPage = resp?.number ?? page;
+        this.totalItems = resp?.totalElements ?? (content.length);
+        this.totalPages = resp?.totalPages ?? Math.ceil(this.totalItems / this.itemsPerPage);
+
+        // villes and stats should be derived from full dataset; if API doesn't provide it, derive from current page
+        this.villesDisponibles = Array.from(new Set(content.map((r: any) => r.ville).filter(Boolean)));
+        this.calculateStats(content);
         this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Erreur lors du chargement des réparateurs:', error);
+        console.error('Erreur lors du chargement des réparateurs (page):', error);
       }
     });
   }
 
-  updatePaginatedGarages() {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedGarages = this.dataSource.data.slice(startIndex, endIndex);
-  }
-
-  goToPage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.updatePaginatedGarages();
+  // Server-driven pagination controls
+  goToPage(pageOneBased: number): void {
+    const pageZeroBased = Math.max(0, pageOneBased - 1);
+    if (pageZeroBased < 0 || (this.totalPages && pageZeroBased >= this.totalPages)) return;
+    // Request the page from API
+    this.loadData(pageZeroBased);
   }
 
   nextPage(): void {
-    this.goToPage(this.currentPage + 1);
+    this.loadData(this.currentPage + 1);
   }
 
   previousPage(): void {
-    this.goToPage(this.currentPage - 1);
+    this.loadData(Math.max(0, this.currentPage - 1));
   }
 
   getPages(): number[] {
@@ -138,12 +132,30 @@ export class GarageValidationComponent implements OnInit {
   }
 
   calculateStats(reparateurs: Reparateur[]): void {
-    this.stats = {
-      enAttente: reparateurs.filter(r => r.isValids === 'en attente').length,
-      valides: reparateurs.filter(r => r.isValids === 'valide').length,
-      rejetes: reparateurs.filter(r => r.isValids === 'rejetée').length,
-      total: reparateurs.length
-    };
+    // Utiliser la normalisation de statut pour couvrir les variantes du backend
+    let enAttente = 0, valides = 0, rejetes = 0;
+    reparateurs.forEach(r => {
+      const s = this.getReparateurStatus(r);
+      if (s === 'en attente') enAttente++;
+      else if (s === 'valide') valides++;
+      else if (s === 'rejeté' || s === 'rejetée' || s === 'rejetes' || s === 'rejet') rejetes++;
+    });
+    this.stats = { enAttente, valides, rejetes, total: reparateurs.length };
+  }
+
+  // Normalise le statut d'un réparateur en une des valeurs: 'en attente' | 'valide' | 'rejeté' | string
+  getReparateurStatus(r: Reparateur): string {
+    if (!r) return 'en attente';
+    const raw = (r as any).isValids ?? (r as any).isvalids ?? (r as any).isValide ?? (r as any).isValid ?? (r as any).isvalid;
+    if (raw === undefined || raw === null) return 'en attente';
+    if (typeof raw === 'boolean') return raw ? 'valide' : 'rejeté';
+    const s = String(raw).toLowerCase().trim();
+    // Mapping commun
+    if (s === 'true' || s.includes('valide') || s.includes('active') || s.includes('valid')) return 'valide';
+    if (s.includes('attente') || s.includes('pending')) return 'en attente';
+    if (s.includes('rej') || s.includes('reject') || s.includes('false')) return 'rejeté';
+    // Retourner la string normalisée si non reconnue
+    return s;
   }
 
   validerReparateur(reparateur: Reparateur): void {

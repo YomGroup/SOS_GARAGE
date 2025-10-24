@@ -100,30 +100,30 @@
           <div class="garage-header">
             <div class="garage-title">
               <h4>{{ reparateur.nomDuGarage }}</h4>
-              <span class="badge pending" *ngIf="reparateur.isValids === 'en attente'">En attente</span>
-              <span class="badge active" *ngIf="reparateur.isValids === 'valide'">Valide</span>
-              <span class="badge rejected" *ngIf="reparateur.isValids === 'rejetée'">Rejeté</span>
+              <span class="badge pending" *ngIf="getReparateurStatus(reparateur) === 'en attente'">En attente</span>
+              <span class="badge active" *ngIf="getReparateurStatus(reparateur) === 'valide'">Valide</span>
+              <span class="badge rejected" *ngIf="getReparateurStatus(reparateur) === 'rejetée'">Rejeté</span>
             </div>
             <div class="garage-actions">
               <!-- Actions pour garages en attente -->
-              <button class="btn btn-sm btn-success" title="Valider" 
-                      (click)="validerReparateur(reparateur)"
-                      *ngIf="reparateur.isValids === 'en attente'">
+        <button class="btn btn-sm btn-success" title="Valider" 
+          (click)="validerReparateur(reparateur)"
+          *ngIf="getReparateurStatus(reparateur) === 'en attente'">
                 <i class="fas fa-check"></i>
               </button>
               <button class="btn btn-sm btn-danger" title="Rejeter" 
-                      (click)="rejeterReparateur(reparateur)"
-                      *ngIf="reparateur.isValids === 'en attente'">
+          (click)="rejeterReparateur(reparateur)"
+          *ngIf="getReparateurStatus(reparateur) === 'en attente'">
                 <i class="fas fa-times"></i>
               </button>
               
               <!-- Actions pour garages validés -->
-              <button class="btn btn-sm btn-warning" title="Suspendre" (click)="suspendreReparateur(reparateur)"
-                      *ngIf="reparateur.isValids === 'valide'">
+        <button class="btn btn-sm btn-warning" title="Suspendre" (click)="suspendreReparateur(reparateur)"
+          *ngIf="getReparateurStatus(reparateur) === 'valide'">
                 <i class="fas fa-pause"></i>
               </button>
               <button class="btn btn-sm btn-danger" title="Supprimer" (click)="supprimerReparateur(reparateur)"
-                      *ngIf="reparateur.isValids === 'valide'">
+          *ngIf="getReparateurStatus(reparateur) === 'valide'">
                 <i class="fas fa-ban"></i>
               </button>
               

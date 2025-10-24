@@ -12,7 +12,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
-import { DossiersService, Dossier as APIDossier } from '../../../../../services/dossiers.service';
+import { DossiersService, Dossier, PaginatedResponse } from '../../../../../services/dossiers.service';
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { filter, debounceTime } from 'rxjs/operators';
@@ -20,7 +20,6 @@ import { forkJoin } from 'rxjs';
 import { DossierViewComponent } from './dossier-view.component';
 import { MissionService } from '../../../../../services/mission.service';
 import { Vehicule } from '../../../../../services/models-api.interface';
-import { Dossier } from '../../../../../services/dossiers.service';
 import { DossierFilterService } from './dossier-filter.service';
 // RxJS
 import { from, of } from 'rxjs';
@@ -264,22 +263,24 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     forkJoin({
       apiDossiers: this.dossiersService.getDossiers(),
       missions: this.missionService.getAllMissions()
-    }).subscribe(({ apiDossiers, missions }) => {
+    }).subscribe(({ apiDossiers, missions }: { apiDossiers: PaginatedResponse<Dossier>; missions: Mission[] }) => {
       this.missions = missions;
+      // use the content array from paginated response
+      const dossiersArray: Dossier[] = apiDossiers.content || [];
       // Traiter chaque dossier pour récupérer les informations de véhicule
-      const dossiersAvecVehicules = apiDossiers.map(d => ({
+      const dossiersAvecVehicules = dossiersArray.map((d: Dossier) => ({
         ...d,
         numero: d.id?.toString() || 'N/A',
         dateCreation: (d as any).dateCreation ? new Date((d as any).dateCreation) : new Date(),
         statut: d.statut ?? (d.conditionsAcceptees ? 'VALIDÉ' : 'EN_ATTENTE'),
-        vehicule: d.vehicule || {},
+        vehicule: (d as any).vehicule || {},
         type: d.type || 'Non spécifié',
-        assurance: d.assurance || 'Non spécifiée'
-      }));
+        assurance: (d as any).assurance || 'Non spécifiée'
+      } as DossierAffichage));
 
       // Initialiser les données avec les informations de véhicule disponibles
       this.dataSource.data = dossiersAvecVehicules;
-      this.totalDossiers = apiDossiers.length;
+      this.totalDossiers = apiDossiers.totalElements ?? dossiersArray.length;
       // Configurer filtre custom pour MatTable (pour la vue tableau et recherche)
       this.dataSource.filterPredicate = (data: DossierAffichage, filter: string) => {
         const f = JSON.parse(filter || '{}');
@@ -292,24 +293,47 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
       };
 
       // Dossiers non traités : pas de mission associée
-      this.nbDossiersNonTraites = apiDossiers.filter(dossier => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
+  this.nbDossiersNonTraites = dossiersArray.filter((dossier: Dossier) => !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)).length;
 
-      const dossiersAvecMission = apiDossiers.filter(dossier => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id));
+  const dossiersAvecMission = dossiersArray.filter((dossier: Dossier) => this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id));
 
       // Dossiers terminés (traités)
-      this.dossiersTraites = dossiersAvecMission.filter(dossier =>
+      this.dossiersTraites = dossiersAvecMission.filter((dossier: Dossier) =>
         this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id && m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase()))
       ).length;
 
       // Dossiers en cours
-      this.nbDossiersEnCours = dossiersAvecMission.length - this.dossiersTraites;
+  this.nbDossiersEnCours = dossiersAvecMission.length - this.dossiersTraites;
 
       // Dossiers commission payée : à adapter selon la logique métier (exemple : statut = 'COMMISSION_PAYEE')
-      this.dossiersCommissionPayee = apiDossiers.filter(dossier => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
+  this.dossiersCommissionPayee = dossiersArray.filter((dossier: Dossier) => dossier.statut && dossier.statut.toLowerCase().includes('commission')).length;
 
       // Récupérer les informations de véhicule pour les dossiers qui n'en ont pas
-      dossiersAvecVehicules.forEach(dossier => {
-        if (dossier.id && (!dossier.vehicule || !dossier.vehicule.marque)) {
+      dossiersAvecVehicules.forEach((dossier: DossierAffichage & { vehiculeId?: number }) => {
+        if (!dossier.id) return;
+
+        const hasVehiculeInfo = !!((dossier as any).vehicule && (dossier as any).vehicule.marque);
+        const vehiculeIdFromDossier = (dossier as any).vehiculeId as number | undefined;
+
+        if (!hasVehiculeInfo && vehiculeIdFromDossier) {
+          // Prefer explicit vehiculeId if provided by the API
+          this.vehiculesEnChargement.add(dossier.id);
+          this.dossiersService.getVehiculeById(vehiculeIdFromDossier).subscribe({
+            next: (vehicule) => {
+              if (vehicule) {
+                dossier.vehicule = vehicule;
+              }
+              this.vehiculesEnChargement.delete(dossier.id);
+              this.cdr.detectChanges();
+            },
+            error: (error) => {
+              console.error(`Erreur lors du chargement du véhicule (by id ${vehiculeIdFromDossier}) pour le dossier ${dossier.id}:`, error);
+              this.vehiculesEnChargement.delete(dossier.id);
+              this.cdr.detectChanges();
+            }
+          });
+        } else if (!hasVehiculeInfo) {
+          // Fallback to searching in cached vehicle list by sinistre id
           this.vehiculesEnChargement.add(dossier.id);
           this.dossiersService.getVehiculeFromSinistreId(dossier.id).subscribe({
             next: (vehicule) => {

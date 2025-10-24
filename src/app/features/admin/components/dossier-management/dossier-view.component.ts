@@ -121,10 +121,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
   ) { }
 
   ngOnChanges(changes: SimpleChanges) {
-    console.log('ngOnChanges triggered with changes:', changes);
-    console.log('Current dossier:', this.dossier);
-    console.log('Current mission:', this.mission);
-    console.log('[DEBUG] dossier.documents:', this.dossier?.documents);
+  // Debug logs removed for production
 
     if (changes['edition'] && this.edition && this.mission) {
       this.lancerEdition();
@@ -135,21 +132,21 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
     // Charger automatiquement les informations de l'assuré si la mission ou le dossier change
     if (changes['mission'] || changes['dossier']) {
-      console.log('Mission or dossier changed, loading data...');
+  // mission or dossier changed — load related data
       this.chargerInformationsAssure();
       this.chargerVehiculeSinistre();
     }
 
     // Si on a un dossier mais pas de mission, forcer le chargement des données
     if (this.dossier && !this.mission) {
-      console.log('Dossier without mission detected, loading data...');
+  // dossier without mission — loading related data
       this.chargerInformationsAssure();
       this.chargerVehiculeSinistre();
     }
   }
 
   ngOnInit(): void {
-    console.log('ngOnInit - Initializing component');
+  // component init
     this.chargerReparateursValides();
     this.commissionStatutEdit = this.mission?.commissionStatut || '';
     this.commissionStatutOriginal = this.mission?.commissionStatut || '';
@@ -242,12 +239,12 @@ export class DossierViewComponent implements OnChanges, OnInit {
       this.missionEdit.commissionPourcentage
     );
 
-    console.log('Données à envoyer:', missionUpdate);
+  // mission update prepared
 
     this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
       next: (updatedMission) => {
 
-        console.log('Mission mise à jour avec succès:', updatedMission);
+  // mission updated successfully
         this.editionEnCours = false;
         this.missionEdit = { documentsAssurance: [] };
         this.missionUpdated.emit(updatedMission);
@@ -275,13 +272,19 @@ export class DossierViewComponent implements OnChanges, OnInit {
 
   chargerReparateursValides() {
     this.reparateurService.getAllReparateurs().subscribe({
-      next: (reps) => {
-        console.log('Réparateurs reçus:', reps); // 👈 Inspecte ici
+      next: (reps: any) => {
+        // Supporter les réponses paginées ou directes
+        const list: any[] = Array.isArray(reps) ? reps : (reps?.content || []);
 
-        this.reparateursValides = reps.filter(r => {
-          console.log('Champ isValids:', r.isValids); // 👈 Que contient ce champ ?
-          return r.isValids?.toLowerCase() === 'valide';
+        this.reparateursValides = list.filter((r: any) => {
+          // Le backend peut fournir différents champs/typos : isValids (string), isvalids (boolean), isValide, etc.
+          const raw = r.isValids ?? r.isvalids ?? r.isValide ?? r.isValid ?? r.isvalid;
+          if (raw === undefined || raw === null) return false;
+          if (typeof raw === 'boolean') return raw === true;
+          const s = ('' + raw).toLowerCase();
+          return s === 'valide' || s === 'true' || s.includes('valide');
         });
+  // reparateurs loaded and filtered
       },
       error: (err) => {
         console.error('Erreur API réparateurs:', err);
@@ -815,9 +818,10 @@ export class DossierViewComponent implements OnChanges, OnInit {
         typeMine: dossier.vehicule.typeMine || 'Type mine non spécifié',
         version: dossier.vehicule.version || 'Version non spécifiée',
         carteGrise: dossier.vehicule.carteGrise || 'Carte grise non spécifiée'
-
       };
     }
+
+    
 
     // Si pas de véhicule dans le dossier mais qu'on a un véhiculeSinistre chargé
     if (this.vehiculeSinistre) {
@@ -855,6 +859,24 @@ export class DossierViewComponent implements OnChanges, OnInit {
       immatriculation: 'Immatriculation non spécifiée',
       assurance: 'Assurance non spécifiée'
     };
+  }
+
+  // Normalise les images du sinistre : supporte l'ancien champ imgUrl: string[]
+  // et le nouveau champ images: { objectStorageUrl }[]
+  getSinistreImageUrls(): string[] {
+    const s = this.sinistre || this.dossier || this.mission?.sinistre;
+    if (!s) return [];
+    // Prioritise le nouveau champ images[].objectStorageUrl
+    if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
+      return (s as any).images
+        .map((i: any) => i?.objectStorageUrl)
+        .filter((u: any) => typeof u === 'string' && u.length > 0);
+    }
+    // Fallback vers l'ancien champ imgUrl
+    if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
+      return (s as any).images.filter((u: any) => typeof u === 'string' && u.length > 0);
+    }
+    return [];
   }
 
   public getStatutAvancementLabel(statut: string | undefined): string {

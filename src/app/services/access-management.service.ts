@@ -111,7 +111,7 @@ export class AccessManagementService {
     const reparateurs$ = this.http.get<any[]>(`${this.baseUrl}/reparateurs`, { context: ctx });
 
     return forkJoin({ assures: assures$, reparateurs: reparateurs$ }).pipe(
-      map(({ assures, reparateurs }) => {
+      map(({ assures, reparateurs }: any) => {
         const users: UserAccess[] = [];
 
         if (Array.isArray(assures)) {
@@ -130,20 +130,28 @@ export class AccessManagementService {
           }
         }
 
-        if (Array.isArray(reparateurs)) {
-          for (const reparateur of reparateurs) {
-            users.push({
-              id: reparateur.id,
-              nom: reparateur.name,
-              prenom: reparateur.prenom,
-              email: reparateur.email,
-              role: 'Réparateur',
-              derniereConnexion: reparateur.lastLoginAt ? new Date(reparateur.lastLoginAt).toLocaleString() : new Date().toLocaleString(),
-              actif: !!reparateur.isvalids,
-              telephone: reparateur.telephone,
-              adresse: reparateur.adresse
-            });
+        // reparateurs may be an array or a paginated response
+        const reparateursList: any[] = Array.isArray(reparateurs) ? reparateurs : (reparateurs?.content || []);
+        for (const reparateur of reparateursList) {
+          const rawValid = reparateur.isvalids ?? reparateur.isValids ?? reparateur.isValide ?? reparateur.isValid ?? reparateur.isvalid;
+          let actif = false;
+          if (typeof rawValid === 'boolean') actif = rawValid;
+          else if (rawValid !== undefined && rawValid !== null) {
+            const s = ('' + rawValid).toLowerCase();
+            actif = s === 'true' || s === 'valide' || s.includes('valide');
           }
+
+          users.push({
+            id: reparateur.id,
+            nom: reparateur.name,
+            prenom: reparateur.prenom,
+            email: reparateur.email,
+            role: 'Réparateur',
+            derniereConnexion: reparateur.lastLoginAt ? new Date(reparateur.lastLoginAt).toLocaleString() : new Date().toLocaleString(),
+            actif: actif,
+            telephone: reparateur.telephone,
+            adresse: reparateur.adresse
+          });
         }
 
         return users;

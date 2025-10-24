@@ -144,7 +144,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
       const search = filter.toLowerCase();
       const matchStatut = this.filtreStatut ? data.statut === this.filtreStatut : true;
       const matchText =
-        data.sinistre?.vehicule.immatriculation?.includes(search) ||
+        data.sinistre?.vehicule?.immatriculation?.toLowerCase().includes(search) ||
         data.statut.toLowerCase().includes(search) ||
         data.devis.toString().includes(search) ||
         data.factureFinale.toString().includes(search);
@@ -199,7 +199,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
             });
 
             // Charger les dossiers non-traités
-            this.dossiersService.getDossiers().subscribe({
+            this.dossiersService.getDossiersSimple().subscribe({
               next: (dossiers: Dossier[]) => {
                 // Filtrer les dossiers qui n'ont pas de mission associée
                 this.dossiersNonTraites = dossiers.filter(dossier =>
@@ -423,7 +423,7 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     if (!query) return true;
     const q = this.normalizeString(query);
     const veh = this.getVehiculeForMission(m) || (m.sinistre?.vehicule as any) || {};
-    const immat = this.normalizeString(veh.immatriculation || m.sinistre?.vehicule.immatriculation || '');
+  const immat = this.normalizeString(veh.immatriculation || m.sinistre?.vehicule?.immatriculation || '');
     const marque = this.normalizeString(veh.marque || '');
     const modele = this.normalizeString(veh.modele || '');
     const assure = this.normalizeString(m.assureName || '');

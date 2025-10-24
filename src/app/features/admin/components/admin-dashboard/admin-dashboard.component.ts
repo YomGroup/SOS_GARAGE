@@ -101,10 +101,13 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private loadData(): void {
-    this.adminService.getAllVehicules().subscribe({
-      next: (vehicules) => {
-        this.stats.totalVehicules = vehicules.length;
-        this.recentVehicules = vehicules.slice(0, 3);
+    // Utiliser une grande taille de page pour récupérer tous les véhicules pour les statistiques
+    this.adminService.getAllVehicules(0, 1000).subscribe({
+      next: (response: any) => {
+        // response might be a PaginatedResponse or already an array
+        const vehicules: any[] = Array.isArray(response) ? response : (response?.content || []);
+        this.stats.totalVehicules = (response && !Array.isArray(response)) ? (response.totalElements || vehicules.length) : vehicules.length;
+        this.recentVehicules = Array.isArray(vehicules) ? vehicules.slice(0, 3) : [];
         this.updateRecentActivity('vehicule', vehicules);
         this.cdr.detectChanges();
       },
@@ -112,10 +115,13 @@ export class AdminDashboardComponent implements OnInit {
         console.error('Erreur lors du chargement des véhicules:', error);
       }
     });
-    this.adminService.getSinistre().subscribe({
-      next: (sinistres) => {
-        this.stats.totalSinistres = sinistres.length;
-        this.recentSinistres = sinistres.slice(0, 3);
+    
+    // Utiliser une grande taille de page pour récupérer tous les sinistres pour les statistiques
+    this.adminService.getSinistre(0, 1000).subscribe({
+      next: (response: any) => {
+        const sinistres: any[] = Array.isArray(response) ? response : (response?.content || []);
+        this.stats.totalSinistres = (response && !Array.isArray(response)) ? (response.totalElements || sinistres.length) : sinistres.length;
+        this.recentSinistres = Array.isArray(sinistres) ? sinistres.slice(0, 3) : [];
         this.pendingSinistresCount = sinistres.filter(s => s.isvalid === false).length;
         this.updateRecentActivity('sinistre', sinistres);
         this.cdr.detectChanges();
@@ -137,10 +143,11 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
     this.reparateurService.getAllReparateurs().subscribe({
-      next: (reparateurs) => {
+      next: (reparateursResponse: any) => {
+        const reparateurs: any[] = Array.isArray(reparateursResponse) ? reparateursResponse : (reparateursResponse?.content || []);
         this.stats.totalReparateurs = reparateurs.length;
         this.recentReparateurs = reparateurs.slice(0, 3);
-        this.pendingReparateursCount = reparateurs.filter(r => (r.isValids + '').toLowerCase() === 'false').length;
+        this.pendingReparateursCount = reparateurs.filter(r => ((r.isValids || r.isvalid || r.isValide) + '').toLowerCase() === 'false').length;
         this.updateRecentActivity('reparateur', reparateurs);
         this.cdr.detectChanges();
       },

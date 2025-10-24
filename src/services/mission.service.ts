@@ -24,15 +24,17 @@ export class MissionService {
   constructor(private http: HttpClient, private messageService: MessageService) { }
 
   getAllMissions(): Observable<Mission[]> {
-    const now = Date.now();
-    if (this.missionsCache && now - this.missionsCache.addedAt < this.missionsCache.ttl) {
-      return of(this.missionsCache.data);
-    }
-    return this.http.get<Mission[]>(`${this.apiUrl}/missions`).pipe(
-      tap(data => (this.missionsCache = { data, addedAt: Date.now(), ttl: this.ttlMissionsMs })),
-      shareReplay({ bufferSize: 1, refCount: true })
-    );
+  const now = Date.now();
+  if (this.missionsCache && now - this.missionsCache.addedAt < this.missionsCache.ttl) {
+    return of(this.missionsCache.data);
   }
+
+  return this.http.get<{ content: Mission[] }>(`${this.apiUrl}/missions`).pipe(
+    map(response => response.content),
+    tap(data => (this.missionsCache = { data, addedAt: Date.now(), ttl: this.ttlMissionsMs })),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
+}
 
   getAllMissionsByReparateur(reparateurId: number): Observable<Mission[]> {
     return this.http.get<Mission[]>(`${this.apiUrl}/reparateurs/${reparateurId}`);

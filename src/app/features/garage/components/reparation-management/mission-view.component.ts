@@ -1143,13 +1143,24 @@ export class MissionViewComponent implements OnChanges {
 
   
   openImageModal(index: number): void {
-    this.currentImages = this.mission?.sinistre?.imgUrl || [];
-    this.currentImageIndex = index;
+    // Normalise les images du sinistre (supporte images[].objectStorageUrl et imgUrl[])
+    const images = this.getSinistreImageUrls();
+    // si pas d'images sur le sinistre, fallback sur photosVehicule si disponible
+    if ((!images || images.length === 0) && Array.isArray(this.mission?.photosVehicule) && this.mission!.photosVehicule!.length > 0) {
+      this.currentImages = this.mission!.photosVehicule!;
+    } else {
+      this.currentImages = images;
+    }
+    this.currentImageIndex = Math.max(0, Math.min(index, this.currentImages.length - 1));
+    this.currentImageUrl = this.currentImages[this.currentImageIndex] || '';
     this.showImageModal = true;
   }
   
   closeImageModal(): void {
     this.showImageModal = false;
+    this.currentImages = [];
+    this.currentImageIndex = 0;
+    this.currentImageUrl = '';
   }
   
   prevImage(): void {
@@ -1162,5 +1173,35 @@ export class MissionViewComponent implements OnChanges {
     if (this.currentImageIndex < this.currentImages.length - 1) {
       this.currentImageIndex++;
     }
+  }
+
+  // Retourne toujours un tableau d'URLs string pour le sinistre
+  getSinistreImageUrls(): string[] {
+    const collected: string[] = [];
+
+    const extractFrom = (s: any) => {
+      if (!s) return;
+      // nouveau format images: [{ objectStorageUrl, ... }]
+      if (Array.isArray(s.images) && s.images.length > 0) {
+        s.images.forEach((it: any) => {
+          const url = it?.objectStorageUrl || it?.url || null;
+          if (typeof url === 'string' && url.length > 0) collected.push(url);
+        });
+      }
+      // ancien format imgUrl: string[]
+      if (Array.isArray(s.imgUrl) && s.imgUrl.length > 0) {
+        s.imgUrl.forEach((u: any) => {
+          if (typeof u === 'string' && u.length > 0) collected.push(u);
+        });
+      }
+    };
+
+    // Prendre d'abord les images liées au dossier (comme dans dossier-view),
+    // puis fusionner avec celles éventuellement présentes dans mission.sinistre.
+    extractFrom(this.dossier);
+    extractFrom(this.mission?.sinistre);
+
+    // Dédupliquer et retourner
+    return Array.from(new Set(collected));
   }
 } 

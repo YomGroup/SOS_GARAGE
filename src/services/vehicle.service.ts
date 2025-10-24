@@ -164,8 +164,8 @@ export class VehicleService implements OnInit {
     }
 
 
-    getVehiculesPage(page: number, limit: number) {
-        return this.http.get(`${this.apiUrl}?page=${page}&limit=${limit}`);
+    getVehiculesPage(page: number = 0, size: number = 10) {
+        return this.http.get(`${this.apiUrl}?page=${page}&size=${size}`);
     }
 
 }

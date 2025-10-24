@@ -40,6 +40,7 @@ export class VehiculesComponent implements OnInit, OnDestroy {
   // Pagination
   currentPage = 1;
   pageSize = 12;
+  totalVehiclesFromServer = 0;
   get totalVehicles(): number {
     return this.filteredVehicles.length;
   }
@@ -70,9 +71,20 @@ export class VehiculesComponent implements OnInit, OnDestroy {
 
   loadVehiclesPage(): void {
     this.isLoadingVehicules = true;
-    this.vehiculeService.getVehiculesPage(1, 9999).subscribe({ // Fetch all vehicles
+    // Utiliser la pagination côté serveur avec une grande taille pour récupérer tous les véhicules
+    this.vehiculeService.getVehiculesPage(0, 1000).subscribe({ // Fetch all vehicles
       next: (res: any) => {
-        this.vehicles = Array.isArray(res) ? res : (res.data || []);
+        // Gérer la nouvelle structure de réponse avec pagination
+        if (res.content) {
+          this.vehicles = res.content;
+          this.totalVehiclesFromServer = res.totalElements;
+        } else if (Array.isArray(res)) {
+          this.vehicles = res;
+          this.totalVehiclesFromServer = res.length;
+        } else {
+          this.vehicles = res.data || [];
+          this.totalVehiclesFromServer = this.vehicles.length;
+        }
         this.cdr.detectChanges();
       },
       error: (err) => {

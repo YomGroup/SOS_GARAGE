@@ -34,6 +34,15 @@ export interface Dossier {
   input?: string;
 }
 
+export interface PaginatedResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  empty: boolean;
+}
+
 
 @Injectable({
   providedIn: 'root'
@@ -45,7 +54,10 @@ export class DossiersService {
 
   constructor(private http: HttpClient) {
     this.allVehicules$ = this.refreshVehicules$.pipe(
-      switchMap(() => this.http.get<Vehicule[]>(`${environment.apiUrl}/vehicule/all`)),
+      // The backend may return either an array or a paginated response { content: Vehicule[] }
+      switchMap(() => this.http.get<any>(`${environment.apiUrl}/vehicule/all`).pipe(
+        map((res: any) => Array.isArray(res) ? res as Vehicule[] : (res?.content || []) as Vehicule[])
+      )),
       shareReplay(1)
     );
   }
@@ -54,7 +66,13 @@ export class DossiersService {
     this.refreshVehicules$.next(undefined);
   }
 
-  getDossiers(): Observable<Dossier[]> {
+  // Méthode avec pagination
+  getDossiers(page: number = 0, size: number = 10): Observable<PaginatedResponse<Dossier>> {
+    return this.http.get<PaginatedResponse<Dossier>>(`${this.apiUrl}/find_by_page?page=${page}&size=${size}`);
+  }
+
+  // Méthode sans pagination (pour compatibilité)
+  getDossiersSimple(): Observable<Dossier[]> {
     return this.http.get<Dossier[]>(this.apiUrl);
   }
 
@@ -86,11 +104,13 @@ export class DossiersService {
   }
 
   getVehiculeBySinistreId(sinistreId: number): Observable<Vehicule> {
-    return this.http.get<Vehicule>(`${this.apiUrl}/${sinistreId}/vehicule`);
+    // The backend does not expose a `/sinistre/{id}/vehicule` route. Use cached lookup instead.
+    return this.getVehiculeFromSinistreId(sinistreId) as unknown as Observable<Vehicule>;
   }
 
   getVehiculeById(vehiculeId: number): Observable<Vehicule> {
-    return this.http.get<Vehicule>(`${this.apiUrl}/vehicules/${vehiculeId}`);
+    // Vehicle endpoint is under `/vehicules/{id}` at the API root
+    return this.http.get<Vehicule>(`${environment.apiUrl}/vehicule/${vehiculeId}`);
   }
 
   // Supprimer un dossier 
