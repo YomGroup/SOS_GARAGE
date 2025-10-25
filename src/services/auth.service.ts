@@ -31,9 +31,9 @@ export interface Assure {
 })
 export class AuthService {
     private decodedToken: DecodedToken | null = null;
-    private apiUrl = `${environment.apiUrl}/assure`;
+    private apiUrl = `${environment.apiUrl}/assure/create`;
 
-    private apiUrlgarage = `${environment.apiUrl}/reparateurs`;
+    private apiUrlgarage = `${environment.apiUrl}/reparateurs/create`;
     private http = inject(HttpClient);
 
     constructor(private keycloakService: KeycloakService) { }
