@@ -91,9 +91,9 @@ export class VehiculesComponent implements OnInit {
   }
 
   // Dans ta classe
-  loadVehicles(assureId: number): void {
+  async loadVehicles(assureId: number): Promise<void> {
     console.log('Chargement des véhicules pour l’assure ID :', assureId);
-    this.vehiculeService.getVehiculesDataById(assureId).subscribe({
+    (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
         this.vehicles = data;
         console.log('Véhicules reçus :', this.vehicles);
@@ -182,7 +182,7 @@ export class VehiculesComponent implements OnInit {
         this.vehicles = vehicles;
       });
     }*/
-  scrapperVehicules() {
+  async scrapperVehicules() {
     const immat = this.newVehicle.immatriculation?.trim();
     if (!immat) return;
 
@@ -198,7 +198,7 @@ export class VehiculesComponent implements OnInit {
       }
     }, 5000);
 
-    this.vehiculeService.getVehiculesData(immat).subscribe({
+    (await this.vehiculeService.getVehiculesData(immat)).subscribe({
       next: (data: any) => {
 
         this.newVehicle.modele = data.AWN_modele || '';
@@ -315,7 +315,7 @@ export class VehiculesComponent implements OnInit {
     };
 
     if (this.isEditMode && this.newVehicle.id) {
-      this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload).subscribe({
+      (await this.vehiculeService.updateVehiculesPost(parseInt(this.newVehicle.id), payload)).subscribe({
         next: (data) => {
           this.loadVehicles(this.assureId);
           this.vehiculeService.refreshVehicules(this.assureId);
@@ -338,36 +338,38 @@ export class VehiculesComponent implements OnInit {
       });
     } else {
       // Mode ajout
-      this.vehiculeService.addVehiculesPost(payload).subscribe({
-        next: (data) => {
-          this.successMessage = 'Véhicule ajouté avec succès !';
-          this.showSuccessToast = true;   // 🔥 déclenche l’affichage du toast
-          setTimeout(() => this.showSuccessToast = false, 5000);
-          this.vehicles = [...this.vehicles, data as Vehicle];  // laisse le temps au backend de commiter l’ajout
+      (await
+        // Mode ajout
+        this.vehiculeService.addVehiculesPost(payload)).subscribe({
+          next: (data) => {
+            this.successMessage = 'Véhicule ajouté avec succès !';
+            this.showSuccessToast = true;   // 🔥 déclenche l’affichage du toast
+            setTimeout(() => this.showSuccessToast = false, 5000);
+            this.vehicles = [...this.vehicles, data as Vehicle];  // laisse le temps au backend de commiter l’ajout
 
-          this.cancelAdd();
-          finalCallback();
+            this.cancelAdd();
+            finalCallback();
 
-        },
-        error: (err) => {
-          console.error('Erreur lors de l’ajout du véhicule :', err.error.message);
+          },
+          error: (err) => {
+            console.error('Erreur lors de l’ajout du véhicule :', err.error.message);
 
-          let msg = 'Une erreur s\'est produite. Le véhicule existe déjà.';
+            let msg = 'Une erreur s\'est produite. Le véhicule existe déjà.';
 
-          // Vérifier le message d'erreur si dispo
-          const backendMessage = err?.error?.message || '';
+            // Vérifier le message d'erreur si dispo
+            const backendMessage = err?.error?.message || '';
 
-          if (backendMessage.includes('duplicate') || backendMessage.includes('existe déjà')) {
-            msg = 'Ce véhicule est déjà enregistré par un autre utilisateur.';
+            if (backendMessage.includes('duplicate') || backendMessage.includes('existe déjà')) {
+              msg = 'Ce véhicule est déjà enregistré par un autre utilisateur.';
+            }
+
+            this.scrapErrorMessage = msg;
+            showError(msg);
+            finalCallback();
           }
 
-          this.scrapErrorMessage = msg;
-          showError(msg);
-          finalCallback();
-        }
 
-
-      });
+        });
     }
   }
 
@@ -477,13 +479,13 @@ export class VehiculesComponent implements OnInit {
     this.selectedVehicle = vehicle;
     this.showAssuranceSelection = true;
   }
-  deleteVehicle(id: string) {
+  async deleteVehicle(id: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {
       // Suppression optimiste - on retire immédiatement le véhicule de la liste
       const index = this.vehicles.findIndex(v => v.id === id);
       if (index !== -1) {
         this.vehicles.splice(index, 1);
-      } this.vehiculeService.deleteVehiculesPost(parseInt(id)).subscribe({
+      } (await this.vehiculeService.deleteVehiculesPost(parseInt(id))).subscribe({
         next: (data) => {
           console.log('Véhicule supprimé avec succès :', data);
           this.loadVehicles(this.assureId);

@@ -1,6 +1,6 @@
 import { inject, Injectable, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, tap } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { environment } from '../environments/environment';
 import { AuthService } from './auth.service';
 
@@ -41,54 +41,110 @@ export interface TimelineEvent {
     providedIn: 'root'
 })
 export class VehicleService implements OnInit {
-    private apiUrl = `${environment.apiUrl}/vehicule/all`;
+    private apiUrl = `${environment.apiUrlLocale}/vehicule/all`;
     private api = `${environment.apiUrlLocale}/vehicule`;
-    private authService = inject(AuthService);
 
     token = '';
-    private apiUrlAdd = `${environment.apiUrl}/vehicule`;
-    private apiUrlData = `${environment.apiUrl}/vehicule`;
+    private apiUrlAdd = `${environment.apiUrlLocale}/vehicule`;
+    private apiUrlData = `${environment.apiUrlLocale}/vehicule`;
     private http = inject(HttpClient);
     private vehiculesSubject = new BehaviorSubject<any[]>([]);
     vehicules$ = this.vehiculesSubject.asObservable();
+    private authService = inject(AuthService);
+
 
     ngOnInit(): void {
         this.authService.getKeycloakInstance().then(token => {
             this.token = token;
+            console.log('Token set in VehicleService:', this.token);
         });
     }
-    getAllVehiculesPost(body: any = {}) {
-        return this.http.get(this.apiUrl, body);
+    async loadToken(): Promise<void> {
+        if (!this.token) {
+            this.token = await this.authService.getKeycloakInstance();
+        }
     }
-    getVehiculesData(immatriculation: string) {
+
+    getAllVehiculesPost(body: any = {}): Observable<any> {
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.http.get<any>(this.apiUrl, { headers, params: body }).pipe(
+            map(response => response.content) // récupère uniquement la liste des véhicules
+        );
+    }
+    async getVehiculesData(immatriculation: string) {
+        await this.loadToken(); // garantit que le token est chargé avant l’appel
+
         const url = `${this.apiUrlData}/scraper/${encodeURIComponent(immatriculation)}`;
-        return this.http.get(url);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        return this.http.get(url, { headers });
     }
-    getVehiculesMatricule(immatriculation: string) {
+
+
+    async getVehiculesMatricule(immatriculation: string) {
+        await this.loadToken();
+
         const url = `${this.apiUrlData}/matricule/${encodeURIComponent(immatriculation)}`;
-        return this.http.get(url);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        return this.http.get(url, { headers });
     }
-    getVehiculesDataById(id: number) {
-        return this.http.get<Vehicle[]>(`${this.apiUrlAdd}/assure/${id}`).pipe(
+
+    async getVehiculesDataById(id: number) {
+        await this.loadToken();
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        return this.http.get<Vehicle[]>(`${this.apiUrlAdd}/assure/${id}`, { headers }).pipe(
             tap(data => this.vehiculesSubject.next(data))
         );
     }
 
-    refreshVehicules(id: number) {
-        this.getVehiculesDataById(id).subscribe((vehicles) => {
+    async refreshVehicules(id: number) {
+        (await this.getVehiculesDataById(id)).subscribe((vehicles) => {
             this.vehiculesSubject.next(vehicles);
         });
     }
 
+    async addVehiculesPost(body: any = {}) {
+        await this.loadToken();
 
-    addVehiculesPost(body: any = {}) {
-        return this.http.post(this.apiUrlAdd, body);
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.http.post(this.apiUrlAdd, body, { headers });
     }
-    updateVehiculesPost(id: number, body: any) {
-        return this.http.put(`${this.apiUrlAdd}/${id}`, body);
+
+    async updateVehiculesPost(id: number, body: any) {
+        await this.loadToken();
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`,
+            'Content-Type': 'application/json'
+        });
+
+        return this.http.put(`${this.apiUrlAdd}/${id}`, body, { headers });
     }
+
     listAssuranceVehicules(body: any = {}) {
-        return this.http.get(`${this.apiUrlAdd}/listeAssurance`);
+        return this.http.get(`${this.api}/listeAssurance`, {
+            headers: {
+                Authorization: `Bearer ${this.token}`
+            }
+        });
+        //return this.http.get(`${this.api}/listeAssurance`);
     }
     listAssuranceVehiculesNumero(token: any) {
         return this.http.get(`${this.api}/listeAssurance`, {
@@ -97,9 +153,16 @@ export class VehicleService implements OnInit {
             }
         });
     }
-    deleteVehiculesPost(id: number) {
-        return this.http.delete(`${this.apiUrlAdd}?id=${id}`);
+    async deleteVehiculesPost(id: number) {
+        await this.loadToken();
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        return this.http.delete(`${this.apiUrlAdd}?id=${id}`, { headers });
     }
+
 
     getVehiculesPage(page: number = 0, size: number = 10) {
         return this.http.get(`${this.apiUrl}?page=${page}&size=${size}`);
