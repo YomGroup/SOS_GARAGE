@@ -95,7 +95,7 @@ export class VehiculesComponent implements OnInit {
     console.log('Chargement des véhicules pour l’assure ID :', assureId);
     (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
-        this.vehicles = data;
+        this.vehicles = data.content;
         console.log('Véhicules reçus :', this.vehicles);
       },
       error: (err) => {

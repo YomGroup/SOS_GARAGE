@@ -65,12 +65,13 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   token = '';
   numeroAssurance = '';
 
-  photoSteps: any = {
-    1: [], // Photos d'ensemble
-    2: [], // Plaque immatriculation
-    3: [], // Numéro de série
-    4: []  // Zones endommagées
-  };
+  photoSteps: { [step: number]: { url: string; file: File }[] } = {
+  1: [],
+  2: [],
+  3: [],
+  4: []
+};
+
   typeassurance: string[] = [
     "STATIONNEMENT_IMPACT",
     "VANDALISME",
@@ -214,10 +215,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   private async loadVehicles(assureId: number): Promise<void> {
+    console.log('test api vehicule kkkkkkkkkkkkk');
     (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
-        this.vehiclesAll = data;
-        this.vehicles = data.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
+        this.vehiclesAll = data.content;
+        this.vehicles = data.content.map((vehicule: any) => vehicule.marque + '(' + vehicule.immatriculation + ')');
       },
       error: (err) => {
         console.error('Erreur lors de l\'appel API :', err);
@@ -463,20 +465,47 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.isSubmitting = true;
 
     try {
-      const savedFiles = await this.saveFilesToAssets();
+      //const savedFiles = await this.saveFilesToAssets();
 
-      const sinistrePayload = {
-        type: this.selectedTypeAssurance,
-        contactAssistance: this.email,
-        lienConstat: this.constatFile ? this.constatFile.name : '',
-        conditionsAcceptees: true,
-        lieu: this.lieuSinistre,
-        vehiculeId: parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0),
-        statut: 'EN_ATTENTE_TRAITEMENT',
-        assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
-        input: this.incidentDescription || '',
-        etatvehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
-      };
+      const vehiculeid=parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0);
+
+      const allFiles: File[] = Object.values(this.photoSteps).flat().map(item => item.file);
+
+      var images2;
+
+      try {
+       const images = await this.sinistreService.uploadImages(vehiculeid + '', allFiles);
+       console.log('Upload réussi', images);
+       images2 = images;
+      } catch (err) {
+       console.error('Erreur upload images', err);
+      }
+
+const imageObjects = (images2 || []).map((url: string, index: number) => ({
+  imageName: url.split('/').pop() || `image_${index}.jpg`, // extrait le nom du fichier
+  imageType: 'AVANT', // tu peux définir une méthode utilitaire pour le type
+  objectStorageUrl: url, // l'URL réelle
+}));
+
+
+
+
+      console.log({images2});
+
+
+  const sinistrePayload = {
+  type: this.selectedTypeAssurance,
+  contactAssistance: this.email,
+  lienConstat: this.constatFile ? this.constatFile.name : '',
+  conditionsAcceptees: true,
+  lieu: this.lieuSinistre,
+  vehiculeId: vehiculeid,
+  assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '', // String
+  description: this.incidentDescription || '',
+  etatVehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+  images: imageObjects,
+};
+
 
       console.log('🚀 Soumission du sinistre:', sinistrePayload);
 

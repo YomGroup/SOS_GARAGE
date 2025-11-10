@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { Observable } from 'rxjs';
+import { lastValueFrom, Observable } from 'rxjs';
 import { AuthService } from './auth.service'; // ✅ à adapter selon ton projet
 
 @Injectable({
@@ -20,10 +20,27 @@ export class SinistreService {
         }
     }
 
+    async uploadImages(id: string, files: File[]): Promise<any> {
+       const formData = new FormData();
+       files.forEach(file => formData.append('images', file));
+
+       await this.loadToken();
+
+       const headers = new HttpHeaders({
+    'Authorization': `Bearer ${this.token}`
+      });
+
+    return lastValueFrom(
+    this.http.post(`${environment.apiUrlLocale}/image/upload/${id}`, formData, { headers }));
+   }
+
+
+
     // ✅ Ajoute un sinistre avec notification Formspree
     async addSinistrePost(body: any): Promise<Observable<any>> {
         await this.loadToken();
 
+        /*
         // --- Notification admin temporaire via Formspree ---
         const formspreeUrl = 'https://formspree.io/f/meoljrlp';
         const notificationPayload = {
@@ -40,6 +57,7 @@ export class SinistreService {
                 console.error('Erreur notification Formspree:', err)
         });
         // --- Fin notification ---
+        */
 
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.token}`,

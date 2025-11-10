@@ -8,5 +8,5 @@ export const environment = {
   // Configuration API
   apiUrl: 'https://prolific-quietude-production.up.railway.app/V1/api',
   //apiUrl: 'https://sosmongarage-production-d435.up.railway.app/V1/api',
-  apiUrlLocale: 'https://prolific-quietude-production.up.railway.app/V1/api/'
+  apiUrlLocale: 'https://prolific-quietude-production.up.railway.app/V1/api'
 }; 

@@ -105,7 +105,7 @@ export class VehicleService implements OnInit {
             'Authorization': `Bearer ${this.token}`
         });
 
-        return this.http.get<Vehicle[]>(`${this.apiUrlAdd}/assure/${id}`, { headers }).pipe(
+        return this.http.get<any>(`${this.apiUrlAdd}/assure/${id}`, { headers }).pipe(
             tap(data => this.vehiculesSubject.next(data))
         );
     }
@@ -134,6 +134,8 @@ export class VehicleService implements OnInit {
             'Authorization': `Bearer ${this.token}`,
             'Content-Type': 'application/json'
         });
+
+        console.log('test api vehicule dddddddddddddddddd');
 
         return this.http.put(`${this.apiUrlAdd}/${id}`, body, { headers });
     }
