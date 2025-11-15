@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { lastValueFrom, Observable } from 'rxjs';
+import { from, lastValueFrom, Observable, switchMap } from 'rxjs';
 import { AuthService } from './auth.service'; // ✅ à adapter selon ton projet
 
 @Injectable({
@@ -9,6 +9,7 @@ import { AuthService } from './auth.service'; // ✅ à adapter selon ton projet
 })
 export class SinistreService {
     private apiUrl = `${environment.apiUrlLocale}/sinistre/create`;
+    private apiUrl2 = `${environment.apiUrlLocale}/sinistre`;
     private http = inject(HttpClient);
     private authService = inject(AuthService); // injection du service Keycloak
     private token: string | null = null;
@@ -78,4 +79,18 @@ export class SinistreService {
 
         return this.http.get(`${this.apiUrl}/assure/${id}`, { headers });
     }
+
+    getDashboard(assureId: number) {
+  return from(this.loadToken()).pipe(
+    switchMap(() => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${this.token}`
+      });
+
+      return this.http.get<any>(`${this.apiUrl2}/getDashboard/${assureId}`, { headers });
+    })
+  );
+}
+
+
 }
