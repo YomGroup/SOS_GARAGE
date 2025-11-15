@@ -1,8 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, from, switchMap } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { get } from 'http';
+import { AuthService } from './auth.service';
 
 export interface Vehicule {
     id: number;
@@ -53,14 +54,35 @@ export class AssureService {
     private apiUrlAdd = `${environment.apiUrl}/assure`;
 
     private http = inject(HttpClient);
+    private authService = inject(AuthService); 
+
+    private token: string | null = null;
+
+
+    private async loadToken(): Promise<void> {
+        if (!this.token) {
+            this.token = await this.authService.getKeycloakInstance();
+        }
+    }
 
 
     addAssurerGet(id: number) {
-        return this.http.get<ASSURE>(`${this.apiUrl}/${id}`);
+        return from(this.loadToken()).pipe(
+            switchMap(()=>{
+            const headers = new HttpHeaders({
+               'Authorization': `Bearer ${this.token}`
+            });
+
+            return this.http.get<ASSURE>(`${this.apiUrl}/${id}`,{headers});
+            })
+        )
     }
 
     // Récupérer l'assuré par l'ID du sinistre
     getAssureBySinistreId(sinistreId: number) {
+
+        return from(this.loadToken())
+
         return this.http.get<ASSURE>(`${this.apiUrl}/assure/${sinistreId}`);
     }
 

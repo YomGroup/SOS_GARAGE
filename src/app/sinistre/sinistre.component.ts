@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
 import { RouterLink } from '@angular/router';
+import { SinistreService } from '../../services/sinistre.service';
 
 interface Notification {
   message: string;
@@ -40,9 +41,11 @@ export class SinistreComponent implements OnInit {
   sinistres: Sinistre[] = [];
   userid: string | null = null;
   assureId: number = 0;
+  private token: string | null = null;
 
   private authService = inject(AuthService);
   private assureService = inject(AssureService);
+  private sinistreService=inject(SinistreService);
 
   ngOnInit(): void {
     console.log('Component initialized'+this.sinistres);
@@ -60,17 +63,22 @@ export class SinistreComponent implements OnInit {
     }
   }
 
+  
+
   loadSinistres(): void {
-    this.assureService.addAssurerGet(this.assureId).subscribe({
-      next: (data: any) => {
-        this.sinistres = this.transformApiDataToSinistres(data);
-        console.log('Sinistres transformés:', this.sinistres);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des sinistres:', err);
-      }
-    });
-  }
+  this.sinistreService.getAllSinistre(this.assureId).subscribe({
+    next: (data: any) => {
+      // Mapping backend → front
+      this.sinistres = data.content.map((s: any) => this.mapBackendSinistreToFront(s));
+      console.log('Sinistres transformés:', this.sinistres);
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des sinistres:', err);
+    }
+  });
+}
+
+
   isEnCours(statut: string): boolean {
     return [
       'EN_ATTENTE_TRAITEMENT',
@@ -201,4 +209,30 @@ export class SinistreComponent implements OnInit {
   getTotalVehicules(): number {
     return new Set(this.sinistres.map(s => s.vehicule)).size;
   }
+
+  private mapBackendSinistreToFront(backend: any): Sinistre {
+  return {
+    id: backend.id.toString(),
+    vehicule: backend.vehiculeImmatriculation ?? `Véhicule #${backend.vehiculeId}`,
+    date: backend.createdAt ? new Date(backend.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue',
+    statut: backend.statut,
+    typeVehicule: backend.type ? backend.type.toString() : 'Inconnu',
+    notifications: [
+      {
+        message: backend.isValid ? 'Sinistre clôturé' : 'Sinistre en cours de traitement',
+        temps: this.formatTimeAgo(backend.updatedAt ?? backend.createdAt)
+      }
+    ],
+    documents: backend.documents?.map((doc: any) => doc.url) || [],
+    photos: backend.images?.map((img: any) => img.url) || [],
+    constat: backend.lienConstat || 'Aucun constat',
+    type: backend.type ? backend.type.toString() : 'Inconnu',
+    etat: backend.etatVehicule ? backend.etatVehicule.toString().toLowerCase() : 'inconnu',
+    raison: backend.description || 'Aucune raison spécifiée',
+    lieu: backend.lieu || 'Lieu inconnu',
+    iSsigned: backend.isSigned,
+    isgarageaffected: backend.isGarageAffected
+  };
+}
+
 }

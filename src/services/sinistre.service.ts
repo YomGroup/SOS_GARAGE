@@ -92,5 +92,20 @@ export class SinistreService {
   );
 }
 
+    getAllSinistre(assureId:number){
+
+        return from(this.loadToken()).pipe(
+    switchMap(() => {
+      const headers = new HttpHeaders({
+        'Authorization': `Bearer ${this.token}`
+      });
+
+      return this.http.get<any>(`${this.apiUrl2}/getAllByassureId/${assureId}`, { headers });
+    })
+  );
+
+
+    }
+
 
 }

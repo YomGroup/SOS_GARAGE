@@ -235,6 +235,8 @@ export class VehiculesComponent implements OnInit {
   async submitVehicle() {
     this.loadingSubmit = true;
     if (this.contratFile) {
+      this.newVehicle.contratAssurance='test';
+      /*
       const storage = getStorage();
       const filePath = `vehicules/contrats/${this.contratFile.name}`;
       const fileRef = ref(storage, filePath);
@@ -248,6 +250,7 @@ export class VehiculesComponent implements OnInit {
         console.error('Erreur de téléversement :', err);
         return; // Ne pas envoyer les données si l’upload a échoué
       }
+      */
     }
     const payload = {
       immatriculation: this.newVehicle.immatriculation,
@@ -255,6 +258,7 @@ export class VehiculesComponent implements OnInit {
       modele: this.newVehicle.modele,
       cylindree: this.newVehicle.cylindree,
       dateMiseEnCirculation: new Date(this.newVehicle.dateMiseEnCirculation).toISOString(),
+      /*
       typeAssurence: this.newVehicle.typeAssurence
         .map((id: number) => {
           const found = this.assuranceOptions.find(opt => opt.id === id);
@@ -262,6 +266,7 @@ export class VehiculesComponent implements OnInit {
         })
         .filter((name: string) => name)
         .join('_'),
+        */
       nomAssurence: this.newVehicle.nomAssurence,
       carteGrise: this.newVehicle.carteGrise,
       contratAssurance: this.newVehicle.contratAssurance,
