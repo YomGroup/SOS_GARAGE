@@ -174,7 +174,7 @@ export interface Vehicule {
   marque?: string;
   modele?: string;
   cylindree?: string;
-  dateMiseEnCirculation: string;
+  dateMiseEnCirculation: string|null;
   carteGrise: string;
   contratAssurance: string;
   imgUrl: string[];
@@ -188,7 +188,6 @@ export interface Vehicule {
   boiteVitesse?: string;
   typeMine?: string;
   version?: string;
-
 }
 
 // Interface Assure

@@ -680,7 +680,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   getVehicule(sinistreId: number): void {
     console.log('Récupération du véhicule pour le sinistre:', sinistreId);
 
-    this.dossiersService.getVehiculeFromSinistreId(sinistreId).subscribe({
+    this.dossiersService.getVehiculeByIdSinistre(sinistreId).subscribe({
       next: (vehicule: Vehicule | null) => {
         if (vehicule) {
           this.vehiculeSelectionne = vehicule;
@@ -734,8 +734,9 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
 
   // Méthode pour obtenir les informations de véhicule formatées
-  getVehiculeInfo(dossier: any): any {
-  if (!dossier.vehicule) {
+  // Méthode pour obtenir les informations de véhicule formatées
+getVehiculeInfo(dossier: any): any {
+  if (!dossier?.vehicule) {
     return {
       marque: 'Marque non spécifiée',
       modele: 'Modèle non spécifié',
@@ -745,31 +746,51 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     };
   }
 
+  const vehicule = dossier.vehicule;
+
+  // Utilise directement ta méthode formatDateVehicule
   let annee = 'Année non spécifiée';
 
-  if (dossier.vehicule.dateMiseEnCirculation) {
-    const dateValue = dossier.vehicule.dateMiseEnCirculation;
+  if (vehicule.dateMiseEnCirculation) {
+    const formattedDate = this.formatDateVehicule(vehicule.dateMiseEnCirculation);
 
-    if (typeof dateValue === 'string') {
-      // Si le backend renvoie une string ISO
-      annee = dateValue.slice(0, 4);
-    } else {
-      // Sinon, on suppose un objet Date ou timestamp
-      const dateObj = new Date(dateValue);
-      if (!isNaN(dateObj.getTime())) {
-        annee = dateObj.getFullYear().toString();
-      }
+    // Si la date est valide, extraire l’année
+    if (formattedDate !== 'N/A') {
+      annee = formattedDate.substring(0, 4);
     }
   }
 
   return {
-    marque: dossier.vehicule.marque || 'Marque non spécifiée',
-    modele: dossier.vehicule.modele || 'Modèle non spécifié',
+    marque: vehicule.marque || 'Marque non spécifiée',
+    modele: vehicule.modele || 'Modèle non spécifié',
     annee: annee,
-    immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
-    assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+    immatriculation: vehicule.immatriculation || 'Immatriculation non spécifiée',
+    assurance: vehicule.nomAssurence || 'Assurance non spécifiée'
   };
 }
+
+  formatDateVehicule(date: any): string {
+  if (!date) {
+    return '—'; // valeur par défaut
+  }
+
+  // Cas 1 : string ISO (le plus courant)
+  if (typeof date === 'string') {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
+  }
+
+  // Cas 2 : objet LocalDate { year, month, day }
+  if (typeof date === 'object' && date.year && date.month && date.day) {
+    return `${date.day.toString().padStart(2, '0')}/${
+      date.month.toString().padStart(2, '0')
+    }/${date.year}`;
+  }
+
+  return '—';
+}
+
+
 
 
 

@@ -49,6 +49,7 @@ export interface PaginatedResponse<T> {
 })
 export class DossiersService {
   private apiUrl = `${environment.apiUrl}/sinistre`;
+  private apiUrl2=`${environment.apiUrl}/vehicule`;
   private allVehicules$: Observable<Vehicule[]>;
   private refreshVehicules$ = new BehaviorSubject<void>(undefined);
 
@@ -83,7 +84,12 @@ export class DossiersService {
     return this.http.get<Dossier>(`${this.apiUrl}/${id}`);
   }
 
+  getVehiculeByIdSinistre(id: number): Observable<Vehicule> {
+    return this.http.get<Vehicule>(`${this.apiUrl2}/sinistre/${id}`);
+  }
+
   getVehiculeFromSinistreId(sinistreId: number): Observable<Vehicule | null> {
+    console.log('la liste de tout les vehicule',this.allVehicules$);
     return this.allVehicules$.pipe(
       map(vehicules => {
         const vehicule = vehicules.find(v => 

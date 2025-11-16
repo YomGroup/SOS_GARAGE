@@ -312,13 +312,13 @@ export class DossierViewComponent implements OnChanges, OnInit {
       devis: 0,
       factureFinale: 0,
       pretVehicule: false,
-      avantages: [],
-      messages: [],
-      reparation: null,
+      //avantages: [],
+     // messages: [],
+      //reparation: null,
       declareCommeEpave: false,
       epaveValideeParAdmin: false,
       dateDeclarationEpave: '',
-      assure: this.assureInfo?.id ?? 0,
+      //assure: this.assureInfo?.id ?? 0,
       commissionStatut: 'non payée'
     };
     this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
@@ -805,8 +805,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
       return {
         marque: dossier.vehicule.marque || 'Marque non spécifiée',
         modele: dossier.vehicule.modele || 'Modèle non spécifié',
-        annee: dossier.vehicule.dateMiseEnCirculation ?
-          dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
+        annee: this.extractYear(dossier.vehicule.dateMiseEnCirculation),
         dateDerniereCg: dossier.vehicule.dateDerniereCg || 'Date dernière CG non spécifiée',
         immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
         assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée',
@@ -860,6 +859,25 @@ export class DossierViewComponent implements OnChanges, OnInit {
       assurance: 'Assurance non spécifiée'
     };
   }
+
+  extractYear(date: any): string {
+  if (!date) {
+    return 'Année non spécifiée';
+  }
+
+  // Cas ISO string → "2024-11-12T00:00:00"
+  if (typeof date === 'string') {
+    return date.substring(0, 4);
+  }
+
+  // Cas objet LocalDate {year, month, day}
+  if (typeof date === 'object' && date.year) {
+    return date.year.toString();
+  }
+
+  return 'Année non spécifiée';
+}
+
 
   // Normalise les images du sinistre : supporte l'ancien champ imgUrl: string[]
   // et le nouveau champ images: { objectStorageUrl }[]
