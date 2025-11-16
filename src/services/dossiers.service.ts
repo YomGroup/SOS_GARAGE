@@ -53,6 +53,7 @@ export class DossiersService {
   private refreshVehicules$ = new BehaviorSubject<void>(undefined);
 
   constructor(private http: HttpClient) {
+    console.log('voici le chargement de donnee dddddddddddddddd');
     this.allVehicules$ = this.refreshVehicules$.pipe(
       // The backend may return either an array or a paginated response { content: Vehicule[] }
       switchMap(() => this.http.get<any>(`${environment.apiUrl}/vehicule/all`).pipe(
@@ -60,6 +61,8 @@ export class DossiersService {
       )),
       shareReplay(1)
     );
+
+    console.log('test',this.allVehicules$);
   }
 
   public refreshVehiculesCache(): void {

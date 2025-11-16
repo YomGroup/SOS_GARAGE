@@ -734,26 +734,44 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
 
   // Méthode pour obtenir les informations de véhicule formatées
-  getVehiculeInfo(dossier: DossierAffichage): any {
-    if (!dossier.vehicule) {
-      return {
-        marque: 'Marque non spécifiée',
-        modele: 'Modèle non spécifié',
-        annee: 'Année non spécifiée',
-        immatriculation: 'Immatriculation non spécifiée',
-        assurance: 'Assurance non spécifiée'
-      };
-    }
-
+  getVehiculeInfo(dossier: any): any {
+  if (!dossier.vehicule) {
     return {
-      marque: dossier.vehicule.marque || 'Marque non spécifiée',
-      modele: dossier.vehicule.modele || 'Modèle non spécifié',
-      annee: dossier.vehicule.dateMiseEnCirculation ?
-        dossier.vehicule.dateMiseEnCirculation.substring(0, 4) : 'Année non spécifiée',
-      immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
-      assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+      marque: 'Marque non spécifiée',
+      modele: 'Modèle non spécifié',
+      annee: 'Année non spécifiée',
+      immatriculation: 'Immatriculation non spécifiée',
+      assurance: 'Assurance non spécifiée'
     };
   }
+
+  let annee = 'Année non spécifiée';
+
+  if (dossier.vehicule.dateMiseEnCirculation) {
+    const dateValue = dossier.vehicule.dateMiseEnCirculation;
+
+    if (typeof dateValue === 'string') {
+      // Si le backend renvoie une string ISO
+      annee = dateValue.slice(0, 4);
+    } else {
+      // Sinon, on suppose un objet Date ou timestamp
+      const dateObj = new Date(dateValue);
+      if (!isNaN(dateObj.getTime())) {
+        annee = dateObj.getFullYear().toString();
+      }
+    }
+  }
+
+  return {
+    marque: dossier.vehicule.marque || 'Marque non spécifiée',
+    modele: dossier.vehicule.modele || 'Modèle non spécifié',
+    annee: annee,
+    immatriculation: dossier.vehicule.immatriculation || 'Immatriculation non spécifiée',
+    assurance: dossier.vehicule.nomAssurence || 'Assurance non spécifiée'
+  };
+}
+
+
 
   // Méthode pour vérifier si un véhicule a des informations complètes
   hasVehiculeInfo(dossier: DossierAffichage): boolean {
