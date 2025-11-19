@@ -1057,7 +1057,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     if (!nom) return;
     // Construction de l'objet à envoyer
     const assurance = {
-      nom: nom,
+      nomAssurence: nom,
       telephone: this.assuranceContactEdit.telephone,
       email: this.assuranceContactEdit.email,
       adresse: this.assuranceContactEdit.adresse
@@ -1111,6 +1111,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   getJoursRestants(): number | null {
+    /*
     const debut = this.mission?.dateDebutTravaux ? new Date(this.mission.dateDebutTravaux) : null;
     const delai = this.mission?.delaiEstime ?? null;
 
@@ -1122,8 +1123,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
     const aujourdHui = new Date();
     const diffTime = dateFin.getTime() - aujourdHui.getTime();
     const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    return diffJours;
+*/
+    return 5;
   }
 
   // Méthodes utilitaires pour ouvrir mail ou téléphone depuis le template
