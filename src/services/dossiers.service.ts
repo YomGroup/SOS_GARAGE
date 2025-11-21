@@ -32,6 +32,7 @@ export interface Dossier {
   telephone: string;
   expert?: Expert;
   input?: string;
+  description?: string;
 }
 
 export interface PaginatedResponse<T> {

@@ -256,10 +256,44 @@ export class DossierViewComponent implements OnChanges, OnInit {
     });
   }
 
-  getMissionDate(mission: Mission | null): string {
-    if (!mission) return '';
-    return new Date(mission.dateCreation).toLocaleDateString('fr-FR');
+toDate(value: any): Date | null {
+  if (!value) return null;
+
+  // Format string ou timestamp
+  if (typeof value === 'string' || typeof value === 'number') {
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
   }
+
+  // Format array : [yyyy, mm, dd, hh, min, sec, nanos]
+  if (Array.isArray(value) && value.length >= 3) {
+    const [y, m, d, hh = 0, mm = 0, ss = 0, nanos = 0] = value;
+    return new Date(y, m - 1, d, hh, mm, ss, Math.floor(nanos / 1_000_000));
+  }
+
+  // Format déjà Date
+  if (value instanceof Date) return value;
+
+  return null;
+}
+
+
+getMissionDate(mission: Mission | null): string {
+  if (!mission) return '';
+
+  const d = this.toDate(mission.dateCreation);
+
+  return d ? d.toLocaleDateString('fr-FR') : '';
+}
+
+
+getMSinistreDate(mission: Mission | null): string {
+  if (!mission) return '';
+
+  const d = this.toDate(mission.dateCreation);
+
+  return d ? d.toLocaleDateString('fr-FR') : '';
+}
 
   isPhotosArrayNonEmpty(mission: Mission | null): boolean {
     if (!mission) return false;
