@@ -118,12 +118,18 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
           console.error('Erreur lors de la récupération de l\'assure  ID :', err);
         }
       });
-      this.checkProfileCompleteness();
+      
       this.checkVehiculeCompleteness();
     }
   }
 
   checkProfileCompleteness(): boolean {
+
+    console.log('-------------------------------------');
+
+    console.log(this.nomAssure,this.adresseAssure,this.telephoneAssure,this.prenomAssure);
+
+    console.log('-------------------------------------');
     const isProfileComplete = this.nomAssure !== '' &&
       this.adresseAssure !== '' &&
       this.telephoneAssure !== '' &&
@@ -170,10 +176,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       next: (data: any) => {
         this.userData = data;
         console.log('Données utilisateur chargées :', this.userData);
-        this.nomAssure = data.name || '';
+        this.nomAssure = data.nom || '';
         this.adresseAssure = data.adresse || '';
         this.telephoneAssure = data.telephone || '';
         this.prenomAssure = data.prenom || '';
+
+        this.checkProfileCompleteness();
       },
       error: (err) => {
         console.error('Erreur lors du chargement des données utilisateur', err);

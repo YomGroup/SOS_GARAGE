@@ -3,6 +3,7 @@ import { AssureService } from '../../services/assure.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
+import { Assure } from '../services/user-management.service';
 
 @Component({
   selector: 'app-profile',
@@ -58,25 +59,32 @@ export class ProfileComponent {
   }
 
   private loadUserData(): void {
+  this.assureService.addAssurerGet(this.assureId).subscribe({
+    next: (data: any) => {
+      console.log('Données utilisateur récupérées :', data);
 
-    this.assureService.addAssurerGet(this.assureId).subscribe({
-      next: (data: any) => {
-        console.log('Données utilisateur récupéréeskdnjn:', data);
-        this.userData = {
-          ...this.userData,
-          ...data,
-          // Formatage des données si nécessaire
-          telephone: this.formatPhoneNumber(data.telephone),
-          //dateObtentionPermis: this.formatDate(data.dateObtentionPermis)
-        };
-        this.originalData = { ...this.userData };
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des données utilisateur', err);
-      }
-    });
+      this.userData = {
+        ...this.userData,
+        ...data,
+        telephone: this.formatPhoneNumber(data.telephone),
+        dateObtentionPermis: this.formatDate2(data.dateObtentionPermis)
+      };
 
-  }
+      this.originalData = { ...this.userData };
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des données utilisateur', err);
+    }
+  });
+}
+
+
+  formatDate2(dateString: string): string | null {
+  if (!dateString) return null;
+  const date = new Date(dateString);
+  return date.toISOString().split('T')[0]; // => "2025-11-22"
+}
+
 
   private formatPhoneNumber(phone: string): string {
     // Formatage du numéro de téléphone
@@ -97,6 +105,7 @@ export class ProfileComponent {
     this.isEditing = false;
     this.originalData = { ...this.userData };
     console.log("user", this.userData);
+    
 
     this.assureService.updateAssurer(this.userData).subscribe({
       next: (data) => {

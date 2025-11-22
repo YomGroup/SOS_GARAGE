@@ -47,6 +47,7 @@ export class RegisterComponent implements OnInit {
         telephone: [''],
         adresse: [''],
         password: [''],
+        adressePostale:['']
       });
     } else if (this.userType === 'garagiste') {
       this.registerForm = this.fb.group({
@@ -62,6 +63,7 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log("bonjour tout le monde tesssssssssssssst");
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;

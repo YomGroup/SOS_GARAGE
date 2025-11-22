@@ -65,6 +65,22 @@ export class VehicleService implements OnInit {
         }
     }
 
+
+    uploaddocument(id: number, file: File) {
+       const formData = new FormData();
+       formData.append('images', file);
+       const headers = new HttpHeaders({
+       'Authorization': `Bearer ${this.token}`
+       });
+       
+       return this.http.post(
+    `${environment.apiUrlLocale}/image/upload/${id}`,
+    formData,
+    { headers }
+  );
+}
+
+
     getAllVehiculesPost(body: any = {}): Observable<any> {
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.token}`,

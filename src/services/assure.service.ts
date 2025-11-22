@@ -44,6 +44,7 @@ export interface ASSURE {
     numeroPermis: string;
     vehicules: Vehicule[];
     messages: any[];
+    dateObtentionPermis:Date;
 }
 
 @Injectable({
@@ -107,6 +108,8 @@ export class AssureService {
         return this.http.get<ASSURE[]>(`${this.apiUrl}`);
     }
     updateAssurer(assure: ASSURE) {
-        return this.http.put<ASSURE>(`${this.apiUrl}/${assure.id}`, assure);
+         const { id,password, ...assureSansId } = assure;
+         console.log({assure});
+         return this.http.put<ASSURE>(`${this.apiUrl}/${assure.id}`, assureSansId);
     }
 }

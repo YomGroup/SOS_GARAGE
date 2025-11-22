@@ -83,12 +83,25 @@ export class VehiculesComponent implements OnInit {
       });
     }
   }
+  
   onContratAssuranceSelected(event: any) {
-    const file: File = event.target.files[0];
-    if (file) {
-      this.contratFile = file;
-    }
+  const file: File = event.target.files[0];
+
+  if (file) {
+    this.contratFile = file;
+
+    this.vehiculeService.uploaddocument(this.assureId, file)
+      .subscribe({
+        next: (res) => {
+          console.log("Upload réussi :", res);
+        },
+        error: (err) => {
+          console.error("Erreur upload :", err);
+        }
+      });
   }
+}
+
 
   // Dans ta classe
   async loadVehicles(assureId: number): Promise<void> {

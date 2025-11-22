@@ -68,12 +68,13 @@ export class AuthService {
     }
 
     registerAssure(payload: any) {
+        /*
         const headers = new HttpHeaders({
             'Authorization': `Bearer ${this.token}`,
             'Content-Type': 'application/json'
         });
-
-        return this.http.post(this.apiUrl, payload, { headers });
+        */
+        return this.http.post(this.apiUrl, payload);
 
     }
     registerGaragistre(payload: any) {
