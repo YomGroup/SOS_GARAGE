@@ -83,7 +83,7 @@ export class AuthService {
             'Content-Type': 'application/json'
         });
 
-        return this.http.post(this.apiUrlgarage, payload, { headers });
+        return this.http.post(this.apiUrlgarage, payload);
 
     }
 }
