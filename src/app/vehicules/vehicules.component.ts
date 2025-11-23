@@ -64,6 +64,7 @@ export class VehiculesComponent implements OnInit {
   loadingSubmit: boolean = false;
   nomAssurenceisempty: boolean = true;
   successMessage: string = '';
+  lientAssurance:string='';
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -94,6 +95,7 @@ export class VehiculesComponent implements OnInit {
       .subscribe({
         next: (res) => {
           console.log("Upload réussi :", res);
+          this.lientAssurance=res[0];
         },
         error: (err) => {
           console.error("Erreur upload :", err);
@@ -248,7 +250,7 @@ export class VehiculesComponent implements OnInit {
   async submitVehicle() {
     this.loadingSubmit = true;
     if (this.contratFile) {
-      this.newVehicle.contratAssurance='test';
+      this.newVehicle.contratAssurance=this.lientAssurance;
       /*
       const storage = getStorage();
       const filePath = `vehicules/contrats/${this.contratFile.name}`;
@@ -403,11 +405,17 @@ export class VehiculesComponent implements OnInit {
       ...vehicle,
 
       typeAssurence: this.extractTypeAssurenceIds(vehicle.typeAssurence || ''),
-      dateMiseEnCirculation: vehicle.dateMiseEnCirculation
-        ? new Date(vehicle.dateMiseEnCirculation).toISOString().split('T')[0]
-        : '',
+      dateMiseEnCirculation: this.safeDate(vehicle.dateMiseEnCirculation),
     };
   }
+
+  private safeDate(value: any): string {
+  if (!value) return '';
+
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? '' : d.toISOString().split('T')[0];
+}
+ 
 
 
 
