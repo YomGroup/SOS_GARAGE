@@ -508,9 +508,9 @@ getMSinistreDate(mission: Mission | null): string {
     this.http.get<any>(`${environment.apiUrl}/assurances/${encodeURIComponent(nom)}`).subscribe(
       (assurance) => {
         console.log('[Assurance] Réponse API:', assurance);
-        if (assurance && assurance.nom) {
+        if (assurance && assurance.nomAssurence) {
           this.assuranceContactEdit = {
-            nom: assurance.nom,
+            nom: assurance.nomAssurence,
             telephone: assurance.telephone || '',
             email: assurance.email || '',
             adresse: assurance.adresse || ''
@@ -1084,51 +1084,57 @@ getMSinistreDate(mission: Mission | null): string {
 
 
   // Nouvelle méthode pour sauvegarder les infos d'assurance via l'API backend
-  saveAssuranceContact() {
-    // Récupère le nom de l'assurance du véhicule (toujours utilisé comme nom principal)
-    const vehiculeInfo = this.getVehiculeInfo(this.dossier);
-    const nom = vehiculeInfo?.assurance || this.assuranceContactEdit.nom;
-    if (!nom) return;
-    // Construction de l'objet à envoyer
-    const assurance = {
-      nomAssurence: nom,
-      telephone: this.assuranceContactEdit.telephone,
-      email: this.assuranceContactEdit.email,
-      adresse: this.assuranceContactEdit.adresse
-    };
-    // Vérifier si l'assurance existe déjà (par nom)
-    this.http.get<any[]>(`${environment.apiUrl}/assurances`).subscribe(
-      (assurances) => {
-        const existante = assurances.find(a => a.nom === nom);
-        if (existante) {
-          // Mise à jour (PUT)
-          this.http.put(`${environment.apiUrl}/assurances/${existante.id}`, { ...existante, ...assurance }).subscribe(
-            () => {
-              this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
-              alert("Informations de contact de l'assurance mises à jour dans la base de données !");
-            },
-            (err) => {
-              alert("Erreur lors de la mise à jour de l'assurance : " + err.message);
-            }
-          );
+saveAssuranceContact() {
+
+  const vehiculeInfo = this.getVehiculeInfo(this.dossier);
+  const nom = vehiculeInfo?.assurance || this.assuranceContactEdit.nom;
+
+  if (!nom) return;
+
+  // Objet assurance à sauvegarder
+  const assurance = {
+    nomAssurence: nom,
+    telephone: this.assuranceContactEdit.telephone,
+    email: this.assuranceContactEdit.email,
+    adresse: this.assuranceContactEdit.adresse
+  };
+
+  // Vérifier si l'assurance existe par son nom
+  this.http.get<boolean>(`${environment.apiUrl}/assurances/verifyIfExist/${nom}`)
+    .subscribe(
+      (exists: boolean) => {
+        if (exists) {
+          // Si elle existe → on la récupère pour avoir son ID
+          this.http.get<any>(`${environment.apiUrl}/assurances/${nom}`)
+            .subscribe(
+              (existante) => {
+                // Mise à jour
+                this.http.put(`${environment.apiUrl}/assurances/${existante.id}`, { ...existante, ...assurance })
+                  .subscribe(
+                    () => {
+                      this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
+                      alert("Informations de l'assurance mises à jour !");
+                    },
+                    (err) => alert("Erreur lors de la mise à jour : " + err.message)
+                  );
+              }
+            );
         } else {
-          // Création (POST)
-          this.http.post(`${environment.apiUrl}/assurances`, assurance).subscribe(
-            () => {
-              this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
-              alert("Nouvelle assurance enregistrée dans la base de données !");
-            },
-            (err) => {
-              alert("Erreur lors de l'enregistrement de l'assurance : " + err.message);
-            }
-          );
+          // Si elle n'existe pas → création
+          this.http.post(`${environment.apiUrl}/assurances`, assurance)
+            .subscribe(
+              () => {
+                this.assuranceContactOriginal = { ...this.assuranceContactEdit, nom };
+                alert("Nouvelle assurance enregistrée !");
+              },
+              (err) => alert("Erreur lors de l'enregistrement : " + err.message)
+            );
         }
       },
-      (err) => {
-        alert("Erreur lors de la vérification des assurances existantes : " + err.message);
-      }
+      (err) => alert("Erreur lors de la vérification : " + err.message)
     );
-  }
+}
+
 
   // Calcul de la commission
   calculerCommission(factureFinale: number, franchiseApplicable: number, commissionPourcentage: number): number {
@@ -1145,7 +1151,7 @@ getMSinistreDate(mission: Mission | null): string {
   }
 
   getJoursRestants(): number | null {
-    /*
+    
     const debut = this.mission?.dateDebutTravaux ? new Date(this.mission.dateDebutTravaux) : null;
     const delai = this.mission?.delaiEstime ?? null;
 
@@ -1157,8 +1163,8 @@ getMSinistreDate(mission: Mission | null): string {
     const aujourdHui = new Date();
     const diffTime = dateFin.getTime() - aujourdHui.getTime();
     const diffJours = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-*/
-    return 5;
+
+    return diffJours;
   }
 
   // Méthodes utilitaires pour ouvrir mail ou téléphone depuis le template
