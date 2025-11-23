@@ -916,8 +916,9 @@ getMSinistreDate(mission: Mission | null): string {
   // Normalise les images du sinistre : supporte l'ancien champ imgUrl: string[]
   // et le nouveau champ images: { objectStorageUrl }[]
   getSinistreImageUrls(): string[] {
-    const s = this.sinistre || this.dossier || this.mission?.sinistre;
-    if (!s) return [];
+ //   const s = this.sinistre || this.dossier || this.mission?.sinistre;
+   const s=this.dossier;
+ ///   if (!s) return [];
     // Prioritise le nouveau champ images[].objectStorageUrl
     if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
       return (s as any).images
