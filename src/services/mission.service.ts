@@ -126,7 +126,7 @@ export class MissionService {
     if (cached && now - cached.addedAt < this.ttlVehiculeMs) {
       return of(cached.data);
     }
-    return this.http.get<Vehicule>(`${this.apiUrl}/sinistre/${sinistreId}/vehicule`).pipe(
+    return this.http.get<Vehicule>(`${this.apiUrl}/vehicule/${sinistreId}/vehicule`).pipe(
       tap(data => this.vehiculeBySinistreCache.set(sinistreId, { data, addedAt: Date.now(), ttl: this.ttlVehiculeMs })),
       shareReplay({ bufferSize: 1, refCount: true })
     );

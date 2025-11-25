@@ -1198,7 +1198,11 @@ export class MissionViewComponent implements OnChanges {
 
     // Prendre d'abord les images liées au dossier (comme dans dossier-view),
     // puis fusionner avec celles éventuellement présentes dans mission.sinistre.
-    extractFrom(this.dossier);
+    console.log("extraire les image ------------------------");
+    //console.log(this.dossier);
+    console.log(this.mission?.sinistre);
+   // extractFrom(this.dossier);
+    console.log("fin extraire les image ------------------------")
     extractFrom(this.mission?.sinistre);
 
     // Dédupliquer et retourner
