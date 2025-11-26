@@ -16,6 +16,7 @@ import { ProfileComponent } from './profile/profile.component';
 import { MessageComponent } from './shared/components/message/message.component';
 import { AuthGuard } from './app/auth-guard.service';
 import { DocumentSigningComponent } from './document-signing/document-signing.component';
+import { ServicesComponent } from './client/pages/services/services.component';
 
 export const routes: Routes = [
   // Page publique pour comptes garages non validés
@@ -85,7 +86,7 @@ export const routes: Routes = [
     path: 'client',
     component: ClientLayoutComponent,
     children: [
-      { path: '', component: ClientComponent },
+      { path: 'services', component: ServicesComponent },
     ]
   },
   { path: 'login', component: LoginComponent },

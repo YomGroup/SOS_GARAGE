@@ -3,571 +3,628 @@
   <div class="container">
     <div class="nav-brand">
       <div class="logo">
-        <img src="assets/logo.png" alt="Logo SOS MON GARAGE" class="logo-img"/>
-        <!-- <span class="logo-text">SOS MON GARAGE</span> -->
+        <img src="assets/logo.png" alt="Logo SOS MON GARAGE" class="logo-img" />
       </div>
     </div>
-    <!-- <nav class="nav-menu">
-      <a href="#" class="nav-link">Services</a>
-      <a href="#" class="nav-link">Comment ça marche</a>
-      <a href="#" class="nav-link">À propos</a>
-      <a href="#" class="nav-link">Contact</a>
-    </nav> -->
+
+    <nav class="nav-menu">
+      <a routerLink="services" routerLinkActive="active" class="nav-link">Services</a>
+      <a routerLink="process" routerLinkActive="active" class="nav-link">Comment ça marche</a>
+      <a routerLink="about" routerLinkActive="active" class="nav-link">À propos</a>
+      <a routerLink="contact" routerLinkActive="active" class="nav-link">Contact</a>
+    </nav>
+
     <div class="auth-buttons">
-      <!-- <a routerLink="/login" class="btn-outline">Se connecter</a> -->
       <a routerLink="/clientDashboard" class="btn-primary btn-large">Se connecter</a>
     </div>
   </div>
- 
 </header>
 
 
 
 <!-- Hero Section -->
-<section class="hero">
-  <div class="container">
-    <div class="hero-content">
-      <div class="trust-badge">
-        <div class="trust-icons">
-          <span class="trust-icon">⭐</span>
+<!-- Hero Section -->
+<section class="hero-section">
+  <!-- Fond animé -->
+  <div class="hero-bg">
+    <div class="hero-orb hero-orb-1"></div>
+    <div class="hero-orb hero-orb-2"></div>
+    <div class="hero-dot hero-dot-1"></div>
+    <div class="hero-dot hero-dot-2"></div>
+    <div class="hero-dot hero-dot-3"></div>
+  </div>
+
+  <div class="hero-container">
+    <div class="hero-grid">
+      <!-- Colonne gauche -->
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="hero-badge-dot">
+            <span class="hero-badge-ping"></span>
+          </span>
+          <span class="hero-eyebrow-text">Service disponible 24h/24</span>
         </div>
-        <span class="trust-text">Confiance, expertise, sérénité.</span>
-        <div class="trust-icons">
-          <span class="trust-icon">⭐</span>
+
+        <h1 class="hero-title">
+          Gérez vos<br />
+          <span class="hero-title-highlight">
+            sinistres auto
+            <span class="hero-underline"></span>
+          </span><br />
+          en toute sérénité
+        </h1>
+
+        <p class="hero-subtitle-2">
+          Nous simplifions chaque étape de votre sinistre automobile.
+          De la déclaration à la réparation, nous sommes à vos côtés.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn-primary btn-large" [routerLink]="['/declaration']">
+            Déclarer un sinistre
+          </a>
+          <a class="btn-outline btn-large" [routerLink]="['/process']">
+            Comment ça marche
+          </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat-value">15K+</div>
+            <div class="hero-stat-label">Sinistres traités</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">48h</div>
+            <div class="hero-stat-label">Délai moyen</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-value">98%</div>
+            <div class="hero-stat-label">Clients satisfaits</div>
+          </div>
         </div>
       </div>
-      
-      <h1 class="hero-title">
-         L'excellence au service de vos réparations.<br>
-        <span class="text-gradient"> Un service dédié, une qualité garantie.</span>
-      </h1>
-      
-      <p class="hero-subtitle">
-        Le seul réseau de garages qui se soucie uniquement de votre satisfaction<br>
-         Profitez de réparations sans contrainte, de votre franchise remboursée et d'une qualitée garantie.
-      </p>
-      
-      <div class="hero-buttons">
-        <button class="btn-primary btn-large">Déclarer un sinistre</button>
-        <a href="#services" class="btn-primary btn-large">Découvrir nos services</a>
-      </div>
-      
-      <div class="stats-container">
-        <div class="stat-card stat-primary">
-          <div class="stat-number">250+</div>
-          <div class="stat-label">Sinistres traités</div>
-          <div class="stat-desc">Avec un taux de satisfaction de 98%</div>
-          <div class="stat-icon">📊</div>
+
+      <!-- Colonne droite -->
+      <div class="hero-right">
+        <div class="hero-main-card">
+          <div class="hero-main-border"></div>
+          <div class="hero-main-image-wrapper">
+            <img
+              src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&q=80"
+              alt="Expert automobile"
+              class="hero-main-image"
+            />
+            <div class="hero-main-gradient"></div>
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">24h</div>
-          <div class="stat-label">En Moyenne</div>
-          <div class="stat-desc">Délai de prise en charge</div>
+
+        <!-- Petite image flottante 1 -->
+        <div class="hero-float hero-float-1">
+          <div class="hero-float-image-wrapper">
+            <img
+              src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=300&q=80"
+              alt="Réparation"
+              class="hero-float-image"
+            />
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">50+</div>
-          <div class="stat-label">Garages partenaires</div>
-          <div class="stat-desc">Partout en France</div>
+
+        <!-- Petite image flottante 2 -->
+        <div class="hero-float hero-float-2">
+          <div class="hero-float-image-wrapper">
+            <img
+              src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=300&q=80"
+              alt="Véhicule"
+              class="hero-float-image"
+            />
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">7j/7</div>
-          <div class="stat-label">Disponibilité</div>
-          <div class="stat-desc">8h30 - 21h00</div>
+
+        <!-- Carte 100% prise en charge -->
+        <div class="hero-mini-card hero-mini-card-1">
+          <div class="hero-mini-icon">
+            <!-- Icône pseudo-bouclier -->
+            <span>🛡</span>
+          </div>
+          <div>
+            <div class="hero-mini-value">100%</div>
+            <div class="hero-mini-label">Prise en charge</div>
+          </div>
+        </div>
+
+        <!-- Carte 48h -->
+        <div class="hero-mini-card hero-mini-card-2">
+          <div class="hero-mini-icon hero-mini-icon-light">
+            <span>⏱</span>
+          </div>
+          <div>
+            <div class="hero-mini-value">48h</div>
+            <div class="hero-mini-label hero-mini-label-light">
+              Traitement express
+            </div>
+          </div>
+        </div>
+
+        <!-- Badge clients satisfaits -->
+        <div class="hero-clients-badge">
+          <div class="hero-clients-avatars">
+            <div class="hero-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
+                alt="Client"
+              />
+            </div>
+            <div class="hero-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
+                alt="Client"
+              />
+            </div>
+            <div class="hero-avatar">
+              <img
+                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
+                alt="Client"
+              />
+            </div>
+          </div>
+          <div class="hero-clients-text">
+            ✔ +2000 clients satisfaits
+          </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Vague basse -->
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M0 50L48 45.8C96 41.7 192 33.3 288 29.2C384 25 480 25 576 33.3C672 41.7 768 58.3 864 62.5C960 66.7 1056 58.3 1152 50C1248 41.7 1344 33.3 1392 29.2L1440 25V100H1392C1344 100 1248 100 1152 100C1056 100 960 100 864 100C768 100 672 100 576 100C480 100 384 100 288 100C192 100 96 100 48 100H0V50Z"
+        fill="#ffffff"
+      />
+    </svg>
+  </div>
 </section>
+
+
 
 <!-- Services Section -->
 <section id="services" class="services">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Nos services<br><span class="text-gradient">pour vous accompagner</span></h2>
-                <p class="section-subtitle">Une prise en charge complète de votre sinistre</p>
-            </div>
-            
-            <div class="services-grid">
-                <div class="service-card" (click)="openModal('modal1')">
-                    <div class="service-icon">📱</div>
-                    <h3 class="service-title">Déclaration simplifiée</h3>
-                    <p class="service-desc">Déclarez votre sinistre en quelques clics depuis votre smartphone</p>
-                </div>
-                
-                <div class="service-card service-featured" (click)="openModal('modal2')">
-                    <div class="service-icon">👨‍💼</div>
-                    <h3 class="service-title">Un Gestionnaire dédié</h3>
-                    <p class="service-desc">Un professionnel vous accompagne tout au long du processus</p>
-                </div>
-                
-                <div class="service-card" (click)="openModal('modal3')">
-                    <div class="service-icon">🔧</div>
-                    <h3 class="service-title">Réseau de garages</h3>
-                    <p class="service-desc">Accès à notre réseau de garages partenaires agréés</p>
-                </div>
-                
-                <div class="service-card" (click)="openModal('modal4')">
-                    <div class="service-icon">💰</div>
-                    <h3 class="service-title">Pas d'avance de frais</h3>
-                    <p class="service-desc">Vous n'avez aucune avance de frais tout au long de la gestion de votre sinistre</p>
-                </div>
-                
-                <div class="service-card" (click)="openModal('modal5')">
-                    <div class="service-icon">🚗</div>
-                    <h3 class="service-title">Véhicule de remplacement</h3>
-                    <p class="service-desc">Mise à disposition d'un véhicule pendant les réparations</p>
-                </div>
-                
-                <div class="service-card" (click)="openModal('modal6')">
-                    <div class="service-icon">📄</div>
-                    <h3 class="service-title">Suivi en temps réel</h3>
-                    <p class="service-desc">Suivez l'avancement de votre dossier depuis votre espace personnel</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Modals -->
-    <!-- Modal 1: Déclaration simplifiée -->
-    <div id="modal1" class="modal"
-     [class.active]="activeModal === 'modal1'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-            <div class="modal-header">
-                <div class="modal-icon">📱</div>
-                <h2 class="modal-title">Déclaration simplifiée</h2>
-            </div>
-            <div class="modal-body">
-                <p>Notre processus de déclaration révolutionne la gestion des sinistres automobiles. Fini les formulaires compliqués et les déplacements inutiles !</p>
-                
-                <h4>Comment ça fonctionne :</h4>
-                <ul>
-                    <li>Interface intuitive accessible 24h/24 et 7j/7</li>
-                    <li>Prise de photos directement depuis votre téléphone</li>
-                    <li>Géolocalisation automatique du lieu de l'accident</li>
-                    <li>Assistance vocale pour vous guider étape par étape</li>
-                    <li>Sauvegarde automatique de votre progression</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Gain de temps :</strong> 5 minutes suffisent pour déclarer votre sinistre, contre 30 minutes avec les méthodes traditionnelles.
-                </div>
-
-                <h4>Informations collectées :</h4>
-                <p>Notre système collecte toutes les informations essentielles : circonstances de l'accident, témoins, dégâts matériels, et données des autres véhicules impliqués.</p>
-
-                <button class="btn-modal">Déclarer un sinistre maintenant</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 2: Gestionnaire dédié -->
-    <div id="modal2" class="modal"
-     [class.active]="activeModal === 'modal2'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-            <div class="modal-header">
-                <div class="modal-icon">👨‍💼</div>
-                <h2 class="modal-title">Un Gestionnaire dédié</h2>
-            </div>
-            <div class="modal-body">
-                <p>Bénéficiez d'un accompagnement personnalisé avec un expert dédié exclusivement à votre dossier. Votre gestionnaire devient votre interlocuteur unique.</p>
-                
-                <h4>Votre expert personnel :</h4>
-                <ul>
-                    <li>Professionnel certifié avec plus de 10 ans d'expérience</li>
-                    <li>Spécialisé dans votre type de sinistre</li>
-                    <li>Disponible par téléphone, email et chat</li>
-                    <li>Suivi proactif de votre dossier</li>
-                    <li>Conseil et accompagnement juridique si nécessaire</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Engagement qualité :</strong> Votre gestionnaire s'engage à vous contacter dans les 2h suivant votre déclaration.
-                </div>
-
-                <h4>Services inclus :</h4>
-                <p>Négociation avec les assurances, coordination avec les garages, gestion des expertises, et suivi jusqu'à la restitution de votre véhicule.</p>
-
-                <button class="btn-modal">Parler à un gestionnaire</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 3: Réseau de garages -->
-    <div id="modal3" class="modal"
-     [class.active]="activeModal === 'modal3'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-            <div class="modal-header">
-                <div class="modal-icon">🔧</div>
-                <h2 class="modal-title">Réseau de garages</h2>
-            </div>
-            <div class="modal-body">
-                <p>Accédez à notre réseau exclusif de plus de 50 garages partenaires certifiés, sélectionnés pour leur excellence et leur professionnalisme.</p>
-                
-                <h4>Nos critères de sélection :</h4>
-                <ul>
-                    <li>Certification constructeurs et agrément assureurs</li>
-                    <li>Équipements de pointe et technologies récentes</li>
-                    <li>Personnel qualifié et formation continue</li>
-                    <li>Respect des délais et transparence tarifaire</li>
-                    <li>Note de satisfaction client supérieure à 4.5/5</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Couverture nationale :</strong> Un garage partenaire à moins de 15 km de votre domicile, partout en France.
-                </div>
-
-                <h4>Avantages de notre réseau :</h4>
-                <p>Tarifs négociés, garantie des réparations, pièces d'origine, et priorité sur les créneaux de réparation. Chaque garage respecte notre charte qualité.</p>
-
-                <button class="btn-modal">Voir les garages près de chez vous</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 4: Pas d'avance de frais -->
-    <div id="modal4" class="modal"
-     [class.active]="activeModal === 'modal4'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-            <div class="modal-header">
-                <div class="modal-icon">💰</div>
-                <h2 class="modal-title">Pas d'avance de frais</h2>
-            </div>
-            <div class="modal-body">
-                <p>Profitez d'une tranquillité financière totale. Nous prenons en charge tous les frais directement auprès de nos partenaires.</p>
-                
-                <h4>Frais pris en charge :</h4>
-                <ul>
-                    <li>Expertise et évaluation des dégâts</li>
-                    <li>Réparations dans nos garages partenaires</li>
-                    <li>Pièces détachées et main d'œuvre</li>
-                    <li>Véhicule de remplacement</li>
-                    <li>Frais administratifs et de dossier</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Simplicité garantie :</strong> Vous ne payez que votre franchise, remboursée si vous n'êtes pas responsable.
-                </div>
-
-                <h4>Comment ça marche :</h4>
-                <p>Nous avons des accords directement avec nos partenaires. Vous signez simplement l'ordre de réparation, et nous nous occupons de toute la gestion financière avec votre assureur.</p>
-
-                <button class="btn-modal">En savoir plus sur la prise en charge</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 5: Véhicule de remplacement -->
-    <div id="modal5" class="modal"
-     [class.active]="activeModal === 'modal5'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-    <div class="modal-header">
-      <div class="modal-icon">🚗</div>
-      <h2 class="modal-title">Véhicule de remplacement</h2>
-    </div>
-            <div class="modal-body">
-                <p>Continuez vos activités quotidiennes sans interruption grâce à notre service de véhicule de remplacement premium.</p>
-                
-                <h4>Notre flotte disponible :</h4>
-                <ul>
-                    <li>Véhicules récents (moins de 2 ans)</li>
-                    <li>Gamme adaptée à votre véhicule sinistré</li>
-                    <li>Assurance tous risques incluse</li>
-                    <li>Kilométrage illimité</li>
-                    <li>Assistance 24h/24 en cas de panne</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Service express :</strong> Livraison du véhicule de remplacement dans les 4h, directement à votre domicile ou lieu de travail.
-                </div>
-
-                <h4>Conditions d'attribution :</h4>
-                <p>Selon votre contrat d'assurance et les circonstances du sinistre. Notre gestionnaire vérifie vos droits et organise la mise à disposition immédiatement.</p>
-
-                <button class="btn-modal">Réserver un véhicule de remplacement</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modal 6: Suivi en temps réel -->
-    <div id="modal6" class="modal"
-     [class.active]="activeModal === 'modal6'"
-     (click)="onBackdropClick($event)">
-  <div class="modal-content">
-    <span class="close" (click)="closeModal()">&times;</span>
-    <div class="modal-header">
-      <div class="modal-icon">📄</div>
-      <h2 class="modal-title">Suivi en temps réel</h2>
-    </div>
-    <div class="modal-body">
-                <p>Restez informé à chaque étape grâce à votre espace personnel et nos notifications automatiques.</p>
-                
-                <h4>Fonctionnalités de suivi :</h4>
-                <ul>
-                    <li>Tableau de bord avec statut en temps réel</li>
-                    <li>Timeline détaillée de votre dossier</li>
-                    <li>Photos avant/pendant/après réparation</li>
-                    <li>Documents numérisés accessibles 24h/24</li>
-                    <li>Messagerie directe avec votre gestionnaire</li>
-                </ul>
-
-                <div class="highlight-box">
-                    <strong>Notifications intelligentes :</strong> SMS et email automatiques à chaque évolution importante de votre dossier.
-                </div>
-
-                <h4>Historique complet :</h4>
-                <p>Accédez à l'historique complet de vos échanges, décisions prises, et documents générés. Parfait pour vos archives personnelles.</p>
-
-                <button class="btn-modal">Accéder à mon espace</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- <script>
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        // Fermer la modal en cliquant à l'extérieur
-        window.onclick = function(event) {
-            if (event.target.classList.contains('modal')) {
-                event.target.classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-        }
-
-        // Fermer la modal avec la touche Échap
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const activeModal = document.querySelector('.modal.active');
-                if (activeModal) {
-                    activeModal.classList.remove('active');
-                    document.body.style.overflow = 'auto';
-                }
-            }
-        });
-    </script> -->
-
-<!-- Registration Section -->
-<section class="registration">
   <div class="container">
-    <div class="registration-content">
-      <div class="registration-text">
-        <h2 class="registration-title">Rejoignez notre plateforme</h2>
-        <p class="registration-desc">
-          Que vous soyez un particulier ayant besoin d'assistance ou un garage souhaitant<br>
-          rejoindre notre réseau, nous avons la solution qu'il vous faut.
+    <!-- Header -->
+    <div class="services-header">
+      <div>
+        <div class="section-badge">
+          <span class="section-badge-dot"></span>
+          <span class="section-badge-text">Nos services</span>
+        </div>
+        <h2 class="section-title">
+          Découvrez notre gamme<br>
+          <span class="text-gradient">de services sinistres</span>
+        </h2>
+      </div>
+
+      <a class="services-link">
+        Voir tous les services →
+      </a>
+    </div>
+
+    <!-- Grid -->
+    <div class="services-grid">
+      <!-- Déclaration -->
+      <div class="service-card" (click)="openModal('modal1')">
+        <div class="service-icon-gradient">
+          <span>📄</span>
+        </div>
+        <h3 class="service-title">Déclaration</h3>
+        <p class="service-desc">
+          Déclarez votre sinistre en quelques clics, 24h/24 et 7j/7.
         </p>
-      </div>
-      
-      <div class="registration-cards">
-        <div class="registration-card">
-          <div class="card-icon">👤</div>
-          <h3 class="card-title">Espace particulier</h3>
-          <p class="card-desc">Créez votre compte client pour bénéficier de nos services de gestion de sinistres</p>
-          <ul class="card-features">
-            <li>✓ Déclaration de sinistre</li>
-            <li>✓ Suivi de dossier</li>
-            <li>✓ Expert dédié</li>
-            <li>✓ Support 7j/7</li>
-          </ul>
-          <button class="btn-primary btn-full" [routerLink]="['/register/assure']">
-            Créer un compte client
-          </button>
+        <div class="service-more">
+          En savoir plus
+          <span>→</span>
         </div>
+      </div>
 
+      <!-- Expertise -->
+      <div class="service-card" (click)="openModal('modal2')">
+        <div class="service-icon-gradient service-icon-gradient-blue">
+          <span>🔍</span>
+        </div>
+        <h3 class="service-title">Expertise</h3>
+        <p class="service-desc">
+          Nos experts évaluent les dommages rapidement et précisément.
+        </p>
+        <div class="service-more">
+          En savoir plus
+          <span>→</span>
+        </div>
+      </div>
 
-        <div class="registration-card registration-featured">
-          <div class="card-icon">🔧</div>
-          <h3 class="card-title">Espace Garage</h3>
-          <p class="card-desc">Rejoignez notre réseau de garages partenaires et développez votre activité</p>
-          <ul class="card-features">
-            <li>✓ Flux de clients régulier</li>
-            <li>✓ Paiement garanti</li>
-            <li>✓ Outils de gestion</li>
-            <li>✓ Formation incluse</li>
-          </ul>
-          <button class="btn-secondary btn-full" [routerLink]="['/register/garagiste']">Devenir partenaire</button>
+      <!-- Indemnisation -->
+      <div class="service-card" (click)="openModal('modal4')">
+        <div class="service-icon-gradient service-icon-gradient-purple">
+          <span>💶</span>
+        </div>
+        <h3 class="service-title">Indemnisation</h3>
+        <p class="service-desc">
+          Recevez votre indemnisation dans les meilleurs délais.
+        </p>
+        <div class="service-more">
+          En savoir plus
+          <span>→</span>
+        </div>
+      </div>
+
+      <!-- Réparation -->
+      <div class="service-card" (click)="openModal('modal3')">
+        <div class="service-icon-gradient service-icon-gradient-mixed">
+          <span>🔧</span>
+        </div>
+        <h3 class="service-title">Réparation</h3>
+        <p class="service-desc">
+          Réseau de garages partenaires agréés pour vos réparations.
+        </p>
+        <div class="service-more">
+          En savoir plus
+          <span>→</span>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- How it works Section -->
-<section class="how-it-works">
+
+<!-- Stats Section -->
+<section class="stats-home">
+  <div class="container stats-home-grid">
+    <!-- Colonne images -->
+    <div class="stats-home-images">
+      <div class="stats-home-col">
+        <div class="stats-home-img-main">
+          <img
+            src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&q=80"
+            alt="Expert automobile"
+          />
+        </div>
+        <div class="stats-home-experience">
+          <div class="stats-home-experience-value">15+</div>
+          <div class="stats-home-experience-label">Années d'expérience</div>
+        </div>
+      </div>
+
+      <div class="stats-home-col stats-home-col-right">
+        <div class="stats-home-img-square">
+          <img
+            src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80"
+            alt="Réparation automobile"
+          />
+        </div>
+        <div class="stats-home-img-wide">
+          <img
+            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80"
+            alt="Véhicule"
+          />
+          <div class="stats-home-img-overlay"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Colonne texte -->
+    <div class="stats-home-content">
+      <div class="section-badge stats-badge">
+        <span class="section-badge-text">Notre impact</span>
+      </div>
+
+      <h2 class="section-title">
+        Notre impact<br />
+        <span class="text-gradient">en chiffres</span>
+      </h2>
+
+      <p class="stats-home-intro">
+        Depuis plus de 15 ans, nous accompagnons les automobilistes dans la
+        gestion de leurs sinistres. Notre expertise et notre réseau de
+        partenaires nous permettent d'offrir un service rapide et efficace.
+      </p>
+
+      <div class="stats-home-list">
+        <div class="stats-home-item">
+          <div class="stats-home-icon-circle">📈</div>
+          <div>
+            <div class="stats-home-value">15K+</div>
+            <div class="stats-home-label">Sinistres traités</div>
+            <div class="stats-home-desc">chaque année</div>
+          </div>
+        </div>
+
+        <div class="stats-home-item">
+          <div class="stats-home-icon-circle">😊</div>
+          <div>
+            <div class="stats-home-value">98%</div>
+            <div class="stats-home-label">Taux de satisfaction</div>
+            <div class="stats-home-desc">clients satisfaits</div>
+          </div>
+        </div>
+
+        <div class="stats-home-item">
+          <div class="stats-home-icon-circle">⏱</div>
+          <div>
+            <div class="stats-home-value">48h</div>
+            <div class="stats-home-label">Délai moyen</div>
+            <div class="stats-home-desc">de traitement</div>
+          </div>
+        </div>
+
+        <div class="stats-home-item">
+          <div class="stats-home-icon-circle">🛠</div>
+          <div>
+            <div class="stats-home-value">500+</div>
+            <div class="stats-home-label">Garages partenaires</div>
+            <div class="stats-home-desc">en France</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Pourquoi nous choisir -->
+<section class="features-section">
   <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Comment ça marche ?</h2>
-      <p class="section-subtitle">Un processus simple et efficace en 4 étapes</p>
+    <!-- Header -->
+    <div class="features-header">
+      <div class="features-badge">
+        <span class="features-badge-dot"></span>
+        <span class="features-badge-text">Pourquoi nous choisir</span>
+      </div>
+      <h2 class="features-title">
+        Ce qui nous distingue<br />
+        <span class="text-gradient">des autres</span>
+      </h2>
+      <p class="features-subtitle">
+        Vos démarches sont simplifiées, sécurisées et accompagnées par une équipe
+        experte, disponible à chaque étape de votre sinistre.
+      </p>
     </div>
-    
-    <div class="steps-container">
-      <div class="step-card">
-        <div class="step-number">1</div>
-        <div class="step-content">
-          <h3 class="step-title">Déclaration</h3>
-          <p class="step-desc">Déclarez votre sinistre en ligne en quelques minutes</p>
-        </div>
+
+    <!-- Layout 2 colonnes -->
+    <div class="features-layout">
+      <!-- Colonne gauche : liste des features -->
+      <div class="feature-list">
+        <button
+          *ngFor="let feature of features"
+          type="button"
+          (click)="setActiveFeature(feature)"
+          class="feature-item"
+          [class.feature-item-active]="activeFeature.id === feature.id"
+        >
+          <div class="feature-item-top">
+            <div
+              class="feature-icon-wrapper"
+              [class.feature-icon-wrapper-active]="activeFeature.id === feature.id"
+            >
+              <span class="feature-icon">{{ feature.icon }}</span>
+            </div>
+
+            <div class="feature-texts">
+              <span class="feature-title">{{ feature.title }}</span>
+              <p
+                class="feature-desc"
+                [class.feature-desc-visible]="activeFeature.id === feature.id"
+              >
+                {{ feature.description }}
+              </p>
+            </div>
+
+            <span
+              class="feature-chevron"
+              [class.feature-chevron-active]="activeFeature.id === feature.id"
+              >›</span
+            >
+          </div>
+        </button>
       </div>
-      
-      <div class="step-arrow">→</div>
-      
-      <div class="step-card">
-        <div class="step-number">2</div>
-        <div class="step-content">
-          <h3 class="step-title">Attribution</h3>
-          <p class="step-desc">Un expert vous est assigné et vous contacte rapidement</p>
+
+      <!-- Colonne droite : image dynamique -->
+      <div class="feature-visual">
+        <div class="feature-visual-glow"></div>
+
+        <div class="feature-visual-card">
+          <img
+            [src]="activeFeature.image"
+            [alt]="activeFeature.title"
+            class="feature-visual-img"
+          />
+
+          <div class="feature-visual-overlay"></div>
+
+          <div class="feature-chip">
+            <div class="chip-bullet"></div>
+            <div class="chip-texts">
+              <div class="chip-title">Gestion complète du sinistre</div>
+              <div class="chip-subtitle">Déclaration, expertise, réparation</div>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <div class="step-arrow">→</div>
-      
-      <div class="step-card">
-        <div class="step-number">3</div>
-        <div class="step-content">
-          <h3 class="step-title">Réparation</h3>
-          <p class="step-desc">Votre véhicule est pris en charge par un garage partenaire</p>
-        </div>
-      </div>
-      
-      <div class="step-arrow">→</div>
-      
-      <div class="step-card">
-        <div class="step-number">4</div>
-        <div class="step-content">
-          <h3 class="step-title">Finalisation</h3>
-          <p class="step-desc">Récupération de votre véhicule et clôture du dossier</p>
+
+        <div class="feature-indicators">
+          <button
+            *ngFor="let feature of features"
+            type="button"
+            (click)="setActiveFeature(feature)"
+            class="feature-indicator"
+            [class.feature-indicator-active]="activeFeature.id === feature.id"
+          ></button>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Advantages Section -->
-<section class="advantages">
-  <div class="container">
-    <div class="advantages-content">
-      <div class="advantages-text">
-        <h2 class="advantages-title">Pourquoi choisir <span class="text-gradient"><br>SOS MON GARAGE </span>? </h2>
-        <div class="advantages-list">
-          <div class="advantage-item">
-            <div class="advantage-icon">⚡</div>
-            <div class="advantage-content">
-              <h4>Rapidité</h4>
-              <p>Prise en charge sous 24h et suivi en temps réel</p>
-            </div>
-          </div>
-          
-          <div class="advantage-item">
-            <div class="advantage-icon">🎯</div>
-            <div class="advantage-content">
-              <h4>Expertise</h4>
-              <p>Nos experts maîtrisent tous les aspects du sinistre automobile</p>
-            </div>
-          </div>
-          
-          <div class="advantage-item">
-            <div class="advantage-icon">🤝</div>
-            <div class="advantage-content">
-              <h4>Accompagnement</h4>
-              <p>Un interlocuteur unique dédié à votre dossier</p>
-            </div>
-          </div>
-          
-          <div class="advantage-item">
-            <div class="advantage-icon">💎</div>
-            <div class="advantage-content">
-              <h4>Qualité</h4>
-              <p>Réseau de garages agréés et certifiés</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="advantages-visual">
-        <div class="visual-card">
-          <img src="assets/img1.jpg" alt="Expert en sinistre" class="visual-image">
-          <div class="visual-badge">
-            <span class="badge-icon">✓</span>
-            <div class="badge-text">
-              <div class="badge-title">Expert certifié</div>
-              <div class="badge-desc">À votre service</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Testimonials Section -->
 <section class="testimonials">
   <div class="container">
-    <h2 class="section-title">Ce que disent nos clients</h2>
-    
+    <!-- Header -->
+    <div class="testimonials-header">
+      <div class="testimonials-title-block">
+        <span class="badge-pill">
+          <span class="badge-pill-text">Témoignages</span>
+        </span>
+        <h2 class="testimonials-title">
+          Ils nous font<br />
+          <span class="text-gradient">confiance</span>
+        </h2>
+        <p class="testimonials-subtitle">
+          Vos démarches sont simplifiées, sécurisées et accompagnées par une équipe experte,
+          disponible à chaque étape de votre sinistre.
+        </p>
+      </div>
+
+      <div class="testimonials-avatars">
+        <div class="avatar-stack">
+          <img
+            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80"
+            alt="Marie Dupont"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80"
+            alt="Thomas Martin"
+          />
+          <img
+            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80"
+            alt="Sophie Bernard"
+          />
+        </div>
+        <span class="avatar-text">+2000 clients satisfaits</span>
+      </div>
+    </div>
+
+    <!-- Cards -->
     <div class="testimonials-grid">
-      <div class="testimonial-card">
-        <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-        <div class="testimonial-content">
-          <p class="testimonial-text">
-            "Service exceptionnel ! Mon sinistre a été traité en moins de 48h et j'ai pu récupérer ma voiture rapidement."
-          </p>
-          <div class="testimonial-author">
-            <img src="assets/icons/avatar.svg" alt="Client" class="avatar">
-            <div class="author-info">
-              <h4 class="author-name">Marie Dupont</h4>
-              <p class="author-role">Cliente depuis 2023</p>
+      <!-- 1 -->
+      <article class="testimonial-card">
+        <div class="testimonial-top-strip"></div>
+        <div class="testimonial-quote">“</div>
+        <p class="testimonial-text">
+          "Service exceptionnel ! Mon sinistre a été traité en moins de 48h. L'équipe m'a accompagnée à chaque étape."
+        </p>
+        <div class="testimonial-footer">
+          <div class="testimonial-user">
+            <div class="avatar-ring">
+              <img
+                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80"
+                alt="Marie Dupont"
+              />
+            </div>
+            <div>
+              <div class="testimonial-name">Marie Dupont</div>
+              <div class="testimonial-role">Particulier</div>
             </div>
           </div>
-        </div>
-      </div>
-      
-      <div class="testimonial-card testimonial-featured">
-        <div class="testimonial-rating">⭐⭐⭐⭐⭐</div>
-        <div class="testimonial-content">
-          <p class="testimonial-text">
-            "Enfin une solution simple pour gérer les sinistres ! L'expert était très professionnel et à l'écoute."
-          </p>
-          <div class="testimonial-author">
-            <img src="assets/icons/avatar.svg" alt="Client" class="avatar">
-            <div class="author-info">
-              <h4 class="author-name">Pierre Martin</h4>
-              <p class="author-role">Client depuis 2022</p>
-            </div>
+          <div class="testimonial-stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
           </div>
         </div>
-      </div>
-      
-      <div class="testimonial-card">
-        <div class="testimonial-rating">⭐⭐⭐⭐</div>
-        <div class="testimonial-content">
-          <p class="testimonial-text">
-            "Excellent suivi et communication parfaite. Je recommande vivement SinistreAssist !"
-          </p>
-          <div class="testimonial-author">
-            <img src="assets/icons/avatar.svg" alt="Client" class="avatar">
-            <div class="author-info">
-              <h4 class="author-name">Sophie Laurent</h4>
-              <p class="author-role">Cliente depuis 2024</p>
+      </article>
+
+      <!-- 2 -->
+      <article class="testimonial-card">
+        <div class="testimonial-top-strip"></div>
+        <div class="testimonial-quote">“</div>
+        <p class="testimonial-text">
+          "Pour notre flotte de véhicules, AutoSinistre est devenu un partenaire indispensable.
+          Rapide et professionnel."
+        </p>
+        <div class="testimonial-footer">
+          <div class="testimonial-user">
+            <div class="avatar-ring">
+              <img
+                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80"
+                alt="Thomas Martin"
+              />
             </div>
+            <div>
+              <div class="testimonial-name">Thomas Martin</div>
+              <div class="testimonial-role">Chef d'entreprise</div>
+            </div>
+          </div>
+          <div class="testimonial-stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 3 -->
+      <article class="testimonial-card">
+        <div class="testimonial-top-strip"></div>
+        <div class="testimonial-quote">“</div>
+        <p class="testimonial-text">
+          "Je recommande vivement ! L'application mobile est très pratique et le suivi en temps réel est un vrai plus."
+        </p>
+        <div class="testimonial-footer">
+          <div class="testimonial-user">
+            <div class="avatar-ring">
+              <img
+                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80"
+                alt="Sophie Bernard"
+              />
+            </div>
+            <div>
+              <div class="testimonial-name">Sophie Bernard</div>
+              <div class="testimonial-role">Particulier</div>
+            </div>
+          </div>
+          <div class="testimonial-stars">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- CTA Section -->
+<section class="cta">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-left">
+        <h2 class="cta-title">
+          Besoin d'aide pour<br />
+          votre sinistre ?
+        </h2>
+        <p class="cta-desc">
+          Notre équipe d'experts est disponible pour vous accompagner
+          dans toutes vos démarches. Contactez-nous dès maintenant.
+        </p>
+
+        <div class="cta-buttons">
+          <a routerLink="/clientDashboard" class="btn-primary cta-btn-primary">
+            Déclarer un sinistre
+          </a>
+          <a routerLink="/contact" class="btn-outline cta-btn-secondary">
+            Nous contacter
+          </a>
+        </div>
+      </div>
+
+      <div class="cta-right">
+        <div class="cta-contact-card">
+          <div class="cta-icon-circle">📞</div>
+          <div>
+            <div class="cta-card-label">Appelez-nous</div>
+            <div class="cta-card-value">01 23 45 67 89</div>
+          </div>
+        </div>
+
+        <div class="cta-contact-card">
+          <div class="cta-icon-circle">✉️</div>
+          <div>
+            <div class="cta-card-label">Écrivez-nous</div>
+            <div class="cta-card-value">supportautosinistre.fr</div>
           </div>
         </div>
       </div>
@@ -575,19 +632,6 @@
   </div>
 </section>
 
-<!-- CTA Section -->
-<section class="cta">
-  <div class="container">
-    <div class="cta-content">
-      <h2 class="cta-title">Prêt à déclarer votre sinistre ?</h2>
-      <p class="cta-desc">Rejoignez les milliers de clients qui nous font confiance pour gérer leurs sinistres</p>
-      <div class="cta-buttons">
-        <button class="btn-primary btn-large">Déclarer un sinistre</button>
-        <button class="btn-outline">Nous contacter</button>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- Footer -->
 <footer class="footer">

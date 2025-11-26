@@ -1,0 +1,5 @@
+.page {
+  padding: 140px 20px 60px; /* pour compenser le header fixe */
+  max-width: 1200px;
+  margin: 0 auto;
+}
