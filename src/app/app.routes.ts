@@ -17,6 +17,8 @@ import { MessageComponent } from './shared/components/message/message.component'
 import { AuthGuard } from './app/auth-guard.service';
 import { DocumentSigningComponent } from './document-signing/document-signing.component';
 import { ServicesComponent } from './client/pages/services/services.component';
+import { ContactComponent } from './client/pages/contact/contact.component';
+import { CommentCaMarcheComponent } from './client/pages/comment-ca-marche/comment-ca-marche.component';
 
 export const routes: Routes = [
   // Page publique pour comptes garages non validés
@@ -86,10 +88,14 @@ export const routes: Routes = [
     path: 'client',
     component: ClientLayoutComponent,
     children: [
-      { path: 'services', component: ServicesComponent },
+      { path: '', component: ClientComponent },
     ]
+
   },
+  { path: 'services', component: ServicesComponent },
+  { path: 'contact', component: ContactComponent },
   { path: 'login', component: LoginComponent },
+  { path: 'comment-ca-marche', component: CommentCaMarcheComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'register/assure', component: RegisterComponent, data: { forcedUserType: 'assure' } },
   { path: 'register/garagiste', component: RegisterComponent, data: { forcedUserType: 'garagiste' } },

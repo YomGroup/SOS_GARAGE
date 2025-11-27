@@ -1,1 +1,248 @@
-<p>contact works!</p>
+<div class="contact-page">
+
+  <!-- HERO -->
+  <section class="contact-hero">
+    <div class="contact-hero-bg-top"></div>
+    <div class="contact-hero-bg-bottom"></div>
+
+    <div class="page-container contact-hero-inner">
+      <span class="contact-badge">
+        <span class="contact-badge-text">Contact</span>
+      </span>
+
+      <h1 class="contact-hero-title">
+        Besoin d'aide ?<br />
+        <span class="contact-hero-gradient">
+          Contactez-nous
+        </span>
+      </h1>
+
+      <p class="contact-hero-subtitle">
+        Notre équipe est à votre disposition pour répondre à toutes vos questions.
+      </p>
+    </div>
+  </section>
+
+  <!-- CARTES INFOS CONTACT -->
+  <section class="contact-infos">
+    <div class="page-container">
+      <div class="contact-info-grid">
+        <div
+          class="contact-card"
+          *ngFor="let info of contactInfo; let i = index"
+        >
+          <div class="contact-card-icon-wrapper">
+            <div class="contact-card-icon-bg">
+              <span class="contact-card-icon">{{ info.icon }}</span>
+            </div>
+          </div>
+
+          <h3 class="contact-card-title">
+            {{ info.title }}
+          </h3>
+
+          <p class="contact-card-value">
+            {{ info.value }}
+          </p>
+
+          <p class="contact-card-desc">
+            {{ info.description }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORMULAIRE + IMAGE -->
+  <section class="contact-form-section">
+    <div class="page-container">
+      <div class="contact-form-grid">
+
+        <!-- Colonne gauche : Formulaire -->
+        <div class="contact-form-wrapper">
+
+          <h2 class="contact-form-title">
+            Envoyez-nous un message
+          </h2>
+          <p class="contact-form-subtitle">
+            Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.
+          </p>
+
+          <!-- Message de succès -->
+          <div *ngIf="submitted; else contactFormBlock" class="contact-success">
+            <div class="contact-success-icon-circle">
+              <span class="contact-success-icon">💬</span>
+            </div>
+            <h3 class="contact-success-title">Message envoyé !</h3>
+            <p class="contact-success-text">
+              Nous avons bien reçu votre message et vous répondrons sous 24h.
+            </p>
+            <button
+              type="button"
+              class="contact-success-button"
+              (click)="resetForm()"
+            >
+              Envoyer un autre message
+            </button>
+          </div>
+
+          <!-- Formulaire -->
+          <ng-template #contactFormBlock>
+            <form #contactForm="ngForm" (ngSubmit)="onSubmit(contactForm)" class="contact-form">
+
+              <div class="contact-two-cols">
+                <div class="contact-field">
+                  <label for="name" class="contact-label">
+                    Nom complet *
+                  </label>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    [(ngModel)]="formData.name"
+                    class="contact-input"
+                    placeholder="Jean Dupont"
+                  />
+                </div>
+
+                <div class="contact-field">
+                  <label for="email" class="contact-label">
+                    Email *
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    [(ngModel)]="formData.email"
+                    class="contact-input"
+                    placeholder="jean@exemple.fr"
+                  />
+                </div>
+              </div>
+
+              <div class="contact-two-cols">
+                <div class="contact-field">
+                  <label for="phone" class="contact-label">
+                    Téléphone
+                  </label>
+                  <input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    [(ngModel)]="formData.phone"
+                    class="contact-input"
+                    placeholder="06 12 34 56 78"
+                  />
+                </div>
+
+                <div class="contact-field">
+                  <label for="subject" class="contact-label">
+                    Sujet *
+                  </label>
+                  <input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    required
+                    [(ngModel)]="formData.subject"
+                    class="contact-input"
+                    placeholder="Suivi de dossier"
+                  />
+                </div>
+              </div>
+
+              <div class="contact-field">
+                <label for="message" class="contact-label">
+                  Message *
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  rows="5"
+                  required
+                  [(ngModel)]="formData.message"
+                  class="contact-textarea"
+                  placeholder="Décrivez votre demande..."
+                ></textarea>
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="isSubmitting"
+                class="contact-submit-btn"
+              >
+                <ng-container *ngIf="isSubmitting; else btnLabel">
+                  <span class="contact-submit-inner">
+                    <span class="contact-spinner"></span>
+                    Envoi en cours...
+                  </span>
+                </ng-container>
+                <ng-template #btnLabel>
+                  <span class="contact-submit-inner">
+                    Envoyer le message
+                    <span class="contact-submit-arrow">➤</span>
+                  </span>
+                </ng-template>
+              </button>
+            </form>
+          </ng-template>
+        </div>
+
+        <!-- Colonne droite : Image -->
+        <div class="contact-image-wrapper">
+          <div class="contact-image-aspect">
+            <img
+              src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800&q=80"
+              alt="Notre équipe"
+              class="contact-image"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION MAP / ADRESSE -->
+  <section class="contact-map-section">
+    <div class="page-container">
+      <div class="contact-map-card">
+        <div class="contact-map-grid">
+          <!-- Texte -->
+          <div class="contact-map-text">
+            <h2 class="contact-map-title">
+              Venez nous rencontrer
+            </h2>
+            <p class="contact-map-subtitle">
+              Notre équipe vous accueille dans nos locaux parisiens
+              du lundi au vendredi de 9h à 18h.
+            </p>
+
+            <div class="contact-map-infos">
+              <div class="contact-map-info-row">
+                <span class="contact-map-icon">📍</span>
+                <span>123 Avenue des Champs-Élysées, 75008 Paris</span>
+              </div>
+              <div class="contact-map-info-row">
+                <span class="contact-map-icon">⏰</span>
+                <span>Lun - Ven : 9h - 18h</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Image map -->
+          <div class="contact-map-image-wrapper">
+            <img
+              src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=800&q=80"
+              alt="Paris"
+              class="contact-map-image"
+            />
+            <div class="contact-map-gradient"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

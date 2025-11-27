@@ -1,0 +1,141 @@
+<div class="process-page">
+
+  <!-- HERO -->
+  <section class="process-hero">
+    <div class="process-hero-bg-top"></div>
+    <div class="process-hero-bg-bottom"></div>
+
+    <div class="page-container process-hero-inner">
+      <span class="process-badge">
+        <span class="process-badge-text">
+          Comment ça marche
+        </span>
+      </span>
+
+      <h1 class="process-hero-title">
+        Un processus simple<br />
+        <span class="process-hero-gradient">
+          en 5 étapes
+        </span>
+      </h1>
+
+      <p class="process-hero-subtitle">
+        Nous avons simplifié au maximum la gestion de votre sinistre
+        pour vous faire gagner du temps et de l'énergie.
+      </p>
+    </div>
+  </section>
+
+  <!-- ÉTAPES -->
+  <section class="process-steps-section">
+    <div class="page-container">
+      <div class="process-steps-wrapper">
+        <!-- Ligne verticale desktop -->
+        <div class="process-line"></div>
+
+        <div class="process-steps-list">
+          <div
+            *ngFor="let step of steps; let i = index"
+            class="process-step-item"
+          >
+            <div
+              class="process-step-card"
+              [ngStyle]="{ 'background-image': step.gradient }"
+            >
+              <!-- numéro (desktop) -->
+              <div class="process-step-number-desktop">
+                <span class="process-step-number-text">
+                  {{ step.number }}
+                </span>
+              </div>
+
+              <div class="process-step-content">
+                <div class="process-step-icon-wrapper">
+                  <div class="process-step-icon-bg">
+                    <span class="process-step-icon">
+                      {{ step.icon }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="process-step-text">
+                  <div class="process-step-top">
+                    <span class="process-step-number-mobile">
+                      Étape {{ step.number }}
+                    </span>
+                    <span class="process-step-duration">
+                      {{ step.duration }}
+                    </span>
+                  </div>
+
+                  <h3 class="process-step-title">
+                    {{ step.title }}
+                  </h3>
+
+                  <p class="process-step-description">
+                    {{ step.description }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="process-faq-section">
+    <div class="page-container">
+      <div class="process-faq-header">
+        <span class="process-faq-badge">
+          <span class="process-faq-badge-text">
+            FAQ
+          </span>
+        </span>
+        <h2 class="process-faq-title">
+          Questions
+          <span class="process-faq-gradient">fréquentes</span>
+        </h2>
+      </div>
+
+      <div class="process-faq-list">
+        <div
+          class="process-faq-item"
+          *ngFor="let faq of faqs; let i = index"
+        >
+          <h3 class="process-faq-question">
+            {{ faq.question }}
+          </h3>
+          <p class="process-faq-answer">
+            {{ faq.answer }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="process-cta-section">
+    <div class="page-container process-cta-inner">
+      <h2 class="process-cta-title">
+        Prêt à commencer ?
+      </h2>
+      <p class="process-cta-subtitle">
+        Déclarez votre sinistre en moins de 5 minutes.
+      </p>
+
+      <!-- Tu peux adapter le lien en fonction de ta vraie route de déclaration -->
+      <a
+        routerLink="/login"
+        class="process-cta-button"
+      >
+        <span class="process-cta-button-inner">
+          Déclarer un sinistre
+          <span class="process-cta-arrow">➤</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+</div>

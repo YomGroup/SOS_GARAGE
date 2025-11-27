@@ -1,1 +1,132 @@
-<p>services works!</p>
+
+<div class="services-page">
+
+  <!-- HERO -->
+  <section class="services-hero">
+    <div class="page-container">
+      <div class="services-hero-inner">
+        <span class="services-badge">
+          <span class="services-badge-text">Nos services</span>
+        </span>
+
+        <h1 class="services-hero-title">
+          Une solution complète pour<br />
+          <span class="services-hero-gradient">
+            tous vos sinistres
+          </span>
+        </h1>
+
+        <p class="services-hero-subtitle">
+          De la déclaration à la réparation, nous prenons en charge l'intégralité
+          de votre sinistre automobile.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES PRINCIPAUX -->
+  <section class="services-main">
+    <div class="page-container">
+      <div class="services-main-list">
+        <div
+          class="service-card"
+          *ngFor="let service of services; let i = index"
+          [ngClass]="service.gradientClass"
+        >
+          <div class="service-card-grid">
+            <!-- Colonne Texte -->
+            <div class="service-card-content">
+              <div class="service-icon-wrapper">
+                <div class="service-icon-circle">
+                  <span class="service-icon">{{ service.icon }}</span>
+                </div>
+              </div>
+
+              <h3 class="service-card-title">{{ service.title }}</h3>
+
+              <p class="service-card-description">
+                {{ service.description }}
+              </p>
+
+              <!-- CTA : adapte le routerLink si tu préfères aller directement sur /clientDashboard/declarations -->
+              <a
+                routerLink="/login"
+                class="service-card-cta"
+              >
+                Commencer maintenant
+                <span class="service-card-cta-arrow">→</span>
+              </a>
+            </div>
+
+            <!-- Colonne puces -->
+            <div class="service-card-features">
+              <div
+                class="service-feature-item"
+                *ngFor="let feature of service.features"
+              >
+                <span class="service-feature-icon">✔</span>
+                <span class="service-feature-text">{{ feature }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICES COMPLÉMENTAIRES -->
+  <section class="services-extra">
+    <div class="page-container">
+      <div class="services-extra-header">
+        <h2 class="services-extra-title">
+          Services
+          <span class="services-hero-gradient">complémentaires</span>
+        </h2>
+        <p class="services-extra-subtitle">
+          Pour une prise en charge encore plus complète
+        </p>
+      </div>
+
+      <div class="services-extra-grid">
+        <div
+          class="services-extra-card"
+          *ngFor="let service of additionalServices"
+        >
+          <div class="services-extra-icon-wrapper">
+            <div class="services-extra-icon-bg">
+              <span class="services-extra-icon">{{ service.icon }}</span>
+            </div>
+          </div>
+
+          <h3 class="services-extra-card-title">{{ service.title }}</h3>
+          <p class="services-extra-card-text">
+            {{ service.description }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINALE -->
+  <section class="services-cta">
+    <div class="page-container">
+      <div class="services-cta-inner">
+        <h2 class="services-cta-title">
+          Prêt à déclarer votre sinistre ?
+        </h2>
+        <p class="services-cta-subtitle">
+          Commencez dès maintenant et bénéficiez d'un accompagnement personnalisé.
+        </p>
+
+        <a
+          routerLink="/login"
+          class="services-cta-button"
+        >
+          Déclarer un sinistre
+          <span class="services-cta-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</div>
