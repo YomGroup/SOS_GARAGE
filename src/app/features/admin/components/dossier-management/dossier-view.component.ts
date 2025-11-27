@@ -336,7 +336,7 @@ getMSinistreDate(mission: Mission | null): string {
     const nouvelleMission = {
       idSinistre: this.dossier.id,
       idReparateur: this.selectedReparateurId,
-      statut: 'en cours',
+      //statut: 'en cours',
       dateCreation: new Date().toISOString(),
       photosVehicule: [],
       constatAccident: '',
