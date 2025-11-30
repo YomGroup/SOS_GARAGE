@@ -127,7 +127,7 @@
         </div>
 
     <!-- Affichage des dossiers filtrés -->
-    <div *ngIf="dossiersFiltresFiltrageAvance().length; else aucunDossier">
+    <div *ngIf="!isLoadingDossiers && dossiersFiltresFiltrageAvance().length; else aucunDossier">
       <div class="card-flex-container" id="cardViewContainer" *ngIf="isCardView">
         <div class="dossier-card-modern" *ngFor="let dossier of dossiersFiltresPagine" style="cursor: pointer" (click)="ouvrirDossierView(dossier)">
           <!-- En-tête avec dégradé -->
@@ -160,11 +160,11 @@
                 </div>
               </div>
               <div class="dossier-numero-badge">
-                <span class="numero-text">N {{ dossier.numero }}</span>
+                <span class="numero-text">N {{ dossier.id }}</span>
               </div>
             </div>
             <div class="dossier-statut-badge">
-              <span class="statut-text" [ngClass]="getStatutClass(getStatutAffichage(dossier))">{{ getStatutAffichage(dossier) }}</span>
+              <span class="statut-text" [ngClass]="getStatutAvancementClass(dossier?.statut)">{{ getStatutAvancementLabel(dossier?.statut) }}</span>
             </div>
           </div>
 
@@ -225,8 +225,8 @@
                 <td>
                   <span
                     class="badge"
-                    [ngClass]="getStatutClass(getStatutAffichage(dossier))"
-                    >{{ getStatutAffichage(dossier) }}</span
+                    [ngClass]="getStatutAvancementClass(dossier?.statut)"
+                    >{{ getStatutAvancementLabel(dossier?.statut) }}</span
                   >
                 </td>
                 <td>{{ formatDate(dossier.dateCreation) }}</td>
