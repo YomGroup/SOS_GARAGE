@@ -27,7 +27,7 @@ export class ContactComponent {
     {
       icon: '✉️',
       title: 'Email',
-      value: 'support@autosinistre.fr',
+      value: 'sosmongarage2025@gmail.com',
       description: 'Réponse sous 24h'
     },
     {

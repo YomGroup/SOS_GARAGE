@@ -1,6 +1,6 @@
 // app.config.ts
 import { APP_INITIALIZER, ApplicationConfig, isDevMode } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideStore } from '@ngrx/store';
@@ -37,7 +37,12 @@ function initializeKeycloak(keycloak: KeycloakService) {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
+    provideRouter(routes,
+      withInMemoryScrolling({
+        scrollPositionRestoration: 'enabled', // remonte en haut sur nouvelle route
+        anchorScrolling: 'enabled'           // gère les ancres (#id) si un jour tu en utilises
+      })
+    ),
     provideAnimations(),
     provideClientHydration(),
     provideStore(),

@@ -282,6 +282,7 @@
   border-radius: 50px;
   font-size: 0.8rem;
   font-weight: 600;
+  color: #004AAD !important;    
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
@@ -325,15 +326,13 @@
 
 .badge.bg-secondary {
   background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
-  color: white;
+  color: rgb(255, 255, 255);
   box-shadow: 0 4px 16px rgba(108, 117, 125, 0.3);
 }
 
 .badge.bg-light {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-  color: var(--primary-blue);
-  border: 2px solid rgba(0, 74, 173, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: #f5f7ff !important;     /* léger bleu très clair */
+  color: #004AAD !important;
 }
 
 /* État du véhicule (roulant/non roulant) */
@@ -664,3 +663,5 @@
     font-size: 1.1rem;
   }
 }
+
+

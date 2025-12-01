@@ -180,10 +180,15 @@
 
 /* CTA */
 .service-card-cta {
-  display: inline-flex;
+ display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 22px;
+
+  /* Taille du bouton */
+  padding: 10px 20px;         /* <– un peu moins large */
+  max-width: fit-content;     /* <– ne jamais s'étirer */
+  width: auto;                /* <– au cas où une règle globale mettrait width: 100% */
+
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
@@ -191,7 +196,7 @@
   font-size: 0.95rem;
   text-decoration: none;
   backdrop-filter: blur(10px);
-  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;;
 }
 
 .service-card-cta:hover {

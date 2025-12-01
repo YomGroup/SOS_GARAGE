@@ -55,6 +55,22 @@
     }
   }
 
+  /* --- Correction header mobile globale --- */
+@media (max-width: 768px) {
+  /* On cache le bouton "Se connecter" du header client */
+  .header .auth-buttons {
+    display: none !important;
+  }
+
+  /* On affiche le burger sur mobile */
+  .header .nav-toggle {
+    display: inline-flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
   /* Custom components */
   @layer components {
     .btn {

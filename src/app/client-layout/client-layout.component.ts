@@ -1,16 +1,43 @@
 import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-client-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './client-layout.component.html',
   styleUrl: './client-layout.component.css'
 })
 export class ClientLayoutComponent {
   activeModal: string | null = null;
+
+constructor(private router: Router) {}
+
+  scrollTo(anchor: string, route?: string) {
+    if (route) {
+      this.router.navigate([route]).then(() => {
+        setTimeout(() => {
+          const el = document.getElementById(anchor);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 50);
+      });
+    } else {
+      const el = document.getElementById(anchor);
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  isMobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
+  }
 
   // === Features "Pourquoi nous choisir" ===
   features = [
@@ -54,7 +81,7 @@ export class ClientLayoutComponent {
     this.activeFeature = feature;
   }
 
-  // === Modales existantes ===
+  // === Modales ===
   openModal(id: string) {
     this.activeModal = id;
     document.body.style.overflow = 'hidden';

@@ -34,24 +34,24 @@ export class ServicesComponent {
       features: [
         'Formulaire en ligne 24h/24',
         'Photos et documents joints',
-        'Constat amiable digital',
-        'Confirmation immédiate'
+        // 'Constat amiable digital',
+        'Prise en charge rapide'
       ],
       gradientClass: 'service-card-1'
     },
-    {
-      icon: '🔍',
-      title: 'Expertise automobile',
-      description:
-        'Nos experts certifiés évaluent les dommages de votre véhicule avec précision. Nous nous déplaçons chez vous ou dans notre réseau de garages partenaires.',
-      features: [
-        'Experts certifiés',
-        'Évaluation précise des dommages',
-        'Rapport détaillé sous 48h',
-        'Expertise à domicile possible'
-      ],
-      gradientClass: 'service-card-2'
-    },
+    // {
+    //   icon: '🔍',
+    //   title: 'Expertise automobile',
+    //   description:
+    //     'Nos experts certifiés évaluent les dommages de votre véhicule avec précision. Nous nous déplaçons chez vous ou dans notre réseau de garages partenaires.',
+    //   features: [
+    //     'Experts certifiés',
+    //     'Évaluation précise des dommages',
+    //     'Rapport détaillé sous 48h',
+    //     'Expertise à domicile possible'
+    //   ],
+    //   gradientClass: 'service-card-2'
+    // },
     {
       icon: '💶',
       title: 'Indemnisation rapide',
@@ -59,7 +59,7 @@ export class ServicesComponent {
         "Recevez votre indemnisation dans les meilleurs délais. Nous négocions avec votre assurance pour vous garantir la meilleure prise en charge.",
       features: [
         "Négociation avec l'assurance",
-        'Virement sous 7 jours',
+        // 'Virement sous 7 jours',
         'Suivi en temps réel',
         'Aucun frais cachés'
       ],
@@ -69,12 +69,12 @@ export class ServicesComponent {
       icon: '🔧',
       title: 'Réparation garantie',
       description:
-        "Notre réseau de 500+ garages partenaires agréés assure des réparations de qualité avec des pièces d'origine et une garantie étendue.",
+        "Des garages assure des réparations de qualité avec des pièces d'origine et une garantie étendue.",
       features: [
         '500+ garages partenaires',
         "Pièces d'origine garanties",
         'Véhicule de courtoisie',
-        'Garantie 2 ans'
+        'Reparations rapides'
       ],
       gradientClass: 'service-card-4'
     }

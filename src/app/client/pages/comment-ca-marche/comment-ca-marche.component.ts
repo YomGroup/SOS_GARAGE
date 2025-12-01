@@ -24,8 +24,17 @@ interface Faq {
 })
 export class CommentCaMarcheComponent {
   steps: Step[] = [
-    {
+     {
       number: '01',
+      icon: '🚘',
+      title: 'Véhicule',
+      description:
+        "Ajoutez votre véhicule à l'aide de votre plaque d'immatriculation, confirmez les informations et choisissez votre assurance en moins de 5 cliques",
+      duration: '3 minutes',
+      gradient: 'linear-gradient(90deg, #04316bff, #0066dd)'
+    },
+    {
+      number: '02',
       icon: '📝',
       title: 'Déclaration',
       description:
@@ -34,7 +43,7 @@ export class CommentCaMarcheComponent {
       gradient: 'linear-gradient(90deg, #004aad, #0066dd)'
     },
     {
-      number: '02',
+      number: '03',
       icon: '✅',
       title: 'Validation',
       description:
@@ -43,7 +52,7 @@ export class CommentCaMarcheComponent {
       gradient: 'linear-gradient(90deg, #0066dd, #5a2d82)'
     },
     {
-      number: '03',
+      number: '04',
       icon: '🔍',
       title: 'Expertise',
       description:
@@ -52,7 +61,7 @@ export class CommentCaMarcheComponent {
       gradient: 'linear-gradient(90deg, #5a2d82, #7b2cbf)'
     },
     {
-      number: '04',
+      number: '05',
       icon: '🔧',
       title: 'Réparation',
       description:
@@ -61,12 +70,12 @@ export class CommentCaMarcheComponent {
       gradient: 'linear-gradient(90deg, #7b2cbf, #9932cc)'
     },
     {
-      number: '05',
+      number: '06',
       icon: '🎉',
       title: 'Clôture',
       description:
         "Récupérez votre véhicule réparé et recevez votre indemnisation. Votre dossier est clôturé avec succès.",
-      duration: '7 jours',
+      duration: ' Variable',
       gradient: 'linear-gradient(90deg, #9932cc, #aa38cb)'
     }
   ];
@@ -75,22 +84,46 @@ export class CommentCaMarcheComponent {
     {
       question: "Combien de temps prend le traitement d'un sinistre ?",
       answer:
-        "En moyenne, un sinistre est traité en 7 à 10 jours ouvrés, de la déclaration à l'indemnisation. Les délais peuvent varier selon la complexité du dossier."
+        "En moyenne, un sinistre est traité en 7 à 10 jours ouvrés, de la déclaration à gestion. Les délais peuvent varier selon la complexité du dossier."
     },
     {
       question: 'Dois-je avancer les frais de réparation ?',
       answer:
-        "Non, dans la plupart des cas, les frais sont directement pris en charge par l'assurance. Vous n'avez aucune avance à faire dans nos garages partenaires."
+        "Non, les frais sont directement pris en charge par l'assurance. Vous n'avez aucune avance à faire a un garage."
     },
-    {
-      question: 'Puis-je choisir mon propre garage ?',
-      answer:
-        'Oui, vous pouvez choisir votre garage habituel. Cependant, nos garages partenaires offrent des avantages exclusifs comme le véhicule de courtoisie gratuit.'
-    },
+    // {
+    //   question: 'Puis-je choisir mon propre garage ?',
+    //   answer:
+    //     'Oui, vous pouvez choisir votre garage habituel. Cependant, nos garages partenaires offrent des avantages exclusifs comme le véhicule de courtoisie gratuit.'
+    // },
     {
       question: "Que faire en cas de désaccord avec l'expertise ?",
       answer:
         "Vous pouvez demander une contre-expertise à vos frais ou nous contacter pour une médiation avec l'assurance."
+    },
+    {
+      question: "Le garage fournit-il un véhicule de remplacement ?",
+      answer:
+        "Oui, un véhicule de secours peut être mis à votre disposition selon la disponibilité du garage chargé de votre réparation."
+    },
+    {
+      question: "Comment se passe la communication avec mon assurance ?",
+      answer:
+        "Nous assurons une liaison directe avec votre assurance pour le suivi du dossier, l'expertise et la validation de la prise en charge."
+    },
+    {
+      question: "Les pièces utilisées sont-elles de qualité ?",
+      answer:
+        "Oui, les garages utilisent exclusivement des pièces de premier choix, conformes aux standards du marché et validées par les assureurs."
+    },
+    {
+      question: "Que faire si le délai de réparation est plus long que prévu ?",
+      answer:
+        "En cas de retard, nous vous informons immédiatement et nous coordonnons avec le garage et l’assurance pour accélérer le traitement si nécessaire."
     }
+
+
+
+
   ];
 }

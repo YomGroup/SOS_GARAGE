@@ -1,637 +1,126 @@
-<!-- Header -->
 <header class="header">
-  <div class="container">
+  <div class="container header-inner">
     <div class="nav-brand">
       <div class="logo">
         <img src="assets/logo.png" alt="Logo SOS MON GARAGE" class="logo-img" />
       </div>
     </div>
 
-    <nav class="nav-menu">
-      <a routerLink="/services" routerLinkActive="active" class="nav-link">Services</a>
-      <a routerLink="/comment-ca-marche" routerLinkActive="active" class="nav-link">Comment ça marche</a>
-      <a routerLink="/contact" routerLinkActive="active" class="nav-link">Contact</a>
-    </nav>
+    <!-- Menu desktop -->
+    <!-- MENU DESKTOP -->
+<nav class="nav-menu nav-desktop">
+  <a
+    routerLink=""
+    [routerLinkActiveOptions]="{ exact: true }"
+    routerLinkActive="active"
+    class="nav-link"
+    (click)="closeMobileMenu()"
+  >
+    Accueil
+  </a>
 
-    <div class="auth-buttons">
+  <a
+    routerLink="services"
+    routerLinkActive="active"
+    class="nav-link"
+    (click)="closeMobileMenu()"
+  >
+    Services
+  </a>
+
+  <a
+    routerLink="comment-ca-marche"
+    routerLinkActive="active"
+    class="nav-link"
+    (click)="closeMobileMenu()"
+  >
+    Comment ça marche
+  </a>
+
+  <a
+    routerLink="contact"
+    routerLinkActive="active"
+    class="nav-link"
+    (click)="closeMobileMenu()"
+  >
+    Contact
+  </a>
+</nav>
+
+
+    <!-- Bouton desktop -->
+    <div class="auth-buttons nav-desktop">
       <a routerLink="/clientDashboard" class="btn-primary btn-large">Se connecter</a>
     </div>
+
+    <!-- Burger mobile -->
+    <button
+      class="nav-toggle"
+      type="button"
+      (click)="toggleMobileMenu()"
+      aria-label="Ouvrir le menu"
+    >
+      <span class="nav-toggle-line" [class.nav-toggle-line-open]="isMobileMenuOpen"></span>
+      <span class="nav-toggle-line" [class.nav-toggle-line-open]="isMobileMenuOpen"></span>
+      <span class="nav-toggle-line" [class.nav-toggle-line-open]="isMobileMenuOpen"></span>
+    </button>
   </div>
+
+  <!-- MENU MOBILE -->
+  <nav class="mobile-menu" *ngIf="isMobileMenuOpen">
+  <a
+    routerLink=""
+    [routerLinkActiveOptions]="{ exact: true }"
+    routerLinkActive="mobile-link-active"
+    class="mobile-link"
+    (click)="closeMobileMenu()"
+  >
+    Accueil
+  </a>
+
+  <a
+    routerLink="services"
+    routerLinkActive="mobile-link-active"
+    class="mobile-link"
+    (click)="closeMobileMenu()"
+  >
+    Services
+  </a>
+
+  <a
+    routerLink="comment-ca-marche"
+    routerLinkActive="mobile-link-active"
+    class="mobile-link"
+    (click)="closeMobileMenu()"
+  >
+    Comment ça marche
+  </a>
+
+  <a
+    routerLink="contact"
+    routerLinkActive="mobile-link-active"
+    class="mobile-link"
+    (click)="closeMobileMenu()"
+  >
+    Contact
+  </a>
+
+  <a
+    routerLink="/clientDashboard"
+    class="mobile-cta"
+    (click)="closeMobileMenu()"
+  >
+    Se connecter
+  </a>
+</nav>
+
 </header>
 
-
-
-<!-- Hero Section -->
-<!-- Hero Section -->
- 
-<section class="hero-section">
-  <!-- Fond animé -->
-  <div class="hero-bg">
-    <div class="hero-orb hero-orb-1"></div>
-    <div class="hero-orb hero-orb-2"></div>
-    <div class="hero-dot hero-dot-1"></div>
-    <div class="hero-dot hero-dot-2"></div>
-    <div class="hero-dot hero-dot-3"></div>
-  </div>
-
-  <div class="hero-container">
-    <div class="hero-grid">
-      <!-- Colonne gauche -->
-      <div class="hero-left">
-        <div class="hero-eyebrow">
-          <span class="hero-badge-dot">
-            <span class="hero-badge-ping"></span>
-          </span>
-          <span class="hero-eyebrow-text">Service disponible 24h/24</span>
-        </div>
-
-        <h1 class="hero-title">
-          Gérez vos<br />
-          <span class="hero-title-highlight">
-            sinistres auto
-            <span class="hero-underline"></span>
-          </span><br />
-          en toute sérénité
-        </h1>
-
-        <p class="hero-subtitle-2">
-          Nous simplifions chaque étape de votre sinistre automobile.
-          De la déclaration à la réparation, nous sommes à vos côtés.
-        </p>
-
-        <div class="hero-actions">
-          <a class="btn-primary btn-large" [routerLink]="['/declaration']">
-            Déclarer un sinistre
-          </a>
-          <a class="btn-outline btn-large" [routerLink]="['/process']">
-            Comment ça marche
-          </a>
-        </div>
-
-        <!-- Stats -->
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="hero-stat-value">15K+</div>
-            <div class="hero-stat-label">Sinistres traités</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-value">48h</div>
-            <div class="hero-stat-label">Délai moyen</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-value">98%</div>
-            <div class="hero-stat-label">Clients satisfaits</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Colonne droite -->
-      <div class="hero-right">
-        <div class="hero-main-card">
-          <div class="hero-main-border"></div>
-          <div class="hero-main-image-wrapper">
-            <img
-              src="https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&q=80"
-              alt="Expert automobile"
-              class="hero-main-image"
-            />
-            <div class="hero-main-gradient"></div>
-          </div>
-        </div>
-
-        <!-- Petite image flottante 1 -->
-        <div class="hero-float hero-float-1">
-          <div class="hero-float-image-wrapper">
-            <img
-              src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=300&q=80"
-              alt="Réparation"
-              class="hero-float-image"
-            />
-          </div>
-        </div>
-
-        <!-- Petite image flottante 2 -->
-        <div class="hero-float hero-float-2">
-          <div class="hero-float-image-wrapper">
-            <img
-              src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=300&q=80"
-              alt="Véhicule"
-              class="hero-float-image"
-            />
-          </div>
-        </div>
-
-        <!-- Carte 100% prise en charge -->
-        <div class="hero-mini-card hero-mini-card-1">
-          <div class="hero-mini-icon">
-            <!-- Icône pseudo-bouclier -->
-            <span>🛡</span>
-          </div>
-          <div>
-            <div class="hero-mini-value">100%</div>
-            <div class="hero-mini-label">Prise en charge</div>
-          </div>
-        </div>
-
-        <!-- Carte 48h -->
-        <div class="hero-mini-card hero-mini-card-2">
-          <div class="hero-mini-icon hero-mini-icon-light">
-            <span>⏱</span>
-          </div>
-          <div>
-            <div class="hero-mini-value">48h</div>
-            <div class="hero-mini-label hero-mini-label-light">
-              Traitement express
-            </div>
-          </div>
-        </div>
-
-        <!-- Badge clients satisfaits -->
-        <div class="hero-clients-badge">
-          <div class="hero-clients-avatars">
-            <div class="hero-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80"
-                alt="Client"
-              />
-            </div>
-            <div class="hero-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80"
-                alt="Client"
-              />
-            </div>
-            <div class="hero-avatar">
-              <img
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80"
-                alt="Client"
-              />
-            </div>
-          </div>
-          <div class="hero-clients-text">
-            ✔ +2000 clients satisfaits
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Vague basse -->
-  <div class="hero-wave">
-    <svg viewBox="0 0 1440 100" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M0 50L48 45.8C96 41.7 192 33.3 288 29.2C384 25 480 25 576 33.3C672 41.7 768 58.3 864 62.5C960 66.7 1056 58.3 1152 50C1248 41.7 1344 33.3 1392 29.2L1440 25V100H1392C1344 100 1248 100 1152 100C1056 100 960 100 864 100C768 100 672 100 576 100C480 100 384 100 288 100C192 100 96 100 48 100H0V50Z"
-        fill="#ffffff"
-      />
-    </svg>
-  </div>
-</section>
-
-
-
-<!-- Services Section -->
-<section id="services" class="services">
-  <div class="container">
-    <!-- Header -->
-    <div class="services-header">
-      <div>
-        <div class="section-badge">
-          <span class="section-badge-dot"></span>
-          <span class="section-badge-text">Nos services</span>
-        </div>
-        <h2 class="section-title">
-          Découvrez notre gamme<br>
-          <span class="text-gradient">de services sinistres</span>
-        </h2>
-      </div>
-
-      <a class="services-link">
-        Voir tous les services →
-      </a>
-    </div>
-
-    <!-- Grid -->
-    <div class="services-grid">
-      <!-- Déclaration -->
-      <div class="service-card" (click)="openModal('modal1')">
-        <div class="service-icon-gradient">
-          <span>📄</span>
-        </div>
-        <h3 class="service-title">Déclaration</h3>
-        <p class="service-desc">
-          Déclarez votre sinistre en quelques clics, 24h/24 et 7j/7.
-        </p>
-        <div class="service-more">
-          En savoir plus
-          <span>→</span>
-        </div>
-      </div>
-
-      <!-- Expertise -->
-      <div class="service-card" (click)="openModal('modal2')">
-        <div class="service-icon-gradient service-icon-gradient-blue">
-          <span>🔍</span>
-        </div>
-        <h3 class="service-title">Expertise</h3>
-        <p class="service-desc">
-          Nos experts évaluent les dommages rapidement et précisément.
-        </p>
-        <div class="service-more">
-          En savoir plus
-          <span>→</span>
-        </div>
-      </div>
-
-      <!-- Indemnisation -->
-      <div class="service-card" (click)="openModal('modal4')">
-        <div class="service-icon-gradient service-icon-gradient-purple">
-          <span>💶</span>
-        </div>
-        <h3 class="service-title">Indemnisation</h3>
-        <p class="service-desc">
-          Recevez votre indemnisation dans les meilleurs délais.
-        </p>
-        <div class="service-more">
-          En savoir plus
-          <span>→</span>
-        </div>
-      </div>
-
-      <!-- Réparation -->
-      <div class="service-card" (click)="openModal('modal3')">
-        <div class="service-icon-gradient service-icon-gradient-mixed">
-          <span>🔧</span>
-        </div>
-        <h3 class="service-title">Réparation</h3>
-        <p class="service-desc">
-          Réseau de garages partenaires agréés pour vos réparations.
-        </p>
-        <div class="service-more">
-          En savoir plus
-          <span>→</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Stats Section -->
-<section class="stats-home">
-  <div class="container stats-home-grid">
-    <!-- Colonne images -->
-    <div class="stats-home-images">
-      <div class="stats-home-col">
-        <div class="stats-home-img-main">
-          <img
-            src="https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=600&q=80"
-            alt="Expert automobile"
-          />
-        </div>
-        <div class="stats-home-experience">
-          <div class="stats-home-experience-value">15+</div>
-          <div class="stats-home-experience-label">Années d'expérience</div>
-        </div>
-      </div>
-
-      <div class="stats-home-col stats-home-col-right">
-        <div class="stats-home-img-square">
-          <img
-            src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=600&q=80"
-            alt="Réparation automobile"
-          />
-        </div>
-        <div class="stats-home-img-wide">
-          <img
-            src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&q=80"
-            alt="Véhicule"
-          />
-          <div class="stats-home-img-overlay"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Colonne texte -->
-    <div class="stats-home-content">
-      <div class="section-badge stats-badge">
-        <span class="section-badge-text">Notre impact</span>
-      </div>
-
-      <h2 class="section-title">
-        Notre impact<br />
-        <span class="text-gradient">en chiffres</span>
-      </h2>
-
-      <p class="stats-home-intro">
-        Depuis plus de 15 ans, nous accompagnons les automobilistes dans la
-        gestion de leurs sinistres. Notre expertise et notre réseau de
-        partenaires nous permettent d'offrir un service rapide et efficace.
-      </p>
-
-      <div class="stats-home-list">
-        <div class="stats-home-item">
-          <div class="stats-home-icon-circle">📈</div>
-          <div>
-            <div class="stats-home-value">15K+</div>
-            <div class="stats-home-label">Sinistres traités</div>
-            <div class="stats-home-desc">chaque année</div>
-          </div>
-        </div>
-
-        <div class="stats-home-item">
-          <div class="stats-home-icon-circle">😊</div>
-          <div>
-            <div class="stats-home-value">98%</div>
-            <div class="stats-home-label">Taux de satisfaction</div>
-            <div class="stats-home-desc">clients satisfaits</div>
-          </div>
-        </div>
-
-        <div class="stats-home-item">
-          <div class="stats-home-icon-circle">⏱</div>
-          <div>
-            <div class="stats-home-value">48h</div>
-            <div class="stats-home-label">Délai moyen</div>
-            <div class="stats-home-desc">de traitement</div>
-          </div>
-        </div>
-
-        <div class="stats-home-item">
-          <div class="stats-home-icon-circle">🛠</div>
-          <div>
-            <div class="stats-home-value">500+</div>
-            <div class="stats-home-label">Garages partenaires</div>
-            <div class="stats-home-desc">en France</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Pourquoi nous choisir -->
-<section class="features-section">
-  <div class="container">
-    <!-- Header -->
-    <div class="features-header">
-      <div class="features-badge">
-        <span class="features-badge-dot"></span>
-        <span class="features-badge-text">Pourquoi nous choisir</span>
-      </div>
-      <h2 class="features-title">
-        Ce qui nous distingue<br />
-        <span class="text-gradient">des autres</span>
-      </h2>
-      <p class="features-subtitle">
-        Vos démarches sont simplifiées, sécurisées et accompagnées par une équipe
-        experte, disponible à chaque étape de votre sinistre.
-      </p>
-    </div>
-
-    <!-- Layout 2 colonnes -->
-    <div class="features-layout">
-      <!-- Colonne gauche : liste des features -->
-      <div class="feature-list">
-        <button
-          *ngFor="let feature of features"
-          type="button"
-          (click)="setActiveFeature(feature)"
-          class="feature-item"
-          [class.feature-item-active]="activeFeature.id === feature.id"
-        >
-          <div class="feature-item-top">
-            <div
-              class="feature-icon-wrapper"
-              [class.feature-icon-wrapper-active]="activeFeature.id === feature.id"
-            >
-              <span class="feature-icon">{{ feature.icon }}</span>
-            </div>
-
-            <div class="feature-texts">
-              <span class="feature-title">{{ feature.title }}</span>
-              <p
-                class="feature-desc"
-                [class.feature-desc-visible]="activeFeature.id === feature.id"
-              >
-                {{ feature.description }}
-              </p>
-            </div>
-
-            <span
-              class="feature-chevron"
-              [class.feature-chevron-active]="activeFeature.id === feature.id"
-              >›</span
-            >
-          </div>
-        </button>
-      </div>
-
-      <!-- Colonne droite : image dynamique -->
-      <div class="feature-visual">
-        <div class="feature-visual-glow"></div>
-
-        <div class="feature-visual-card">
-          <img
-            [src]="activeFeature.image"
-            [alt]="activeFeature.title"
-            class="feature-visual-img"
-          />
-
-          <div class="feature-visual-overlay"></div>
-
-          <div class="feature-chip">
-            <div class="chip-bullet"></div>
-            <div class="chip-texts">
-              <div class="chip-title">Gestion complète du sinistre</div>
-              <div class="chip-subtitle">Déclaration, expertise, réparation</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="feature-indicators">
-          <button
-            *ngFor="let feature of features"
-            type="button"
-            (click)="setActiveFeature(feature)"
-            class="feature-indicator"
-            [class.feature-indicator-active]="activeFeature.id === feature.id"
-          ></button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- Testimonials Section -->
-<section class="testimonials">
-  <div class="container">
-    <!-- Header -->
-    <div class="testimonials-header">
-      <div class="testimonials-title-block">
-        <span class="badge-pill">
-          <span class="badge-pill-text">Témoignages</span>
-        </span>
-        <h2 class="testimonials-title">
-          Ils nous font<br />
-          <span class="text-gradient">confiance</span>
-        </h2>
-        <p class="testimonials-subtitle">
-          Vos démarches sont simplifiées, sécurisées et accompagnées par une équipe experte,
-          disponible à chaque étape de votre sinistre.
-        </p>
-      </div>
-
-      <div class="testimonials-avatars">
-        <div class="avatar-stack">
-          <img
-            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80"
-            alt="Marie Dupont"
-          />
-          <img
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80"
-            alt="Thomas Martin"
-          />
-          <img
-            src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80"
-            alt="Sophie Bernard"
-          />
-        </div>
-        <span class="avatar-text">+2000 clients satisfaits</span>
-      </div>
-    </div>
-
-    <!-- Cards -->
-    <div class="testimonials-grid">
-      <!-- 1 -->
-      <article class="testimonial-card">
-        <div class="testimonial-top-strip"></div>
-        <div class="testimonial-quote">“</div>
-        <p class="testimonial-text">
-          "Service exceptionnel ! Mon sinistre a été traité en moins de 48h. L'équipe m'a accompagnée à chaque étape."
-        </p>
-        <div class="testimonial-footer">
-          <div class="testimonial-user">
-            <div class="avatar-ring">
-              <img
-                src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&q=80"
-                alt="Marie Dupont"
-              />
-            </div>
-            <div>
-              <div class="testimonial-name">Marie Dupont</div>
-              <div class="testimonial-role">Particulier</div>
-            </div>
-          </div>
-          <div class="testimonial-stars">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- 2 -->
-      <article class="testimonial-card">
-        <div class="testimonial-top-strip"></div>
-        <div class="testimonial-quote">“</div>
-        <p class="testimonial-text">
-          "Pour notre flotte de véhicules, AutoSinistre est devenu un partenaire indispensable.
-          Rapide et professionnel."
-        </p>
-        <div class="testimonial-footer">
-          <div class="testimonial-user">
-            <div class="avatar-ring">
-              <img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&q=80"
-                alt="Thomas Martin"
-              />
-            </div>
-            <div>
-              <div class="testimonial-name">Thomas Martin</div>
-              <div class="testimonial-role">Chef d'entreprise</div>
-            </div>
-          </div>
-          <div class="testimonial-stars">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-        </div>
-      </article>
-
-      <!-- 3 -->
-      <article class="testimonial-card">
-        <div class="testimonial-top-strip"></div>
-        <div class="testimonial-quote">“</div>
-        <p class="testimonial-text">
-          "Je recommande vivement ! L'application mobile est très pratique et le suivi en temps réel est un vrai plus."
-        </p>
-        <div class="testimonial-footer">
-          <div class="testimonial-user">
-            <div class="avatar-ring">
-              <img
-                src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&q=80"
-                alt="Sophie Bernard"
-              />
-            </div>
-            <div>
-              <div class="testimonial-name">Sophie Bernard</div>
-              <div class="testimonial-role">Particulier</div>
-            </div>
-          </div>
-          <div class="testimonial-stars">
-            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-          </div>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
-
-<!-- CTA Section -->
-<section class="cta">
-  <div class="container">
-    <div class="cta-inner">
-      <div class="cta-left">
-        <h2 class="cta-title">
-          Besoin d'aide pour<br />
-          votre sinistre ?
-        </h2>
-        <p class="cta-desc">
-          Notre équipe d'experts est disponible pour vous accompagner
-          dans toutes vos démarches. Contactez-nous dès maintenant.
-        </p>
-
-        <div class="cta-buttons">
-          <a routerLink="/clientDashboard" class="btn-primary cta-btn-primary">
-            Déclarer un sinistre
-          </a>
-          <a routerLink="/contact" class="btn-outline cta-btn-secondary">
-            Nous contacter
-          </a>
-        </div>
-      </div>
-
-      <div class="cta-right">
-        <div class="cta-contact-card">
-          <div class="cta-icon-circle">📞</div>
-          <div>
-            <div class="cta-card-label">Appelez-nous</div>
-            <div class="cta-card-value">01 23 45 67 89</div>
-          </div>
-        </div>
-
-        <div class="cta-contact-card">
-          <div class="cta-icon-circle">✉️</div>
-          <div>
-            <div class="cta-card-label">Écrivez-nous</div>
-            <div class="cta-card-value">supportautosinistre.fr</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+<!-- CONTENU DES PAGES CLIENT -->
+<main class="client-main">
+  <!-- ICI s’affichent : Home, Services, Contact, Comment ça marche -->
+  <router-outlet></router-outlet>
+</main>
 
 <!-- Footer -->
 <footer class="footer">
@@ -642,7 +131,10 @@
           <div class="footer-logo">🚗</div>
           <span class="footer-brand-text">SOS MON GARAGE</span>
         </div>
-        <p>Votre partenaire de confiance pour la gestion de vos sinistres automobiles. Nous nous occupons de tout, de A à Z.</p>
+        <p>
+          Votre partenaire de confiance pour la gestion de vos sinistres automobiles.
+          Nous nous occupons de tout, de A à Z.
+        </p>
         <div class="social-links">
           <a href="#" class="social-link">
             <span><img src="assets/icons/facebook.svg" alt="Facebook" class="social-icon" /></span>
@@ -653,13 +145,10 @@
           <a href="#" class="social-link">
             <span><img src="assets/icons/tiktok.svg" alt="TikTok" class="social-icon" /></span>
           </a>
-          <!-- <a href="#" class="social-link">
-            <span><img src="assets/icons/linkedin.svg" alt="LinkedIn" class="social-icon" /></span>
-          </a> -->
         </div>
       </div>
       
-      <div class="footer-section">
+      <!-- <div class="footer-section">
         <h4>Services</h4>
         <ul>
           <li>Déclaration de sinistre</li>
@@ -668,25 +157,25 @@
           <li>Véhicule de remplacement</li>
           <li>Avance de frais</li>
         </ul>
-      </div>
+      </div> -->
       
       <div class="footer-section">
         <h4>Entreprise</h4>
         <ul>
-          <li>À propos</li>
-          <li>Notre équipe</li>
-          <li>Carrières</li>
-          <li>Actualités</li>
-          <li>Partenaires</li>
+          <li routerLink="/client/services">Services</li>
+          <li routerLink="/client/class">Comment ça marche</li>
+          <li routerLink="/client/contact">Contact</li>
+          <!-- <li>Actualités</li>
+          <li>Partenaires</li> -->
         </ul>
       </div>
       
       <div class="footer-section">
         <h4>Support</h4>
         <ul>
-          <li>Centre d'aide</li>
-          <li>Nous contacter</li>
-          <li>FAQ</li>
+          <li routerLink="/client/contact">Contact</li>
+          <li (click)="scrollTo('contact-info', '/client/contact')">Nous contacter</li>
+          <li (click)="scrollTo('faq', '/client/comment-ca-marche')">FAQ</li>
           <li>Conditions d'utilisation</li>
           <li>Politique de confidentialité</li>
         </ul>
@@ -699,7 +188,6 @@
         <div class="footer-bottom-links">
           <a href="#">Mentions légales</a>
           <a href="#">Cookies</a>
-          <!-- <a href="#">Plan du site</a> -->
         </div>
       </div>
     </div>
