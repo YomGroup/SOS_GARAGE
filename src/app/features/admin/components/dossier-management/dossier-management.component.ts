@@ -23,6 +23,16 @@ import { MessageService } from '../../../../../services/messagerie.service';
 import { AuthService } from '../../../../../services/auth.service';
 import { DossierFilterService } from './dossier-filter.service';
 import { Vehicule, Reparateur, Mission } from '../../../../../services/models-api.interface';
+import { 
+  getDisplayStatus, 
+  getDisplayStatusColor, 
+  DisplayStatus 
+} from '../../../../shared/utils/status.utils';
+import { 
+  formatDateFr, 
+  formatDateTimeFr, 
+  parseBackendDate 
+} from '../../../../shared/utils/date.utils';
 
 
 // Étend l'interface Dossier pour l'affichage local
@@ -416,7 +426,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     const s = this.getStatutAffichage(dossier).toLowerCase();
     if (statut === 'en_cours') return s === 'en cours';
     if (statut === 'termine') return s === 'terminé';
-    if (statut === 'en_attente') return s === 'non traité';
+    if (statut === 'en_attente' || statut === 'non_traite') return s === 'non traité';
     return true;
   }
 
@@ -540,11 +550,12 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     this.router.navigate(['/admin/dossiers/view', dossier.id]);
   }
 
-  formatDate(date: Date | undefined | null): string {
-    if (!date) {
-      return 'Date non disponible';
-    }
-    return date.toLocaleDateString('fr-FR');
+  /**
+   * Formate une date en format français
+   * Utilise l'utilitaire centralisé qui gère tous les formats de date du backend
+   */
+  formatDate(date: any): string {
+    return formatDateFr(date) || 'Date non disponible';
   }
 
 
@@ -795,26 +806,14 @@ getVehiculeInfo(dossier: any): any {
   };
 }
 
+  /**
+   * Formate une date de véhicule
+   * Utilise l'utilitaire centralisé qui gère tous les formats de date
+   */
   formatDateVehicule(date: any): string {
-  if (!date) {
-    return '—'; // valeur par défaut
+    const formatted = formatDateFr(date);
+    return formatted === 'N/A' ? '—' : formatted;
   }
-
-  // Cas 1 : string ISO (le plus courant)
-  if (typeof date === 'string') {
-    const d = new Date(date);
-    return isNaN(d.getTime()) ? '—' : d.toLocaleDateString('fr-FR');
-  }
-
-  // Cas 2 : objet LocalDate { year, month, day }
-  if (typeof date === 'object' && date.year && date.month && date.day) {
-    return `${date.day.toString().padStart(2, '0')}/${
-      date.month.toString().padStart(2, '0')
-    }/${date.year}`;
-  }
-
-  return '—';
-}
 
 
 
@@ -834,57 +833,92 @@ getVehiculeInfo(dossier: any): any {
   }
 
   /**
-   * Retourne le statut d'affichage pour la carte basé sur le statut réel du dossier/sinistre
+   * Retourne le statut d'affichage simplifié (3 catégories: Non traité, En cours, Terminé)
+   * Utilise le statusDisplay du backend si disponible, sinon fait le mapping localement
    */
-  getStatutAffichage(dossier: any): string {
-    const statut = dossier?.statut;
-    return this.getStatutAvancementLabel(statut);
+  getStatutAffichage(dossier: any): DisplayStatus {
+    // Vérifier d'abord si le dossier a une mission associée
+    const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier?.id);
+    
+    if (!mission) {
+      // Pas de mission = Non traité
+      return 'Non traité';
+    }
+    
+    // Utiliser le statusDisplay du backend s'il existe
+    if (mission.statusDisplay) {
+      return mission.statusDisplay as DisplayStatus;
+    }
+    
+    // Fallback: utiliser l'utilitaire centralisé
+    return getDisplayStatus(mission);
   }
 
   /**
-   * Retourne le libellé lisible du statut d'avancement (compatible avec dossier-view)
+   * Retourne le libellé lisible du statut d'avancement détaillé
    */
   getStatutAvancementLabel(statut: string | undefined): string {
-    if (!statut) return 'En attente de traitement';
-    switch (statut) {
+    if (!statut) return 'Non traité';
+    const s = statut.toUpperCase().replace(/ /g, '_');
+    switch (s) {
       case 'EN_ATTENTE_TRAITEMENT':
-        return 'En attente de traitement';
+      case 'EN_ATTENTE_DE_TRAITEMENT':
+      case 'PENDING':
+      case 'DRAFT':
+      case 'NON_TRAITEE':
+        return 'Non traité';
       case 'EN_ATTENTE_EXPERTISE':
         return 'En attente d\'expertise';
       case 'EN_ATTENTE_REPARATION':
         return 'En attente de réparation';
       case 'EN_COURS_REPARATION':
-        return 'En cours de réparation';
+      case 'EN_COURS_DE_REPARATION':
+      case 'IN_PROGRESS':
+      case 'EN_COUR':
+      case 'ASSIGNED':
+        return 'En cours';
       case 'REPARATION_TERMINEE':
-        return 'Réparation terminée';
+      case 'TERMINEE':
+      case 'TERMINE':
+      case 'COMPLETED':
+        return 'Terminé';
       case 'VALIDÉ':
+      case 'VALIDE':
         return 'Validé';
       case 'EN_ATTENTE':
         return 'En attente';
       case 'REJETÉ':
+      case 'REJETE':
+      case 'CANCELLED':
         return 'Rejeté';
       default:
-        return statut;
+        // Retourner le mapping simplifié pour les statuts inconnus
+        const lower = statut.toLowerCase();
+        if (lower.includes('terminé') || lower.includes('terminee')) return 'Terminé';
+        if (lower.includes('en cours') || lower.includes('en_cours')) return 'En cours';
+        return 'Non traité';
     }
   }
 
   /**
-   * Retourne la classe CSS du statut d'avancement (compatible avec dossier-view)
+   * Retourne la classe CSS du statut d'avancement
    */
   getStatutAvancementClass(statut: string | undefined): string {
-    if (!statut) return 'statut-attente';
-    switch (statut) {
-      case 'EN_ATTENTE_TRAITEMENT':
-      case 'EN_ATTENTE_EXPERTISE':
-      case 'EN_ATTENTE_REPARATION':
-      case 'EN_ATTENTE':
-        return 'statut-attente';
-      case 'EN_COURS_REPARATION':
-        return 'statut-encours';
-      case 'REPARATION_TERMINEE':
-      case 'VALIDÉ':
+    const label = this.getStatutAvancementLabel(statut);
+    switch (label) {
+      case 'Terminé':
+      case 'Validé':
         return 'statut-terminee';
-      case 'REJETÉ':
+      case 'En cours':
+      case 'En cours de réparation':
+      case 'En attente d\'expertise':
+      case 'En attente de réparation':
+        return 'statut-encours';
+      case 'Non traité':
+      case 'En attente':
+      case 'En attente de traitement':
+        return 'statut-attente';
+      case 'Rejeté':
         return 'statut-rejete';
       default:
         return 'statut-default';

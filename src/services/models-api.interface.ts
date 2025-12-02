@@ -52,7 +52,11 @@ export interface Reparation {
 export interface Mission {
   id?: number;
   statut: string;
+  // Champs normalisés pour l'affichage (provenant du backend)
+  statusDisplay?: string; // "Non traité", "En cours", "Terminé"
+  statusColor?: string;   // "success", "warning", "secondary"
   dateCreation: string; // LocalDate -> string (ISO)
+  dateCreationFormatted?: string; // Date pré-formatée en français
   photosVehicule: string[];
   constatAccident: string;
   documentsAssurance: string[];
@@ -158,6 +162,9 @@ export interface Sinistre {
   isvalid?: boolean;
   statut?: string;
   statutAvancement?: StatutAvancementSinistre;
+  // Champs normalisés pour l'affichage (provenant du backend)
+  statusDisplay?: string; // "Non traité", "En cours", "Terminé"
+  statusColor?: string;   // "success", "warning", "secondary"
   // Propriétés d'assurance
   compagnieAssurance?: string;
   numeroContrat?: string;

@@ -352,17 +352,18 @@
         <h2>Votre demande a été prise en compte</h2>
         <p>Un professionnel prendra contact avec vous dans quelques minutes</p>
         
-        <div class="btn-contact" *ngIf="vehicleStatus === 'not-rolling'">
-          
-          <!-- Affichage du numéro d'assurance -->
-          <div class="assurance-info" *ngIf="numeroAssurance">
-            <p><strong>Numéro d'assurance :</strong></p>
-            <p class="numero-assurance">{{ numeroAssurance }}</p>
-          </div>
-          
-          <!-- Message de chargement -->
-          <div class="loading-assurance" *ngIf="showAssuranceStep && !numeroAssurance">
-            <p>Chargement des informations d'assurance...</p>
+        <div class="btn-contact">
+          <!-- Affichage des informations d'assurance -->
+          <div class="assurance-info">
+            <p><strong>Assurance :</strong></p>
+            <p class="nom-assurance">{{ getSelectedVehicleAssurance() }}</p>
+            
+            <p *ngIf="numeroAssurance" class="mt-2"><strong>Numéro d'assurance :</strong></p>
+            <p *ngIf="numeroAssurance" class="numero-assurance">{{ numeroAssurance }}</p>
+            
+            <p *ngIf="!numeroAssurance" class="text-muted mt-2">
+              <small>Numéro d'assurance non disponible</small>
+            </p>
           </div>
         </div>
       </div>

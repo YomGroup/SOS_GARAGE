@@ -44,7 +44,7 @@
         </div>
         <div class="card-body">
           <h5 class="card-title">{{ vehicle.marque }} {{ vehicle.modele }}</h5>
-          <p class="text-muted">{{ vehicle.dateMiseEnCirculation | date:'yyyy' }}</p>
+          <p class="text-muted">{{ formatDate(vehicle.dateMiseEnCirculation, 'short') }}</p>
           <div class="mb-3">
             <div class="d-flex justify-content-between py-2 border-bottom">
               <span class="text-muted">Immatriculation</span>
@@ -87,7 +87,7 @@
               <h5>{{ selectedVehicle?.marque }} {{ selectedVehicle?.modele }}</h5>
               <p>Immatriculation: {{ selectedVehicle?.immatriculation }}</p>
               <p>Boite de vitesse: {{ selectedVehicle?.boiteVitesse }}</p>
-              <p>Date de mise en circulation: {{ selectedVehicle?.dateMiseEnCirculation | date:'dd/MM/yyyy' }}</p>
+              <p>Date de mise en circulation: {{ formatDate(selectedVehicle?.dateMiseEnCirculation) }}</p>
               <P>Marque: {{ selectedVehicle?.marque }}</P>
               <P>Modele: {{ selectedVehicle?.modele }}</P>
               <P>Année: {{ selectedVehicle?.year }}</P>
@@ -97,7 +97,7 @@
               <p>Nom de l'assurence: {{ selectedVehicle?.nomAssurence }}</p>
               <p>Type d'assurence: {{ selectedVehicle?.typeAssurence }}</p>
               <p>Etat du véhicule: {{ selectedVehicle?.etatvehicule }}</p>
-              <p>Date de la dernière CG: {{ selectedVehicle?.dateDerniereCg | date:'dd/MM/yyyy' }}</p>
+              <p>Date de la dernière CG: {{ formatDate(selectedVehicle?.dateDerniereCg) }}</p>
               <p>Energie: {{ selectedVehicle?.energie }}</p>
               <p>Nom commerciale: {{ selectedVehicle?.nomCommerciale }}</p>
               <p>Puissance en chevaux: {{ selectedVehicle?.puissanceChevaux }}</p>

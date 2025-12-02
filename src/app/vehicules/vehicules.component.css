@@ -1,372 +1,569 @@
-.fade-in {
-    animation: fadeIn 0.4s ease-in;
+/* ============================================
+   MES VÉHICULES
+   Design moderne violet/blanc
+   ============================================ */
+
+/* Variables CSS */
+:host {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #7c3aed;
+  --primary-light: #a78bfa;
+  --primary-dark: #5b21b6;
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-purple: 0 10px 40px rgba(124, 58, 237, 0.25);
+  --radius: 16px;
+  --radius-lg: 24px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Animation d'apparition */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .fade-in {
-    animation: fadeIn 0.4s ease-in;
+  animation: fadeIn 0.4s ease-out;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
+/* ============================================
+   CONTENEUR PRINCIPAL
+   ============================================ */
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.container-fluid {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f5f3ff 0%, var(--white) 50%, #faf5ff 100%);
+  padding: 30px;
 }
 
-/* Conteneur principal */
-.assurance-selection-container {
-    background: white;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    position: relative;
-    z-index: 1;
-}
+/* ============================================
+   TITRE PRINCIPAL
+   ============================================ */
 
-/* Titre principal avec gradient */
 .main-title {
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 1.5rem;
-    font-weight: 600;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    letter-spacing: -0.01em;
+  font-size: 2rem;
+  font-weight: 800;
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
 }
 
-/* Dropdown avec style moderne */
+/* ============================================
+   SÉLECTION D'ASSURANCE
+   ============================================ */
+
+.assurance-selection-container {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(124, 58, 237, 0.1);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ============================================
+   DROPDOWN VÉHICULE
+   ============================================ */
+
 .vehicle-dropdown {
-    position: relative;
-    padding: 0.75rem 1rem;
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: all 0.3s ease;
-    color: white;
-    font-weight: 500;
-    font-size: 0.95rem;
-    box-shadow: 0 2px 8px rgba(30, 77, 184, 0.2);
-    margin-bottom: 1rem;
-    z-index: 1000;
+  position: relative;
+  padding: 1rem 1.5rem;
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: var(--transition);
+  color: var(--white);
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: var(--shadow-purple);
+  margin-bottom: 1rem;
+  z-index: 100;
 }
 
 .vehicle-dropdown:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(30, 77, 184, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 15px 50px rgba(124, 58, 237, 0.35);
 }
 
 .vehicle-dropdown.open {
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .dropdown-icon {
-    transition: transform 0.3s ease;
-    font-size: 1.2rem;
+  transition: transform 0.3s ease;
+  font-size: 1.2rem;
 }
 
 .vehicle-dropdown.open .dropdown-icon {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 /* Liste dropdown */
 .dropdown-list {
-    position: absolute;
-    width: 100%;
-    max-height: 180px;
-    overflow-y: auto;
-    background: white;
-    border-radius: 8px;
-    margin-top: 2px;
-    z-index: 9999;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    list-style: none;
-    padding: 0;
-    left: 0;
-    top: 100%;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+  position: absolute;
+  width: 100%;
+  max-height: 250px;
+  overflow-y: auto;
+  background: var(--white);
+  border-radius: 0 0 var(--radius) var(--radius);
+  margin-top: -1px;
+  z-index: 1000;
+  box-shadow: var(--shadow-xl);
+  list-style: none;
+  padding: 0;
+  left: 0;
+  top: 100%;
+  border: 1px solid var(--gray-200);
+  animation: fadeIn 0.2s ease;
 }
 
 .dropdown-list li {
-    padding: 0.75rem 1rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid #f0f0f0;
-    color: #333;
-    font-size: 0.9rem;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border-bottom: 1px solid var(--gray-100);
+  color: var(--gray-700);
+  font-weight: 500;
 }
 
 .dropdown-list li:last-child {
-    border-bottom: none;
+  border-bottom: none;
 }
 
 .dropdown-list li:hover {
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-    color: #1e4db8;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1) 0%, transparent 100%);
+  color: var(--primary-color);
+  padding-left: 2rem;
 }
 
-/* Message d'absence d'assurances */
-.no-assurances {
-    padding: 2rem;
-    text-align: center;
-    color: #6c757d;
-    font-style: italic;
-    background: #f8f9fa;
-    border-radius: 12px;
-    margin-top: 1rem;
-}
+/* ============================================
+   FORMULES D'ASSURANCE
+   ============================================ */
 
-/* Section formules */
 .formule-container {
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    margin-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
 }
 
 .formule-title {
-    color: #2c3e50;
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+  color: var(--gray-900);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formule-title::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: var(--primary-gradient);
+  border-radius: 2px;
 }
 
 .formule-options {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .formule-option {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 0.25rem;
-    transition: all 0.3s ease;
-    border: 1px solid transparent;
+  background: var(--gray-50);
+  border-radius: var(--radius);
+  padding: 0.5rem;
+  transition: var(--transition);
+  border: 2px solid transparent;
+  animation: slideInUp 0.3s ease forwards;
 }
 
 .formule-option:hover {
-    background: #e9ecef;
-    border-color: #1e4db8;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%);
+  border-color: var(--primary-light);
 }
 
-/* Checkbox personnalisé moderne */
+.formule-option:has(input:checked) {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+  border-color: var(--primary-color);
+}
+
+/* ============================================
+   CHECKBOX PERSONNALISÉ
+   ============================================ */
+
 .option-label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-    padding: 0.5rem 0.75rem;
-    min-height: 20px;
-    margin: 0;
-    width: 100%;
-    font-weight: 500;
-    color: #495057;
-    transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding: 0.75rem 1rem;
+  margin: 0;
+  width: 100%;
+  font-weight: 500;
+  color: var(--gray-700);
+  transition: var(--transition);
 }
 
 .option-label input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
 }
 
 .checkmark {
-    position: absolute;
-    top: 50%;
-    left: 0.75rem;
-    transform: translateY(-50%);
-    height: 18px;
-    width: 18px;
-    background-color: white;
-    border: 2px solid #dee2e6;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  transform: translateY(-50%);
+  height: 22px;
+  width: 22px;
+  background-color: var(--white);
+  border: 2px solid var(--gray-300);
+  border-radius: 6px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.option-label:hover input~.checkmark {
-    border-color: #1e4db8;
+.option-label:hover input ~ .checkmark {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
-.option-label input:checked~.checkmark {
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-    border-color: #1e4db8;
+.option-label input:checked ~ .checkmark {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  box-shadow: var(--shadow-purple);
 }
 
-.checkmark:after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 5px;
-    top: 2px;
-    width: 3px;
-    height: 7px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
+.checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 10px;
+  border: solid var(--white);
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
 }
 
-.option-label input:checked~.checkmark:after {
-    display: block;
+.option-label input:checked ~ .checkmark::after {
+  display: block;
 }
 
 .option-text {
-    margin-left: 2.25rem;
-    font-size: 0.95rem;
-    color: #333;
-    font-weight: 500;
+  margin-left: 2.5rem;
+  font-size: 0.95rem;
+  color: var(--gray-700);
+  font-weight: 500;
 }
 
-.option-label input:checked~.option-text {
-    color: #1e4db8;
-    font-weight: 600;
+.option-label input:checked ~ .option-text {
+  color: var(--primary-color);
+  font-weight: 600;
 }
 
-/* Champ contrat d'assurance */
-.col-12 {
-    margin-top: 1.5rem;
-}
+/* ============================================
+   FORMULAIRE
+   ============================================ */
 
 .form-label {
-    color: #2c3e50;
-    font-size: 0.95rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    display: block;
+  color: var(--gray-700);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
 .form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    background: white;
-    color: #495057;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  font-size: 1rem;
+  transition: var(--transition);
+  background: var(--white);
+  color: var(--gray-700);
 }
 
 .form-control:focus {
-    outline: none;
-    border-color: #1e4db8;
-    box-shadow: 0 0 0 2px rgba(30, 77, 184, 0.1);
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
 .form-control::placeholder {
-    color: #adb5bd;
-    font-style: italic;
+  color: var(--gray-500);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ============================================
+   CARTES VÉHICULES
+   ============================================ */
 
-    .assurance-selection-container,
-    .formule-container {
-        padding: 1.5rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .main-title {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-    }
-
-    .vehicle-dropdown {
-        padding: 1rem 1.25rem;
-        font-size: 1rem;
-    }
-
-    .formule-title {
-        font-size: 1.25rem;
-    }
-
-    .option-text {
-        font-size: 1rem;
-    }
+.card {
+  border: none;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+  overflow: hidden;
+  background: var(--white);
+  animation: scaleIn 0.4s ease-out;
 }
 
-/* Animations pour les éléments */
-.formule-option {
-    animation: slideInUp 0.3s ease forwards;
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Effet de focus amélioré */
-.vehicle-dropdown:focus-within {
-    box-shadow: 0 0 0 3px rgba(30, 77, 184, 0.2);
-}
-
-/* Style pour les états actifs */
-.formule-option:has(input:checked) {
-    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-    border-color: #1e4db8;
-}
-
-.loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #3498db;
-    border-radius: 50%;
-    width: 32px;
-    height: 32px;
-    animation: spin 1s linear infinite;
-    margin: auto;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
 }
 
 .hover-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: var(--transition);
 }
 
 .hover-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.card:hover .card-img-top {
+  transform: scale(1.05);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  font-weight: 700;
+  color: var(--gray-900);
+  font-size: 1.1rem;
+}
+
+/* ============================================
+   BADGES
+   ============================================ */
+
+.badge {
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+}
+
+.badge.bg-light {
+  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%) !important;
+  color: var(--gray-700) !important;
+}
+
+.badge.bg-primary {
+  background: var(--primary-gradient) !important;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%) !important;
+}
+
+/* ============================================
+   BOUTONS
+   ============================================ */
+
+.btn {
+  font-weight: 600;
+  border-radius: var(--radius);
+  padding: 0.75rem 1.5rem;
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: var(--primary-gradient);
+  border: none;
+  box-shadow: var(--shadow-purple);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(124, 58, 237, 0.4);
+}
+
+.btn-outline-primary {
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  background: transparent;
+}
+
+.btn-outline-primary:hover {
+  background: var(--primary-gradient);
+  border-color: transparent;
+  color: var(--white);
+}
+
+.btn-outline-danger {
+  border: 2px solid var(--danger);
+  color: var(--danger);
+}
+
+.btn-outline-danger:hover {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+  border: none;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
+}
+
+/* ============================================
+   LOADER
+   ============================================ */
+
+.loader {
+  border: 4px solid var(--gray-200);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+
+/* ============================================
+   MESSAGES VIDES
+   ============================================ */
+
+.no-assurances,
+.text-center.text-muted {
+  padding: 3rem;
+  text-align: center;
+  color: var(--gray-500);
+  background: var(--gray-50);
+  border-radius: var(--radius);
+  font-style: italic;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 20px 15px;
+  }
+
+  .assurance-selection-container {
+    padding: 1.5rem;
+  }
+
+  .main-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .vehicle-dropdown {
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+  }
+
+  .formule-title {
+    font-size: 1rem;
+  }
+
+  .card-img-top {
+    height: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .option-text {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   SCROLLBAR PERSONNALISÉE
+   ============================================ */
+
+.dropdown-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-list::-webkit-scrollbar-track {
+  background: var(--gray-100);
+  border-radius: 3px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb {
+  background: var(--primary-light);
+  border-radius: 3px;
+}
+
+.dropdown-list::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-color);
 }

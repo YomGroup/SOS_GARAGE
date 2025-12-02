@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 import { DossiersService } from '../../../../../../src/services/dossiers.service';
 import { ReparateurService } from '../../../../../../src/services/reparateur.service';
+import { StatisticsService, AdminFinancialStatsDTO, MissionFinancialDTO } from '../../../../../../src/services/statistics.service';
 import { Reparateur } from '../../../../../../src/services/models-api.interface';
 import { FormsModule } from '@angular/forms';
 import { DossierViewComponent } from '../dossier-management/dossier-view.component';
@@ -48,9 +49,13 @@ export class GestionFinanceComponent implements OnInit {
   } | null = null;
   private _paginatedMissionsCache: Mission[] | null = null;
 
+  // Données provenant du backend
+  adminStats: AdminFinancialStatsDTO | null = null;
+  
   constructor(
     private missionService: MissionService,
     private reparateurService: ReparateurService,
+    private statisticsService: StatisticsService,
     private cdr: ChangeDetectorRef,
     private dossiersService: DossiersService
   ) {}
@@ -74,12 +79,66 @@ export class GestionFinanceComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  // Méthode loadFinancialData inchangée mais optimisée en interne
+  // Méthode loadFinancialData utilisant l'API backend
   async loadFinancialData(): Promise<void> {
     this.isLoading = true;
     this.error = null;
     this.cdr.detectChanges();
     
+    try {
+      // Essayer d'abord avec l'API backend optimisée
+      const stats = await firstValueFrom(this.statisticsService.getAdminFinancialStats());
+      this.adminStats = stats;
+      
+      // Mettre à jour les KPIs depuis le backend
+      this.totalDevis = stats.totalDevis;
+      this.totalFactures = stats.totalFactures;
+      this.totalCommissions = stats.totalCommissions;
+      this.netBalance = stats.netBalance;
+      
+      // Convertir les missions du backend en format attendu
+      this._missions = stats.missions.map(m => this.convertMissionFinancialToMission(m));
+      
+      this._clearCache();
+      this.cdr.detectChanges();
+      console.log('Données financières chargées depuis le backend');
+      
+    } catch (err) {
+      console.warn('API admin/financial non disponible, fallback vers méthode classique', err);
+      // Fallback: charger les données de manière classique
+      await this.loadFinancialDataFallback();
+    } finally {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Convertir MissionFinancialDTO en Mission (pour compatibilité avec le reste du code)
+  private convertMissionFinancialToMission(m: MissionFinancialDTO): Mission {
+    return {
+      id: m.id,
+      statut: m.statut,
+      commissionStatut: m.commissionStatut,
+      devis: m.devis,
+      factureFinale: m.factureFinale,
+      commissionPourcentage: m.commissionPourcentage,
+      dateCreation: m.dateCreation,
+      assureName: m.assureNom && m.assurePrenom ? `${m.assureNom} ${m.assurePrenom}` : 'N/A',
+      reparateur: m.reparateurId ? {
+        id: m.reparateurId,
+        name: m.reparateurNom,
+        prenom: m.reparateurPrenom,
+        commission: m.reparateurCommission
+      } : null,
+      sinistre: m.sinistreId ? {
+        id: m.sinistreId,
+        type: m.typeSinistre
+      } : null
+    } as any;
+  }
+
+  // Fallback si l'API backend n'est pas disponible
+  async loadFinancialDataFallback(): Promise<void> {
     try {
       const missions = await firstValueFrom(this.missionService.getAllMissions());
       this._missions = await this.enrichMissionsData(missions);
@@ -89,9 +148,6 @@ export class GestionFinanceComponent implements OnInit {
     } catch (err) {
       console.error('Erreur lors du chargement des données financières', err);
       this.error = 'Erreur lors du chargement des données financières';
-      this.cdr.detectChanges();
-    } finally {
-      this.isLoading = false;
       this.cdr.detectChanges();
     }
   }

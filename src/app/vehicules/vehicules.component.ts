@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { RouterLink } from '@angular/router';
+import { parseBackendDate } from '../shared/utils/date.utils';
 
 @Component({
   selector: 'app-vehicules',
@@ -504,6 +505,15 @@ export class VehiculesComponent implements OnInit {
   openAssuranceSelection(vehicle: Vehicle): void {
     this.selectedVehicle = vehicle;
     this.showAssuranceSelection = true;
+  }
+
+  /**
+   * Formate une date du backend (tableau Java, string, etc.) en année
+   */
+  formatYear(date: any): string {
+    const parsed = parseBackendDate(date);
+    if (!parsed) return 'N/A';
+    return parsed.getFullYear().toString();
   }
   async deleteVehicle(id: string) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce véhicule ?')) {

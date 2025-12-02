@@ -174,8 +174,8 @@
                 </div>
               </td>
               <td>
-                <span class="type-badge" [class]="'type-' + mission.typeSinistre.toLowerCase()">
-                  {{ mission.typeSinistre }}
+                <span class="type-badge" [class]="'type-' + (mission.typeSinistre || 'autre').toLowerCase()">
+                  {{ mission.typeSinistre || 'Non défini' }}
                 </span>
               </td>
               <td>

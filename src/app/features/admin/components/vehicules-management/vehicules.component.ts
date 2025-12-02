@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, NavigationEnd } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { VehicleService, Vehicle } from '../../../../../services/vehicle.service';
+import { formatDateFr, parseBackendDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-vehicules',
@@ -144,5 +145,19 @@ export class VehiculesComponent implements OnInit, OnDestroy {
 
   trackByVehicleId(index: number, vehicle: Vehicle): string | number {
     return vehicle.id || index;
+  }
+
+  /**
+   * Formate une date du backend (peut être tableau Java, string ISO, etc.)
+   */
+  formatDate(date: any, format: 'short' | 'full' = 'full'): string {
+    const parsed = parseBackendDate(date);
+    if (!parsed) return 'N/A';
+    
+    if (format === 'short') {
+      return parsed.getFullYear().toString();
+    }
+    
+    return formatDateFr(date);
   }
 }

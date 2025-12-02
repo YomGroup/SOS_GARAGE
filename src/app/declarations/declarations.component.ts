@@ -11,10 +11,7 @@ import { DocumentService } from '../../services/document.service';
 import { SinistreService } from '../../services/sinistre.service';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { firstValueFrom, switchMap } from 'rxjs';
-import { FirebaseStorageService } from '../../services/firebase-storage.service';
-import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
-
-import { Router } from '@angular/router'
+import { Router } from '@angular/router';
 import { Vehicule } from '../../services/models-api.interface';
 
 @Component({
@@ -90,7 +87,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   private assureService = inject(AssureService);
   private sinistreService = inject(SinistreService);
   private documentService = inject(DocumentService);
-  private firebaseStorageService = inject(FirebaseStorageService);
   showProfileAlert = false;
   showvehicleAlert = false;
   currentCity: string = 'Casablanca';
@@ -271,17 +267,16 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
         (await this.vehiculeService.getVehiculesMatricule(vehiculematricule)).pipe(
           switchMap((vehicle: any) => {
-            console.log('Données du véhicule récupérées :', vehicle?.nomAssurence);
+            console.log('Données du véhicule récupérées :', vehicle);
             assurance = vehicle?.nomAssurence || '';
+            // Récupérer le numéro d'assistance directement depuis le véhicule
+            this.numeroAssurance = vehicle?.telephoneAssistance || '';
+            console.log('Numéro d\'assurance récupéré:', this.numeroAssurance);
             return this.vehiculeService.listAssuranceVehiculesNumero(this.token);
           })
         ).subscribe({
           next: (data: any) => {
             this.assurances = data;
-            this.numeroAssurance = this.assurances.find(a => {
-              const nom = a.split('-')[0].trim().toUpperCase();
-              return nom === assurance.trim().toUpperCase();
-            });
           },
           error: (err) => {
             console.error('Erreur lors du chargement des assurances', err);
@@ -468,52 +463,67 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }, 100);
   }
 
+  /**
+   * Récupère le nom de l'assurance du véhicule sélectionné
+   */
+  getSelectedVehicleAssurance(): string {
+    if (this.selectedAssurance) {
+      return this.selectedAssurance;
+    }
+    const vehicule = this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle);
+    return vehicule?.nomAssurence || 'Non spécifiée';
+  }
+
   // Soumission du sinistre (simplifiée, sans signature)
   async submitSinistre(): Promise<void> {
     this.isSubmitting = true;
 
     try {
-      //const savedFiles = await this.saveFilesToAssets();
+      const vehiculeid = parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0);
 
-      const vehiculeid=parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0);
-
+      // Upload des photos via MinIO
       const allFiles: File[] = Object.values(this.photoSteps).flat().map(item => item.file);
-
-      var images2;
+      let images2: string[] = [];
 
       try {
-       const images = await this.sinistreService.uploadImages(vehiculeid + '', allFiles);
-       console.log('Upload réussi', images);
-       images2 = images;
+        const images = await this.sinistreService.uploadImages(vehiculeid + '', allFiles);
+        console.log('✅ Upload photos réussi', images);
+        images2 = images;
       } catch (err) {
-       console.error('Erreur upload images', err);
+        console.error('❌ Erreur upload images', err);
       }
 
-const imageObjects = (images2 || []).map((url: string, index: number) => ({
-  imageName: url.split('/').pop() || `image_${index}.jpg`, // extrait le nom du fichier
-  imageType: 'AVANT', // tu peux définir une méthode utilitaire pour le type
-  objectStorageUrl: url, // l'URL réelle
-}));
+      // Upload du constat via MinIO si présent
+      let constatUrl = '';
+      if (this.constatFile) {
+        try {
+          constatUrl = await this.sinistreService.uploadConstat(vehiculeid + '', this.constatFile);
+          console.log('✅ Upload constat réussi:', constatUrl);
+        } catch (err) {
+          console.error('❌ Erreur upload constat', err);
+        }
+      }
 
+      const imageObjects = (images2 || []).map((url: string, index: number) => ({
+        imageName: url.split('/').pop() || `image_${index}.jpg`,
+        imageType: 'AVANT',
+        objectStorageUrl: url,
+      }));
 
+      console.log({ images2, constatUrl });
 
-
-      console.log({images2});
-
-
-  const sinistrePayload = {
-  type: this.selectedTypeAssurance,
-  contactAssistance: this.email,
-  lienConstat: this.constatFile ? this.constatFile.name : '',
-  conditionsAcceptees: true,
-  lieu: this.lieuSinistre,
-  vehiculeId: vehiculeid,
-  assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '', // String
-  description: this.incidentDescription || '',
-  etatVehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
-  images: imageObjects,
-};
-
+      const sinistrePayload = {
+        type: this.selectedTypeAssurance,
+        contactAssistance: this.email,
+        lienConstat: constatUrl || '', // URL MinIO du constat
+        conditionsAcceptees: true,
+        lieu: this.lieuSinistre,
+        vehiculeId: vehiculeid,
+        assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
+        description: this.incidentDescription || '',
+        etatVehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
+        images: imageObjects,
+      };
 
       console.log('🚀 Soumission du sinistre:', sinistrePayload);
 
@@ -536,63 +546,6 @@ const imageObjects = (images2 || []).map((url: string, index: number) => ({
       this.isSubmitting = false;
       alert('Une erreur est survenue lors de l\'enregistrement des fichiers.');
     }
-  }
-
-  private async saveFilesToAssets(): Promise<
-    { imageName: string; imageType: string; objectStorageUrl: string; }[]
-  > {
-    const storage = getStorage();
-    const uploadedImages: {
-      imageName: string;
-      imageType: string;
-      objectStorageUrl: string;
-    }[] = [];
-
-    const baseDir = 'declaration/photos';
-    const photoStepDirs: { [key: number]: string } = {
-      1: 'AVANT',
-      2: 'PLAQUE',
-      3: 'COTE',
-      4: 'DEGATS'
-    };
-
-    // 🔄 Upload de chaque photo dans Firebase
-    for (const step in this.photoSteps) {
-      const photos = this.photoSteps[step];
-      const imageType = photoStepDirs[+step];
-
-      for (const photo of photos) {
-        const file = photo.file;
-        const firebasePath = `${baseDir}/${imageType}/${file.name}`;
-        const fileRef = ref(storage, firebasePath);
-
-        await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(fileRef);
-
-        uploadedImages.push({
-          imageName: file.name,
-          imageType,
-          objectStorageUrl: downloadURL
-        });
-      }
-    }
-
-    // 🔄 Upload du constat s’il existe
-    if (this.constatFile) {
-      const constatPath = `${baseDir}/constats/${this.constatFile.name}`;
-      const constatRef = ref(storage, constatPath);
-
-      await uploadBytes(constatRef, this.constatFile);
-      const constatUrl = await getDownloadURL(constatRef);
-
-      uploadedImages.push({
-        imageName: this.constatFile.name,
-        imageType: 'CONSTAT',
-        objectStorageUrl: constatUrl
-      });
-    }
-
-    return uploadedImages;
   }
 
 }

@@ -1,107 +1,121 @@
-<div class="min-h-screen">
-  <!-- Top Navbar -->
-
-
-  <div class="container-fluid px-4">
+<div class="dashboard-wrapper">
+  <div class="container-fluid px-4 py-4">
     <!-- Statistics -->
-    <div class="min-h-screen">
-      <div class="container-fluid px-4">
-        <!-- Statistics -->
-        <div class="row mb-4 mt-5 stats-row">
-          <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card" (click)="onStatsCardClick('vehicules')" tabindex="0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 class="stats-title opacity-90">Véhicules enregistrés</h3>
-                  <div class="stats-number">{{ stats.totalVehicules }}</div>
-                </div>
-                <div class="stats-icon">
-                  <i class="fas fa-car"></i>
-                </div>
-              </div>
+    <div class="row mb-4 g-3 g-lg-4">
+      <div class="col-6 col-lg-3">
+        <div class="stats-card" (click)="onStatsCardClick('vehicules')" tabindex="0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title">Véhicules enregistrés</h3>
+              <div class="stats-number">{{ stats.totalVehicules }}</div>
             </div>
-          </div>
-          <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card" (click)="onStatsCardClick('sinistres')" tabindex="0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 class="stats-title opacity-90">Sinistres</h3>
-                  <div class="stats-number">{{ stats.totalSinistres }}</div>
-                </div>
-                <div class="stats-icon">
-                  <i class="fas fa-file-alt"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card" (click)="onStatsCardClick('missions')" tabindex="0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 class="stats-title opacity-90">Missions</h3>
-                  <div class="stats-number">{{ stats.totalMissions }}</div>
-                </div>
-                <div class="stats-icon">
-                  <i class="fas fa-tasks"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-lg-3 mb-4">
-            <div class="stats-card" (click)="onStatsCardClick('reparateurs')" tabindex="0">
-              <div class="d-flex justify-content-between align-items-center">
-                <div>
-                  <h3 class="stats-title opacity-90">Réparateurs</h3>
-                  <div class="stats-number">{{ stats.totalReparateurs }}</div>
-                </div>
-                <div class="stats-icon">
-                  <i class="fas fa-user-cog"></i>
-                </div>
-              </div>
+            <div class="stats-icon">
+              <i class="fas fa-car"></i>
             </div>
           </div>
         </div>
-
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stats-card" (click)="onStatsCardClick('sinistres')" tabindex="0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title">Sinistres</h3>
+              <div class="stats-number">{{ stats.totalSinistres }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-file-alt"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stats-card" (click)="onStatsCardClick('missions')" tabindex="0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title">Missions</h3>
+              <div class="stats-number">{{ stats.totalMissions }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-tasks"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="stats-card" (click)="onStatsCardClick('reparateurs')" tabindex="0">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h3 class="stats-title">Réparateurs</h3>
+              <div class="stats-number">{{ stats.totalReparateurs }}</div>
+            </div>
+            <div class="stats-icon">
+              <i class="fas fa-user-cog"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Activité récente et sections latérales -->
-    <div class="row mb-4 equal-height-row">
-      <div class="col-xl-8 col-lg-12 mb-4">
-        <div class="card equal-height">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 opacity-90">Activité récente</h5>
+    <div class="row g-4">
+      <!-- Colonne principale - Activité récente -->
+      <div class="col-12 col-xl-8">
+        <div class="card h-100">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-clock me-2"></i>
+              Activité récente
+            </h5>
           </div>
           <div class="card-body p-0">
             <ul class="list-group list-group-flush">
               <li class="list-group-item" *ngFor="let item of recentActivity" (click)="onRecentActivityClick(item)" tabindex="0">
-                <i [ngClass]="item.icon"></i>
-                <span class="ms-2">{{ item.label }}</span>
-                <small class="text-muted float-end">{{ item.date | date:'dd/MM/yyyy --- HH:mm' }}</small>
+                <i [ngClass]="item.icon" class="activity-icon"></i>
+                <span class="activity-label">{{ item.label }}</span>
+                <small class="activity-time">{{ item.date | date:'dd/MM/yyyy - HH:mm' }}</small>
+              </li>
+              <li class="list-group-item empty-state" *ngIf="recentActivity.length === 0">
+                <div class="text-center py-4">
+                  <i class="fas fa-inbox fa-2x text-muted mb-2"></i>
+                  <p class="text-muted mb-0">Aucune activité récente</p>
+                </div>
               </li>
             </ul>
           </div>
         </div>
       </div>
-      <div class="col-xl-4 col-lg-12 mb-4">
-        <div class="row">
+
+      <!-- Colonne latérale -->
+      <div class="col-12 col-xl-4">
+        <div class="row g-4">
           <!-- Tâches prioritaires -->
-          <div class="col-12 mb-4">
-            <div class="card equal-height">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 opacity-90">Tâches prioritaires</h5>
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-exclamation-circle me-2"></i>
+                  Tâches prioritaires
+                </h5>
               </div>
               <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item" (click)="onTaskClick('missions')" tabindex="0">
-                    <i class="fas fa-tasks text-info me-2"></i>
-                    {{ pendingMissionsCount }} missions en attente
+                  <li class="list-group-item task-item" (click)="onTaskClick('missions')" tabindex="0">
+                    <div class="task-icon info">
+                      <i class="fas fa-tasks"></i>
+                    </div>
+                    <span class="task-label">{{ pendingMissionsCount }} missions en attente</span>
                   </li>
-                  <li class="list-group-item" (click)="onTaskClick('reparateurs')" tabindex="0">
-                    <i class="fas fa-user-cog text-warning me-2"></i>
-                    {{ pendingReparateursCount }} réparateurs à valider
+                  <li class="list-group-item task-item" (click)="onTaskClick('reparateurs')" tabindex="0">
+                    <div class="task-icon warning">
+                      <i class="fas fa-user-cog"></i>
+                    </div>
+                    <span class="task-label">{{ pendingReparateursCount }} réparateurs à valider</span>
                   </li>
-                  <li class="list-group-item" (click)="onTaskClick('sinistres')" tabindex="0">
-                    <i class="fas fa-file-alt text-danger me-2"></i>
-                    {{ pendingSinistresCount }} sinistres à traiter
+                  <li class="list-group-item task-item" (click)="onTaskClick('sinistres')" tabindex="0">
+                    <div class="task-icon danger">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <span class="task-label">{{ pendingSinistresCount }} sinistres à traiter</span>
                   </li>
                 </ul>
               </div>
@@ -110,25 +124,33 @@
           
           <!-- Sinistres déclarés -->
           <div class="col-12">
-            <div class="card equal-height">
-              <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0 opacity-90">Sinistres déclarés</h5>
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-car-crash me-2"></i>
+                  Sinistres déclarés
+                </h5>
               </div>
               <div class="card-body p-0">
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item" *ngFor="let sinistre of recentSinistres" (click)="onSinistreClick(sinistre)" tabindex="0">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <span class="sinistre-id opacity-90">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
-                        <span class="ms-2">{{ sinistre.type || 'Sinistre' }}</span>
-                      </div>
-                      <span class="status-badge" [ngClass]="getStatusClass(sinistre.statut)">{{sinistre.statut}}</span>
-
+                  <li class="list-group-item sinistre-item-card" *ngFor="let sinistre of recentSinistres" (click)="onSinistreClick(sinistre)" tabindex="0">
+                    <div class="sinistre-header">
+                      <span class="sinistre-id">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
+                      <span class="status-badge" [ngClass]="getStatusClass(sinistre.statut)">{{ sinistre.statut }}</span>
                     </div>
-                    <div class="sinistre-details">
-                      <i class="fas fa-car me-2 text-primary"></i>
-                      <span class="opacity-90">{{ sinistre.contactAssistance }}</span>
-                      <small class="text-muted opacity-75 d-block">{{ sinistre.createdAt ? (sinistre.createdAt | date:'dd/MM/yyyy à HH:mm') : '' }}</small>
+                    <div class="sinistre-info">
+                      <span class="sinistre-type">{{ sinistre.type || 'Sinistre' }}</span>
+                      <span class="sinistre-contact">
+                        <i class="fas fa-car me-1"></i>
+                        {{ sinistre.contactAssistance }}
+                      </span>
+                    </div>
+                    <small class="sinistre-date">{{ sinistre.createdAt ? formatBackendDate(sinistre.createdAt) : '' }}</small>
+                  </li>
+                  <li class="list-group-item empty-state" *ngIf="recentSinistres.length === 0">
+                    <div class="text-center py-3">
+                      <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                      <p class="text-muted mb-0">Aucun sinistre récent</p>
                     </div>
                   </li>
                 </ul>
@@ -138,38 +160,5 @@
         </div>
       </div>
     </div>
-
-    <!-- Analytics & Sinistres -->
-    <!-- <div class="row">
-      <div class="col-xl-8 col-lg-12 mb-4">
-        <div class="card equal-height">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0 opacity-90">Analyses et statistiques</h5>
-            <div class="graph-controls">
-              <button class="btn btn-outline-primary btn-sm me-2" (click)="showGraph('performance')">
-                <i class="fas fa-chart-line me-2"></i>Performance
-              </button>
-              <button class="btn btn-outline-primary btn-sm me-2" (click)="showGraph('distribution')">
-                <i class="fas fa-chart-pie me-2"></i>Distribution
-              </button>
-              <button class="btn btn-outline-primary btn-sm" (click)="showGraph('evolution')">
-                <i class="fas fa-chart-bar me-2"></i>Évolution
-              </button>
-            </div>
-          </div>
-          <div class="card-body">
-            <div class="graph-container" *ngIf="currentGraph === 'performance'">
-              <app-performance-chart></app-performance-chart>
-            </div>
-            <div class="graph-container" *ngIf="currentGraph === 'distribution'">
-              <app-distribution-chart></app-distribution-chart>
-            </div>
-            <div class="graph-container" *ngIf="currentGraph === 'evolution'">
-              <app-evolution-chart></app-evolution-chart>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
   </div>
 </div>

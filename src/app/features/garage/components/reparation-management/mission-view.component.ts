@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, MissionUpdate, Assure, Vehicule, StatutAvancementSinistre, Expert, Expertise } from '../../../../../services/models-api.interface';
-import { FirebaseStorageService } from '../../../../../services/firebase-storage.service';
+import { MinioStorageService } from '../../../../../services/minio-storage.service';
 import { DossiersService } from '../../../../../services/dossiers.service';
 import { ExpertService } from '../../../../../services/expert.service';
 import { ExpertiseService } from '../../../../../services/expertise.service';
@@ -109,7 +109,7 @@ export class MissionViewComponent implements OnChanges {
   constructor(
     private missionService: MissionService, 
     private cdr: ChangeDetectorRef,
-    private firebaseService: FirebaseStorageService,
+    private minioService: MinioStorageService,
     private dossiersService: DossiersService,
     private expertService: ExpertService,
     private expertiseService: ExpertiseService
@@ -415,36 +415,20 @@ export class MissionViewComponent implements OnChanges {
     input.click();
   }
 
-  // Méthode modifiée pour supporter les types de documents
-  uploaderDocumentsFirebase(files: File[], type?: string) {
+  // Méthode pour uploader des documents vers MinIO (backend)
+  uploaderDocuments(files: File[], type?: string) {
     if (!this.mission || !this.mission.id) {
       alert('Mission non trouvée');
       return;
     }
 
     this.uploadingFiles = true;
-    const uploadPromises: Promise<string>[] = [];
+    this.uploadErrorMessage = '';
 
-    files.forEach(file => {
-      let uploadPromise: Promise<string>;
-      if (type === 'devis') {
-        uploadPromise = firstValueFrom(this.firebaseService.uploadDevisFile(file, this.mission!.id!));
-      } else if (type === 'facture') {
-        uploadPromise = firstValueFrom(this.firebaseService.uploadFactureFile(file, this.mission!.id!));
-      } else {
-        uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
-      }
-      uploadPromises.push(uploadPromise);
-    });
-
-    if (uploadPromises.length === 0) {
-      this.uploadingFiles = false;
-      return;
-    }
-
-    Promise.all(uploadPromises)
-      .then((downloadURLs: string[]) => {
-        console.log('Documents uploadés:', downloadURLs);
+    // Upload tous les fichiers en une fois via MinIO backend
+    this.minioService.uploadMissionDocuments(this.mission.id, files).subscribe({
+      next: (downloadURLs: string[]) => {
+        console.log('Documents uploadés via MinIO:', downloadURLs);
         if (!this.missionEdit.documentsAssurance) {
           this.missionEdit.documentsAssurance = [];
         }
@@ -456,40 +440,37 @@ export class MissionViewComponent implements OnChanges {
         ];
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        // Feedback UI léger, éviter alert bloquante
         console.log('Upload terminé. Type:', type);
-      })
-      .catch((error) => {
+      },
+      error: (error) => {
         console.error('Erreur lors de l\'upload:', error);
         this.uploadingFiles = false;
+        this.uploadErrorMessage = error.message || 'Erreur lors de l\'upload';
         this.cdr.detectChanges();
-        alert(`Erreur lors de l'upload: ${error.message}`);
-      });
+        alert(`Erreur lors de l'upload: ${error.message || 'Erreur serveur'}`);
+      }
+    });
   }
 
-  // Nouvelle méthode pour uploader des images
-  uploaderImagesFirebase(files: File[]) {
+  // Alias pour compatibilité avec l'ancien code
+  uploaderDocumentsFirebase(files: File[], type?: string) {
+    this.uploaderDocuments(files, type);
+  }
+
+  // Méthode pour uploader des images vers MinIO (backend)
+  uploaderImages(files: File[]) {
     if (!this.mission || !this.mission.id) {
       alert('Mission non trouvée');
       return;
     }
 
     this.uploadingFiles = true;
-    const uploadPromises: Promise<string>[] = [];
+    this.uploadErrorMessage = '';
 
-    files.forEach(file => {
-      const uploadPromise = firstValueFrom(this.firebaseService.uploadImageFile(file, this.mission!.id!));
-      uploadPromises.push(uploadPromise);
-    });
-
-    if (uploadPromises.length === 0) {
-      this.uploadingFiles = false;
-      return;
-    }
-
-    Promise.all(uploadPromises)
-      .then((downloadURLs: string[]) => {
-        console.log('Images uploadées:', downloadURLs);
+    // Upload tous les fichiers en une fois via MinIO backend
+    this.minioService.uploadMissionPhotos(this.mission.id, files).subscribe({
+      next: (downloadURLs: string[]) => {
+        console.log('Images uploadées via MinIO:', downloadURLs);
         
         // Ajouter les URLs aux photos existantes
         if (!this.missionEdit.photosVehicule) {
@@ -505,34 +486,27 @@ export class MissionViewComponent implements OnChanges {
         this.cdr.detectChanges();
         
         alert(`Images uploadées avec succès !`);
-      })
-      .catch((error) => {
+      },
+      error: (error) => {
         console.error('Erreur lors de l\'upload des images:', error);
         this.uploadingFiles = false;
+        this.uploadErrorMessage = error.message || 'Erreur lors de l\'upload';
         this.cdr.detectChanges();
-        alert(`Erreur lors de l'upload des images: ${error.message}`);
-      });
+        alert(`Erreur lors de l'upload des images: ${error.message || 'Erreur serveur'}`);
+      }
+    });
+  }
+
+  // Alias pour compatibilité avec l'ancien code
+  uploaderImagesFirebase(files: File[]) {
+    this.uploaderImages(files);
   }
 
   supprimerDocument(index: number) {
     if (!this.missionEdit.documentsAssurance) return;
-    const doc = this.missionEdit.documentsAssurance[index];
-    const url = (doc && typeof doc === 'object' && doc.url) ? doc.url : doc;
-    if (url && typeof url === 'string' && url.includes('firebasestorage.googleapis.com')) {
-      // Utiliser la méthode dédiée pour URL complète
-      this.firebaseService.deleteFileByUrl(url).subscribe({
-        next: () => {
-          console.log('Document supprimé de Firebase');
-          this.supprimerDocumentLocal(index);
-        },
-        error: (error) => {
-          console.error('Erreur lors de la suppression de Firebase:', error);
-          this.supprimerDocumentLocal(index);
-        }
-      });
-    } else {
-      this.supprimerDocumentLocal(index);
-    }
+    // Pour MinIO, la suppression côté serveur se fait lors de la sauvegarde
+    // On supprime juste localement pour l'instant
+    this.supprimerDocumentLocal(index);
   }
 
   private supprimerDocumentLocal(index: number) {
@@ -828,40 +802,36 @@ export class MissionViewComponent implements OnChanges {
     }
 
     this.uploadingFiles = true;
-    const uploadPromises: Promise<string>[] = [];
 
-    files.forEach(file => {
-      // Utiliser la méthode uploadPdfFile existante
-      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
-      uploadPromises.push(uploadPromise);
-    });
-
-    if (uploadPromises.length === 0) {
+    // Upload via MinIO backend - prendre le premier fichier pour le rapport d'expertise
+    const file = files[0];
+    if (!file) {
       this.uploadingFiles = false;
       return;
     }
 
-    Promise.all(uploadPromises)
-      .then((downloadURLs: string[]) => {
-        console.log('Rapport d\'expertise uploadé:', downloadURLs[0]);
+    this.minioService.uploadPdfFile(file, this.mission.id).subscribe({
+      next: (downloadURL: string) => {
+        console.log('Rapport d\'expertise uploadé:', downloadURL);
         
         // Mettre à jour l'URL du rapport dans l'expertise
         if (!this.expertiseEdit) {
           this.expertiseEdit = {};
         }
-        this.expertiseEdit.rapportExpertise = downloadURLs[0];
+        this.expertiseEdit.rapportExpertise = downloadURL;
 
         this.uploadingFiles = false;
         this.cdr.detectChanges();
         
         alert('Rapport d\'expertise uploadé avec succès !');
-      })
-      .catch((error) => {
+      },
+      error: (error: any) => {
         console.error('Erreur lors de l\'upload du rapport:', error);
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        alert(`Erreur lors de l'upload: ${error.message}`);
-      });
+        alert(`Erreur lors de l'upload: ${error.message || 'Erreur serveur'}`);
+      }
+    });
   }
 
   telechargerRapportExpertise() {
@@ -870,35 +840,34 @@ export class MissionViewComponent implements OnChanges {
       return;
     }
 
-    // Si c'est une URL Firebase, télécharger via le service
-    if (this.mission.expertise.rapportExpertise.includes('firebasestorage.googleapis.com')) {
-      this.firebaseService.downloadPdfFile(this.mission.expertise.rapportExpertise).subscribe({
-        next: (blob: Blob) => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'rapport_expertise.pdf';
-          document.body.appendChild(a);
-          a.click();
-          setTimeout(() => {
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-          }, 0);
-        },
-        error: (error) => {
-          console.error('Erreur lors du téléchargement du rapport:', error);
-          alert(`Erreur lors du téléchargement: ${error.message}`);
-        }
-      });
-    } else {
-      // Téléchargement direct si ce n'est pas Firebase
-      const a = document.createElement('a');
-      a.href = this.mission.expertise.rapportExpertise;
-      a.download = 'rapport_expertise.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
+    const rapportUrl = this.mission.expertise.rapportExpertise;
+    
+    // Télécharger via MinIO service ou direct
+    this.minioService.downloadFile(rapportUrl).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'rapport_expertise.pdf';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }, 0);
+      },
+      error: (error: any) => {
+        // Fallback: téléchargement direct
+        console.warn('Téléchargement via service échoué, tentative directe:', error);
+        const a = document.createElement('a');
+        a.href = rapportUrl;
+        a.download = 'rapport_expertise.pdf';
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    });
   }
 
   public confirmerPassageExpert() {
@@ -1032,18 +1001,10 @@ export class MissionViewComponent implements OnChanges {
       return;
     }
     this.uploadingFiles = true;
-    const uploadPromises: Promise<string>[] = [];
-    files.forEach(file => {
-      // On stocke dans Firebase comme des PDF/images génériques
-      const uploadPromise = firstValueFrom(this.firebaseService.uploadPdfFile(file, this.mission!.id!));
-      uploadPromises.push(uploadPromise);
-    });
-    if (uploadPromises.length === 0) {
-      this.uploadingFiles = false;
-      return;
-    }
-    Promise.all(uploadPromises)
-      .then((downloadURLs: string[]) => {
+    
+    // Upload via MinIO backend
+    this.minioService.uploadMissionDocuments(this.mission.id, files).subscribe({
+      next: (downloadURLs: string[]) => {
         this.rapportsGarage = [
           ...this.rapportsGarage,
           ...downloadURLs
@@ -1051,31 +1012,20 @@ export class MissionViewComponent implements OnChanges {
         this.uploadingFiles = false;
         this.cdr.detectChanges();
         alert('Rapport(s) uploadé(s) avec succès !');
-      })
-      .catch((error) => {
+      },
+      error: (error) => {
         this.uploadingFiles = false;
         this.cdr.detectChanges();
-        alert(`Erreur lors de l\'upload des rapports: ${error.message}`);
-      });
+        alert(`Erreur lors de l'upload des rapports: ${error.message || 'Erreur serveur'}`);
+      }
+    });
   }
 
   supprimerRapportGarage(index: number) {
-    const url = this.rapportsGarage[index];
-    if (url && url.includes('firebasestorage.googleapis.com')) {
-      this.firebaseService.deletePdfFile(url).subscribe({
-        next: () => {
-          this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
-      this.cdr.detectChanges();
-    }
+    // Pour MinIO, la suppression côté serveur se fait lors de la sauvegarde
+    // On supprime juste localement pour l'instant
+    this.rapportsGarage = this.rapportsGarage.filter((_, i) => i !== index);
+    this.cdr.detectChanges();
   }
 
   // --- Méthode pour sélectionner une assurance ---

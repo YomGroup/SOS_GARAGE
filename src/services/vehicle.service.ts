@@ -122,12 +122,18 @@ export class VehicleService implements OnInit {
         });
 
         return this.http.get<any>(`${this.apiUrlAdd}/assure/${id}`, { headers }).pipe(
-            tap(data => this.vehiculesSubject.next(data))
+            tap(data => {
+                // Gérer la réponse paginée ou tableau direct
+                const vehicles = data?.content || (Array.isArray(data) ? data : []);
+                this.vehiculesSubject.next(vehicles);
+            })
         );
     }
 
     async refreshVehicules(id: number) {
-        (await this.getVehiculesDataById(id)).subscribe((vehicles) => {
+        (await this.getVehiculesDataById(id)).subscribe((response) => {
+            // Gérer la réponse paginée ou tableau direct
+            const vehicles = response?.content || (Array.isArray(response) ? response : []);
             this.vehiculesSubject.next(vehicles);
         });
     }

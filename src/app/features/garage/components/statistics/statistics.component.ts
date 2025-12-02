@@ -8,45 +8,18 @@ import { Mission } from '../../../../../services/models-api.interface';
 import { AuthService } from '../../../../../services/auth.service';
 import { ReparateurService } from '../../../../../services/reparateur.service';
 import { AssureService, ASSURE, Vehicule } from '../../../../../services/assure.service';
+import { StatisticsService, StatisticsResponseDTO, MissionStatsDTO, FinancialStatsDTO, RecentMissionDTO } from '../../../../../services/statistics.service';
 import { firstValueFrom, forkJoin } from 'rxjs';
 import { MissionViewComponent } from '../reparation-management/mission-view.component';
 import { Reparateur } from '../../../../../services/models-api.interface';
 
-interface MissionStats {
-  total: number;
-  completed: number;
-  inProgress: number;
-  pending: number;
-  assigned: number;
-  refused: number;
-  epave: number;
-}
-
-interface FinancialStats {
-  totalDevis: number;
-  totalFactures: number;
-  totalCommissions: number;
-  netBalance: number;
-  averageDevis: number;
-  averageFacture: number;
-  averageCommission: number;
-}
-
-interface RecentMission {
-  id: number;
-  title: string;
-  status: string;
-  date: string;
-  vehicle: string;
-  client: string;
-  devis: number;
-  facture: number;
-  typeSinistre: string;
-  assureName: string;
-  vehiculeInfo: string;
-  assureInfo: any;
-  vehicule: any;
-  montantCommission: number;
+// Utilisation des interfaces du StatisticsService backend
+interface RecentMissionDisplay extends RecentMissionDTO {
+  typeSinistre?: string;
+  assureName?: string;
+  vehiculeInfo?: string;
+  assureInfo?: any;
+  vehicule?: any;
 }
 
 @Component({
@@ -61,7 +34,8 @@ interface RecentMission {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
-  missionStats: MissionStats = {
+  // Statistiques provenant du backend
+  missionStats: MissionStatsDTO = {
     total: 0,
     completed: 0,
     inProgress: 0,
@@ -71,7 +45,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     epave: 0
   };
 
-  financialStats: FinancialStats = {
+  financialStats: FinancialStatsDTO = {
     totalDevis: 0,
     totalFactures: 0,
     totalCommissions: 0,
@@ -81,10 +55,11 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     averageCommission: 0
   };
 
-  recentMissions: RecentMission[] = [];
+  recentMissions: RecentMissionDisplay[] = [];
   loading: boolean = true;
   error: string | null = null;
   reparateurMissions: Mission[] = [];
+  currentReparateur: Reparateur | null = null;
   
   // Propriétés pour la modale mission-view
   showMissionView: boolean = false;
@@ -104,6 +79,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     private authService: AuthService,
     private reparateurService: ReparateurService,
     private assureService: AssureService,
+    private statisticsService: StatisticsService,
     private router: Router,
     private route: ActivatedRoute,
     cdr: ChangeDetectorRef
@@ -199,7 +175,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
       this.error = null;
       this.cdr.detectChanges();
 
-      console.log('Début du chargement des statistiques...');
+      console.log('Début du chargement des statistiques via API backend...');
 
       // Récupérer l'UUID Keycloak du réparateur connecté
       const keycloakId = this.authService.getKeycloakId();
@@ -209,40 +185,79 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
         throw new Error('Utilisateur non connecté');
       }
 
-      // Charger toutes les missions puis filtrer côté front
-      const allMissions = await firstValueFrom(this.missionService.getAllMissions());
-      console.log('Toutes les missions récupérées:', allMissions.length);
+      // Récupérer le réparateur par son ID Keycloak
+      const reparateur = await firstValueFrom(this.reparateurService.getReparateurByKeycloakId(keycloakId));
+      if (!reparateur || !reparateur.id) {
+        throw new Error('Réparateur non trouvé');
+      }
+      this.currentReparateur = reparateur;
+      console.log('Réparateur trouvé:', reparateur.id, reparateur.name);
+
+      // Charger les statistiques depuis le backend (calculs faits côté serveur)
+      const stats = await firstValueFrom(this.statisticsService.getStatisticsByReparateurId(reparateur.id));
+      console.log('Statistiques reçues du backend:', stats);
+
+      // Mettre à jour les statistiques
+      this.missionStats = stats.missionStats;
+      this.financialStats = stats.financialStats;
       
-      // Filtrer les missions du réparateur connecté
+      // Transformer les missions récentes pour l'affichage
+      this.recentMissions = stats.recentMissions.map(m => ({
+        ...m,
+        typeSinistre: m.client || 'N/A',
+        assureName: 'N/A',
+        vehiculeInfo: m.vehicle || 'N/A'
+      }));
+
+      // Charger aussi les missions pour la modale (si besoin)
+      const allMissions = await firstValueFrom(this.missionService.getAllMissions());
       this.reparateurMissions = allMissions.filter(m => 
         m.reparateur && m.reparateur.useridKeycloak === keycloakId
       );
-      console.log('Missions du réparateur connecté:', this.reparateurMissions.length);
-      
-      // Calculer les statistiques
-      await this.calculateStatistics();
       
       this.hasLoadedData = true;
       this.lastLoadedAt = Date.now();
       this.cdr.detectChanges();
-      console.log('Statistiques chargées avec succès');
+      console.log('Statistiques chargées avec succès depuis le backend');
       
     } catch (error: any) {
       console.error('Erreur lors du chargement des statistiques:', error);
       
-      if (error.message) {
-        this.error = `Erreur: ${error.message}`;
-      } else {
-        this.error = 'Erreur lors du chargement des statistiques. Veuillez réessayer.';
-      }
-      this.cdr.detectChanges();
+      // Fallback: essayer de calculer localement si l'API échoue
+      await this.loadStatisticsFallback();
     } finally {
       this.loading = false;
       this.cdr.detectChanges();
     }
   }
 
-  private async calculateStatistics(): Promise<void> {
+  // Méthode de fallback si l'API backend échoue
+  private async loadStatisticsFallback(): Promise<void> {
+    try {
+      console.log('Utilisation du fallback pour calculer les statistiques localement...');
+      
+      const keycloakId = this.authService.getKeycloakId();
+      if (!keycloakId) {
+        this.error = 'Utilisateur non connecté';
+        return;
+      }
+
+      const allMissions = await firstValueFrom(this.missionService.getAllMissions());
+      this.reparateurMissions = allMissions.filter(m => 
+        m.reparateur && m.reparateur.useridKeycloak === keycloakId
+      );
+
+      await this.calculateStatisticsLocally();
+      this.hasLoadedData = true;
+      this.lastLoadedAt = Date.now();
+      
+    } catch (fallbackError: any) {
+      console.error('Erreur lors du fallback:', fallbackError);
+      this.error = 'Erreur lors du chargement des statistiques. Veuillez réessayer.';
+    }
+  }
+
+  private async calculateStatisticsLocally(): Promise<void> {
     const missions = this.reparateurMissions;
     
     // Debug: Afficher les statuts réels des missions
@@ -420,16 +435,28 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   getStatusColor(status: string): string {
     switch (status.toLowerCase()) {
       case 'terminée':
+      case 'terminee':
+      case 'reparation_terminee':
         return 'success';
       case 'en cours':
+      case 'en_cours':
+      case 'en_cours_reparation':
+      case 'assignée':
+      case 'assignee':
         return 'warning';
       case 'en attente':
+      case 'en_attente':
+      case 'en_attente_traitement':
+      case 'en_attente_expertise':
+      case 'en_attente_reparation':
         return 'info';
-      case 'en cours':
-        return 'primary';
       case 'non assignée':
+      case 'non assignee':
+      case 'refusée':
+      case 'refusee':
         return 'secondary';
       case 'épave':
+      case 'epave':
         return 'danger';
       default:
         return 'secondary';
@@ -439,16 +466,30 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   getStatusLabel(status: string): string {
     switch (status.toLowerCase()) {
       case 'terminée':
+      case 'terminee':
+      case 'reparation_terminee':
         return 'Terminée';
       case 'en cours':
+      case 'en_cours':
+      case 'en_cours_reparation':
         return 'En cours';
+      case 'assignée':
+      case 'assignee':
+        return 'Assignée';
       case 'en attente':
+      case 'en_attente':
+      case 'en_attente_traitement':
+      case 'en_attente_expertise':
+      case 'en_attente_reparation':
         return 'En attente';
-      case 'en cours':
-        return 'En cours';
       case 'non assignée':
+      case 'non assignee':
         return 'Non assignée';
+      case 'refusée':
+      case 'refusee':
+        return 'Refusée';
       case 'épave':
+      case 'epave':
         return 'Épave';
       default:
         return status;
@@ -512,8 +553,8 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     const index = this.reparateurMissions.findIndex(m => m.id === updatedMission.id);
     if (index !== -1) {
       this.reparateurMissions[index] = updatedMission;
-      // Recalculer les statistiques
-      this.calculateStatistics();
+      // Recalculer les statistiques localement
+      this.calculateStatisticsLocally();
     }
     this.cdr.detectChanges();
   }

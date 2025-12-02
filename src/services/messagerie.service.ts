@@ -62,23 +62,63 @@ export class MessageService {
         return id;
     }
 
-    async sendSystemMessage(assureId: string, garageId: string, text: string) {
-        this.sendMessage(garageId, assureId, text);
-        /*const id = this.conversationId(assureId, garageId);
-        const convRef = doc(db, 'conversations', id);
-        const msgsCol = collection(convRef, 'messages');
-        const now = serverTimestamp();
+    /**
+     * Crée une conversation et envoie un message système automatique
+     * Appelé lors de l'affectation d'un sinistre à un garagiste
+     */
+    async sendSystemMessage(assureId: string, garageId: string, text: string): Promise<void> {
+        try {
+            // 1. S'assurer que la conversation existe
+            await this.ensureConversation(assureId, garageId);
+            
+            // 2. Envoyer un message de bienvenue du garagiste vers l'assuré
+            await this.sendMessage(garageId, assureId, text);
+            
+            console.log('✅ Conversation créée et message système envoyé entre:', { assureId, garageId });
+        } catch (error) {
+            console.error('❌ Erreur lors de la création de la conversation:', error);
+            throw error;
+        }
+    }
 
-        await addDoc(msgsCol, {
-            text,
-            senderId: 'system',
-            receiverId: assureId,
-            timestamp: now,
-            type: 'system'
-        });
+    /**
+     * Crée une conversation complète entre assuré et garagiste lors de l'affectation d'une mission
+     */
+    async createConversationForMission(
+        assureKeycloakId: string,
+        garageKeycloakId: string,
+        missionId: number,
+        sinistreId: number,
+        assureName?: string,
+        garageName?: string
+    ): Promise<string> {
+        try {
+            // 1. Créer la conversation avec les métadonnées
+            const conversationId = await this.ensureConversation(
+                assureKeycloakId,
+                garageKeycloakId,
+                missionId,
+                sinistreId
+            );
 
-        await setDoc(convRef, { lastMessage: { text, senderId: 'system', timestamp: now } }, { merge: true });*/
+            // 2. Envoyer un message de bienvenue automatique
+            const welcomeMessage = `🚗 Bonjour ! Une mission de réparation a été créée pour votre sinistre. ${garageName ? `Je suis ${garageName} et je serai en charge de votre véhicule.` : ''} N'hésitez pas à me contacter ici pour toute question concernant votre réparation.`;
+            
+            await this.sendMessage(garageKeycloakId, assureKeycloakId, welcomeMessage);
 
+            console.log('✅ Conversation créée pour la mission:', { 
+                conversationId, 
+                missionId, 
+                sinistreId,
+                assureKeycloakId,
+                garageKeycloakId 
+            });
+
+            return conversationId;
+        } catch (error) {
+            console.error('❌ Erreur lors de la création de la conversation pour la mission:', error);
+            throw error;
+        }
     }
 
     listenToUnreadMessagesCount(userId: string): Observable<number> {

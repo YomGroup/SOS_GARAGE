@@ -298,7 +298,7 @@
             <h6 class="card-title mb-0 fw-bold">{{ vehicle.marque }} {{ vehicle.modele }}</h6>
             <small class="text-muted">{{ vehicle.version }}</small>
           </div>
-          <span class="badge bg-light text-dark">{{ vehicle.dateMiseEnCirculation | date:'yyyy' }}</span>
+          <span class="badge bg-light text-dark">{{ formatYear(vehicle.dateMiseEnCirculation) }}</span>
         </div>
 
         <!-- Informations principales en grid compact -->

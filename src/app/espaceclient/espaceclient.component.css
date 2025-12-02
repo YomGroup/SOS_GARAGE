@@ -1,181 +1,392 @@
-/* Styles spécifiques des liens de navigation */
-.nav-link {
-    color: #4a5568;
-    font-weight: 500;
-    font-size: 15px;
+/* ============================================
+   ESPACE CLIENT - TABLEAU DE BORD
+   Design moderne violet/blanc
+   ============================================ */
+
+/* Variables CSS */
+:host {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary-color: #7c3aed;
+  --primary-light: #a78bfa;
+  --primary-dark: #5b21b6;
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-500: #6b7280;
+  --gray-700: #374151;
+  --gray-900: #111827;
+  --success: #10b981;
+  --danger: #ef4444;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-purple: 0 10px 40px rgba(124, 58, 237, 0.2);
+  --radius: 16px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.nav-link:hover {
-    background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 50%);
-    color: #333;
-    transform: translateX(5px);
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.nav-link.active {
-    background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-    color: white !important;
-    border-radius: 25px !important;
-    transform: translateX(5px);
-    box-shadow: 0 4px 15px rgba(30, 77, 184, 0.3);
-}
-
-/* Ajustements responsive */
-@media (max-width: 768px) {
-    aside {
-        z-index: 1040;
-        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-    }
-
-    main {
-        margin-left: 0 !important;
-    }
-}
-/* Ajouter ces styles au fichier espaceclient.component.css */
-
-/* Animation pour les notifications */
 @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-5px);
-  }
-  60% {
-    transform: translateY(-3px);
-  }
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+  60% { transform: translateY(-3px); }
 }
 
-/* Style pour le bouton de messages avec notification */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(124, 58, 237, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(124, 58, 237, 0.5); }
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+header {
+  background: var(--white) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gray-100) !important;
+}
+
+header h1,
+header h2 {
+  background: var(--primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+
+aside {
+  background: linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%) !important;
+  border-right: 1px solid var(--gray-100);
+}
+
+/* Style des liens de navigation */
+.nav-link {
+  color: var(--gray-700);
+  font-weight: 500;
+  font-size: 0.95rem;
+  border-radius: var(--radius) !important;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--primary-gradient);
+  transform: scaleY(0);
+  transition: var(--transition);
+  border-radius: 0 4px 4px 0;
+}
+
+.nav-link:hover {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+  color: var(--primary-color);
+  transform: translateX(5px);
+}
+
+.nav-link:hover::before {
+  transform: scaleY(1);
+}
+
+.nav-link:hover i {
+  color: var(--primary-color);
+}
+
+.nav-link.active {
+  background: var(--primary-gradient) !important;
+  color: var(--white) !important;
+  border-radius: var(--radius) !important;
+  transform: translateX(5px);
+  box-shadow: var(--shadow-purple);
+}
+
+.nav-link.active::before {
+  display: none;
+}
+
+.nav-link.active i {
+  color: var(--white) !important;
+}
+
+.nav-link i {
+  transition: var(--transition);
+}
+
+/* Lien déconnexion */
+.nav-link.text-danger:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--danger) !important;
+}
+
+/* ============================================
+   MESSAGES & NOTIFICATIONS
+   ============================================ */
+
+/* Bouton messages avec notification */
 .btn-message-notification {
-  transition: all 0.3s ease;
+  transition: var(--transition);
+  border-radius: 50% !important;
 }
 
 .btn-message-notification.has-new-messages {
   animation: pulse 2s infinite;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%) !important;
 }
 
 .btn-message-notification:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
+  background: var(--gray-100);
 }
 
-/* Badge de notification personnalisé */
-.notification-badge {
+/* Badge de notification */
+.notification-badge,
+.badge.bg-danger {
   animation: bounce 1s ease-in-out;
-  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
-  font-weight: bold;
-  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  font-weight: 700;
+  border: 2px solid var(--white) !important;
 }
 
 /* Point de notification */
-.notification-dot {
+.notification-dot,
+.bg-danger.rounded-circle {
   animation: pulse 1.5s infinite;
-  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.2);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2);
 }
 
 /* Style pour le lien de messages dans la sidebar */
-.nav-link.message-link {
-  position: relative;
-  overflow: visible;
-}
-
 .nav-link.message-link.has-new-messages {
-  background: linear-gradient(90deg, rgba(30, 77, 184, 0.1) 0%, rgba(139, 46, 184, 0.1) 100%);
-  border-left: 3px solid #1e4db8;
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%);
+  border-left: 4px solid var(--primary-color);
 }
 
 .nav-link.message-link.has-new-messages i {
-  color: #1e4db8;
+  color: var(--primary-color);
   animation: pulse 2s infinite;
 }
 
-/* Toast personnalisé */
-.toast.message-toast {
-  border: none;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+/* ============================================
+   TOAST NOTIFICATIONS
+   ============================================ */
+
+.toast {
+  border: none !important;
+  border-radius: var(--radius) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
   backdrop-filter: blur(10px);
+  animation: slideInRight 0.5s ease-out;
 }
 
-.toast.message-toast .toast-body {
-  backdrop-filter: blur(5px);
+.toast.message-toast {
+  background: var(--primary-gradient) !important;
 }
 
-/* Responsive adjustments */
+.toast-header {
+  border-radius: var(--radius) var(--radius) 0 0 !important;
+}
+
+.toast .btn-light {
+  background: var(--white);
+  color: var(--primary-color);
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  transition: var(--transition);
+}
+
+.toast .btn-light:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow);
+}
+
+/* ============================================
+   DROPDOWN MENU
+   ============================================ */
+
+.dropdown-menu {
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  padding: 8px;
+  animation: fadeIn 0.2s ease;
+}
+
+.dropdown-item {
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.dropdown-item:hover {
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.1) 0%, transparent 100%);
+  color: var(--primary-color);
+}
+
+.dropdown-divider {
+  border-color: var(--gray-200);
+  margin: 8px 0;
+}
+
+/* ============================================
+   AVATAR UTILISATEUR
+   ============================================ */
+
+.dropdown-toggle .rounded-circle {
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.dropdown-toggle:hover .rounded-circle {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-purple);
+}
+
+/* ============================================
+   ALERT VÉHICULES
+   ============================================ */
+
+.alert-warning {
+  background: linear-gradient(90deg, #fef3c7 0%, #fde68a 100%);
+  border: none;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.alert-warning a {
+  color: #78350f;
+}
+
+/* ============================================
+   CONVERSATIONS NON LUES
+   ============================================ */
+
+.conversation-item.has-unread {
+  border-left: 4px solid var(--primary-color);
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  font-weight: 500;
+}
+
+.conversation-item.has-unread .user-name {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.conversation-item.has-unread .last-message {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+/* Badge messages non lus */
+.unread-count-badge {
+  background: var(--primary-gradient);
+  color: var(--white);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 50px;
+  min-width: 22px;
+  text-align: center;
+  box-shadow: var(--shadow-purple);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+
+main {
+  background: linear-gradient(180deg, var(--gray-50) 0%, var(--white) 100%);
+  animation: fadeIn 0.4s ease;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
 @media (max-width: 768px) {
+  aside {
+    z-index: 1040;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  main {
+    margin-left: 0 !important;
+  }
+
   .notification-badge {
     font-size: 0.6rem;
     min-width: 16px;
     height: 16px;
     line-height: 16px;
   }
-  
+
   .notification-dot {
     width: 8px;
     height: 8px;
   }
+
+  header h1,
+  header h2 {
+    font-size: 1rem !important;
+  }
 }
 
-/* Amélioration de l'accessibilité */
+/* ============================================
+   ACCESSIBILITÉ
+   ============================================ */
+
 .btn:focus-visible,
 .nav-link:focus-visible {
-  outline: 2px solid #1e4db8;
+  outline: 3px solid var(--primary-light);
   outline-offset: 2px;
 }
 
-/* Animation d'apparition pour les nouvelles notifications */
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* ============================================
+   SCROLLBAR PERSONNALISÉE
+   ============================================ */
+
+aside::-webkit-scrollbar {
+  width: 6px;
 }
 
-.toast.show {
-  animation: slideInRight 0.5s ease-out;
+aside::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-/* Style pour les conversations avec messages non lus */
-.conversation-item.has-unread {
-  border-left: 4px solid #1e4db8;
-  background: linear-gradient(90deg, rgba(30, 77, 184, 0.05) 0%, transparent 50%);
-  font-weight: 500;
+aside::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
 }
 
-.conversation-item.has-unread .user-name {
-  color: #1e4db8;
-  font-weight: 600;
-}
-
-.conversation-item.has-unread .last-message {
-  font-weight: 500;
-  color: #495057;
-}
-
-/* Badge flottant pour le nombre de messages non lus */
-.unread-count-badge {
-  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+aside::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-light);
 }

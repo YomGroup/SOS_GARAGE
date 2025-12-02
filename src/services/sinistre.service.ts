@@ -28,12 +28,34 @@ export class SinistreService {
        await this.loadToken();
 
        const headers = new HttpHeaders({
-    'Authorization': `Bearer ${this.token}`
-      });
+           'Authorization': `Bearer ${this.token}`
+       });
 
-    return lastValueFrom(
-    this.http.post(`${environment.apiUrlLocale}/image/upload/${id}`, formData, { headers }));
-   }
+       return lastValueFrom(
+           this.http.post(`${environment.apiUrlLocale}/image/upload/${id}`, formData, { headers })
+       );
+    }
+
+    /**
+     * Upload du constat (PDF ou image) via MinIO
+     */
+    async uploadConstat(sinistreId: string, file: File): Promise<string> {
+        const formData = new FormData();
+        formData.append('images', file);
+
+        await this.loadToken();
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+        const result = await lastValueFrom(
+            this.http.post<string[]>(`${environment.apiUrlLocale}/image/upload/constat_${sinistreId}`, formData, { headers })
+        );
+        
+        // Retourne la première URL (le constat)
+        return result && result.length > 0 ? result[0] : '';
+    }
 
 
 

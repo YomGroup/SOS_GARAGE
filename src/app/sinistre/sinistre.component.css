@@ -1,18 +1,25 @@
 /* Variables CSS pour cohérence */
-:root {
-  --primary-blue: #004AAD;
-  --gradient: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);
-  --card-shadow: 0 8px 32px rgba(0, 74, 173, 0.08), 0 2px 16px rgba(0, 0, 0, 0.04);
-  --hover-shadow: 0 12px 40px rgba(0, 74, 173, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
-  --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+:host {
+  --primary-color: #7c3aed;
+  --primary-light: #a78bfa;
+  --primary-dark: #5b21b6;
+  --primary-blue: #7c3aed;
+  --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --card-shadow: 0 8px 32px rgba(124, 58, 237, 0.08), 0 2px 16px rgba(0, 0, 0, 0.04);
+  --hover-shadow: 0 12px 40px rgba(124, 58, 237, 0.15), 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-purple: 0 10px 40px rgba(124, 58, 237, 0.25);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --radius: 16px;
+  --radius-lg: 24px;
 }
 
 /* Container principal */
 .container-fluid {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+  background: linear-gradient(180deg, #f5f3ff 0%, #ffffff 50%, #faf5ff 100%);
   position: relative;
   overflow-x: hidden;
+  padding: 30px;
 }
 
 /* Animations keyframes */

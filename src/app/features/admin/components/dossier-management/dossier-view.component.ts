@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
 import { ExpertiseService } from '../../../../../services/expertise.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { MessageService } from '../../../../../services/messagerie.service';
+import { ChatService } from '../../../../../services/chat.service';
 interface AssuranceContact {
   nom: string;
   telephone: string;
@@ -115,8 +115,7 @@ export class DossierViewComponent implements OnChanges, OnInit {
     private firebaseService: FirebaseStorageService,
     private cdr: ChangeDetectorRef,
     private expertiseService: ExpertiseService,
-    private messageService: MessageService, // ⬅️ AJOUT
-
+    private chatService: ChatService,
     private http: HttpClient
   ) { }
 
@@ -359,35 +358,46 @@ getMSinistreDate(mission: Mission | null): string {
       next: async (mission) => {
         this.attributionEnCours = false;
         this.selectedReparateurId = null;
-        alert('Mission créée avec succès !');
-        let KeycloakReparateur: any = null;
-        let KeycloakAssure: any = null;
+        
+        try {
+          // Récupération des infos Assuré et Réparateur en parallèle
+          const [assure, reparateur] = await Promise.all([
+            this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
+            this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
+          ]);
 
-        this.attributionEnCours = false;
-        this.selectedReparateurId = null;
-        alert('Mission créée avec succès !');
-
-        // Récupération des infos Assuré et Réparateur en parallèle
-        const [assure, reparateur] = await Promise.all([
-          this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
-          this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
-        ]);
-
-        KeycloakAssure = assure;
-        KeycloakReparateur = reparateur;
-
-
-        if (KeycloakReparateur && KeycloakAssure) {
-          this.messageService.sendSystemMessage(
-            KeycloakAssure.useridKeycloak || '',
-            KeycloakReparateur.useridKeycloak || '',
-            "Discussion ouverte pour le suivi du sinistre "
-          );
+          if (reparateur && assure && reparateur.id && assure.id) {
+            // Création du chat dans le backend (PostgreSQL)
+            try {
+              const chatId = await this.chatService.createChatForMission(
+                assure.id,
+                reparateur.id
+              );
+              console.log('✅ Chat créé:', { 
+                chatId, 
+                assureId: assure.id, 
+                assureName: `${assure.name || ''} ${assure.prenom || ''}`.trim(),
+                reparateurId: reparateur.id,
+                garageName: reparateur.nomDuGarage || reparateur.name,
+                missionId: mission.id 
+              });
+            } catch (chatError) {
+              console.error('❌ Erreur création chat:', chatError);
+            }
+          } else {
+            console.warn('⚠️ IDs assuré/réparateur manquants pour créer le chat');
+          }
+        } catch (error) {
+          console.error('❌ Erreur lors de la récupération des infos:', error);
         }
 
-        this.missionUpdated.emit(mission); // Ajout : notifie le parent pour recharger
+        alert('Mission créée avec succès ! Une conversation a été ouverte avec l\'assuré.');
+        this.missionUpdated.emit(mission);
       },
-      error: () => alert('Erreur lors de la création de la mission')
+      error: (err) => {
+        console.error('Erreur lors de la création de la mission:', err);
+        alert('Erreur lors de la création de la mission');
+      }
     });
   }
 

@@ -22,6 +22,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
 import { MissionService } from '../../../../../services/mission.service';
 import { ReparateurService } from '../../../../../services/reparateur.service';
+import { parseBackendDate, formatDateTimeFr } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -160,9 +161,10 @@ export class AdminDashboardComponent implements OnInit {
   private updateRecentActivity(type: string, items: any[]): void {
     const mapped = (items || []).map(item => {
       let date = item.createdAt || item.dateCreation || item.updatedAt || null;
+      const parsedDate = parseBackendDate(date) || new Date();
       return {
         type,
-        date: date ? new Date(date) : new Date(),
+        date: parsedDate,
         label: this.getActivityLabel(type, item),
         icon: this.getActivityIcon(type)
       };
@@ -171,6 +173,14 @@ export class AdminDashboardComponent implements OnInit {
     this.recentActivity = this.recentActivity
       .sort((a, b) => b.date.getTime() - a.date.getTime())
       .slice(0, 10);
+  }
+
+  /**
+   * Formate une date du backend pour l'affichage
+   * Utilise l'utilitaire centralisé qui gère tous les formats
+   */
+  formatBackendDate(date: any): string {
+    return formatDateTimeFr(date);
   }
 
   private getActivityLabel(type: string, item: any): string {

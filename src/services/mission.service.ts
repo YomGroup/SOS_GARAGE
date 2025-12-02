@@ -49,17 +49,7 @@ export class MissionService {
   }
 
   updateMissionStatus(id: number, statut: string): Observable<Mission> {
-    // --- Notification admin temporaire via Formspree ---
-    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
-    const notificationPayload = {
-        subject: '[SOS Garage] Changement Statut Mission',
-        message: 'Le statut de la mission ID ' + id + ' est maintenant : ' + statut
-    };
-    this.http.post(formspreeUrl, notificationPayload).subscribe({
-        next: () => console.log('Notification temporaire (statut mission) envoyée.'),
-        error: (err) => console.error('Erreur notification temporaire:', err)
-    });
-    // --- Fin de la notification temporaire ---
+    // Les notifications sont désormais gérées côté backend
     return this.http.patch<Mission>(`${this.apiUrl}/${id}/statut`, { statut });
   }
 
@@ -91,18 +81,7 @@ export class MissionService {
   }
 
   updateMission(id: number, mission: MissionUpdate): Observable<Mission> {
-    // --- Notification admin temporaire via Formspree ---
-    const formspreeUrl = 'https://formspree.io/f/meoljrlp';
-    const notificationPayload = {
-        subject: '[SOS Garage] Mise à Jour Mission',
-        message: 'La mission ID ' + id + ' a été mise à jour.',
-        details: 'Contenu: ' + JSON.stringify(mission, null, 2)
-    };
-    this.http.post(formspreeUrl, notificationPayload).subscribe({
-        next: () => console.log('Notification temporaire (MAJ mission) envoyée.'),
-        error: (err) => console.error('Erreur notification temporaire:', err)
-    });
-    // --- Fin de la notification temporaire ---
+    // Les notifications sont désormais gérées côté backend
     return this.http.patch<Mission>(`${this.apiUrl}/missions/${id}`, mission).pipe(
       catchError(this.handleError)
     );
