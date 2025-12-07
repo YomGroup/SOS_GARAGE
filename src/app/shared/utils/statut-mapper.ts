@@ -171,3 +171,5 @@ export function filterByStatutCategorie<T>(
   return items.filter(item => getStatutCategorie(getStatut(item)) === categorie);
 }
 
+
+
