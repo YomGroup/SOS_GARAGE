@@ -1,0 +1,211 @@
+<div class="document-generation-wrapper">
+  <div class="container-fluid px-4 py-4">
+    
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <div class="header-icon">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="header-text">
+          <h1>Génération de Documents</h1>
+          <p>Générez des documents officiels (Ordre de réparation, Cession) pour les sinistres</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="alert alert-success" *ngIf="successMessage">
+      <i class="fas fa-check-circle me-2"></i>
+      {{ successMessage }}
+    </div>
+    <div class="alert alert-danger" *ngIf="errorMessage">
+      <i class="fas fa-exclamation-circle me-2"></i>
+      {{ errorMessage }}
+    </div>
+
+    <div class="row g-4">
+      <!-- Colonne gauche: Sélection du sinistre -->
+      <div class="col-12 col-lg-7">
+        <div class="card sinistre-selection-card">
+          <div class="card-header">
+            <h5>
+              <i class="fas fa-car-crash me-2"></i>
+              Sélectionner un Sinistre
+            </h5>
+            <span class="badge bg-purple">{{ filteredSinistres.length }} sinistre(s)</span>
+          </div>
+          
+          <div class="card-body">
+            <!-- Barre de recherche -->
+            <div class="search-box">
+              <i class="fas fa-search search-icon"></i>
+              <input 
+                type="text" 
+                class="form-control search-input"
+                placeholder="Rechercher par email, nom, immatriculation ou ID..."
+                [(ngModel)]="searchEmail"
+                (input)="filterSinistres()"
+              />
+              <button 
+                class="btn-clear" 
+                *ngIf="searchEmail"
+                (click)="searchEmail = ''; filterSinistres()"
+              >
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+
+            <!-- Loading -->
+            <div class="loading-container" *ngIf="isLoading">
+              <div class="spinner-border text-purple" role="status">
+                <span class="visually-hidden">Chargement...</span>
+              </div>
+              <p>Chargement des sinistres...</p>
+            </div>
+
+            <!-- Liste des sinistres -->
+            <div class="sinistre-list" *ngIf="!isLoading">
+              <div class="empty-state" *ngIf="filteredSinistres.length === 0">
+                <i class="fas fa-inbox"></i>
+                <p>Aucun sinistre trouvé</p>
+              </div>
+
+              <div 
+                class="sinistre-item"
+                *ngFor="let sinistre of filteredSinistres"
+                [class.selected]="selectedSinistre?.id === sinistre.id"
+                (click)="selectSinistre(sinistre)"
+              >
+                <div class="sinistre-icon">
+                  <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="sinistre-details">
+                  <div class="sinistre-header">
+                    <span class="sinistre-id">SIN-{{ sinistre.id.toString().padStart(3, '0') }}</span>
+                    <span class="status-badge" [ngClass]="getStatusClass(sinistre.statut)">
+                      {{ sinistre.statut }}
+                    </span>
+                  </div>
+                  <div class="sinistre-info">
+                    <span class="info-item">
+                      <i class="fas fa-envelope me-1"></i>
+                      {{ sinistre.assureEmail }}
+                    </span>
+                    <span class="info-item">
+                      <i class="fas fa-car me-1"></i>
+                      {{ sinistre.vehiculeImmatriculation }}
+                    </span>
+                  </div>
+                  <div class="sinistre-meta">
+                    <span class="type-badge">{{ sinistre.type }}</span>
+                    <span class="date">
+                      <i class="fas fa-calendar me-1"></i>
+                      {{ formatDate(sinistre.createdAt) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="sinistre-check" *ngIf="selectedSinistre?.id === sinistre.id">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Colonne droite: Type de document et génération -->
+      <div class="col-12 col-lg-5">
+        <!-- Sinistre sélectionné -->
+        <div class="card selected-sinistre-card" *ngIf="selectedSinistre">
+          <div class="card-header">
+            <h5>
+              <i class="fas fa-check-double me-2"></i>
+              Sinistre Sélectionné
+            </h5>
+            <button class="btn-close-selection" (click)="clearSelection()">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="selected-info">
+              <div class="info-row">
+                <span class="label">ID:</span>
+                <span class="value">SIN-{{ selectedSinistre.id.toString().padStart(3, '0') }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Email:</span>
+                <span class="value">{{ selectedSinistre.assureEmail }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Véhicule:</span>
+                <span class="value">{{ selectedSinistre.vehiculeImmatriculation }}</span>
+              </div>
+              <div class="info-row">
+                <span class="label">Type:</span>
+                <span class="value">{{ selectedSinistre.type }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Type de document -->
+        <div class="card document-type-card">
+          <div class="card-header">
+            <h5>
+              <i class="fas fa-file-alt me-2"></i>
+              Type de Document
+            </h5>
+          </div>
+          <div class="card-body">
+            <div class="document-types">
+              <div 
+                class="document-type-item"
+                *ngFor="let docType of documentTypes"
+                [class.selected]="selectedDocumentType === docType.value"
+                (click)="selectDocumentType(docType.value)"
+              >
+                <div class="type-icon">
+                  <i [class]="docType.icon"></i>
+                </div>
+                <div class="type-details">
+                  <span class="type-label">{{ docType.label }}</span>
+                  <span class="type-description">{{ docType.description }}</span>
+                </div>
+                <div class="type-radio">
+                  <div class="radio-circle" [class.active]="selectedDocumentType === docType.value">
+                    <div class="radio-dot" *ngIf="selectedDocumentType === docType.value"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bouton de génération -->
+        <div class="generate-section">
+          <button 
+            class="btn-generate"
+            [disabled]="!selectedSinistre || isGenerating"
+            (click)="generateDocument()"
+          >
+            <span class="btn-content" *ngIf="!isGenerating">
+              <i class="fas fa-download me-2"></i>
+              Générer le Document PDF
+            </span>
+            <span class="btn-content loading" *ngIf="isGenerating">
+              <span class="spinner-border spinner-border-sm me-2"></span>
+              Génération en cours...
+            </span>
+          </button>
+          
+          <p class="generate-hint" *ngIf="!selectedSinistre">
+            <i class="fas fa-info-circle me-1"></i>
+            Sélectionnez un sinistre pour générer un document
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

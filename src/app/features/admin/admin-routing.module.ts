@@ -15,6 +15,7 @@ import { AdminStatsComponent } from './components/administration/admin-stats/adm
 import { DossierViewComponent } from './components/dossier-management/dossier-view.component';
 import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 import { VehiculesComponent } from './components/vehicules-management/vehicules.component';
+import { DocumentGenerationComponent } from './components/document-generation/document-generation.component';
 
 
 const routes: Routes = [
@@ -59,6 +60,10 @@ const routes: Routes = [
   {
     path: 'gestion-finance',
     component: GestionFinanceComponent
+  },
+  {
+    path: 'documents',
+    component: DocumentGenerationComponent
   },
   {
     path: 'garages',

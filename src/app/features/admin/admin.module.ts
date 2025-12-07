@@ -34,6 +34,7 @@ import { DossierViewComponent } from './components/dossier-management/dossier-vi
 import { GestionFinanceComponent } from './components/gestion-finance/gestion-finance.component';
 import { VehiculesComponent } from './components/vehicules-management/vehicules.component';
 import { MessageComponent } from '../../shared/components/message/message.component';
+import { DocumentGenerationComponent } from './components/document-generation/document-generation.component';
 
 const routes: Routes = [
   {
@@ -50,6 +51,10 @@ const routes: Routes = [
   {
     path: 'gestion-finance',
     component: GestionFinanceComponent
+  },
+  {
+    path: 'documents',
+    loadComponent: () => import('./components/document-generation/document-generation.component').then(m => m.DocumentGenerationComponent)
   },
   {
     path: 'vehicules',
@@ -125,7 +130,8 @@ const routes: Routes = [
     UserManagementComponent,
     AuditLogsComponent,
     AccessManagementComponent,
-    AdminStatsComponent
+    AdminStatsComponent,
+    DocumentGenerationComponent
   ]
 })
 export class AdminModule { } 

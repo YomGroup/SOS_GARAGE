@@ -76,6 +76,7 @@ export class SidebarComponent implements OnInit {
       ]
     },
     { title: 'Véhicules', icon: 'bi bi-car-front', route: '/admin/vehicules' },
+    { title: 'Documents', icon: 'bi bi-file-earmark-pdf', route: '/admin/documents' },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/admin/gestion-finance' },
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
     // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
