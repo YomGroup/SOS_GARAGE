@@ -1,3 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+
 /* Global Styles */
 * {
   margin: 0;
@@ -19,6 +29,20 @@ body {
   padding: 0 20px;
 }
 
+.container,
+.hero-container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+@media (max-width: 768px) {
+  .container,
+  .hero-container {
+    padding-inline: 16px;  /* évite que le contenu touche les bords */
+  }
+}
+
 /* Typography */
 .text-gradient {
   background: linear-gradient(135deg, #004aad 0%, #aa38cb 100%);
@@ -34,12 +58,19 @@ body {
   line-height: 1.2;
   margin-bottom: 1rem;
   color: #1f2937;
+  display: inline-block;
 }
 
 .section-subtitle {
   font-size: 1.125rem;
   color: #6b7280;
   margin-bottom: 2rem;
+}
+.section-title .text-gradient {
+  display: inline-block;
+}
+.section-title br {
+  line-height: 0;
 }
 
 /* Buttons */
@@ -495,12 +526,16 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  gap: 2rem;
+
   margin-bottom: 3rem;
 }
-
+.services-header-left {
+  display: flex;
+  flex-direction: column;  /* empile badge + titre */
+  gap: 0.75rem;            /* espace entre badge et titre */
+}
 .section-badge {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
@@ -508,6 +543,8 @@ body {
   background: linear-gradient(90deg, rgba(0,74,173,0.08), rgba(170,56,203,0.08));
   border: 1px solid rgba(0,74,173,0.15);
   margin-bottom: 1.5rem;
+  max-width: max-content;
+  flex: 0 0 auto; 
 }
 
 .section-badge-dot {
@@ -958,6 +995,28 @@ body {
 
 .feature-icon-wrapper-active {
   background: rgba(173, 172, 172, 0.22);
+}
+/* L'élément actif garde toujours son vrai dégradé, même au hover */
+.feature-item.feature-item-active,
+.feature-item.feature-item-active:hover {
+  background: linear-gradient(135deg, #004aad, #aa38cb);
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 22px 55px rgba(170, 56, 203, 0.35);
+}
+
+/* Texte lisible sur fond violet */
+.feature-item-active .feature-title {
+  color: #ffffff;
+}
+
+.feature-item-active .feature-desc {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Icône plus clean sur l'actif */
+.feature-item-active .feature-icon-wrapper {
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .feature-icon {
@@ -1713,6 +1772,17 @@ body {
 .cta-card-value {
   font-size: 1.4rem;
   font-weight: 700;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 768px) {
+  .cta-card-value {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* Responsive CTA */
@@ -1721,6 +1791,8 @@ body {
     grid-template-columns: 1fr;
     padding: 2.5rem 1.75rem;
   }
+
+
 
   .cta-title {
     font-size: 2rem;
@@ -2528,4 +2600,15 @@ body {
   .hero-container {
     padding-top: 7rem;
   }
+
+  /* Corrige l'affichage du titre "Découvrez notre gamme de services sinistres" */
+.section-title {
+  display: block;          /* empêche tout comportement flex éventuel */
+  text-align: left;
+}
+
+.section-title .text-gradient {
+  display: inline;         /* reste dans la même ligne que le reste du texte */
+}
+
 }

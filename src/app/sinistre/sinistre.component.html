@@ -80,34 +80,37 @@
             <div class="list-group-item list-group-item-action p-3 border-0" 
                  *ngFor="let sinistre of sinistres" 
                  (click)="selectSinistre(sinistre)"
-                 [class.active]="selectedSinistre?.id === sinistre.id">
+                 [class.active]="selectedSinistre?.id === sinistre.id"
+                 [attr.id]="'sinistre-' + sinistre.id">
               
               <div class="d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
                   <div class="bg-primary bg-gradient rounded-circle p-2 text-white me-3">
                     <i class="bi bi-car-front fs-5"></i>
-                  </div>
+                  </div> 
                   <div>
                     <h6 class="mb-1">{{ sinistre.vehicule }}</h6>
-                    <div class="d-flex align-items-center">
+                    <div class="d-flex align-items-center"> 
                  <!-- Badge lisible avec icône et couleur -->
-                    <span class="badge rounded-pill me-2" [ngClass]="{
-                      'bg-warning text-dark': isEnCours(sinistre.statut),
-                      'bg-success': isCloture(sinistre.statut),
-                      'bg-secondary': isEnAttente(sinistre.statut)
-                    }">
-                      <i class="me-1" [ngClass]="{
-                        'bi bi-clock': isEnCours(sinistre.statut),
-                        'bi bi-check-circle': isCloture(sinistre.statut),
-                        'bi bi-hourglass': isEnAttente(sinistre.statut)
-                      }"></i>
-                      {{
-                        isEnCours(sinistre.statut) ? 'En cours' :
-                        isCloture(sinistre.statut) ? 'Clôturé' :
-                        isEnAttente(sinistre.statut) ? 'En attente' :
-                        sinistre.statut
-                      }}
-                    </span>
+<span class="badge rounded-pill me-2"
+      [ngClass]="{
+        'bg-white text-primary': getMainStatus(sinistre.statut) === 'nonTraite',
+        'bg-warning text-white':  getMainStatus(sinistre.statut) === 'enCours',
+        'bg-success':            getMainStatus(sinistre.statut) === 'termine'
+  }">
+
+  <i class="me-1"
+     [ngClass]="{
+       'bi bi-pause-circle':  getMainStatus(sinistre.statut) === 'nonTraite',
+       'bi bi-clock':         getMainStatus(sinistre.statut) === 'enCours',
+       'bi bi-check-circle':  getMainStatus(sinistre.statut) === 'termine'
+     }">
+  </i>
+
+  <!-- 🔥 Ici, on affiche UNIQUEMENT le sous-statut lisible -->
+  {{ formatStatut(sinistre.statut) }}
+</span>
+
 
                     
 
@@ -132,10 +135,10 @@
                    </button>
                   </ng-container>
 
-                  <div class="rounded-circle p-2 text-white" 
+                  <div class="rounded-circle p-2 text-white"  
                        [ngClass]="{
-                         'bg-success': sinistre.etat === 'roulant',
-                         'bg-danger': sinistre.etat === 'non roulant'
+                         'bg-success': sinistre.etat === 'Roulant',
+                         'bg-danger': sinistre.etat === 'Non roulant'
                        }">
                     <i [class]="sinistre.etat === 'roulant' ? 'bi bi-car-front' : 'bi bi-p-circle'"></i>
                   </div>
@@ -160,7 +163,7 @@
                     <h6 class="text-primary mb-1">
                       <i class="bi bi-info-circle me-2"></i><strong>État</strong>
                     </h6>
-                    <p class="text1 mb-0">{{ sinistre.etat }}</p>
+                    <p class="text1 mb-0">{{ formatEtat(sinistre.etat) }}</p>
                   </div>
 
                   <!-- Raison -->

@@ -221,6 +221,12 @@ export class EspaceclientComponent implements OnInit, OnDestroy {
     }
   }
 
+  handleNavClick(): void {
+  if (this.isMobile) {
+    this.sidebarCollapsed = true;
+  }
+}
+
   ngAfterViewInit() {
     const tooltipElements = Array.from(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipElements.forEach(el => new bootstrap.Tooltip(el));

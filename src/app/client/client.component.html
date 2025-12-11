@@ -24,7 +24,7 @@
         <h1 class="hero-title">
           Gérez vos<br />
           <span class="hero-title-highlight">
-            sinistres auto
+            sinistres auto et Moto
             <span class="hero-underline"></span>
           </span><br />
           en toute sérénité
@@ -169,22 +169,24 @@
 <section id="services" class="services">
   <div class="container">
     <!-- Header -->
-    <div class="services-header">
-      <div>
-        <div class="section-badge">
-          <span class="section-badge-dot"></span>
-          <span class="section-badge-text">Nos services</span>
-        </div>
-        <h2 class="section-title">
-          Découvrez notre gamme<br>
-          <span class="text-gradient">de services sinistres</span>
-        </h2>
-      </div>
-
-      <a routerLink="/client/services" class="services-link d-block">
-        Voir tous les services →
-        </a>
+<div class="services-header">
+  <div class="services-header-left">
+    <div class="section-badge">
+      <span class="section-badge-dot"></span>
+      <span class="section-badge-text">Nos services</span>
     </div>
+
+    <h2 class="section-title">
+      Découvrez notre gamme<br>
+      <span class="text-gradient">de services sinistres</span>
+    </h2>
+  </div>
+
+  <a class="services-link d-block">
+    Voir tous les services →
+  </a>
+</div>
+
 
     <!-- Grid -->
     <div class="services-grid">
@@ -468,7 +470,7 @@
             alt="Sophie Bernard"
           />
         </div>
-        <span class="avatar-text">+2000 clients satisfaits</span>
+        <span class="avatar-text">+45 clients satisfaits</span>
       </div>
     </div>
 
@@ -575,7 +577,7 @@
           <a routerLink="/clientDashboard" class="btn-primary cta-btn-primary">
             Déclarer un sinistre
           </a>
-          <a routerLink="/contact" class="btn-outline cta-btn-secondary">
+          <a routerLink="/client/contact" class="btn-outline cta-btn-secondary">
             Nous contacter
           </a>
         </div>

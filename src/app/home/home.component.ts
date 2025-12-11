@@ -1,6 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-import { inject } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { VehicleService } from '../../services/vehicle.service';
@@ -10,32 +9,86 @@ import { AssureService } from '../../services/assure.service';
 
 @Component({
   selector: 'app-home',
+  standalone: true,
   imports: [RouterLink, CommonModule],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css'
 })
 export class HomeComponent implements OnInit {
 
+  // Regroupe les statuts techniques en 3 familles
+getMainStatus(statut: string): 'nonTraite' | 'enCours' | 'termine' {
+  if (!statut) return 'nonTraite';
+
+  if (statut === 'NON_TRAITEE') {
+    return 'nonTraite';
+  }
+
+  if ([
+    'EN_ATTENTE_TRAITEMENT',
+    'EN_ATTENTE_EXPERTISE',
+    'EN_COURS_REPARATION',
+    'EN_ATTENTE_RDV',
+    'EN_ATTENTE_VALIDATION_ASSURANCE'
+  ].includes(statut)) {
+    return 'enCours';
+  }
+
+  if (statut === 'REPARATION_TERMINEE') {
+    return 'termine';
+  }
+
+  return 'nonTraite';
+}
+
+// Texte lisible pour le statut
+formatStatut(statut: string): string {
+  if (!statut) return 'Statut inconnu';
+
+  const mapping: { [key: string]: string } = {
+    'NON_TRAITEE': 'Non traitée',
+    'EN_ATTENTE_TRAITEMENT': 'En attente de traitement',
+    'EN_ATTENTE_EXPERTISE': "En attente d'expertise",
+    'EN_COURS_REPARATION': 'En cours de réparation',
+    'EN_ATTENTE_RDV': 'En attente de rendez-vous',
+    'EN_ATTENTE_VALIDATION_ASSURANCE': 'En attente de validation assurance',
+    'REPARATION_TERMINEE': 'Réparation terminée'
+  };
+
+  return mapping[statut] ?? statut.replace(/_/g, ' ').toLowerCase();
+}
+
+// Texte lisible pour l’état véhicule
+formatEtat(etat?: string | null): string {
+  if (!etat) return 'Inconnu';
+
+  const normalized = etat.toUpperCase();
+  if (normalized === 'ROULANT') return 'Roulant';
+  if (normalized === 'NON_ROULANT') return 'Non roulant';
+
+  return etat;
+}
+
+
   private sinistreService = inject(SinistreService);
   private authService = inject(AuthService);
   private assureService = inject(AssureService);
+  private router = inject(Router);   // ✅ injection du Router
 
   userid: string | null = null;
   assureId: number = 0;
 
-  // Champs venant du backend
-  vehiclesCount: number = 0;
-  sinistreCount: number = 0;
-  sinistreEnCoursCount: number = 0;
+  vehiclesCount = 0;
+  sinistreCount = 0;
+  sinistreEnCoursCount = 0;
 
   latestVehiclesWithClaims: any[] = [];
   recentVehicles: any[] = [];
   recentSinistres: any[] = [];
 
-  // ❗ Champs nécessaires pour ton HTML
-  vehicules: any[] = [];                // Pour *ngFor des véhicules
-  vehiculesDataLimited: any[] = [];     // Pour *ngFor limité à 3 ou 5
-  sinistreOpenStates: { [id: number]: boolean } = {}; // Toggle sinistres
+  vehicules: any[] = [];
+  vehiculesDataLimited: any[] = [];
+  sinistreOpenStates: { [id: number]: boolean } = {};
 
   ngOnInit(): void {
     this.userid = this.authService.getToken()?.['sub'] ?? null;
@@ -54,7 +107,6 @@ export class HomeComponent implements OnInit {
   loadDashboard() {
     this.sinistreService.getDashboard(this.assureId).subscribe({
       next: (data) => {
-
         this.vehiclesCount = data.vehiclesCount;
         this.sinistreCount = data.sinistreCount;
         this.sinistreEnCoursCount = data.sinistreEnCoursCount;
@@ -70,12 +122,10 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  // Pour ouvrir / fermer une liste de sinistres
   toggleSinistreList(vehicleId: number) {
     this.sinistreOpenStates[vehicleId] = !this.sinistreOpenStates[vehicleId];
   }
 
-  // Formattage du temps
   getTimeSince(dateArr: number[]): string {
     const date = new Date(
       dateArr[0], dateArr[1] - 1, dateArr[2],
@@ -92,5 +142,13 @@ export class HomeComponent implements OnInit {
     if (diffHrs < 24) return `Il y a ${diffHrs} h`;
 
     return date.toLocaleDateString();
+  }
+
+  // ✅ méthode appelée dans le (click)
+  goToSinistreDetail(sinistreId: number) {
+    this.router.navigate(
+      ['/clientDashboard/sinistre'],
+      { queryParams: { sinistreId } }
+    );
   }
 }

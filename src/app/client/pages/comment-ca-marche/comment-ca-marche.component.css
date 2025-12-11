@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
 .process-page {
   background-color: #ffffff;
 }
@@ -407,6 +409,63 @@
 
 .process-cta-arrow {
   font-size: 1rem;
+}
+
+
+
+
+
+/* ===== Layout mobile forcé pour la page process ===== */
+@media (max-width: 768px) {
+  /* Container plus serré */
+  .page-container {
+    padding: 0 16px !important;
+  }
+
+  /* On enlève le décalage du timeline */
+  .process-steps-wrapper {
+    padding-left: 0 !important;
+  }
+
+  /* On masque la ligne verticale + les gros ronds desktop */
+  .process-line {
+    display: none !important;
+  }
+
+  .process-step-number-desktop {
+    display: none !important;
+  }
+
+  /* Carte pleine largeur, bien centrée */
+  .process-step-card {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    width: 100% !important;
+    border-radius: 28px !important;
+    padding: 24px 20px !important;
+  }
+
+  /* Contenu en colonne */
+  .process-step-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 16px !important;
+  }
+
+  /* Titre + texte un peu plus petits pour respirer */
+  .process-step-title {
+    font-size: 1.25rem !important;
+  }
+
+  .process-step-description {
+    font-size: 0.95rem !important;
+    line-height: 1.6 !important;
+  }
+
+  /* Titre hero un peu réduit */
+  .process-hero-title {
+    font-size: 1.9rem !important;
+  }
 }
 
 /* =============== RESPONSIVE =============== */
