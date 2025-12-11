@@ -66,27 +66,37 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   pageSizeOptions: number[] = [5, 10, 20, 50];
 
   // Fonction helper pour normaliser les statuts
-  private normalizeStatut(statut: string): string {
-    if (!statut) return '';
-    return statut.toLowerCase().trim();
-  }
+private normalizeStatut(statut: string): string {
+  if (!statut) return '';
+  // On remplace aussi _ par des espaces pour tout unifier
+  return statut
+    .toLowerCase()
+    .trim()
+    .replace(/[_-]+/g, ' ')
+    .replace(/\s+/g, ' ');
+}
 
   get missionsNouvelles() {
     return this.missions.filter(m => {
       const statut = this.normalizeStatut(m.statut);
-      return statut === 'assignée' || statut === 'assignee' || statut === 'en attente' || statut === 'en_attente' ||
+      return statut === 'assignée' || statut === 'assignee' || statut === 'En attente' || statut === 'en_attente' ||
              statut === 'non traité' || statut === 'non traite' || statut === 'en_attente_traitement' ||
              statut === 'en_attente_expertise' || statut === 'en_attente_reparation';
     });
   }
 
-  get missionsEnCours() {
-    return this.missions.filter(m => {
-      const statut = this.normalizeStatut(m.statut);
-      return statut === 'en cours' || statut === 'en_cours' || statut === 'assignée' || statut === 'assignee' || 
-             statut === 'en_cours_reparation' || statut === 'en cours de réparation';
-    });
-  }
+get missionsEnCours() {
+  return this.missions.filter(m => {
+    const statut = this.normalizeStatut(m.statut);
+    return (
+      statut === 'en cours' ||
+      statut === 'en cours reparation' ||
+      statut === 'en cours de reparation' || // ✅ couvrira EN_COURS_DE_REPARATION
+      statut === 'assignée' ||
+      statut === 'assignee'
+    );
+  });
+}
 
   get missionsTerminees() {
     return this.missions.filter(m => {

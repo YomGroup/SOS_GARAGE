@@ -81,7 +81,7 @@ export class SidebarComponent implements OnInit {
     { title: 'Garages', icon: 'bi bi-building', route: '/admin/garages' },
     // { title: 'Épaves', icon: 'bi bi-car-front', route: '/admin/epaves', isNew: true },
     { title: 'Administration', icon: 'bi bi-gear', route: '/admin/administration' },
-    { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/admin/message' },
+    // { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/admin/message' },
     //{ title: 'Paramètres', icon: 'bi bi-sliders', route: '/admin/parametre' }
 
   ];
@@ -100,7 +100,7 @@ export class SidebarComponent implements OnInit {
       ]
     },
     { title: 'Finance', icon: 'bi bi-cash-coin', route: '/garage/finance' },
-    { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/garage/message' },
+    // { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/garage/message' },
     { title: 'Profil', icon: 'bi bi-person', route: '/garage/profil' }
   ];
 
@@ -109,7 +109,7 @@ export class SidebarComponent implements OnInit {
     { title: 'Mes Véhicules', icon: 'bi bi-car-front-fill', route: '/clientDashboard/vehicules' },
     { title: 'Mes Déclarations', icon: 'bi bi-file-earmark-text', route: '/clientDashboard/declarations' },
     { title: 'Mes Sinistres', icon: 'bi bi-exclamation-triangle', route: '/clientDashboard/sinistre' },
-    { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/clientDashboard/message' },
+    // { title: 'Messages', icon: 'bi bi-chat-left-text', route: '/clientDashboard/message' },
     { title: 'Support', icon: 'bi bi-question-circle', route: '/clientDashboard/support' },
   ];
 

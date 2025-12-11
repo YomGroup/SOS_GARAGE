@@ -140,6 +140,7 @@
           [(ngModel)]="newMessage"
           placeholder="Écrivez votre message..."
           (keyup.enter)="sendMessage()"
+          (input)="onMessageInput()"
           [disabled]="!connectionStatus">
         
         <button 

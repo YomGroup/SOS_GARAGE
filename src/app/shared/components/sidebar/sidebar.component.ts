@@ -107,7 +107,7 @@ export class SidebarComponent implements OnInit {
 
   get menuItems(): MenuItem[] {
     const commonItems = [
-      { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
+      // { title: 'Messages', icon: 'bi bi-envelope', route: '/message', badge: '2' },
       { title: 'Profil', icon: 'bi bi-person', route: '/clientDashboard/profiles' } // Route de profil commune
     ];
 

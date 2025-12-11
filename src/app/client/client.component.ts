@@ -22,7 +22,7 @@ export class ClientComponent {
       title: 'Sécurité',
       description:
         "Vos données sont protégées et vos démarches sont sécurisées. Nous utilisons les dernières technologies de cryptage pour garantir la confidentialité de vos informations personnelles.",
-      image: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1750558222639-3573a142508d?q=80&w=1171&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=800&q=80'
     },
     {
       id: 'speed',
@@ -38,7 +38,7 @@ export class ClientComponent {
       title: 'Experts dédiés',
       description:
         "Une équipe d'experts automobiles à votre service. Chaque dossier est suivi par un conseiller dédié qui connaît votre situation et peut répondre à toutes vos questions.",
-      image: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=800&q=80'
+      image: 'https://images.unsplash.com/photo-1746079074371-e28f14c76e37?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=800&q=80'
     },
     {
       id: 'support',

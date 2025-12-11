@@ -44,7 +44,7 @@ export class MessageComponent implements OnInit, OnDestroy {
   totalUnreadCount: number = 0;
 
   private subscriptions: Subscription[] = [];
-  private newMessageSub?: Subscription;
+  private typingTimeout: any;
 
   constructor(
     private authService: AuthService,
@@ -57,10 +57,17 @@ export class MessageComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    console.log('🚀 MessageComponent initialized');
+    
     await this.initializeUser();
-    await this.connectWebSocket();
-    await this.loadChats();
-    this.setupNewMessageListener();
+    
+    if (this.currentUserDbId) {
+      await this.connectWebSocket();
+      await this.loadChats();
+      this.setupMessageListeners();
+    } else {
+      console.warn('⚠️ User not found in database, cannot load chats');
+    }
     
     // Handle route params
     this.route.queryParams.subscribe(params => {
@@ -72,11 +79,13 @@ export class MessageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log('🛑 MessageComponent destroyed');
     this.subscriptions.forEach(sub => sub.unsubscribe());
-    if (this.newMessageSub) {
-      this.newMessageSub.unsubscribe();
-    }
     this.messagingService.disconnect();
+    
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
   }
 
   // ==================== Initialization ====================
@@ -86,21 +95,21 @@ export class MessageComponent implements OnInit, OnDestroy {
       this.currentUserKeycloakId = this.authService.getKeycloakId() || '';
       const roles = this.authService.getRoles();
       
-      // Check roles (Keycloak uses ROLE_ prefix and various formats)
+      // Check roles
       this.isAssure = roles.some(r => r.toLowerCase().includes('assure'));
       this.isGaragiste = roles.some(r => r.toLowerCase().includes('garagiste') || r.toLowerCase().includes('garage'));
       this.isAdmin = roles.some(r => r.toLowerCase().includes('admin'));
 
-      console.log('Initializing user:', { keycloakId: this.currentUserKeycloakId, roles });
+      console.log('👤 User roles:', { isAssure: this.isAssure, isGaragiste: this.isGaragiste, isAdmin: this.isAdmin });
 
       // Get database ID based on role
       if (this.isAssure && this.currentUserKeycloakId) {
         try {
           const assure = await firstValueFrom(this.assureService.getAssurerID(this.currentUserKeycloakId)) as Assure;
           this.currentUserDbId = assure?.id || 0;
-          console.log('Assure found:', assure);
+          console.log('✅ Assure found:', { id: this.currentUserDbId, name: assure.name });
         } catch (e) {
-          console.warn('Could not get assure by keycloak ID:', e);
+          console.warn('❌ Could not get assure:', e);
         }
       }
       
@@ -108,19 +117,19 @@ export class MessageComponent implements OnInit, OnDestroy {
         try {
           const reparateur = await firstValueFrom(this.reparateurService.getReparateurByKeycloakId(this.currentUserKeycloakId));
           this.currentUserDbId = reparateur?.id || 0;
-          console.log('Reparateur found:', reparateur);
+          console.log('✅ Reparateur found:', { id: this.currentUserDbId, name: reparateur.name });
         } catch (e) {
-          console.warn('Could not get reparateur by keycloak ID:', e);
+          console.warn('❌ Could not get reparateur:', e);
         }
       }
       
       if (this.isAdmin && this.currentUserKeycloakId) {
-        // Try as reparateur first (admin might be a garage)
+        // Try as reparateur first
         try {
           const reparateur = await firstValueFrom(this.reparateurService.getReparateurByKeycloakId(this.currentUserKeycloakId));
           if (reparateur?.id) {
             this.currentUserDbId = reparateur.id;
-            console.log('Admin as reparateur found:', reparateur);
+            console.log('✅ Admin as reparateur:', reparateur);
           }
         } catch (e) {
           // Try as assure
@@ -128,92 +137,85 @@ export class MessageComponent implements OnInit, OnDestroy {
             const assure = await firstValueFrom(this.assureService.getAssurerID(this.currentUserKeycloakId)) as Assure;
             if (assure?.id) {
               this.currentUserDbId = assure.id;
-              console.log('Admin as assure found:', assure);
+              console.log('✅ Admin as assure:', assure);
             }
           } catch (e2) {
-            console.warn('Admin not found in DB, using keycloak ID hash');
-            // Use a hash of keycloak ID as fallback
-            this.currentUserDbId = this.hashCode(this.currentUserKeycloakId);
+            console.warn('⚠️ Admin not found in DB');
           }
         }
       }
 
-      console.log('User initialized:', { 
+      console.log('✅ User initialized:', { 
         keycloakId: this.currentUserKeycloakId, 
-        dbId: this.currentUserDbId,
-        roles: { isAssure: this.isAssure, isGaragiste: this.isGaragiste, isAdmin: this.isAdmin }
+        dbId: this.currentUserDbId
       });
     } catch (error) {
-      console.error('Error initializing user:', error);
+      console.error('❌ Error initializing user:', error);
     }
-  }
-
-  private hashCode(str: string): number {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash) % 1000000; // Keep it reasonable
   }
 
   private async connectWebSocket(): Promise<void> {
     if (!this.currentUserDbId) {
-      console.warn('Cannot connect WebSocket: No user ID found in database');
-      console.warn('User may not be registered in backend yet. Keycloak ID:', this.currentUserKeycloakId);
-      // Don't block - user can still view UI, just won't have real-time updates
-      this.connectionStatus = false;
+      console.warn('⚠️ Cannot connect WebSocket: No user ID');
       return;
     }
 
     try {
+      console.log('🔌 Connecting to WebSocket...');
       await this.messagingService.connect(this.currentUserDbId);
-      this.connectionStatus = true;
-      console.log('✅ WebSocket connected for user:', this.currentUserDbId);
+      console.log('✅ WebSocket connected');
     } catch (error) {
       console.error('❌ WebSocket connection failed:', error);
-      this.connectionStatus = false;
     }
 
     // Subscribe to connection status
     const statusSub = this.messagingService.connectionStatus$.subscribe(status => {
       this.ngZone.run(() => {
         this.connectionStatus = status;
+        console.log('🔌 Connection status:', status ? 'Connected' : 'Disconnected');
         this.cdRef.detectChanges();
       });
     });
     this.subscriptions.push(statusSub);
   }
 
-  private setupNewMessageListener(): void {
-    this.newMessageSub = this.messagingService.newMessage$.subscribe(message => {
-      if (message) {
-        this.ngZone.run(() => {
-          // If message is for current chat, add it
-          if (message.chatId === this.currentChatId) {
-            this.messages.push(message);
-            this.scrollToBottom();
-          } else {
-            // Update unread count for other chat
-            const currentCount = this.unreadMessagesByUser.get(message.senderId) || 0;
-            this.unreadMessagesByUser.set(message.senderId, currentCount + 1);
-          }
-          this.cdRef.detectChanges();
-        });
-      }
+  private setupMessageListeners(): void {
+    // Listen to new messages
+    const messageSub = this.messagingService.newMessage$.subscribe(message => {
+      this.ngZone.run(() => {
+        console.log('📨 New message received:', message);
+        
+        // If message is for current chat, add it
+        if (message.chatId === this.currentChatId) {
+          this.messages.push(message);
+          this.scrollToBottom();
+        } else {
+          // Update unread count for other chat
+          const currentCount = this.unreadMessagesByUser.get(message.senderId) || 0;
+          this.unreadMessagesByUser.set(message.senderId, currentCount + 1);
+          this.totalUnreadCount++;
+        }
+        
+        this.cdRef.detectChanges();
+      });
     });
+    this.subscriptions.push(messageSub);
   }
 
   // ==================== Load Chats ====================
 
   async loadChats(): Promise<void> {
-    if (!this.currentUserDbId) return;
+    if (!this.currentUserDbId) {
+      console.warn('⚠️ Cannot load chats: No user ID');
+      return;
+    }
     
     this.isLoading = true;
     
     try {
+      console.log('📋 Loading chats for user:', this.currentUserDbId);
       const chats = await firstValueFrom(this.messagingService.getEnhancedChats(this.currentUserDbId));
+      console.log('✅ Chats loaded:', chats.length);
       
       // Convert to ChatUser format
       this.conversationUsers = await Promise.all(chats.map(async (chat) => {
@@ -237,10 +239,11 @@ export class MessageComponent implements OnInit, OnDestroy {
 
       // Calculate total unread
       this.totalUnreadCount = Array.from(this.unreadMessagesByUser.values()).reduce((a, b) => a + b, 0);
+      console.log('📊 Total unread:', this.totalUnreadCount);
       
       this.cdRef.detectChanges();
     } catch (error) {
-      console.error('Error loading chats:', error);
+      console.error('❌ Error loading chats:', error);
     } finally {
       this.isLoading = false;
     }
@@ -266,7 +269,7 @@ export class MessageComponent implements OnInit, OnDestroy {
         };
       }
     } catch (error) {
-      console.warn('Could not get user info for:', userId);
+      console.warn('⚠️ Could not get user info for:', userId);
     }
     return null;
   }
@@ -274,6 +277,8 @@ export class MessageComponent implements OnInit, OnDestroy {
   // ==================== Select User / Chat ====================
 
   async selectUser(user: ChatUser & { chatId?: number }): Promise<void> {
+    console.log('👤 Selecting user:', user);
+    
     this.selectedUser = user;
     this.selectedUserId = user.id;
     this.showConversationsList = false;
@@ -287,22 +292,43 @@ export class MessageComponent implements OnInit, OnDestroy {
         const result = await firstValueFrom(
           this.messagingService.getOrCreateChat(this.currentUserDbId, user.id)
         );
-        this.currentChatId = result.chatId || 0;
+        
+        if (result.chatId) {
+          this.currentChatId = result.chatId;
+        } else if (result.canChat) {
+          // Create new chat
+          const newChatId = await firstValueFrom(
+            this.messagingService.createChat(this.currentUserDbId, user.id)
+          );
+          this.currentChatId = newChatId;
+        } else {
+          console.error('❌ Cannot create chat between users');
+          this.currentChatId = 0;
+        }
       }
 
       if (this.currentChatId) {
+        console.log('💬 Loading messages for chat:', this.currentChatId);
+        
         // Load messages
         const messages = await firstValueFrom(this.messagingService.getChatMessages(this.currentChatId));
         this.messages = messages || [];
+        console.log('✅ Messages loaded:', this.messages.length);
         
-        // Mark as read
-        await firstValueFrom(this.messagingService.markMessagesAsRead(this.currentChatId));
+        // Mark as read (API REST)
+        await firstValueFrom(this.messagingService.markMessagesAsRead(this.currentChatId, this.currentUserDbId));
+        
+        // Send WebSocket read receipt
+        this.messagingService.sendReadReceipt(this.currentChatId, this.currentUserDbId, user.id);
+        
+        // Update unread count
         this.unreadMessagesByUser.set(user.id, 0);
+        this.totalUnreadCount = Array.from(this.unreadMessagesByUser.values()).reduce((a, b) => a + b, 0);
         
         this.scrollToBottom();
       }
     } catch (error) {
-      console.error('Error selecting user:', error);
+      console.error('❌ Error selecting user:', error);
       this.messages = [];
     } finally {
       this.isLoadingMessages = false;
@@ -321,12 +347,14 @@ export class MessageComponent implements OnInit, OnDestroy {
 
   async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || !this.currentChatId || !this.selectedUserId) {
-      console.warn('Cannot send: missing data');
+      console.warn('⚠️ Cannot send: missing data');
       return;
     }
 
     const messageContent = this.newMessage.trim();
     this.newMessage = '';
+
+    console.log('📤 Sending message:', messageContent);
 
     // Optimistic UI update
     const tempMessage: ChatMessage = {
@@ -343,13 +371,49 @@ export class MessageComponent implements OnInit, OnDestroy {
     this.cdRef.detectChanges();
 
     // Send via WebSocket
-    this.messagingService.sendMessage({
+    const sent = this.messagingService.sendMessage({
       content: messageContent,
       senderId: this.currentUserDbId,
       receiverId: this.selectedUserId,
       chatId: this.currentChatId,
       type: 'TEXT'
     });
+
+    if (!sent) {
+      console.error('❌ Failed to send message');
+      // Remove optimistic message
+      this.messages = this.messages.filter(m => m !== tempMessage);
+      this.cdRef.detectChanges();
+    }
+  }
+
+  // ==================== Typing Indicator ====================
+
+  onMessageInput(): void {
+    if (!this.currentChatId || !this.selectedUserId) return;
+
+    // Clear existing timeout
+    if (this.typingTimeout) {
+      clearTimeout(this.typingTimeout);
+    }
+
+    // Send typing indicator
+    this.messagingService.sendTypingIndicator(
+      this.currentUserDbId,
+      this.selectedUserId,
+      this.currentChatId,
+      true
+    );
+
+    // Auto-stop typing after 3 seconds
+    this.typingTimeout = setTimeout(() => {
+      this.messagingService.sendTypingIndicator(
+        this.currentUserDbId,
+        this.selectedUserId,
+        this.currentChatId,
+        false
+      );
+    }, 3000);
   }
 
   // ==================== UI Helpers ====================
@@ -425,7 +489,7 @@ export class MessageComponent implements OnInit, OnDestroy {
     this.currentChatId = 0;
   }
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize(): void {
     // Handle responsive behavior
   }

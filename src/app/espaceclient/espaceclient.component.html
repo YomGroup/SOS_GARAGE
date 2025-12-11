@@ -24,28 +24,28 @@
                 <span class="text-muted small me-2 d-none d-sm-block">{{currentDate}}</span>
                 
                 <!-- Bouton Messages avec notification -->
-                <button class="btn btn-light position-relative p-2 rounded-circle" 
+                <!-- <button class="btn btn-light position-relative p-2 rounded-circle" 
                         (click)="navigateToMessages()"
                         [class.btn-outline-primary]="hasNewMessages"
                         title="Messages">
                     <i class="bi bi-envelope-fill" 
                        [class.text-primary]="hasNewMessages"
-                       [class.text-muted]="!hasNewMessages"></i>
+                       [class.text-muted]="!hasNewMessages"></i> -->
                     <!-- Badge de notification -->
-                   <span *ngIf="hasNewMessages && unreadMessagesCount > 0" 
+                   <!-- <span *ngIf="hasNewMessages && unreadMessagesCount > 0" 
                           class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                           style="font-size: 0.65rem; min-width: 18px; height: 18px; line-height: 18px;"
                           [attr.aria-label]="unreadMessagesCount + ' nouveaux messages'">
                         {{ unreadMessagesCount > 99 ? '99+' : unreadMessagesCount }}
-                    </span>
+                    </span> -->
                     <!-- Indicateur visuel pour nouveaux messages (point rouge) -->
-                    <span *ngIf="hasNewMessages && unreadMessagesCount === 0"
+                    <!-- <span *ngIf="hasNewMessages && unreadMessagesCount === 0"
                           class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"
                           style="width: 10px; height: 10px;"
                           aria-label="Nouveaux messages">
                     </span>
                 </button>
-                
+                 -->
              
                 
                 <!-- Menu utilisateur -->
@@ -127,17 +127,17 @@
                         <span [class.d-none]="sidebarCollapsed">Mes Sinistres</span>
                     </a>
                     
-                    <a routerLink="/clientDashboard/document" 
+                    <!-- <a routerLink="/clientDashboard/document" 
                        routerLinkActive="active"
                        class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3"
                        [class.justify-content-center]="sidebarCollapsed"
                        style="gap: 12px; transition: all 0.3s ease;">
                         <i class="bi bi-file-earmark-text fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Mes Documents</span>
-                    </a>
+                    </a> -->
 
                     <!-- Lien Messages avec notification dans la sidebar -->
-                    <a routerLink="/clientDashboard/message" 
+                    <!-- <a routerLink="/clientDashboard/message" 
                        routerLinkActive="active"
                        class="nav-link d-flex align-items-center py-2 px-3 mb-2 rounded-3 position-relative"
                        [class.justify-content-center]="sidebarCollapsed"
@@ -145,17 +145,17 @@
                         <i class="bi bi-chat-dots-fill fs-5"></i>
                         <span [class.d-none]="sidebarCollapsed">Messages</span>
                         <!-- Badge dans la sidebar -->
-                        <span *ngIf="hasNewMessages && unreadMessagesCount > 0 && !sidebarCollapsed" 
+                        <!-- <span *ngIf="hasNewMessages && unreadMessagesCount > 0 && !sidebarCollapsed" 
                               class="badge bg-danger rounded-pill ms-auto"
                               style="font-size: 0.65rem;">
                             !
-                        </span>
+                        </span> -->
                         <!-- Point rouge dans la sidebar collapsed -->
-                        <span *ngIf="hasNewMessages && sidebarCollapsed"
+                        <!-- <span *ngIf="hasNewMessages && sidebarCollapsed"
                               class="position-absolute top-2 end-2 p-1 bg-danger border border-light rounded-circle"
                               style="width: 8px; height: 8px;">
                         </span>
-                    </a>
+                    </a> --> 
                     
                     <a routerLink="/clientDashboard/profiles" 
                        routerLinkActive="active"
