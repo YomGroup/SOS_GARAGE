@@ -105,7 +105,7 @@
   color: #ffffff;           /* Blanc visible sur gradient */
   line-height: 1;           /* Compact */
   margin-bottom: 0.5rem;
-  font-family: 'Poppins';
+  font-family: 'Poppins', sans-serif;
 }
 
 .stats-number {
@@ -423,7 +423,7 @@
   }
   
   .stats-title {
-    font-size: 1.5rem;
+    font-size: 0.9rem;
   }
   
   .stats-icon {
@@ -533,9 +533,9 @@
     min-height: 120px;
   }
   
-  /* .stats-number {
+  .stats-number {
     font-size: 1.75rem;
-  } */
+  }
   
   .stats-title {
     font-size: 0.8rem;
@@ -581,11 +581,11 @@
   }
   
   .stats-number {
-    font-size: 2rem;
+    font-size: 1.5rem;
   }
   
   .stats-title {
-    font-size: 1.3rem;
+    font-size: 0.75rem;
     margin-bottom: 0.25rem;
   }
   
@@ -664,9 +664,7 @@
   }
   
   .stats-title {
-    font-size: 1rem;
-    font-weight: 600;
-    font-style: uppercase;
+    font-size: 0.7rem;
   }
   
   .stats-icon {
@@ -674,12 +672,10 @@
     height: 40px;
     font-size: 1rem;
     border-radius: 10px;
-    align-items: center;
   }
   
   .card {
     border-radius: 14px;
-    align-items: center;
   }
   
   .card-header {
