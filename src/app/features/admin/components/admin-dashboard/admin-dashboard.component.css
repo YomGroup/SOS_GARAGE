@@ -100,12 +100,12 @@
 }
 
 .stats-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  opacity: 0.9;
+  font-size: 3.2rem;        /* Très grand */
+  font-weight: 800;         /* Ultra gras */
+  color: #ffffff;           /* Blanc visible sur gradient */
+  line-height: 1;           /* Compact */
   margin-bottom: 0.5rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-family: 'Poppins';
 }
 
 .stats-number {
@@ -423,7 +423,7 @@
   }
   
   .stats-title {
-    font-size: 0.9rem;
+    font-size: 1.5rem;
   }
   
   .stats-icon {
@@ -533,9 +533,9 @@
     min-height: 120px;
   }
   
-  .stats-number {
+  /* .stats-number {
     font-size: 1.75rem;
-  }
+  } */
   
   .stats-title {
     font-size: 0.8rem;
@@ -581,11 +581,11 @@
   }
   
   .stats-number {
-    font-size: 1.5rem;
+    font-size: 2rem;
   }
   
   .stats-title {
-    font-size: 0.75rem;
+    font-size: 1.3rem;
     margin-bottom: 0.25rem;
   }
   
@@ -664,7 +664,9 @@
   }
   
   .stats-title {
-    font-size: 0.7rem;
+    font-size: 1rem;
+    font-weight: 600;
+    font-style: uppercase;
   }
   
   .stats-icon {
@@ -672,10 +674,12 @@
     height: 40px;
     font-size: 1rem;
     border-radius: 10px;
+    align-items: center;
   }
   
   .card {
     border-radius: 14px;
+    align-items: center;
   }
   
   .card-header {
