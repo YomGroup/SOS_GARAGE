@@ -179,7 +179,7 @@
 <div *ngIf=" currentStep === 2" class="fade-in">  
 <div class="assurance-selection-container">
     <h2 class="main-title">Sélectionnez votre assurance</h2>
-    
+  <div class="vehicle-dropdown-wrapper">
     <div class="vehicle-dropdown" 
      [class.open]="isAssuranceDropdownOpen"
      (click)="toggleAssuranceDropdown()">
@@ -240,7 +240,7 @@
          (change)="onContratAssuranceSelected($event)"
          accept=".pdf,.png,.jpg,.jpeg" />
 </div>
-    </div>
+    </div></div>
         <!-- Footer avec boutons de navigation -->
         <div class="modal-footer">
           <div *ngIf="currentStep === 1">
@@ -257,7 +257,7 @@
           
           <div *ngIf="currentStep === 2">
             <button type="button" class="btn btn-secondary" (click)="prevStep()">Précédent</button>
-            <button type="submit" class="btn btn-primary"
+            <button type="submit" class="btn btn-primary ml-3"
                     [ngStyle]="{
                       background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
                       border: 'none'
