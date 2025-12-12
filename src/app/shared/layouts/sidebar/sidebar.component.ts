@@ -86,6 +86,9 @@ export class SidebarComponent implements OnInit {
 
   ];
 
+
+
+  
   garageMenuItems: MenuItem[] = [
     { title: 'Tableau de bord', icon: 'bi bi-graph-up', route: '/garage/statistiques' },
     {
@@ -275,4 +278,11 @@ export class SidebarComponent implements OnInit {
     event.stopPropagation();
     this.missionFilterService.setFiltre(filter as any);
   }
+
+  handleClose(event: MouseEvent) {
+  event.preventDefault();
+  event.stopPropagation();
+  this.closeSidebar.emit();
+}
+
 }

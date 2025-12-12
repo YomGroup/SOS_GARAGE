@@ -1,4 +1,12 @@
-import { Component, OnInit, ViewChild, AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  inject
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -9,6 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
+
 import { MissionService } from '../../../../../services/mission.service';
 import { Mission, Reparation, Vehicule } from '../../../../../services/models-api.interface';
 import { DossiersService, Dossier } from '../../../../../services/dossiers.service';
@@ -16,6 +25,7 @@ import { KeycloakService } from 'keycloak-angular';
 import { MissionViewComponent } from './mission-view.component';
 import { MissionFilterService } from './mission-filter.service';
 
+type MainMissionStatus = 'nonTraite' | 'enCours' | 'termine';
 
 @Component({
   selector: 'app-reparation-management',
@@ -40,23 +50,31 @@ import { MissionFilterService } from './mission-filter.service';
 export class ReparationManagementComponent implements OnInit, AfterViewInit {
   displayedColumns: string[] = ['vehicule', 'statut', 'dateReception', 'montantDevis', 'montantFacture', 'actions'];
   dataSource: MatTableDataSource<Mission>;
+
   isCardView: boolean = true;
+
   filtreStatut: string = '';
   rechercheTexte: string = '';
   clientFiltre: string = '';
+
   missions: Mission[] = [];
-  dossiersNonTraites: Dossier[] = []; // Ajout pour les dossiers non-traités
+  dossiersNonTraites: Dossier[] = [];
+
   missionSelectionnee: Mission | null = null;
-  dossierSelectionne: Dossier | null = null; // Ajout pour les dossiers sélectionnés
+  dossierSelectionne: Dossier | null = null;
+
   missionEnEdition: boolean = false;
   loading: boolean = false;
   error: string | null = null;
+
   vehicule: Vehicule | null = null;
+
   private keycloakService = inject(KeycloakService);
   private missionService = inject(MissionService);
-  private dossiersService = inject(DossiersService); // Ajout du service dossiers
+  private dossiersService = inject(DossiersService);
   private cdr = inject(ChangeDetectorRef);
   private missionFilterService = inject(MissionFilterService);
+
   vehiculesMap: Map<number, Vehicule> = new Map();
   filtreActuel: 'nouvelles' | 'enCours' | 'terminees' | 'toutes' = 'toutes';
 
@@ -65,77 +83,127 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
   pageSize: number = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
 
-  // Fonction helper pour normaliser les statuts
-private normalizeStatut(statut: string): string {
-  if (!statut) return '';
-  // On remplace aussi _ par des espaces pour tout unifier
-  return statut
-    .toLowerCase()
-    .trim()
-    .replace(/[_-]+/g, ' ')
-    .replace(/\s+/g, ' ');
-}
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-  get missionsNouvelles() {
-    return this.missions.filter(m => {
-      const statut = this.normalizeStatut(m.statut);
-      return statut === 'assignée' || statut === 'assignee' || statut === 'En attente' || statut === 'en_attente' ||
-             statut === 'non traité' || statut === 'non traite' || statut === 'en_attente_traitement' ||
-             statut === 'en_attente_expertise' || statut === 'en_attente_reparation';
-    });
+  constructor() {
+    this.dataSource = new MatTableDataSource();
+
+    // Custom filter predicate for search + statut
+    this.dataSource.filterPredicate = (data: Mission, filter: string) => {
+      const search = (filter || '').toLowerCase();
+
+      const matchStatut = this.filtreStatut ? (data.statut === this.filtreStatut) : true;
+
+      const matchText =
+        (data.sinistre?.vehicule?.immatriculation || '').toLowerCase().includes(search) ||
+        (data.statut || '').toLowerCase().includes(search) ||
+        (data.devis ?? '').toString().includes(search) ||
+        (data.factureFinale ?? '').toString().includes(search);
+
+      return matchStatut && matchText;
+    };
   }
 
-get missionsEnCours() {
-  return this.missions.filter(m => {
-    const statut = this.normalizeStatut(m.statut);
-    return (
-      statut === 'en cours' ||
-      statut === 'en cours reparation' ||
-      statut === 'en cours de reparation' || // ✅ couvrira EN_COURS_DE_REPARATION
-      statut === 'assignée' ||
-      statut === 'assignee'
-    );
-  });
-}
+  // =====================================================
+  // ✅ STATUTS (SOURCE UNIQUE)
+  // =====================================================
 
-  get missionsTerminees() {
-    return this.missions.filter(m => {
-      const statut = this.normalizeStatut(m.statut);
-      return statut === 'terminée' || statut === 'terminee' || statut === 'terminé' || statut === 'reparation_terminee';
-    });
+  private normalizeMissionStatus(statut?: string | null): string {
+    return (statut ?? '')
+      .toString()
+      .toUpperCase()
+      .trim()
+      .replace(/\s+/g, '_');
   }
 
-  get missionsFiltres() {
-    console.log('=== FILTRAGE DES MISSIONS ===');
-    console.log('Filtre actuel:', this.filtreActuel);
-    console.log('Total des missions:', this.missions.length);
-    
-    // Debug: Afficher les statuts de toutes les missions
-    this.missions.forEach((mission, index) => {
-      console.log(`Mission ${index + 1} (ID: ${mission.id}): statut = "${mission.statut}"`);
-    });
-    
-    let result: Mission[];
-    switch (this.filtreActuel) {
-      case 'nouvelles':
-        result = this.missionsNouvelles;
-        console.log('Missions nouvelles trouvées:', result.length);
-        break;
+  /** Groupe principal : Non traité / En cours / Terminé */
+  getMainMissionStatus(statut?: string | null): MainMissionStatus {
+    const s = this.normalizeMissionStatus(statut);
+
+    // ✅ NON TRAITÉ / NOUVELLES
+    if (
+      s === 'NON_TRAITE' ||
+      s === 'NON_TRAITEE' ||
+      s === 'EN_ATTENTE' ||
+      s === 'EN_ATTENTE_TRAITEMENT' ||
+      s === 'EN_ATTENTE_EXPERTISE' ||
+      s === 'EN_ATTENTE_RDV' ||
+      s === 'EN_ATTENTE_REPARATION' ||
+      s === 'EN_ATTENTE_VALIDATION_ASSURANCE'
+    ) return 'nonTraite';
+
+    // ✅ TERMINÉ
+    if (
+      s === 'TERMINEE' ||
+      s === 'REPARATION_TERMINEE'
+    ) return 'termine';
+
+    // ✅ EN COURS (par défaut)
+    return 'enCours';
+  }
+
+  /** Texte lisible : affiche UNIQUEMENT le sous-statut */
+  formatMissionStatut(statut?: string | null): string {
+    const s = this.normalizeMissionStatus(statut);
+
+    const mapping: Record<string, string> = {
+      'NON_TRAITE': 'Non traitée',
+      'NON_TRAITEE': 'Non traitée',
+
+      'EN_ATTENTE': 'En attente',
+      'EN_ATTENTE_TRAITEMENT': 'En attente de traitement',
+      'EN_ATTENTE_EXPERTISE': "En attente d’expertise",
+      'EN_ATTENTE_RDV': 'En attente de rendez-vous',
+      'EN_ATTENTE_REPARATION': 'En attente de réparation',
+      'EN_ATTENTE_VALIDATION_ASSURANCE': 'En attente de validation assurance',
+
+      'EN_COURS': 'En cours',
+      'EN_COURS_REPARATION': 'En cours de réparation',
+      'EN_COURS_DE_REPARATION': 'En cours de réparation',
+
+      'TERMINEE': 'Réparation terminée',
+      'REPARATION_TERMINEE': 'Réparation terminée',
+    };
+
+    return mapping[s] ?? (s ? s.replace(/_/g, ' ').toLowerCase() : 'Non traitée');
+  }
+
+  /** Classe CSS basée sur le groupe principal */
+  getStatutClass(statut?: string | null): string {
+    const main = this.getMainMissionStatus(statut);
+
+    switch (main) {
+      case 'nonTraite':
+        return 'statut-attente'; // orange/attente
       case 'enCours':
-        result = this.missionsEnCours;
-        console.log('Missions en cours trouvées:', result.length);
-        break;
-      case 'terminees':
-        result = this.missionsTerminees;
-        console.log('Missions terminées trouvées:', result.length);
-        break;
-      default:
-        result = this.missions;
-        console.log('Toutes les missions:', result.length);
+        return 'statut-cours';   // bleu
+      case 'termine':
+        return 'statut-valide';  // vert
     }
-    
-    console.log('============================');
-    return result;
+  }
+
+  /** Label affiché dans l’UI (uniquement lisible) */
+  getGarageStatutLabel(statut?: string | null): string {
+    return this.formatMissionStatut(statut);
+  }
+
+  // =====================================================
+  // ✅ FILTRE MENU (SIDEBAR)
+  // =====================================================
+
+  get missionsFiltres(): Mission[] {
+    if (this.filtreActuel === 'toutes') return this.missions;
+
+    return this.missions.filter(m => {
+      const main = this.getMainMissionStatus(m.statut);
+
+      if (this.filtreActuel === 'nouvelles') return main === 'nonTraite';
+      if (this.filtreActuel === 'enCours') return main === 'enCours';
+      if (this.filtreActuel === 'terminees') return main === 'termine';
+
+      return true;
+    });
   }
 
   setFiltreMission(filtre: 'nouvelles' | 'enCours' | 'terminees' | 'toutes') {
@@ -144,31 +212,20 @@ get missionsEnCours() {
     this.cdr.detectChanges();
   }
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
-
-  constructor() {
-    this.dataSource = new MatTableDataSource();
-    // Custom filter predicate for search + statut
-    this.dataSource.filterPredicate = (data: Mission, filter: string) => {
-      const search = filter.toLowerCase();
-      const matchStatut = this.filtreStatut ? data.statut === this.filtreStatut : true;
-      const matchText =
-        data.sinistre?.vehicule?.immatriculation?.toLowerCase().includes(search) ||
-        data.statut.toLowerCase().includes(search) ||
-        data.devis.toString().includes(search) ||
-        data.factureFinale.toString().includes(search);
-      return matchStatut && matchText;
-    };
-  }
+  // =====================================================
+  // INIT / DATA
+  // =====================================================
 
   async ngOnInit(): Promise<void> {
     await this.refreshData();
+
     this.missionFilterService.filtre$.subscribe(filtre => {
       console.log('Changement de filtre détecté:', filtre);
+
       this.filtreActuel = filtre;
       this.dataSource.data = this.missionsFiltres;
       this.pageIndex = 0;
+
       this.cdr.detectChanges();
     });
   }
@@ -177,65 +234,68 @@ get missionsEnCours() {
     this.loading = true;
     this.error = null;
     this.cdr.detectChanges();
+
     try {
       const isLoggedIn = await this.keycloakService.isLoggedIn();
-      if (isLoggedIn) {
-        const token = await this.keycloakService.getToken();
-        const payload: any = JSON.parse(atob(token.split('.')[1]));
-        const keycloakId = payload.sub;
 
-        // Charger les missions (bénéficie du cache service + HTTP)
-        this.missionService.getAllMissions().subscribe({
-          next: (missions: Mission[]) => {
-            this.missions = missions.filter((m: Mission) =>
-              m.reparateur &&
-              typeof m.reparateur.useridKeycloak === 'string' &&
-              m.reparateur.useridKeycloak === keycloakId
-            );
-            console.log('missions après filtrage réparateur', this.missions);
-            this.dataSource.data = this.missionsFiltres;
-            // Charger les véhicules pour chaque mission (appel mis en cache au niveau service)
-            this.missions.forEach(mission => {
-              this.missionService.getVehiculeByMissionId(mission.id!).subscribe({
-                next: (vehicule) => {
-                  this.vehiculesMap.set(mission.id!, vehicule);
-                  this.cdr.detectChanges();
-                },
-                error: () => {
-                  this.vehiculesMap.set(mission.id!, null as any);
-                  this.cdr.detectChanges();
-                }
-              });
-            });
-
-            // Charger les dossiers non-traités
-            this.dossiersService.getDossiersSimple().subscribe({
-              next: (dossiers: Dossier[]) => {
-                // Filtrer les dossiers qui n'ont pas de mission associée
-                this.dossiersNonTraites = dossiers.filter(dossier =>
-                  !this.missions.some(mission => mission.sinistre?.id === dossier.id)
-                );
-                this.cdr.detectChanges();
-              },
-              error: (err) => {
-                console.error('Erreur lors du chargement des dossiers non-traités:', err);
-              }
-            });
-
-            this.loading = false;
-            this.cdr.detectChanges();
-          },
-          error: (err) => {
-            this.error = 'Erreur lors du chargement des missions';
-            this.loading = false;
-            this.cdr.detectChanges();
-          }
-        });
-      } else {
+      if (!isLoggedIn) {
         this.error = 'Utilisateur non connecté';
         this.loading = false;
         this.cdr.detectChanges();
+        return;
       }
+
+      const token = await this.keycloakService.getToken();
+      const payload: any = JSON.parse(atob(token.split('.')[1]));
+      const keycloakId = payload.sub;
+
+      this.missionService.getAllMissions().subscribe({
+        next: (missions: Mission[]) => {
+          this.missions = missions.filter((m: Mission) =>
+            m.reparateur &&
+            typeof m.reparateur.useridKeycloak === 'string' &&
+            m.reparateur.useridKeycloak === keycloakId
+          );
+
+          this.dataSource.data = this.missionsFiltres;
+
+          // Charger les véhicules pour chaque mission
+          this.missions.forEach(mission => {
+            this.missionService.getVehiculeByMissionId(mission.id!).subscribe({
+              next: (vehicule) => {
+                this.vehiculesMap.set(mission.id!, vehicule);
+                this.cdr.detectChanges();
+              },
+              error: () => {
+                this.vehiculesMap.set(mission.id!, null as any);
+                this.cdr.detectChanges();
+              }
+            });
+          });
+
+          // Dossiers non-traités
+          this.dossiersService.getDossiersSimple().subscribe({
+            next: (dossiers: Dossier[]) => {
+              this.dossiersNonTraites = dossiers.filter(dossier =>
+                !this.missions.some(mission => mission.sinistre?.id === dossier.id)
+              );
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              console.error('Erreur dossiers non-traités:', err);
+            }
+          });
+
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.error = 'Erreur lors du chargement des missions';
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+
     } catch (err: any) {
       this.error = 'Erreur lors du chargement des missions';
       this.loading = false;
@@ -259,62 +319,66 @@ get missionsEnCours() {
     this.cdr.detectChanges();
   }
 
+  // =====================================================
+  // ACTIONS
+  // =====================================================
+
   changerStatut(reparation: Reparation, nouveauStatut: string): void {
     const mission = this.missions.find(m => m.id === reparation.id);
-    if (mission) {
-      this.missionService.updateMission(mission.id ?? 0, { statut: nouveauStatut }).subscribe({
-        next: (updatedMission) => {
-          mission.statut = nouveauStatut as any;
-          this.dataSource._updateChangeSubscription();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.error = 'Erreur lors de la mise à jour du statut';
-          this.cdr.detectChanges();
-        }
-      });
-    }
+    if (!mission) return;
+
+    this.missionService.updateMission(mission.id ?? 0, { statut: nouveauStatut }).subscribe({
+      next: () => {
+        mission.statut = nouveauStatut as any;
+        this.dataSource._updateChangeSubscription();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.error = 'Erreur lors de la mise à jour du statut';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   validerFacture(reparation: Reparation): void {
     const mission = this.missions.find(m => m.id === reparation.id);
-    if (mission) {
-      this.missionService.updateMission(mission.id ?? 0, {
-        factureFinale: mission.devis,
-        statut: 'terminée'
-      }).subscribe({
-        next: (updatedMission) => {
-          mission.factureFinale = mission.devis;
-          mission.statut = 'TERMINEE';
-          this.dataSource._updateChangeSubscription();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.error = 'Erreur lors de la validation de la facture';
-          this.cdr.detectChanges();
-        }
-      });
-    }
+    if (!mission) return;
+
+    this.missionService.updateMission(mission.id ?? 0, {
+      factureFinale: mission.devis,
+      statut: 'terminée'
+    }).subscribe({
+      next: () => {
+        mission.factureFinale = mission.devis;
+        mission.statut = 'TERMINEE';
+        this.dataSource._updateChangeSubscription();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.error = 'Erreur lors de la validation de la facture';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   declarerEpave(reparation: Reparation): void {
     const mission = this.missions.find(m => m.id === reparation.id);
-    if (mission) {
-      this.missionService.updateMission(mission.id ?? 0, {
-        declareCommeEpave: true,
-        statut: 'épave'
-      }).subscribe({
-        next: (updatedMission) => {
-          mission.statut = 'EPAVE';
-          this.dataSource._updateChangeSubscription();
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.error = 'Erreur lors de la déclaration d\'épave';
-          this.cdr.detectChanges();
-        }
-      });
-    }
+    if (!mission) return;
+
+    this.missionService.updateMission(mission.id ?? 0, {
+      declareCommeEpave: true,
+      statut: 'épave'
+    }).subscribe({
+      next: () => {
+        mission.statut = 'EPAVE';
+        this.dataSource._updateChangeSubscription();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.error = "Erreur lors de la déclaration d'épave";
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   formatDate(date: string | Date | undefined | null): string {
@@ -349,16 +413,14 @@ get missionsEnCours() {
 
   onMissionUpdated(updatedMission: Mission): void {
     const idx = this.missions.findIndex(m => m.id === updatedMission.id);
-    if (idx !== -1) {
-      this.missions[idx] = updatedMission;
-    }
+    if (idx !== -1) this.missions[idx] = updatedMission;
+
     this.missionSelectionnee = updatedMission;
     this.dataSource._updateChangeSubscription();
     this.cdr.detectChanges();
   }
 
-  modifierMission(reparation: Reparation): void {
-    // Ouvrir un modal ou une page de modification
+  modifierMission(_: Reparation): void {
     alert('Fonctionnalité de modification à implémenter');
   }
 
@@ -377,48 +439,20 @@ get missionsEnCours() {
   }
 
   // Données dérivées pour filtres dropdown (clients)
-  get clientsDisponibles(): string[] {
-    const noms = new Set<string>();
-    this.missions.forEach(m => {
-      const assure = (m.assureName || '').toString().trim();
-      if (assure) noms.add(assure);
-    });
-    return Array.from(noms);
-  }
+get clientsDisponibles(): string[] {
+  const noms = new Set<string>();
+  this.missions.forEach(m => {
+    const assure = (m.assureName || '').toString().trim();
+    if (assure) noms.add(assure);
+  });
+  return Array.from(noms);
+}
 
-  // Nouvelles méthodes pour le style et la gestion des statuts
-  getStatutClass(statut: string): string {
-    switch (statut.toLowerCase()) {
-      case 'en attente':
-        return 'statut-attente';
-      case 'en cours':
-        return 'statut-cours';
-      case 'terminée':
-        return 'statut-valide';
-      case 'épave':
-        return 'statut-rejete';
-      default:
-        return 'statut-attente';
-    }
-  }
 
-  getGarageStatutLabel(statut: string | undefined): string {
-    if (!statut) return 'En attente';
-    switch (statut.toLowerCase()) {
-      case 'en attente':
-        return 'En attente';
-      case 'en cours':
-        return 'En cours';
-      case 'terminée':
-        return 'Terminée';
-      case 'épave':
-        return 'Épave';
-      default:
-        return statut;
-    }
-  }
+  // =====================================================
+  // FILTRES AVANCÉS
+  // =====================================================
 
-  // Filtres avancés et pagination unifiée
   private normalizeString(value: string): string {
     return (value || '')
       .toString()
@@ -432,14 +466,16 @@ get missionsEnCours() {
   private matchSearch(m: Mission, query: string): boolean {
     if (!query) return true;
     const q = this.normalizeString(query);
+
     const veh = this.getVehiculeForMission(m) || (m.sinistre?.vehicule as any) || {};
-  const immat = this.normalizeString(veh.immatriculation || m.sinistre?.vehicule?.immatriculation || '');
+    const immat = this.normalizeString(veh.immatriculation || m.sinistre?.vehicule?.immatriculation || '');
     const marque = this.normalizeString(veh.marque || '');
     const modele = this.normalizeString(veh.modele || '');
     const assure = this.normalizeString(m.assureName || '');
     const statut = this.normalizeString(m.statut || '');
     const devis = this.normalizeString((m.devis ?? '').toString());
     const facture = this.normalizeString((m.factureFinale ?? '').toString());
+
     return (
       immat.includes(q) ||
       marque.includes(q) ||
@@ -451,10 +487,26 @@ get missionsEnCours() {
     );
   }
 
-  private matchStatut(m: Mission, statut: string): boolean {
-    if (!statut) return true;
-    return (m.statut || '') === statut;
+private matchStatut(m: Mission, filtre: string): boolean {
+  if (!filtre) return true;
+
+  const f = (filtre || '').toUpperCase().trim();
+
+  // Filtre "UI" => groupe principal
+  const map: Record<string, MainMissionStatus> = {
+    'EN_ATTENTE': 'nonTraite',
+    'EN_COURS': 'enCours',
+    'TERMINEE': 'termine',
+  };
+
+  if (map[f]) {
+    return this.getMainMissionStatus(m.statut) === map[f];
   }
+
+  // Si un jour tu mets des statuts exacts dans le select, ça marche aussi
+  return this.normalizeMissionStatus(m.statut) === this.normalizeMissionStatus(filtre);
+}
+
 
   private matchClient(m: Mission, client: string): boolean {
     if (!client) return true;
@@ -462,7 +514,11 @@ get missionsEnCours() {
   }
 
   missionsFiltresFiltrageAvance(): Mission[] {
-    return this.missionsFiltres.filter(m => this.matchStatut(m, this.filtreStatut) && this.matchClient(m, this.clientFiltre) && this.matchSearch(m, this.rechercheTexte));
+    return this.missionsFiltres.filter(m =>
+      this.matchStatut(m, this.filtreStatut) &&
+      this.matchClient(m, this.clientFiltre) &&
+      this.matchSearch(m, this.rechercheTexte)
+    );
   }
 
   get missionsFiltresPagine(): Mission[] {
@@ -470,6 +526,4 @@ get missionsEnCours() {
     const start = this.pageIndex * this.pageSize;
     return all.slice(start, start + this.pageSize);
   }
-
-  // Les méthodes d'édition ont été déplacées dans le composant mission-view
-} 
+}

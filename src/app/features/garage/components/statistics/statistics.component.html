@@ -99,21 +99,24 @@
             <i class="fas fa-chart-pie me-2"></i>Répartition des missions
           </h4>
           <div class="stats-detail-content">
-            <div class="stat-item">
-              <span class="stat-label">En attente de réparation</span>
-              <span class="stat-value">{{ missionStats.pending }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.pending, missionStats.total) }}%)</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">En cours</span>
-              <span class="stat-value">{{ missionStats.inProgress }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.inProgress, missionStats.total) }}%)</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Terminées</span>
-              <span class="stat-value">{{ missionStats.completed }}</span>
-              <span class="stat-percentage">({{ getPercentage(missionStats.completed, missionStats.total) }}%)</span>
-            </div>
+    <div class="stat-item clickable" (click)="goToMissions('nouvelles')">
+  <span class="stat-label">En attente</span>
+  <span class="stat-value">{{ missionStats.pending }}</span>
+  <span class="stat-percentage">({{ getPercentage(missionStats.pending, missionStats.total) }}%)</span>
+</div>
+
+<div class="stat-item clickable" (click)="goToMissions('enCours')">
+  <span class="stat-label">En cours</span>
+  <span class="stat-value">{{ missionStats.inProgress }}</span>
+  <span class="stat-percentage">({{ getPercentage(missionStats.inProgress, missionStats.total) }}%)</span>
+</div>
+
+<div class="stat-item clickable" (click)="goToMissions('terminees')">
+  <span class="stat-label">Terminées</span>
+  <span class="stat-value">{{ missionStats.completed }}</span>
+  <span class="stat-percentage">({{ getPercentage(missionStats.completed, missionStats.total) }}%)</span>
+</div>
+
 
           </div>
         </div>
@@ -179,9 +182,10 @@
                 </span>
               </td>
               <td>
-                <span class="status-badge" [class]="'status-' + getStatusColor(mission.status)">
-                  {{ getStatusLabel(mission.status) }}
-                </span>
+                <span class="status-badge" [class]="'status-' + getStatusBadgeClass(mission.status)">
+  {{ formatMissionStatut(mission.status) }}
+</span>
+
               </td>
               <td>
                 <span class="amount" *ngIf="mission.devis > 0">{{ formatCurrency(mission.devis) }}</span>

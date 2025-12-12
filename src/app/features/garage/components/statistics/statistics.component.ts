@@ -16,6 +16,9 @@ import {
 } from '../../../../../services/statistics.service';
 import { MissionViewComponent } from '../reparation-management/mission-view.component';
 import { getStatutCategorie } from '../../../.././shared/utils/statut-mapper';
+import { MissionFilterService } from '../reparation-management/mission-filter.service';
+
+
 
 // Utilisation des interfaces du StatisticsService backend
 interface RecentMissionDisplay extends RecentMissionDTO {
@@ -37,6 +40,9 @@ interface RecentMissionDisplay extends RecentMissionDTO {
   styleUrls: ['./statistics.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
+
+
+
 export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   // Statistiques provenant du backend (puis recalculées côté front)
   missionStats: MissionStatsDTO = {
@@ -79,6 +85,7 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
 
   constructor(
     private missionService: MissionService,
+    private missionFilterService: MissionFilterService,
     private authService: AuthService,
     private reparateurService: ReparateurService,
     private assureService: AssureService,
@@ -89,6 +96,11 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
   ) {
     this.cdr = cdr;
   }
+
+  goToMissions(filtre: 'nouvelles' | 'enCours' | 'terminees') {
+  this.missionFilterService.setFiltre(filtre);
+  this.router.navigate(['/garage/reparations']);
+}
 
   ngOnInit(): void {
     // Charger les données immédiatement
@@ -335,69 +347,49 @@ export class StatisticsComponent implements OnInit, OnDestroy, AfterViewInit {
     // ... tu peux garder tout ton bloc existant ici, il n'a pas d'impact sur les compteurs
   }
 
-  getStatusColor(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'terminée':
-      case 'terminee':
-      case 'reparation_terminee':
-        return 'success';
-      case 'en cours':
-      case 'en_cours':
-      case 'en_cours_reparation':
-      case 'assignée':
-      case 'assignee':
-        return 'warning';
-      case 'en attente':
-      case 'en_attente':
-      case 'en_attente_traitement':
-      case 'en_attente_expertise':
-      case 'en_attente_reparation':
-        return 'info';
-      case 'non assignée':
-      case 'non assignee':
-      case 'refusée':
-      case 'refusee':
-        return 'secondary';
-      case 'épave':
-      case 'epave':
-        return 'danger';
-      default:
-        return 'secondary';
-    }
-  }
+ private normalizeMissionStatus(statut?: string | null): string {
+  return (statut ?? '')
+    .toUpperCase()
+    .trim()
+    .replace(/\s+/g, '_');
+}
 
-  getStatusLabel(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'terminée':
-      case 'terminee':
-      case 'reparation_terminee':
-        return 'Terminée';
-      case 'en cours':
-      case 'en_cours':
-      case 'en_cours_reparation':
-        return 'En cours';
-      case 'assignée':
-      case 'assignee':
-        return 'Assignée';
-      case 'en attente':
-      case 'en_attente':
-      case 'en_attente_traitement':
-      case 'en_attente_expertise':
-      case 'en_attente_reparation':
-        return 'En attente';
-      case 'non assignée':
-      case 'non assignee':
-        return 'Non assignée';
-      case 'refusée':
-      case 'refusee':
-        return 'Refusée';
-      case 'épave':
-      case 'epave':
-        return 'Épave';
-      default:
-        return status;
-    }
-  }
+formatMissionStatut(statut?: string | null): string {
+  const s = this.normalizeMissionStatus(statut);
+
+  const mapping: Record<string, string> = {
+    'NON_TRAITE': 'Non traitée',
+    'NON_TRAITEE': 'Non traitée',
+    'EN_ATTENTE': 'En attente',
+    'EN_ATTENTE_TRAITEMENT': 'En attente de traitement',
+    'EN_ATTENTE_EXPERTISE': "En attente d’expertise",
+    'EN_ATTENTE_RDV': 'En attente de rendez-vous',
+    'EN_ATTENTE_REPARATION': 'En attente de réparation',
+
+    'EN_COURS': 'En cours',
+    'EN_COURS_REPARATION': 'En cours de réparation',
+    'EN_COURS_DE_REPARATION': 'En cours de réparation',
+
+    'TERMINEE': 'Terminée',
+    'REPARATION_TERMINEE': 'Réparation terminée',
+  };
+
+  return mapping[s] ?? (s ? s.replace(/_/g, ' ').toLowerCase() : 'Non traitée');
+}
+
+/**
+ * Retourne le suffixe de classe utilisé dans ton HTML:
+ * status-success | status-warning | status-info
+ */
+getStatusBadgeClass(statut?: string | null): string {
+  const group = this.missionFilterService.getGroupFromStatus(statut ?? '');
+
+  if (group === 'terminees') return 'success';
+  if (group === 'enCours') return 'warning';
+  // nouvelles + défaut => info
+  return 'info';
+}
+
 
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('fr-FR', {
