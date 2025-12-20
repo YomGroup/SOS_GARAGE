@@ -1,66 +1,66 @@
 <div class="container-fluid py-4 bg-light min-vh-100">
+  
+  <!-- ✅ MESSAGES D'ALERTE -->
+  <div class="alert-container" *ngIf="successMessage || errorMessage">
+    <div class="alert alert-dismissible fade show" 
+         [ngClass]="successMessage ? 'alert-success' : 'alert-danger'"
+         role="alert">
+      <div class="d-flex align-items-center">
+        <i class="me-2" 
+           [ngClass]="successMessage ? 'bi bi-check-circle-fill' : 'bi bi-exclamation-triangle-fill'">
+        </i>
+        <span>{{ successMessage || errorMessage }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeMessage()"></button>
+    </div>
+  </div>
+
   <!-- Statistiques -->
   <div class="row g-4 mb-4">
     <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="bg-primary bg-gradient rounded-circle p-3 text-white me-3">
-              <i class="bi bi-file-earmark-text fs-4"></i>
-            </div>
-            <div>
-              <h5 class="mb-0">{{ sinistres.length }}</h5>
-              <p class="text-muted mb-0 small">Total Sinistres</p>
-            </div>
-          </div>
+      <div class="stat-card card-purple">
+        <div class="stat-icon">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ sinistres.length }}</h3>
+          <p>Total Sinistres</p>
         </div>
       </div>
     </div>
     
     <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="bg-warning bg-gradient rounded-circle p-3 text-white me-3">
-              <i class="bi bi-clock fs-4"></i>
-            </div>
-            <div>
-              <h5 class="mb-0">{{ getSinistresEnCours() }}</h5>
-              <p class="text-muted mb-0 small">En cours</p>
-            </div>
-          </div>
+      <div class="stat-card card-orange">
+        <div class="stat-icon">
+          <i class="bi bi-clock-history"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getSinistresEnCours() }}</h3>
+          <p>En cours</p>
         </div>
       </div>
     </div>
     
     <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="bg-success bg-gradient rounded-circle p-3 text-white me-3">
-              <i class="bi bi-check-circle fs-4"></i>
-            </div>
-            <div>
-              <h5 class="mb-0">{{ getSinistresClotures() }}</h5>
-              <p class="text-muted mb-0 small">Clôturés</p>
-            </div>
-          </div>
+      <div class="stat-card card-green">
+        <div class="stat-icon">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getSinistresClotures() }}</h3>
+          <p>Clôturés</p>
         </div>
       </div>
     </div>
     
     <div class="col-md-6 col-lg-3">
-      <div class="card shadow-sm h-100 border-0">
-        <div class="card-body">
-          <div class="d-flex align-items-center">
-            <div class="bg-info bg-gradient rounded-circle p-3 text-white me-3">
-              <i class="bi bi-car-front fs-4"></i>
-            </div>
-            <div>
-              <h5 class="mb-0">{{ getTotalVehicules() }}</h5>
-              <p class="text-muted mb-0 small">Véhicules déclarés</p>
-            </div>
-          </div>
+      <div class="stat-card card-blue">
+        <div class="stat-icon">
+          <i class="bi bi-car-front"></i>
+        </div>
+        <div class="stat-content">
+          <h3>{{ getTotalVehicules() }}</h3>
+          <p>Véhicules déclarés</p>
         </div>
       </div>
     </div>
@@ -69,153 +69,346 @@
   <!-- Liste des sinistres -->
   <div class="row g-4">
     <div class="col-12">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-0 py-3">
-          <h5 class="mb-0">
-            <i class="bi bi-clock-history me-2"></i>Historique des Sinistres
-          </h5>
+      <div class="main-card">
+        <div class="main-card-header">
+          <div class="header-content">
+            <i class="bi bi-clock-history"></i>
+            <h5>Historique des Sinistres</h5>
+          </div>
         </div>
-        <div class="card-body p-0">
-          <div class="list-group list-group-flush">
-            <div class="list-group-item list-group-item-action p-3 border-0" 
-                 *ngFor="let sinistre of sinistres" 
-                 (click)="selectSinistre(sinistre)"
-                 [class.active]="selectedSinistre?.id === sinistre.id"
-                 [attr.id]="'sinistre-' + sinistre.id">
+        
+        <div class="sinistres-list">
+          <!-- Item de sinistre -->
+          <div class="sinistre-item" 
+               *ngFor="let sinistre of sinistres" 
+               (click)="selectSinistre(sinistre)"
+               [class.active]="selectedSinistre?.id === sinistre.id"
+               [attr.id]="'sinistre-' + sinistre.id">
+            
+            <div class="sinistre-header">
+              <div class="sinistre-info">
+                <div class="vehicle-icon">
+                  <i class="bi bi-car-front"></i>
+                </div>
+                <div class="vehicle-details">
+                  <h6>{{ sinistre.vehicule }}</h6>
+                  <div class="badges-row">
+                    <!-- Badge statut principal -->
+                    <span class="status-badge"
+                          [ngClass]="{
+                            'status-pending': getMainStatus(sinistre.statut) === 'nonTraite',
+                            'status-progress': getMainStatus(sinistre.statut) === 'enCours',
+                            'status-completed': getMainStatus(sinistre.statut) === 'termine'
+                          }">
+                      <i [ngClass]="{
+                           'bi bi-pause-circle': getMainStatus(sinistre.statut) === 'nonTraite',
+                           'bi bi-clock': getMainStatus(sinistre.statut) === 'enCours',
+                           'bi bi-check-circle': getMainStatus(sinistre.statut) === 'termine'
+                         }">
+                      </i>
+                      {{ formatStatut(sinistre.statut) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
               
-              <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                  <div class="bg-primary bg-gradient rounded-circle p-2 text-white me-3">
-                    <i class="bi bi-car-front fs-5"></i>
-                  </div> 
-                  <div>
-                    <h6 class="mb-1">{{ sinistre.vehicule }}</h6>
-                    <div class="d-flex align-items-center"> 
-                 <!-- Badge lisible avec icône et couleur -->
-<span class="badge rounded-pill me-2"
-      [ngClass]="{
-        'bg-white text-primary': getMainStatus(sinistre.statut) === 'nonTraite',
-        'bg-warning text-white':  getMainStatus(sinistre.statut) === 'enCours',
-        'bg-success':            getMainStatus(sinistre.statut) === 'termine'
-  }">
+              <div class="sinistre-actions">
+                <span class="id-badge">{{ sinistre.id }}</span>
+                
+                <!-- Bouton signer -->
+                <button 
+                  *ngIf="!sinistre.iSsigned && sinistre.isgarageaffected"
+                  [routerLink]="['/clientDashboard/pdf', sinistre.id]" 
+                  class="btn-sign"
+                  (click)="$event.stopPropagation()">
+                  <i class="bi bi-pencil-square"></i> Signer
+                </button>
 
-  <i class="me-1"
-     [ngClass]="{
-       'bi bi-pause-circle':  getMainStatus(sinistre.statut) === 'nonTraite',
-       'bi bi-clock':         getMainStatus(sinistre.statut) === 'enCours',
-       'bi bi-check-circle':  getMainStatus(sinistre.statut) === 'termine'
-     }">
-  </i>
+                <!-- État véhicule -->
+                <div class="vehicle-state" 
+                     [ngClass]="{
+                       'state-ok': sinistre.etat === 'ROULANT',
+                       'state-error': sinistre.etat === 'NON_ROULANT'
+                     }">
+                  <i [class]="sinistre.etat === 'ROULANT' ? 'bi bi-check-circle' : 'bi bi-x-circle'"></i>
+                </div>
 
-  <!-- 🔥 Ici, on affiche UNIQUEMENT le sous-statut lisible -->
-  {{ formatStatut(sinistre.statut) }}
-</span>
+                <i class="chevron-icon" 
+                   [class.rotated]="selectedSinistre?.id === sinistre.id"
+                   [ngClass]="selectedSinistre?.id === sinistre.id ? 'bi bi-chevron-up' : 'bi bi-chevron-down'">
+                </i>
+              </div>
+            </div>
 
+            <!-- ✅ DÉTAILS EXPANDUS -->
+            <div class="sinistre-details" *ngIf="selectedSinistre?.id === sinistre.id">
+              
+              <!-- ✅ ALERTE SI PAS DE CONTRAT -->
+              <div class="alert alert-warning mb-4" *ngIf="!hasContratAssurance(sinistre)">
+                <div class="d-flex align-items-center justify-content-between">
+                  <div class="d-flex align-items-center">
+                    <i class="bi bi-exclamation-triangle-fill me-3 fs-4"></i>
+                    <div>
+                      <strong>Contrat d'assurance manquant</strong>
+                      <p class="mb-0 small">Vous devez ajouter votre contrat d'assurance pour traiter ce sinistre</p>
+                    </div>
+                  </div>
+                  <button class="btn btn-warning btn-sm" (click)="redirectToVehiculeEdit(sinistre)">
+                    <i class="bi bi-plus-circle me-1"></i>Ajouter
+                  </button>
+                </div>
+              </div>
 
-                    
+              <!-- ✅ SECTION STATUT -->
+              <div class="detail-section">
+                <div class="section-header">
+                  <h6><i class="bi bi-flag me-2"></i>Statut du sinistre</h6>
+                  <button 
+                    *ngIf="!isEditingStatus" 
+                    class="btn-edit"
+                    (click)="startEditingStatus(sinistre); $event.stopPropagation()">
+                    <i class="bi bi-pencil"></i> Modifier
+                  </button>
+                </div>
 
-                    <!-- Badge technique en complément -->
-                    <!-- <small class="badge bg-light text-dark border">{{ sinistre.statut }}</small> -->
+                <!-- Mode lecture -->
+                <div *ngIf="!isEditingStatus" class="section-content">
+                  <span class="status-badge-large"
+                        [ngClass]="{
+                          'status-pending': getMainStatus(sinistre.statut) === 'nonTraite',
+                          'status-progress': getMainStatus(sinistre.statut) === 'enCours',
+                          'status-completed': getMainStatus(sinistre.statut) === 'termine'
+                        }">
+                    <i [ngClass]="{
+                         'bi bi-pause-circle': getMainStatus(sinistre.statut) === 'nonTraite',
+                         'bi bi-clock': getMainStatus(sinistre.statut) === 'enCours',
+                         'bi bi-check-circle': getMainStatus(sinistre.statut) === 'termine'
+                       }">
+                    </i>
+                    {{ formatStatut(sinistre.statut) }}
+                  </span>
+                </div>
 
+                <!-- Mode édition -->
+                <div *ngIf="isEditingStatus" class="edit-form" (click)="$event.stopPropagation()">
+                  <div class="row g-3">
+                    <div class="col-md-8">
+                      <label class="form-label">Nouveau statut</label>
+                      <select class="form-select" [(ngModel)]="editForm.statut">
+                        <option *ngFor="let statut of availableStatuts" [value]="statut.value">
+                          {{ statut.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div class="col-12">
+                      <button class="btn btn-primary me-2" (click)="saveStatus(); $event.stopPropagation()">
+                        <i class="bi bi-check-lg me-1"></i>Enregistrer
+                      </button>
+                      <button class="btn btn-outline-secondary" (click)="cancelEditingStatus(); $event.stopPropagation()">
+                        <i class="bi bi-x-lg me-1"></i>Annuler
+                      </button>
                     </div>
                   </div>
                 </div>
-                
-                <div class="d-flex align-items-center">
-                  <span class="badge bg-light text-dark me-2">{{ sinistre.id }}</span>
+              </div>
 
-                  <!--*ngIf="!sinistre.iSsigned && sinistre.isgarageaffected"-->
-                  <ng-container >
+              <div class="divider"></div>
+
+              <!-- ✅ SECTION DÉTAILS -->
+              <div class="detail-section">
+                <div class="section-header">
+                  <h6><i class="bi bi-info-circle me-2"></i>Informations</h6>
                   <button 
-                  *ngIf="!sinistre.iSsigned && sinistre.isgarageaffected"
-                   [routerLink]="['/clientDashboard/pdf', sinistre.id]" 
-                   routerLinkActive="active"
-                   class="btn btn-primary ms-2">
-                   <i class="bi bi-pencil-square me-1"></i> Signer
-                   </button>
-                  </ng-container>
-
-                  <div class="rounded-circle p-2 text-white"  
-                       [ngClass]="{
-                         'bg-success': sinistre.etat === 'Roulant',
-                         'bg-danger': sinistre.etat === 'Non roulant'
-                       }">
-                    <i [class]="sinistre.etat === 'roulant' ? 'bi bi-car-front' : 'bi bi-p-circle'"></i>
-                  </div>
-                  <i class="bi bi-chevron-down ms-2" 
-                     [class.bi-chevron-up]="selectedSinistre?.id === sinistre.id"></i>
+                    *ngIf="!isEditingDetails" 
+                    class="btn-edit"
+                    (click)="startEditingDetails(sinistre); $event.stopPropagation()">
+                    <i class="bi bi-pencil"></i> Modifier
+                  </button>
                 </div>
-              </div>
 
-              <!-- Détails expandus -->
-              <div class="mt-3 pt-3 border-top" *ngIf="selectedSinistre?.id === sinistre.id">
-                <div class="row g-4">
-                  <!-- Type -->
-                  <div class="col-md-6">
-                    <h6 class="text-primary mb-1">
-                      <i class="bi bi-card-text me-2"></i><strong>Description</strong>
-                    </h6>
-                    <p class="text1 mb-0">{{ sinistre.type }}</p>
-                  </div>
-
-                  <!-- État -->
-                  <div class="col-md-6">
-                    <h6 class="text-primary mb-1">
-                      <i class="bi bi-info-circle me-2"></i><strong>État</strong>
-                    </h6>
-                    <p class="text1 mb-0">{{ formatEtat(sinistre.etat) }}</p>
-                  </div>
-
-                  <!-- Raison -->
-                  <div class="col-md-6">
-                    <h6 class="text-primary mb-1">
-                      <i class="bi bi-question-circle me-2"></i><strong>Raison</strong>
-                    </h6>
-                    <p class="text1 mb-0">{{ sinistre.raison }}</p>
-                  </div>
-
-                  <!-- Lieu -->
-                  <div class="col-md-6">
-                    <h6 class="text-primary mb-1">
-                      <i class="bi bi-geo-alt me-2"></i><strong>Lieu</strong>
-                    </h6>
-                    <p class="text1 mb-0">{{ sinistre.lieu }}</p>
+                <!-- Mode lecture -->
+                <div *ngIf="!isEditingDetails" class="section-content">
+                  <div class="info-grid">
+                    <div class="info-item">
+                      <label><i class="bi bi-card-text me-2"></i>Type</label>
+                      <p>{{ sinistre.type }}</p>
+                    </div>
+                    <div class="info-item">
+                      <label><i class="bi bi-info-circle me-2"></i>État</label>
+                      <p>{{ formatEtat(sinistre.etat) }}</p>
+                    </div>
+                    <div class="info-item">
+                      <label><i class="bi bi-question-circle me-2"></i>Raison</label>
+                      <p>{{ sinistre.raison }}</p>
+                    </div>
+                    <div class="info-item">
+                      <label><i class="bi bi-geo-alt me-2"></i>Lieu</label>
+                      <p>{{ sinistre.lieu }}</p>
+                    </div>
                   </div>
                 </div>
 
+                <!-- Mode édition -->
+                <div *ngIf="isEditingDetails" class="edit-form" (click)="$event.stopPropagation()">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Type de sinistre</label>
+                      <select class="form-select" [(ngModel)]="editForm.type">
+                        <option *ngFor="let type of availableTypes" [value]="type.value">
+                          {{ type.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">État du véhicule</label>
+                      <select class="form-select" [(ngModel)]="editForm.etatVehicule">
+                        <option *ngFor="let etat of availableEtats" [value]="etat.value">
+                          {{ etat.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-6">
+                      <label class="form-label">Lieu</label>
+                      <input type="text" class="form-control" [(ngModel)]="editForm.lieu" 
+                             placeholder="Lieu de l'accident">
+                    </div>
+
+                    <div class="col-md-12">
+                      <label class="form-label">Description / Raison</label>
+                      <textarea class="form-control" rows="3" [(ngModel)]="editForm.description"
+                                placeholder="Description détaillée du sinistre"></textarea>
+                    </div>
+
+                    <div class="col-12">
+                      <button class="btn btn-primary me-2" (click)="saveDetails(); $event.stopPropagation()">
+                        <i class="bi bi-check-lg me-1"></i>Enregistrer
+                      </button>
+                      <button class="btn btn-outline-secondary" (click)="cancelEditingDetails(); $event.stopPropagation()">
+                        <i class="bi bi-x-lg me-1"></i>Annuler
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            <div class="list-group-item text-center py-5" *ngIf="sinistres.length === 0">
-              <i class="bi bi-inbox text-muted display-5 mb-3"></i>
-              <p class="text-muted">Aucun sinistre déclaré</p>
-              <a routerLink="/clientDashboard/declarations" class="btn btn-primary mt-2"  style="background: linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%);">
-                <i class="bi bi-plus me-2"></i>Déclarer un sinistre
-              </a>
+
+              <div class="divider"></div>
+
+              <!-- ✅ SECTION DOCUMENTS -->
+              <div class="detail-section">
+                <div class="section-header">
+                  <h6><i class="bi bi-file-earmark-pdf me-2"></i>Documents</h6>
+                </div>
+
+                <div class="section-content" (click)="$event.stopPropagation()">
+                  
+                  <!-- ✅ CONSTAT EXISTANT -->
+                  <div *ngIf="hasConstat(sinistre)" class="document-card mb-3">
+                    <div class="document-info">
+                      <i class="bi bi-file-pdf text-danger"></i>
+                      <span>Constat amiable</span>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" (click)="viewDocument(sinistre.constat); $event.stopPropagation()">
+                      <i class="bi bi-eye"></i> Voir
+                    </button>
+                  </div>
+
+                  <!-- ✅ ALERTE SI PAS DE CONSTAT -->
+                  <div *ngIf="!hasConstat(sinistre)" class="alert alert-info mb-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>Aucun constat n'a été ajouté pour ce sinistre</span>
+                  </div>
+
+                  <!-- ✅ UPLOAD CONSTAT -->
+                  <div class="upload-zone mb-4">
+                    <label class="upload-label">
+                      <i class="bi bi-cloud-upload me-2"></i>
+                      {{ hasConstat(sinistre) ? 'Remplacer le constat' : 'Ajouter un constat' }}
+                    </label>
+                    <div class="input-group">
+                      <input type="file" 
+                             id="constatFileInput"
+                             class="form-control" 
+                             accept="application/pdf,image/*"
+                             (change)="onConstatFileSelected($event); $event.stopPropagation()">
+                      <button class="btn btn-primary" 
+                              [disabled]="!selectedConstat || uploadingConstat"
+                              (click)="uploadConstat($event)">
+                        <span *ngIf="!uploadingConstat">
+                          <i class="bi bi-upload me-1"></i>Téléverser
+                        </span>
+                        <span *ngIf="uploadingConstat">
+                          <span class="spinner-border spinner-border-sm me-1"></span>Upload...
+                        </span>
+                      </button>
+                    </div>
+                    <small class="text-muted">Format accepté : PDF, JPG, PNG (Max 10 Mo)</small>
+                  </div>
+
+                  <div class="divider my-4"></div>
+
+                  <!-- ✅ UPLOAD PHOTOS -->
+                  <div class="upload-zone mb-3">
+                    <label class="upload-label">
+                      <i class="bi bi-images me-2"></i>Ajouter des photos
+                    </label>
+                    <div class="input-group">
+                      <input type="file" 
+                             id="photosFileInput"
+                             class="form-control" 
+                             accept="image/*" 
+                             multiple
+                             (change)="onPhotosFileSelected($event); $event.stopPropagation()">
+                      <button class="btn btn-primary" 
+                              [disabled]="selectedPhotos.length === 0 || uploadingPhotos"
+                              (click)="uploadPhotos($event)">
+                        <span *ngIf="!uploadingPhotos">
+                          <i class="bi bi-images me-1"></i>Téléverser ({{ selectedPhotos.length }})
+                        </span>
+                        <span *ngIf="uploadingPhotos">
+                          <span class="spinner-border spinner-border-sm me-1"></span>Upload...
+                        </span>
+                      </button>
+                    </div>
+                    <small class="text-muted">Formats acceptés : JPG, PNG (Max 5 Mo par image)</small>
+                  </div>
+
+                  <!-- ✅ PHOTOS EXISTANTES -->
+                  <div *ngIf="sinistre.photos && sinistre.photos.length > 0" class="mt-4">
+                    <p class="photos-count">
+                      <i class="bi bi-images me-2"></i>
+                      Photos du sinistre ({{ sinistre.photos.length }})
+                    </p>
+                    <div class="photos-grid">
+                      <div class="photo-item" *ngFor="let photo of sinistre.photos" (click)="viewDocument(photo); $event.stopPropagation()">
+                        <img [src]="photo" alt="Photo sinistre" loading="lazy">
+                        <div class="photo-overlay">
+                          <i class="bi bi-eye"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!sinistre.photos || sinistre.photos.length === 0" class="no-photos">
+                    <i class="bi bi-images text-muted"></i>
+                    <p class="text-muted mb-0">Aucune photo ajoutée</p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Panel latéral -->
-    <div class="col-lg-4 d-none">
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-header bg-white border-0 py-3">
-          <h6 class="mb-0">
-            <i class="bi bi-lightning me-2"></i>Actions rapides
-          </h6>
-        </div>
-        <div class="card-body">
-          <button class="btn btn-outline-primary w-100 mb-2">
-            <i class="bi bi-plus me-2"></i>Nouveau sinistre
-          </button>
-          <button class="btn btn-outline-secondary w-100 mb-2">
-            <i class="bi bi-download me-2"></i>Exporter l'historique
-          </button>
-          <button class="btn btn-outline-info w-100">
-            <i class="bi bi-printer me-2"></i>Imprimer les documents
-          </button>
+          
+          <!-- État vide -->
+          <div class="empty-state" *ngIf="sinistres.length === 0">
+            <i class="bi bi-inbox"></i>
+            <h6>Aucun sinistre déclaré</h6>
+            <p>Vous n'avez pas encore déclaré de sinistre</p>
+            <a routerLink="/clientDashboard/declarations" class="btn btn-primary">
+              <i class="bi bi-plus-circle me-2"></i>Déclarer un sinistre
+            </a>
+          </div>
         </div>
       </div>
     </div>

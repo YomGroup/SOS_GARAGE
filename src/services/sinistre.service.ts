@@ -57,7 +57,48 @@ export class SinistreService {
         return result && result.length > 0 ? result[0] : '';
     }
 
+/**
+ * Mettre à jour le statut d'un sinistre
+ */
+async updateSinistreStatus(sinistreId: number, newStatus: string): Promise<Observable<any>> {
+  await this.loadToken();
 
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${this.token}`,
+    'Content-Type': 'application/json'
+  });
+
+  const body = { statut: newStatus };
+
+  return this.http.patch(`${this.apiUrl2}/${sinistreId}`, body, { headers });
+}
+
+/**
+ * Récupérer un sinistre par ID
+ */
+async getSinistreById(sinistreId: number): Promise<Observable<any>> {
+  await this.loadToken();
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${this.token}`
+  });
+
+  return this.http.get(`${this.apiUrl2}/find_by/${sinistreId}`, { headers });
+}
+
+/**
+ * Mettre à jour un sinistre complet
+ */
+async updateSinistre(sinistreId: number, sinistreData: any): Promise<Observable<any>> {
+  await this.loadToken();
+
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${this.token}`,
+    'Content-Type': 'application/json'
+  });
+
+  return this.http.put(`${this.apiUrl2}/${sinistreId}`, sinistreData, { headers });
+}
 
     // ✅ Ajoute un sinistre avec notification Formspree
     async addSinistrePost(body: any): Promise<Observable<any>> {
