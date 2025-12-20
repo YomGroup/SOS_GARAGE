@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth.service';
 import { AssureService } from '../../services/assure.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { SinistreService } from '../../services/sinistre.service';
+import { VehicleService } from '../../services/vehicle.service'; // ✅ Ajouter si nécessaire
 
 interface Notification {
   message: string;
@@ -14,7 +15,7 @@ interface Notification {
 interface Sinistre {
   id: string;
   vehicule: string;
-  vehiculeId?: number;
+  vehiculeId?: number; // ✅ AJOUTER pour la redirection
   date: string;
   statut: string;
   typeVehicule: string;
@@ -22,7 +23,7 @@ interface Sinistre {
   documents: string[];
   photos: string[];
   constat: string;
-  contratAssurance?: string;
+  contratAssurance?: string; // ✅ AJOUTER
   type: string;
   etat?: string;
   raison?: string;
@@ -40,6 +41,7 @@ interface Sinistre {
 })
 export class SinistreComponent implements OnInit {
 
+  // ===== PROPRIÉTÉS EXISTANTES =====
   selectedSinistre: Sinistre | null = null;
   sinistres: Sinistre[] = [];
   userid: string | null = null;
@@ -50,9 +52,47 @@ export class SinistreComponent implements OnInit {
   private assureService = inject(AssureService);
   private sinistreService = inject(SinistreService);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private router = inject(Router); // ✅ AJOUTER
 
   private sinistreIdFromUrl: string | null = null;
+
+  // ===== NOUVELLES PROPRIÉTÉS POUR ÉDITION =====
+  isEditingStatus: boolean = false;
+  isEditingDetails: boolean = false;
+  
+  editForm = {
+    statut: '',
+    type: '',
+    lieu: '',
+    description: '',
+    contactAssistance: '',
+    etatVehicule: ''
+  };
+
+  // Liste des statuts disponibles
+  availableStatuts = [
+    { value: 'EN_ATTENTE', label: 'En attente' },
+    { value: 'EN_COURS', label: 'En cours' },
+    { value: 'TERMINE', label: 'Terminé' },
+    { value: 'ANNULE', label: 'Annulé' }
+  ];
+
+  // Liste des types de sinistre
+  availableTypes = [
+    { value: 'COLLISION', label: 'Collision' },
+    { value: 'VOL', label: 'Vol' },
+    { value: 'VANDALISME', label: 'Vandalisme' },
+    { value: 'INCENDIE', label: 'Incendie' },
+    { value: 'BRIS_DE_GLACE', label: 'Bris de glace' },
+    { value: 'CATASTROPHE_NATURELLE', label: 'Catastrophe naturelle' },
+    { value: 'AUTRE', label: 'Autre' }
+  ];
+
+  // États du véhicule
+  availableEtats = [
+    { value: 'ROULANT', label: 'Roulant' },
+    { value: 'NON_ROULANT', label: 'Non roulant' }
+  ];
 
   // Upload de fichiers
   selectedConstat: File | null = null;
@@ -60,10 +100,11 @@ export class SinistreComponent implements OnInit {
   uploadingConstat: boolean = false;
   uploadingPhotos: boolean = false;
 
-  // Messages
+  // ✅ NOUVELLES PROPRIÉTÉS pour les messages
   successMessage: string | null = null;
   errorMessage: string | null = null;
 
+  // ===== LIFECYCLE =====
   ngOnInit(): void {
     console.log('Component initialized', this.sinistres);
 
@@ -143,14 +184,14 @@ export class SinistreComponent implements OnInit {
   }
 
   // ===== VÉRIFICATIONS =====
-  hasConstat(sinistre: Sinistre): boolean {
-    return !!(sinistre.constat && sinistre.constat !== 'Aucun constat' && sinistre.constat.trim() !== '');
-  }
+ // ===== VÉRIFICATIONS =====
+hasConstat(sinistre: Sinistre): boolean {
+  return !!(sinistre.constat && sinistre.constat !== 'Aucun constat' && sinistre.constat.trim() !== '');
+}
 
-  hasContratAssurance(sinistre: Sinistre): boolean {
-    return !!(sinistre.contratAssurance && sinistre.contratAssurance.trim() !== '');
-  }
-
+hasContratAssurance(sinistre: Sinistre): boolean {
+  return !!(sinistre.contratAssurance && sinistre.contratAssurance.trim() !== '');
+}
   redirectToVehiculeEdit(sinistre: Sinistre): void {
     if (sinistre.vehiculeId) {
       this.router.navigate(['/clientDashboard/vehicules', sinistre.vehiculeId]);
@@ -221,6 +262,105 @@ export class SinistreComponent implements OnInit {
     return `Il y a ${Math.floor(days / 30)} mois`;
   }
 
+  // ===== ÉDITION - INITIALISATION =====
+  initEditForm(sinistre: Sinistre): void {
+    this.editForm = {
+      statut: sinistre.statut,
+      type: sinistre.type,
+      lieu: sinistre.lieu || '',
+      description: sinistre.raison || '',
+      contactAssistance: '',
+      etatVehicule: sinistre.etat || 'INCONNU'
+    };
+  }
+
+  // ===== GESTION DU STATUT =====
+  startEditingStatus(sinistre: Sinistre): void {
+    this.selectedSinistre = sinistre;
+    this.initEditForm(sinistre);
+    this.isEditingStatus = true;
+  }
+
+  cancelEditingStatus(): void {
+    this.isEditingStatus = false;
+  }
+
+  async saveStatus(): Promise<void> {
+    if (!this.selectedSinistre) return;
+
+    try {
+      const observable = await this.sinistreService.updateSinistreStatus(
+        Number(this.selectedSinistre.id),
+        this.editForm.statut
+      );
+
+      observable.subscribe({
+        next: (response) => {
+          this.selectedSinistre!.statut = this.editForm.statut;
+          this.isEditingStatus = false;
+          this.showSuccess('✅ Statut mis à jour avec succès');
+        },
+        error: (err) => {
+          console.error('Erreur mise à jour statut:', err);
+          this.showError('❌ Erreur lors de la mise à jour du statut');
+        }
+      });
+    } catch (err) {
+      console.error('Erreur:', err);
+      this.showError('❌ Erreur lors de la mise à jour');
+    }
+  }
+
+  // ===== GESTION DES DÉTAILS =====
+  startEditingDetails(sinistre: Sinistre): void {
+    this.selectedSinistre = sinistre;
+    this.initEditForm(sinistre);
+    this.isEditingDetails = true;
+  }
+
+  cancelEditingDetails(): void {
+    this.isEditingDetails = false;
+  }
+
+  async saveDetails(): Promise<void> {
+    if (!this.selectedSinistre) return;
+
+    try {
+      const updatedData = {
+        id: this.selectedSinistre.id,
+        type: this.editForm.type,
+        lieu: this.editForm.lieu,
+        description: this.editForm.description,
+        etatVehicule: this.editForm.etatVehicule
+      };
+
+      const observable = await this.sinistreService.updateSinistre(
+        Number(this.selectedSinistre.id),
+        updatedData
+      );
+
+      observable.subscribe({
+        next: (response) => {
+          Object.assign(this.selectedSinistre!, {
+            type: this.editForm.type,
+            lieu: this.editForm.lieu,
+            raison: this.editForm.description,
+            etat: this.editForm.etatVehicule
+          });
+          this.isEditingDetails = false;
+          this.showSuccess('✅ Détails mis à jour avec succès');
+        },
+        error: (err) => {
+          console.error('Erreur mise à jour détails:', err);
+          this.showError('❌ Erreur lors de la mise à jour des détails');
+        }
+      });
+    } catch (err) {
+      console.error('Erreur:', err);
+      this.showError('❌ Erreur lors de la mise à jour');
+    }
+  }
+
   // ===== UPLOAD CONSTAT =====
   onConstatFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -230,6 +370,7 @@ export class SinistreComponent implements OnInit {
   }
 
   async uploadConstat(event?: Event): Promise<void> {
+    // ✅ Empêcher la fermeture du modal
     if (event) {
       event.stopPropagation();
     }
@@ -252,6 +393,7 @@ export class SinistreComponent implements OnInit {
       this.uploadingConstat = false;
       this.showSuccess('✅ Constat téléversé avec succès');
       
+      // Réinitialiser l'input file
       const fileInput = document.getElementById('constatFileInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
@@ -271,6 +413,7 @@ export class SinistreComponent implements OnInit {
   }
 
   async uploadPhotos(event?: Event): Promise<void> {
+    // ✅ Empêcher la fermeture du modal
     if (event) {
       event.stopPropagation();
     }
@@ -294,6 +437,7 @@ export class SinistreComponent implements OnInit {
       this.uploadingPhotos = false;
       this.showSuccess(`✅ ${count} photo(s) téléversée(s) avec succès`);
       
+      // Réinitialiser l'input file
       const fileInput = document.getElementById('photosFileInput') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
@@ -338,7 +482,7 @@ export class SinistreComponent implements OnInit {
   private mapBackendSinistreToFront(backend: any): Sinistre {
     return {
       id: backend.id.toString(),
-      vehiculeId: backend.vehiculeId,
+      vehiculeId: backend.vehiculeId, // ✅ AJOUTER
       vehicule: backend.vehiculeImmatriculation ?? `Véhicule #${backend.vehiculeId}`,
       date: backend.createdAt ? new Date(backend.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue',
       statut: backend.statut,
@@ -352,7 +496,7 @@ export class SinistreComponent implements OnInit {
       documents: backend.documents?.map((doc: any) => doc.objectStorageUrl) || [],
       photos: backend.images?.map((img: any) => img.objectStorageUrl) || [],
       constat: backend.lienConstat || '',
-      contratAssurance: backend.contratAssurance || '',
+      contratAssurance: backend.contratAssurance || '', // ✅ AJOUTER
       type: backend.type ? backend.type.toString() : 'Inconnu',
       etat: backend.etatVehicule ? backend.etatVehicule.toString().toUpperCase() : 'INCONNU',
       raison: backend.description || 'Aucune raison spécifiée',
@@ -362,7 +506,7 @@ export class SinistreComponent implements OnInit {
     };
   }
 
-  // ===== MÉTHODES LEGACY =====
+  // ===== MÉTHODES LEGACY (à garder pour compatibilité) =====
   isEnCours(statut: string): boolean {
     return [
       'EN_ATTENTE_TRAITEMENT',
