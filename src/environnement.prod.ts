@@ -1,4 +1,4 @@
 export const environment = {
-    apiUrl: 'https://sosmongarage-production-d435.up.railway.app/V1/api',
+    apiUrl: 'http://localhost:8083/V1/api',
 };
   

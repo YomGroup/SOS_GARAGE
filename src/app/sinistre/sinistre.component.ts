@@ -193,12 +193,15 @@ hasContratAssurance(sinistre: Sinistre): boolean {
   return !!(sinistre.contratAssurance && sinistre.contratAssurance.trim() !== '');
 }
   redirectToVehiculeEdit(sinistre: Sinistre): void {
-    if (sinistre.vehiculeId) {
-      this.router.navigate(['/clientDashboard/vehicules', sinistre.vehiculeId]);
-    } else {
-      this.showError('Impossible de rediriger vers le véhicule');
-    }
+  if (sinistre.vehiculeId) {
+    // Naviguer vers la page véhicules avec le mode édition
+    this.router.navigate(['/clientDashboard/vehicules'], {
+      queryParams: { editVehicleId: sinistre.vehiculeId }
+    });
+  } else {
+    this.showError('Impossible de rediriger vers le véhicule');
   }
+}
 
   // ===== FORMATTERS =====
   formatEtat(etat?: string): string {
@@ -480,31 +483,31 @@ hasContratAssurance(sinistre: Sinistre): boolean {
 
   // ===== MAPPING BACKEND =====
   private mapBackendSinistreToFront(backend: any): Sinistre {
-    return {
-      id: backend.id.toString(),
-      vehiculeId: backend.vehiculeId, // ✅ AJOUTER
-      vehicule: backend.vehiculeImmatriculation ?? `Véhicule #${backend.vehiculeId}`,
-      date: backend.createdAt ? new Date(backend.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue',
-      statut: backend.statut,
-      typeVehicule: backend.type ? backend.type.toString() : 'Inconnu',
-      notifications: [
-        {
-          message: backend.isValid ? 'Sinistre clôturé' : 'Sinistre en cours de traitement',
-          temps: this.formatTimeAgo(backend.updatedAt ?? backend.createdAt)
-        }
-      ],
-      documents: backend.documents?.map((doc: any) => doc.objectStorageUrl) || [],
-      photos: backend.images?.map((img: any) => img.objectStorageUrl) || [],
-      constat: backend.lienConstat || '',
-      contratAssurance: backend.contratAssurance || '', // ✅ AJOUTER
-      type: backend.type ? backend.type.toString() : 'Inconnu',
-      etat: backend.etatVehicule ? backend.etatVehicule.toString().toUpperCase() : 'INCONNU',
-      raison: backend.description || 'Aucune raison spécifiée',
-      lieu: backend.lieu || 'Lieu inconnu',
-      iSsigned: backend.isSigned,
-      isgarageaffected: backend.isGarageAffected
-    };
-  }
+  return {
+    id: backend.id.toString(),
+    vehiculeId: backend.vehiculeId || backend.vehicule?.id, // ✅ Essayer les deux
+    vehicule: backend.vehiculeImmatriculation ?? `Véhicule #${backend.vehiculeId}`,
+    date: backend.createdAt ? new Date(backend.createdAt).toLocaleDateString('fr-FR') : 'Date inconnue',
+    statut: backend.statut,
+    typeVehicule: backend.type ? backend.type.toString() : 'Inconnu',
+    notifications: [
+      {
+        message: backend.isValid ? 'Sinistre clôturé' : 'Sinistre en cours de traitement',
+        temps: this.formatTimeAgo(backend.updatedAt ?? backend.createdAt)
+      }
+    ],
+    documents: backend.documents?.map((doc: any) => doc.objectStorageUrl) || [],
+    photos: backend.images?.map((img: any) => img.objectStorageUrl) || [],
+    constat: backend.lienConstat || '',
+    contratAssurance: backend.vehicule?.contratAssurance || backend.contratAssurance || '', // ✅ Essayer les deux
+    type: backend.type ? backend.type.toString() : 'Inconnu',
+    etat: backend.etatVehicule ? backend.etatVehicule.toString().toUpperCase() : 'INCONNU',
+    raison: backend.description || 'Aucune raison spécifiée',
+    lieu: backend.lieu || 'Lieu inconnu',
+    iSsigned: backend.isSigned,
+    isgarageaffected: backend.isGarageAffected
+  };
+}
 
   // ===== MÉTHODES LEGACY (à garder pour compatibilité) =====
   isEnCours(statut: string): boolean {

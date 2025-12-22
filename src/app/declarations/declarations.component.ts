@@ -53,7 +53,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   assurances: any[] = [];
   selectedAssurance: any = null;
   showAssuranceStep = false;
-  currentPhotoStep: number = 1;
   lieuSinistre: string = '';
   nomAssure: string = '';
   adresseAssure: string = '';
@@ -62,12 +61,17 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   token = '';
   numeroAssurance = '';
 
-  photoSteps: { [step: number]: { url: string; file: File }[] } = {
-  1: [],
-  2: [],
-  3: [],
-  4: []
-};
+  // ✅ NOUVEAUX : Gestion des sections optionnelles
+  showOptionalPhotos: boolean = false;
+  showConstatSection: boolean = false;
+
+  // ✅ MODIFIÉ : Seulement 2 photos obligatoires + 2 optionnelles
+  photoSteps: { [key: string]: { url: string; file: File }[] } = {
+    plaque: [],      // Obligatoire
+    degats: [],      // Obligatoire
+    avant: [],       // Optionnel
+    cote: []         // Optionnel
+  };
 
   typeassurance: string[] = [
     "STATIONNEMENT_IMPACT",
@@ -120,12 +124,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   checkProfileCompleteness(): boolean {
-
-    console.log('-------------------------------------');
-
-    console.log(this.nomAssure,this.adresseAssure,this.telephoneAssure,this.prenomAssure);
-
-    console.log('-------------------------------------');
     const isProfileComplete = this.nomAssure !== '' &&
       this.adresseAssure !== '' &&
       this.telephoneAssure !== '' &&
@@ -143,8 +141,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy() {
-    this.previewPhotos.forEach(photo => {
-      URL.revokeObjectURL(photo.url);
+    Object.values(this.photoSteps).forEach(photos => {
+      photos.forEach(photo => URL.revokeObjectURL(photo.url));
     });
     if (this.constatPreviewUrl) {
       URL.revokeObjectURL(this.constatPreviewUrl);
@@ -171,7 +169,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.userData = data;
-        console.log('Données utilisateur chargées :', this.userData);
         this.nomAssure = data.nom || '';
         this.adresseAssure = data.adresse || '';
         this.telephoneAssure = data.telephone || '';
@@ -219,7 +216,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   private async loadVehicles(assureId: number): Promise<void> {
-    console.log('test api vehicule kkkkkkkkkkkkk');
     (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data.content;
@@ -267,11 +263,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
         (await this.vehiculeService.getVehiculesMatricule(vehiculematricule)).pipe(
           switchMap((vehicle: any) => {
-            console.log('Données du véhicule récupérées :', vehicle);
             assurance = vehicle?.nomAssurence || '';
-            // Récupérer le numéro d'assistance directement depuis le véhicule
             this.numeroAssurance = vehicle?.telephoneAssistance || '';
-            console.log('Numéro d\'assurance récupéré:', this.numeroAssurance);
             return this.vehiculeService.listAssuranceVehiculesNumero(this.token);
           })
         ).subscribe({
@@ -289,7 +282,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   acceptGarageWarning(): void {
     this.hasAcceptedGarageWarning = true;
     this.showGarageWarningStep = false;
-    // Soumettre directement le sinistre
     this.submitSinistre();
   }
 
@@ -303,11 +295,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
+  // ✅ MODIFIÉ : Validation des 2 photos obligatoires uniquement
   private hasRequiredPhotos(): boolean {
-    return this.photoSteps[1].length > 0 &&
-      this.photoSteps[2].length > 0 &&
-      this.photoSteps[3].length > 0 &&
-      this.photoSteps[4].length > 0;
+    return this.photoSteps['plaque'].length > 0 && this.photoSteps['degats'].length > 0;
   }
 
   toggleAssuranceDropdown(): void {
@@ -319,13 +309,14 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.isAssuranceDropdownOpen = false;
   }
 
+  // ✅ MODIFIÉ : Validation simplifiée (description + 2 photos)
   canProceed(): boolean {
     switch (this.currentStep) {
       case 1:
         return !!this.selectedVehicle && !!this.vehicleStatus;
       case 2:
         return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
-          (!!this.incidentDescription || !!this.constatFile) && this.hasRequiredPhotos();
+          !!this.incidentDescription && this.hasRequiredPhotos();
       case 3:
         return this.hasAcceptedGarageWarning &&
           this.nomAssure !== '' &&
@@ -343,7 +334,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
     if (this.vehicleStatus === 'not-rolling') {
       this.showAssuranceStep = true;
-      console.log('Véhicule sélectionné :', this.selectedVehicle);
     } else {
       this.showAssuranceStep = false;
     }
@@ -381,67 +371,37 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  onPhotoSelect(event: Event, step: number): void {
+  // ✅ MODIFIÉ : Upload photo pour une catégorie spécifique
+  onPhotoSelect(event: Event, category: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
-      const files = Array.from(input.files);
+      const file = input.files[0];
 
-      files.forEach(file => {
-        if (!file.type.match('image.*')) {
-          alert('Seules les images sont acceptées');
-          return;
-        }
+      if (!file.type.match('image.*')) {
+        alert('Seules les images sont acceptées');
+        return;
+      }
 
-        const reader = new FileReader();
-        reader.onload = (e: any) => {
-          this.photoSteps[step].push({
-            url: e.target.result,
-            file: file
-          });
-        };
-        reader.readAsDataURL(file);
-      });
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        // Limiter à 1 photo par catégorie
+        this.photoSteps[category] = [{
+          url: e.target.result,
+          file: file
+        }];
+      };
+      reader.readAsDataURL(file);
 
       input.value = '';
     }
   }
 
-  getCurrentStepPhotos() {
-    return this.photoSteps[this.currentPhotoStep];
-  }
-
-  setPhotoStep(step: number): void {
-    if (this.currentPhotoStep !== step) {
-      this.currentPhotoStep = step;
+  // ✅ NOUVEAU : Supprimer photo d'une catégorie
+  removePhoto(category: string): void {
+    if (this.photoSteps[category].length > 0) {
+      URL.revokeObjectURL(this.photoSteps[category][0].url);
+      this.photoSteps[category] = [];
     }
-  }
-
-  nextPhotoStep(): void {
-    if (this.currentPhotoStep < 4) {
-      this.currentPhotoStep++;
-    } else {
-      // Marquer que les photos sont complètes et afficher un toast
-      this.photosCompleted = true;
-      // Auto-cacher le toast après 3 secondes
-      setTimeout(() => {
-        this.photosCompleted = false;
-      }, 3000);
-    }
-  }
-
-  prevPhotoStep(): void {
-    if (this.currentPhotoStep > 1) {
-      this.currentPhotoStep--;
-    }
-  }
-
-  canProceedPhotoStep(): boolean {
-    return this.photoSteps[this.currentPhotoStep].length > 0;
-  }
-
-  removePhoto(index: number, step: number): void {
-    URL.revokeObjectURL(this.photoSteps[step][index].url);
-    this.photoSteps[step].splice(index, 1);
   }
 
   removeConstat(): void {
@@ -453,19 +413,6 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.showPdfViewer = false;
   }
 
-  scrollToConstat(): void {
-    // Scroll vers la section constat
-    setTimeout(() => {
-      const constatSection = document.querySelector('.upload-section');
-      if (constatSection) {
-        constatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 100);
-  }
-
-  /**
-   * Récupère le nom de l'assurance du véhicule sélectionné
-   */
   getSelectedVehicleAssurance(): string {
     if (this.selectedAssurance) {
       return this.selectedAssurance;
@@ -474,14 +421,14 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     return vehicule?.nomAssurence || 'Non spécifiée';
   }
 
-  // Soumission du sinistre (simplifiée, sans signature)
+  // Soumission du sinistre
   async submitSinistre(): Promise<void> {
     this.isSubmitting = true;
 
     try {
       const vehiculeid = parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0);
 
-      // Upload des photos via MinIO
+      // ✅ Upload toutes les photos (obligatoires + optionnelles)
       const allFiles: File[] = Object.values(this.photoSteps).flat().map(item => item.file);
       let images2: string[] = [];
 
@@ -493,7 +440,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         console.error('❌ Erreur upload images', err);
       }
 
-      // Upload du constat via MinIO si présent
+      // Upload du constat si présent
       let constatUrl = '';
       if (this.constatFile) {
         try {
@@ -510,12 +457,10 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         objectStorageUrl: url,
       }));
 
-      console.log({ images2, constatUrl });
-
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
-        lienConstat: constatUrl || '', // URL MinIO du constat
+        lienConstat: constatUrl || '',
         conditionsAcceptees: true,
         lieu: this.lieuSinistre,
         vehiculeId: vehiculeid,
@@ -531,7 +476,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
         next: (sinistreResponse: any) => {
           console.log("✅ Sinistre créé :", sinistreResponse);
           this.isSubmitting = false;
-          this.currentStep = 4; // Étape de confirmation
+          this.currentStep = 4;
         },
         error: (error) => {
           console.error("❌ Erreur création sinistre:", error);
@@ -547,5 +492,4 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
       alert('Une erreur est survenue lors de l\'enregistrement des fichiers.');
     }
   }
-
 }

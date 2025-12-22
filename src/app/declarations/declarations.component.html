@@ -115,235 +115,338 @@
     </div>
 
     <!-- Étape 2: Déclaration de l'incident -->
-    <div class="step-content" *ngIf="currentStep === 2">
-      <h2>Déclaration de l'incident</h2>
+    <!-- Étape 2: Déclaration de l'incident -->
+<div class="step-content" *ngIf="currentStep === 2">
+  <h2>Déclaration de l'incident</h2>
 
-      <!-- Informations du sinistre -->
-      <div class="form-row">
-        <!-- Type d'incident -->
-        <div class="form-group">
-          <label for="typeAssuranceSelect" class="form-label fw-semibold text-secondary">
-            Type de sinistre <span class="text-danger">*</span> :
-          </label>
-          <select id="typeAssuranceSelect"
-                  class="form-select shadow-sm rounded"
-                  [(ngModel)]="selectedTypeAssurance"
-                  name="typeAssurance"
+  <!-- Informations du sinistre -->
+  <div class="form-row">
+    <!-- Type d'incident -->
+    <div class="form-group">
+      <label for="typeAssuranceSelect" class="form-label fw-semibold text-secondary">
+        Type de sinistre <span class="text-danger">*</span> :
+      </label>
+      <select id="typeAssuranceSelect"
+              class="form-select shadow-sm rounded"
+              [(ngModel)]="selectedTypeAssurance"
+              name="typeAssurance"
+              required>
+        <option value="" disabled selected>-- Choisissez un type --</option>
+        <option *ngFor="let type of typeassurance" [value]="type">
+          {{ type }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Lieu du sinistre -->
+    <div class="form-group">
+      <label for="lieuSinistre" class="form-label fw-semibold text-secondary">
+        Code Postal <span class="text-danger">*</span> :
+      </label>
+      <input type="text" id="lieuSinistre"
+             class="form-control shadow-sm rounded"
+             [(ngModel)]="lieuSinistre"
+             name="lieuSinistre"
+             placeholder="Entrez le Code Postal"
+             required />
+    </div>
+  </div>
+
+  <!-- Choix de méthode de déclaration -->
+  <div class="choices-container" *ngIf="!hasChosenDeclarationMethod">
+    <div class="choice-card" (click)="selectDeclarationMethod('describe')">
+      <i class="bi bi-text-paragraph"></i>
+      <h3>Décrire l'incident et ajouter les photos</h3>
+      <p>Racontez ce qui s'est passé en détail</p>
+    </div>
+  </div>
+
+  <!-- Description + Photos -->
+  <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
+    <div class="row">
+      <!-- Colonne gauche : Description -->
+      <div class="col-md-6">
+        <div class="section-header">
+          <button class="btn-back" (click)="resetDeclarationMethod()">
+            <i class="bi bi-arrow-left"></i> Retour
+          </button>
+          <h3><i class="bi bi-text-paragraph"></i> Description de l'incident</h3>
+        </div>
+
+        <textarea class="form-control" rows="10"
+                  [(ngModel)]="incidentDescription"
+                  placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)"
                   required>
-            <option value="" disabled selected>-- Choisissez un type --</option>
-            <option *ngFor="let type of typeassurance" [value]="type">
-              {{ type }}
-            </option>
-          </select>
+        </textarea>
+        <p class="help-text">
+          <span class="text-danger">*</span> Champ obligatoire - Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.
+        </p>
+
+        <!-- Bouton Ajouter un constat (optionnel) -->
+        <div class="optional-section mt-4" *ngIf="!showConstatSection">
+          <button class="btn-add-optional" (click)="showConstatSection = true">
+            <i class="bi bi-file-earmark-plus"></i> Ajouter un constat (optionnel)
+          </button>
         </div>
 
-        <!-- Lieu du sinistre -->
-        <div class="form-group">
-          <label for="lieuSinistre" class="form-label fw-semibold text-secondary">
-            Code Postal <span class="text-danger">*</span> :
-          </label>
-          <input type="text" id="lieuSinistre"
-                 class="form-control shadow-sm rounded"
-                 [(ngModel)]="lieuSinistre"
-                 name="lieuSinistre"
-                 placeholder="Entrez le Code Postal"
-                 required />
-        </div>
-      </div>
-
-      <!-- Choix de méthode de déclaration -->
-      <div class="choices-container" *ngIf="!hasChosenDeclarationMethod">
-        <div class="choice-card" (click)="selectDeclarationMethod('describe')">
-          <i class="bi bi-text-paragraph"></i>
-          <h3>Décrire l'incident et ajouter les photos</h3>
-          <p>Racontez ce qui s'est passé en détail</p>
-        </div>
-      </div>
-
-      <!-- Description + Photos -->
-      <div class="description-section" *ngIf="hasChosenDeclarationMethod && declarationMethod === 'describe'">
-        <div class="row">
-          <!-- Colonne gauche : Description -->
-          <div class="col-md-6">
-            <div class="section-header">
-              <button class="btn-back" (click)="resetDeclarationMethod()">
-                <i class="bi bi-arrow-left"></i> Retour
-              </button>
-              <h3><i class="bi bi-text-paragraph"></i> Description de l'incident</h3>
+        <!-- Upload constat -->
+        <div class="upload-section mt-4" *ngIf="showConstatSection">
+          <div class="section-header">
+            <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat</h3>
+          </div>
+          
+          <div class="file-upload">
+            <div class="upload-area" (click)="fileInput.click()">
+              <i class="bi bi-upload"></i>
+              <p>Téléverser votre constat</p>
+              <input #fileInput type="file" accept=".pdf,.jpg,.png" 
+                     (change)="onFileSelect($event)" style="display: none;">
             </div>
-
-            <textarea class="form-control" rows="10"
-                      [(ngModel)]="incidentDescription"
-                      placeholder="Décrivez précisément ce qui s'est passé (lieu, heure, circonstances, dégâts apparents...)">
-            </textarea>
+            
+            <div class="preview-container" *ngIf="constatPreviewUrl">
+              <h4>Prévisualisation :</h4>
+              
+              <div *ngIf="showPdfViewer" class="pdf-preview">
+                <pdf-viewer [src]="constatPreviewUrl" 
+                           [render-text]="true"
+                           style="width: 100%; height: 500px; border: 1px solid #ddd;">
+                </pdf-viewer>
+              </div>
+              
+              <div *ngIf="!showPdfViewer" class="image-preview">
+                <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
+              </div>
+              
+              <button class="btn-remove" (click)="removeConstat()">
+                <i class="bi bi-trash"></i> Supprimer
+              </button>
+            </div>
+            
             <p class="help-text">
-              Plus votre description sera précise, plus nous pourrons traiter votre dossier rapidement.
+              Vous n'avez pas de constat ? <br>
+              Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
             </p>
+          </div>
+        </div>
+      </div>
 
-            <!-- Upload constat -->
-            <div class="upload-section mt-4">
-              <div class="section-header">
-                <h3><i class="bi bi-file-earmark-arrow-up"></i> Téléverser un constat </h3>
-              </div>
-              
-              <div class="file-upload">
-                <div class="upload-area" (click)="fileInput.click()">
-                  <p><i class="bi bi-upload"></i> Téléverser votre constat</p>
-                  <input #fileInput type="file" accept=".pdf,.jpg,.png" 
-                         (change)="onFileSelect($event)" style="display: none;">
-                </div>
-                
-                <div class="preview-container" *ngIf="constatPreviewUrl">
-                  <h4>Prévisualisation :</h4>
-                  
-                  <div *ngIf="showPdfViewer" class="pdf-preview">
-                    <pdf-viewer [src]="constatPreviewUrl" 
-                               [render-text]="true"
-                               style="width: 100%; height: 500px; border: 1px solid #ddd;">
-                    </pdf-viewer>
-                  </div>
-                  
-                  <div *ngIf="!showPdfViewer" class="image-preview">
-                    <img [src]="constatPreviewUrl" alt="Prévisualisation du constat">
-                  </div>
-                  
-                  <button class="btn-remove" (click)="removeConstat()">
-                    <i class="bi bi-trash"></i> Supprimer
-                  </button>
-                </div>
-                
-                <p class="help-text">
-                  Vous n'avez pas de constat ? <br>
-                  Rendez-vous sur <a href="https://www.e-constat.fr" target="_blank">www.e-constat.fr</a> pour réaliser le vôtre.
-                </p>
-              </div>
+      <!-- Colonne droite : Photos -->
+      <div class="col-md-6">
+        <h3><i class="bi bi-camera"></i> Photos du véhicule accidenté</h3>
+        <p class="help-text mb-4">
+          <span class="text-danger">*</span> 2 photos obligatoires minimum
+        </p>
+
+        <!-- Photos obligatoires -->
+        <div class="required-photos-section">
+          <!-- Photo Plaque d'immatriculation -->
+          <div class="photo-upload-card mb-3">
+            <div class="photo-card-header">
+              <h4><i class="bi bi-card-text"></i> Plaque d'immatriculation <span class="text-danger">*</span></h4>
+            </div>
+            
+            <div class="photo-upload-area" (click)="plaqueInput.click()" *ngIf="photoSteps['plaque'].length === 0">
+              <i class="bi bi-camera"></i>
+              <p>Ajouter une photo</p>
+              <input #plaqueInput type="file" accept="image/*"
+                    (change)="onPhotoSelect($event, 'plaque')"
+                    style="display: none;">
+            </div>
+
+            <div class="photo-preview" *ngIf="photoSteps['plaque'].length > 0">
+              <img [src]="photoSteps['plaque'][0].url" alt="Plaque d'immatriculation">
+              <button class="btn-remove-photo" (click)="removePhoto('plaque')">
+                <i class="bi bi-trash"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Colonne droite : Photos -->
-          <div class="col-md-6">
-            <h3><i class="bi bi-camera"></i> Photos du véhicule accidenté</h3>
-
-            <!-- Étape en cours -->
-            <ul class="nav nav-pills justify-content-center my-4">
-              <li class="nav-item" (click)="setPhotoStep(1)" style="cursor:pointer;">
-                <a class="nav-link" [class.active]="currentPhotoStep === 1">Avant</a>
-              </li>
-              <li class="nav-item" (click)="setPhotoStep(2)" style="cursor:pointer;">
-                <a class="nav-link" [class.active]="currentPhotoStep === 2">Immatriculation</a>
-              </li>
-              <li class="nav-item" (click)="setPhotoStep(3)" style="cursor:pointer;">
-                <a class="nav-link" [class.active]="currentPhotoStep === 3">Côté</a>
-              </li>
-              <li class="nav-item" (click)="setPhotoStep(4)" style="cursor:pointer;">
-                <a class="nav-link" [class.active]="currentPhotoStep === 4">Dégâts</a>
-              </li>
-            </ul>
-
-            <!-- Zone d'upload -->
-            <div class="photo-upload-area" (click)="photoInput.click()">
-              <div class="upload-icon">
-                <i class="bi bi-camera"></i>
-                <p>Ajouter une photo pour cette étape</p>
-                <p class="photo-count">{{ getCurrentStepPhotos().length }} photo(s) ajoutée(s)</p>
-              </div>
-              <input #photoInput type="file" accept="image/jpeg,image/png"
-                    (change)="onPhotoSelect($event, currentPhotoStep)"
-                    style="display: none;"
-                    [multiple]="currentPhotoStep === 4">
+          <!-- Photo Dégâts -->
+          <div class="photo-upload-card mb-3">
+            <div class="photo-card-header">
+              <h4><i class="bi bi-exclamation-triangle"></i> Dégâts apparents <span class="text-danger">*</span></h4>
+            </div>
+            
+            <div class="photo-upload-area" (click)="degatsInput.click()" *ngIf="photoSteps['degats'].length === 0">
+              <i class="bi bi-camera"></i>
+              <p>Ajouter une photo</p>
+              <input #degatsInput type="file" accept="image/*"
+                    (change)="onPhotoSelect($event, 'degats')"
+                    style="display: none;">
             </div>
 
-            <!-- Gallery preview -->
-            <div class="photo-gallery" *ngIf="getCurrentStepPhotos().length > 0">
-              <div class="photo-grid">
-                <div class="photo-item" *ngFor="let photo of getCurrentStepPhotos(); let i = index">
-                  <img [src]="photo.url" alt="Photo du sinistre">
-                  <div class="photo-overlay">
-                    <button class="btn-remove" (click)="removePhoto(i, currentPhotoStep); $event.stopPropagation()">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Navigation entre étapes photos -->
-            <div class="step-navigation">
-              <button class="btn-backs" (click)="prevPhotoStep()" [disabled]="currentPhotoStep === 1">
-                <i class="bi bi-chevron-left"></i> Étape précédente
+            <div class="photo-preview" *ngIf="photoSteps['degats'].length > 0">
+              <img [src]="photoSteps['degats'][0].url" alt="Dégâts">
+              <button class="btn-remove-photo" (click)="removePhoto('degats')">
+                <i class="bi bi-trash"></i>
               </button>
-              
-              <button class="btn-nexts" (click)="nextPhotoStep()" [disabled]="!canProceedPhotoStep()">
-                {{ currentPhotoStep === 4 ? 'Valider les photos' : 'Étape suivante' }} 
-                <i class="bi bi-chevron-right"></i>
-              </button>
-            </div>
-
-            <!-- Toast de confirmation -->
-            <div class="alert alert-success mt-3" *ngIf="photosCompleted" role="alert">
-              <i class="bi bi-check-circle-fill me-2"></i>
-              Photos validées avec succès ! Vous pouvez maintenant ajouter un constat (optionnel) ou passer à l'étape suivante.
             </div>
           </div>
+        </div>
+
+        <!-- Bouton pour afficher les photos optionnelles -->
+        <div class="optional-section mt-4" *ngIf="!showOptionalPhotos">
+          <button class="btn-add-optional" (click)="showOptionalPhotos = true">
+            <i class="bi bi-camera-fill"></i> Ajouter d'autres photos (optionnel)
+          </button>
+        </div>
+
+        <!-- Photos optionnelles -->
+        <div class="optional-photos-section mt-4" *ngIf="showOptionalPhotos">
+          <h4 class="optional-title">Photos optionnelles</h4>
+          
+          <!-- Photo Avant -->
+          <div class="photo-upload-card mb-3">
+            <div class="photo-card-header">
+              <h4><i class="bi bi-arrow-up-circle"></i> Avant du véhicule</h4>
+            </div>
+            
+            <div class="photo-upload-area" (click)="avantInput.click()" *ngIf="photoSteps['avant'].length === 0">
+              <i class="bi bi-camera"></i>
+              <p>Ajouter une photo</p>
+              <input #avantInput type="file" accept="image/*"
+                    (change)="onPhotoSelect($event, 'avant')"
+                    style="display: none;">
+            </div>
+
+            <div class="photo-preview" *ngIf="photoSteps['avant'].length > 0">
+              <img [src]="photoSteps['avant'][0].url" alt="Avant du véhicule">
+              <button class="btn-remove-photo" (click)="removePhoto('avant')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Photo Côté -->
+          <div class="photo-upload-card mb-3">
+            <div class="photo-card-header">
+              <h4><i class="bi bi-arrow-left-right"></i> Côté du véhicule</h4>
+            </div>
+            
+            <div class="photo-upload-area" (click)="coteInput.click()" *ngIf="photoSteps['cote'].length === 0">
+              <i class="bi bi-camera"></i>
+              <p>Ajouter une photo</p>
+              <input #coteInput type="file" accept="image/*"
+                    (change)="onPhotoSelect($event, 'cote')"
+                    style="display: none;">
+            </div>
+
+            <div class="photo-preview" *ngIf="photoSteps['cote'].length > 0">
+              <img [src]="photoSteps['cote'][0].url" alt="Côté du véhicule">
+              <button class="btn-remove-photo" (click)="removePhoto('cote')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Indicateur de progression -->
+        <div class="photo-progress mt-4" *ngIf="photoSteps['plaque'].length > 0 || photoSteps['degats'].length > 0">
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" 
+                 [style.width]="((photoSteps['plaque'].length + photoSteps['degats'].length) / 2 * 100) + '%'">
+            </div>
+          </div>
+          <p class="progress-text">
+            {{ photoSteps['plaque'].length + photoSteps['degats'].length }} / 2 photos obligatoires
+          </p>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
     <!-- Étape 3: Confirmation et validation -->
-    <div class="step-content" *ngIf="currentStep === 3">
-      <h2>Récapitulatif de votre déclaration</h2>
+    <!-- Étape 3: Confirmation et validation -->
+<div class="step-content" *ngIf="currentStep === 3">
+  <h2>Récapitulatif de votre déclaration</h2>
 
-      <div class="recap-card">
-        <div class="recap-section">
-          <h4><i class="bi bi-car-front"></i> Véhicule</h4>
-          <p><strong>Véhicule :</strong> {{ selectedVehicle }}</p>
-          <p><strong>État :</strong> {{ vehicleStatus === 'rolling' ? 'Roulant' : 'Non roulant' }}</p>
-          <p *ngIf="selectedAssurance"><strong>Assurance :</strong> {{ selectedAssurance }}</p>
-        </div>
+  <div class="recap-card">
+    <div class="recap-section">
+      <h4><i class="bi bi-car-front"></i> Véhicule</h4>
+      <p><strong>Véhicule :</strong> {{ selectedVehicle }}</p>
+      <p><strong>État :</strong> {{ vehicleStatus === 'rolling' ? 'Roulant' : 'Non roulant' }}</p>
+      <p *ngIf="selectedAssurance"><strong>Assurance :</strong> {{ selectedAssurance }}</p>
+    </div>
 
-        <div class="recap-section">
-          <h4><i class="bi bi-file-text"></i> Incident</h4>
-          <p><strong>Type :</strong> {{ selectedTypeAssurance }}</p>
-          <p><strong>Lieu :</strong> {{ lieuSinistre }}</p>
-          <p *ngIf="incidentDescription"><strong>Description :</strong> {{ incidentDescription }}</p>
-        </div>
-
-        <div class="recap-section">
-          <h4><i class="bi bi-images"></i> Documents</h4>
-          <p><strong>Photos :</strong> 
-            {{ photoSteps[1].length + photoSteps[2].length + photoSteps[3].length + photoSteps[4].length }} photo(s)
-          </p>
-          <p *ngIf="constatFile"><strong>Constat :</strong> {{ constatFile.name }}</p>
-        </div>
-      </div>
-
-      <div class="confirmation-actions">
-        <div class="info-banner">
-          <div class="info-banner-content">
-            <i class="bi bi-info-circle"></i>
-            <div class="info-text">
-              <strong>Information :</strong> En validant, vous confirmez l'exactitude des informations fournies.
-              Un professionnel prendra contact avec vous rapidement.
-            </div>
-          </div>
-        </div>
-
-       <div class="d-flex justify-content-center align-items-center mt-4">
-  <button class="btn-back me-3" (click)="previousStep()" [disabled]="isSubmitting">
-    <i class="bi bi-arrow-left"></i> Retour
-  </button>
-  <button class="btn-next" (click)="submitSinistre()" [disabled]="isSubmitting">
-    <span *ngIf="!isSubmitting">
-      <i class="bi bi-check-circle"></i> Valider ma déclaration
-    </span>
-    <span *ngIf="isSubmitting">
-      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-      Envoi en cours...
-    </span>
-  </button>
-</div>
+    <div class="recap-section">
+      <h4><i class="bi bi-file-text"></i> Incident</h4>
+      <p><strong>Type :</strong> {{ selectedTypeAssurance }}</p>
+      <p><strong>Lieu :</strong> {{ lieuSinistre }}</p>
+      
+      <!-- ✅ AJOUT : Affichage de la description -->
+      <div *ngIf="incidentDescription" class="description-recap">
+        <strong>Description :</strong>
+        <p class="description-text">{{ incidentDescription }}</p>
       </div>
     </div>
+
+    <div class="recap-section">
+      <h4><i class="bi bi-images"></i> Documents</h4>
+      
+      <!-- ✅ MODIFIÉ : Comptage des photos -->
+      <p><strong>Photos :</strong> 
+        <span class="badge-count">
+          {{ (photoSteps['plaque'].length + photoSteps['degats'].length + photoSteps['avant'].length + photoSteps['cote'].length) }} photo(s)
+        </span>
+      </p>
+      
+      <!-- ✅ AJOUT : Détail des photos -->
+      <ul class="photo-list">
+        <li *ngIf="photoSteps['plaque'].length > 0">
+          <i class="bi bi-check-circle-fill text-success"></i> Plaque d'immatriculation
+        </li>
+        <li *ngIf="photoSteps['degats'].length > 0">
+          <i class="bi bi-check-circle-fill text-success"></i> Dégâts apparents
+        </li>
+        <li *ngIf="photoSteps['avant'].length > 0">
+          <i class="bi bi-check-circle-fill text-success"></i> Avant du véhicule
+        </li>
+        <li *ngIf="photoSteps['cote'].length > 0">
+          <i class="bi bi-check-circle-fill text-success"></i> Côté du véhicule
+        </li>
+      </ul>
+      
+      <!-- ✅ AJOUT : Affichage du constat -->
+      <p *ngIf="constatFile" class="mt-3">
+        <strong>Constat :</strong> 
+        <span class="badge-file">
+          <i class="bi bi-file-earmark-check"></i> {{ constatFile.name }}
+        </span>
+      </p>
+      <p *ngIf="!constatFile" class="text-muted mt-3">
+        <small>Aucun constat ajouté</small>
+      </p>
+    </div>
+  </div>
+
+  <div class="confirmation-actions">
+    <div class="info-banner">
+      <div class="info-banner-content">
+        <i class="bi bi-info-circle"></i>
+        <div class="info-text">
+          <strong>Information :</strong> En validant, vous confirmez l'exactitude des informations fournies.
+          Un professionnel prendra contact avec vous rapidement.
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-center align-items-center mt-4">
+      <button class="btn-back me-3" (click)="previousStep()" [disabled]="isSubmitting">
+        <i class="bi bi-arrow-left"></i> Retour
+      </button>
+      <button class="btn-next" (click)="submitSinistre()" [disabled]="isSubmitting">
+        <span *ngIf="!isSubmitting">
+          <i class="bi bi-check-circle"></i> Valider ma déclaration
+        </span>
+        <span *ngIf="isSubmitting">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Envoi en cours...
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
 
     <!-- Étape 4: Message de succès -->
     <div class="step-content" *ngIf="currentStep === 4">

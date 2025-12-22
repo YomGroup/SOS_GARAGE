@@ -706,7 +706,307 @@ textarea.form-control {
   color: var(--white) !important;
   box-shadow: var(--shadow-purple);
 }
+/* ============================================
+   PHOTOS - NOUVEAU DESIGN
+   ============================================ */
 
+.required-photos-section,
+.optional-photos-section {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.photo-upload-card {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: var(--transition);
+}
+
+.photo-upload-card:hover {
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow);
+}
+
+.photo-card-header {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--gray-100);
+}
+
+.photo-card-header h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.photo-card-header h4 i {
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.photo-upload-area {
+  border: 3px dashed var(--primary-light);
+  border-radius: var(--radius);
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.02) 0%, rgba(139, 92, 246, 0.05) 100%);
+}
+
+.photo-upload-area:hover {
+  border-color: var(--primary-color);
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.05) 0%, rgba(139, 92, 246, 0.1) 100%);
+  transform: translateY(-3px);
+}
+
+.photo-upload-area i {
+  font-size: 48px;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+  display: block;
+}
+
+.photo-upload-area p {
+  font-size: 1rem;
+  color: var(--gray-700);
+  font-weight: 500;
+  margin: 0;
+}
+
+.photo-preview {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.photo-preview img {
+  width: 100%;
+  height: auto;
+  max-height: 250px;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.btn-remove-photo {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 50px;
+  background: var(--danger);
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.btn-remove-photo:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+/* ============================================
+   SECTIONS OPTIONNELLES
+   ============================================ */
+
+.optional-section {
+  text-align: center;
+}
+
+.btn-add-optional {
+  padding: 16px 32px;
+  border: 2px dashed var(--primary-color);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(167, 139, 250, 0.05) 100%);
+  color: var(--primary-color);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition);
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-add-optional:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(167, 139, 250, 0.1) 100%);
+  border-color: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn-add-optional i {
+  font-size: 1.25rem;
+}
+
+.optional-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gray-700);
+  margin-bottom: 15px;
+  text-align: center;
+  padding: 12px;
+  background: var(--gray-50);
+  border-radius: var(--radius);
+}
+
+/* ============================================
+   PROGRESS BAR
+   ============================================ */
+
+.photo-progress {
+  text-align: center;
+  padding: 20px;
+  background: var(--gray-50);
+  border-radius: var(--radius);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 12px;
+  background: var(--gray-200);
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--primary-gradient);
+  border-radius: 50px;
+  transition: width 0.4s ease;
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+/* ============================================
+   RESPONSIVE PHOTOS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .photo-upload-area {
+    padding: 30px 15px;
+  }
+
+  .photo-upload-area i {
+    font-size: 36px;
+  }
+
+  .btn-add-optional {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+
+  .photo-preview img {
+    max-height: 200px;
+  }
+}
+
+/* ============================================
+   RÉCAPITULATIF - AMÉLIORATIONS
+   ============================================ */
+
+.description-recap {
+  margin-top: 15px;
+  padding: 15px;
+  background: var(--gray-50);
+  border-left: 4px solid var(--primary-color);
+  border-radius: 8px;
+}
+
+.description-text {
+  margin: 10px 0 0 0;
+  color: var(--gray-700);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.badge-count {
+  display: inline-block;
+  padding: 6px 14px;
+  background: var(--primary-gradient);
+  color: var(--white);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+.badge-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #065f46;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-left: 8px;
+}
+
+.badge-file i {
+  font-size: 1.1rem;
+}
+
+.photo-list {
+  list-style: none;
+  padding: 0;
+  margin: 15px 0 0 0;
+}
+
+.photo-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--gray-50);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: var(--gray-700);
+}
+
+.photo-list li i {
+  font-size: 1.1rem;
+}
+
+/* Responsive pour le récapitulatif */
+@media (max-width: 768px) {
+  .description-text {
+    font-size: 0.9rem;
+  }
+
+  .badge-count,
+  .badge-file {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .photo-list li {
+    font-size: 0.9rem;
+  }
+}
 /* ============================================
    GALERIE PHOTOS
    ============================================ */

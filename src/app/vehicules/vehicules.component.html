@@ -67,8 +67,9 @@
           <div class="mb-3">
             <label class="form-label fw-semibold">Immatriculation</label>
             <input type="text" class="form-control" [(ngModel)]="newVehicle.immatriculation" 
-                   name="immatriculation" (blur)="scrapperVehicules()" required 
-                   placeholder="Ex: AB-123-CD" [disabled]="isEditMode">
+                  name="immatriculation" (blur)="scrapperVehicules()" required 
+                  placeholder="Ex: AB-123-CD" [disabled]="isEditMode">
+            <small class="text-muted">Format: AB-123-CD ou 1234AB12</small>
             <div *ngIf="scrapErrorMessage" class="text-danger mt-1 small">
               {{ scrapErrorMessage }}
             </div>
@@ -243,17 +244,18 @@
     </div></div>
         <!-- Footer avec boutons de navigation -->
         <div class="modal-footer">
-          <div *ngIf="currentStep === 1">
-            <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
-            <button type="button" class="btn btn-primary ml-5" [ngStyle]="{
-                      background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
-                      border: 'none'
-                    }"
-                    [disabled]="!vehicleForm.valid || (!scrappingReussi && !isEditMode)"
-                    (click)="nextStep()">
-              Suivant
-            </button>
-          </div>
+         <div *ngIf="currentStep === 1">
+  <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
+  <button type="button" class="btn btn-primary ml-5" 
+          [ngStyle]="{
+            background: 'linear-gradient(135deg, #1e4db8 0%, #8b2eb8 100%)',
+            border: 'none'
+          }"
+          [disabled]="!scrappingReussi && !isEditMode"
+          (click)="nextStep()">
+    Suivant
+  </button>
+</div>
           
           <div *ngIf="currentStep === 2">
             <button type="button" class="btn btn-secondary" (click)="prevStep()">Précédent</button>

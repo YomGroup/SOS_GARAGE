@@ -53,7 +53,7 @@ export class WebSocketService {
     this.client = new Client({
       webSocketFactory: () => {
         // ✅ CORRECTION : Un seul protocole HTTPS
-        return new SockJS('https://prolific-quietude-production.up.railway.app/V1/api/ws');
+        return new SockJS('http://localhost:8083/V1/api/ws');
       },
       
       connectHeaders: {
