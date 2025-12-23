@@ -169,7 +169,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
   ngOnInit(): void {
     this.setupMobileDetection();
-    this.loadData();
+    this.loadData(this.pageIndex, this.pageSize);
     this.detecterFiltreActuel();
     this.setupNavigationListener();
     this.setupFilterListener();
@@ -292,6 +292,9 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
       next: ({ apiDossiers, missions }) => {
         this.missions = missions;
         const dossiersArray: Dossier[] = apiDossiers.content || [];
+
+        this.totalDossiers = apiDossiers.totalElements;
+        this.pageSize = apiDossiers.size;
 
         // Transformer les dossiers pour l'affichage
         const dossiersAvecVehicules = dossiersArray.map((d: Dossier) => ({
@@ -447,11 +450,12 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     this.cdr.detectChanges();
   }
 
-  onPageChange(event: PageEvent) {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-    this.cdr.detectChanges();
-  }
+  onPageChange(event: PageEvent): void {
+  this.pageIndex = event.pageIndex;
+  this.pageSize = event.pageSize;
+
+  this.loadData(this.pageIndex, this.pageSize);
+}
 
   // Sous-ensemble paginé selon la vue cartes
   get dossiersFiltresPagine(): DossierAffichage[] {

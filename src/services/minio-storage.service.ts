@@ -35,9 +35,9 @@ export class MinioStorageService {
    */
   uploadImage(id: string | number, file: File): Observable<string> {
     const formData = new FormData();
-    formData.append('image', file, file.name);
+    formData.append('images', file, file.name);
 
-    return this.http.post<string>(`${this.apiUrl}/add/${id}`, formData, {
+    return this.http.post<string>(`${this.apiUrl}/uploads/${id}`, formData, {
       responseType: 'text' as 'json'
     });
   }
