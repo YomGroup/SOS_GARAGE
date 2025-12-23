@@ -55,6 +55,9 @@ export class SinistreComponent implements OnInit {
   private router = inject(Router); // ✅ AJOUTER
 
   private sinistreIdFromUrl: string | null = null;
+  
+  selectedConstatFile: File | null = null;
+  uploadingConstat: boolean = false;
 
   // ===== NOUVELLES PROPRIÉTÉS POUR ÉDITION =====
   isEditingStatus: boolean = false;
@@ -97,8 +100,9 @@ export class SinistreComponent implements OnInit {
   // Upload de fichiers
   selectedConstat: File | null = null;
   selectedPhotos: File[] = [];
-  uploadingConstat: boolean = false;
+  
   uploadingPhotos: boolean = false;
+  
 
   // ✅ NOUVELLES PROPRIÉTÉS pour les messages
   successMessage: string | null = null;
@@ -184,10 +188,10 @@ export class SinistreComponent implements OnInit {
   }
 
   // ===== VÉRIFICATIONS =====
- // ===== VÉRIFICATIONS =====
+
 hasConstat(sinistre: Sinistre): boolean {
-  return !!(sinistre.constat && sinistre.constat !== 'Aucun constat' && sinistre.constat.trim() !== '');
-}
+    return !!(sinistre.constat && sinistre.constat !== 'Aucun constat' && sinistre.constat.trim() !== '');
+  }
 
 hasContratAssurance(sinistre: Sinistre): boolean {
   return !!(sinistre.contratAssurance && sinistre.contratAssurance.trim() !== '');
@@ -375,37 +379,57 @@ hasContratAssurance(sinistre: Sinistre): boolean {
   async uploadConstat(event?: Event): Promise<void> {
     // ✅ Empêcher la fermeture du modal
     if (event) {
-      event.stopPropagation();
+        event.stopPropagation();
     }
 
-    if (!this.selectedConstat || !this.selectedSinistre) {
-      this.showError('⚠️ Veuillez sélectionner un fichier');
-      return;
+    if (!this.selectedConstat) {
+        this.showError('⚠️ Veuillez sélectionner un fichier');
+        return;
+    }
+
+    if (!this.selectedSinistre) {
+        this.showError('⚠️ Aucun sinistre sélectionné');
+        return;
     }
 
     try {
-      this.uploadingConstat = true;
-      
-      const constatUrl = await this.sinistreService.uploadConstat(
-        this.selectedSinistre.id,
-        this.selectedConstat
-      );
+        this.uploadingConstat = true;
+        
+        console.log('📤 Upload constat pour sinistre', this.selectedSinistre.id);
+        
+        // ✅ Le service renvoie le sinistre complet
+        const updatedSinistre: any = await this.sinistreService.uploadConstat(
+            this.selectedSinistre.id,
+            this.selectedConstat
+        );
 
-      this.selectedSinistre.constat = constatUrl;
-      this.selectedConstat = null;
-      this.uploadingConstat = false;
-      this.showSuccess('✅ Constat téléversé avec succès');
-      
-      // Réinitialiser l'input file
-      const fileInput = document.getElementById('constatFileInput') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-      
-    } catch (err) {
-      console.error('Erreur upload constat:', err);
-      this.uploadingConstat = false;
-      this.showError('❌ Erreur lors du téléversement du constat');
+        console.log('✅ Réponse backend:', updatedSinistre);
+
+        // ✅ Backend renvoie le sinistre complet
+        if (updatedSinistre?.lienConstat !== undefined) {
+            this.selectedSinistre.constat = updatedSinistre.lienConstat || '';
+        }
+        // ✅ Fallback: backend renvoie juste l'URL
+        else if (typeof updatedSinistre === 'string') {
+            this.selectedSinistre.constat = updatedSinistre;
+        }
+
+        // Réinitialiser les champs
+        this.selectedConstat = null;
+        this.uploadingConstat = false;
+        
+        // Réinitialiser l'input file
+        const fileInput = document.getElementById('constatFileInput') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        
+        this.showSuccess('✅ Constat téléversé avec succès');
+        
+    } catch (err: any) {
+        console.error('❌ Erreur upload constat:', err);
+        this.uploadingConstat = false;
+        this.showError('❌ Erreur lors du téléversement du constat: ' + (err?.error?.message || err?.message || 'Erreur inconnue'));
     }
-  }
+}
 
   // ===== UPLOAD PHOTOS =====
   onPhotosFileSelected(event: Event): void {
@@ -416,40 +440,70 @@ hasContratAssurance(sinistre: Sinistre): boolean {
   }
 
   async uploadPhotos(event?: Event): Promise<void> {
-    // ✅ Empêcher la fermeture du modal
     if (event) {
-      event.stopPropagation();
+        event.stopPropagation();
     }
 
-    if (this.selectedPhotos.length === 0 || !this.selectedSinistre) {
-      this.showError('⚠️ Veuillez sélectionner au moins une photo');
-      return;
+    if (!this.selectedPhotos || this.selectedPhotos.length === 0) {
+        this.showError('⚠️ Veuillez sélectionner au moins une photo');
+        return;
+    }
+
+    if (!this.selectedSinistre) {
+        this.showError('⚠️ Aucun sinistre sélectionné');
+        return;
     }
 
     try {
-      this.uploadingPhotos = true;
+        this.uploadingPhotos = true;
 
-      const photoUrls = await this.sinistreService.uploadImages(
-        this.selectedSinistre.id,
-        this.selectedPhotos
-      );
+        console.log('📤 Upload de', this.selectedPhotos.length, 'photo(s) pour sinistre', this.selectedSinistre.id);
 
-      this.selectedSinistre.photos.push(...photoUrls);
-      const count = photoUrls.length;
-      this.selectedPhotos = [];
-      this.uploadingPhotos = false;
-      this.showSuccess(`✅ ${count} photo(s) téléversée(s) avec succès`);
-      
-      // Réinitialiser l'input file
-      const fileInput = document.getElementById('photosFileInput') as HTMLInputElement;
-      if (fileInput) fileInput.value = '';
-      
-    } catch (err) {
-      console.error('Erreur upload photos:', err);
-      this.uploadingPhotos = false;
-      this.showError('❌ Erreur lors du téléversement des photos');
+        // ✅ Le service utilise maintenant 'files' comme le mobile
+        const updatedSinistre: any = await this.sinistreService.uploadImages(
+            this.selectedSinistre.id,
+            this.selectedPhotos
+        );
+
+        console.log('✅ Réponse backend:', updatedSinistre);
+
+        // Backend renvoie le sinistre complet avec images
+        if (updatedSinistre?.images && Array.isArray(updatedSinistre.images)) {
+            const newPhotos = updatedSinistre.images.map((img: any) => img.objectStorageUrl);
+            this.selectedSinistre.photos = newPhotos;
+            console.log('📸 Photos mises à jour:', this.selectedSinistre.photos);
+        }
+
+        const count = this.selectedPhotos.length;
+        
+        // Réinitialiser
+        this.selectedPhotos = [];
+        this.uploadingPhotos = false;
+        
+        const fileInput = document.getElementById('photosFileInput') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        
+        this.showSuccess(`✅ ${count} photo(s) téléversée(s) avec succès`);
+        
+    } catch (err: any) {
+        console.error('❌ Erreur upload photos:', err);
+        this.uploadingPhotos = false;
+        
+        let errorMessage = 'Erreur inconnue';
+        
+        if (err?.error) {
+            if (typeof err.error === 'object') {
+                errorMessage = err.error.message || err.error.error || JSON.stringify(err.error);
+            } else if (typeof err.error === 'string') {
+                errorMessage = err.error;
+            }
+        } else if (err?.message) {
+            errorMessage = err.message;
+        }
+        
+        this.showError('❌ Erreur lors du téléversement des photos: ' + errorMessage);
     }
-  }
+}
 
   // ===== UTILITAIRES =====
   selectSinistre(sinistre: Sinistre): void {

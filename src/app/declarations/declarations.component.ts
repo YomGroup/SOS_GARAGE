@@ -53,6 +53,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   assurances: any[] = [];
   selectedAssurance: any = null;
   showAssuranceStep = false;
+  currentPhotoStep: number = 1;
   lieuSinistre: string = '';
   nomAssure: string = '';
   adresseAssure: string = '';
@@ -61,17 +62,15 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   token = '';
   numeroAssurance = '';
 
-  // ✅ NOUVEAUX : Gestion des sections optionnelles
-  showOptionalPhotos: boolean = false;
-  showConstatSection: boolean = false;
-
-  // ✅ MODIFIÉ : Seulement 2 photos obligatoires + 2 optionnelles
   photoSteps: { [key: string]: { url: string; file: File }[] } = {
-    plaque: [],      // Obligatoire
-    degats: [],      // Obligatoire
-    avant: [],       // Optionnel
-    cote: []         // Optionnel
+    plaque: [],
+    degats: [],
+    avant: [],
+    cote: []
   };
+
+  showConstatSection = false;
+  showOptionalPhotos = false;
 
   typeassurance: string[] = [
     "STATIONNEMENT_IMPACT",
@@ -124,6 +123,12 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   checkProfileCompleteness(): boolean {
+
+    console.log('-------------------------------------');
+
+    console.log(this.nomAssure,this.adresseAssure,this.telephoneAssure,this.prenomAssure);
+
+    console.log('-------------------------------------');
     const isProfileComplete = this.nomAssure !== '' &&
       this.adresseAssure !== '' &&
       this.telephoneAssure !== '' &&
@@ -141,8 +146,8 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   ngOnDestroy() {
-    Object.values(this.photoSteps).forEach(photos => {
-      photos.forEach(photo => URL.revokeObjectURL(photo.url));
+    this.previewPhotos.forEach(photo => {
+      URL.revokeObjectURL(photo.url);
     });
     if (this.constatPreviewUrl) {
       URL.revokeObjectURL(this.constatPreviewUrl);
@@ -169,6 +174,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.assureService.addAssurerGet(this.assureId).subscribe({
       next: (data: any) => {
         this.userData = data;
+        console.log('Données utilisateur chargées :', this.userData);
         this.nomAssure = data.nom || '';
         this.adresseAssure = data.adresse || '';
         this.telephoneAssure = data.telephone || '';
@@ -216,6 +222,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   }
 
   private async loadVehicles(assureId: number): Promise<void> {
+    console.log('test api vehicule kkkkkkkkkkkkk');
     (await this.vehiculeService.getVehiculesDataById(assureId)).subscribe({
       next: (data: any) => {
         this.vehiclesAll = data.content;
@@ -263,8 +270,11 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
         (await this.vehiculeService.getVehiculesMatricule(vehiculematricule)).pipe(
           switchMap((vehicle: any) => {
+            console.log('Données du véhicule récupérées :', vehicle);
             assurance = vehicle?.nomAssurence || '';
+            // Récupérer le numéro d'assistance directement depuis le véhicule
             this.numeroAssurance = vehicle?.telephoneAssistance || '';
+            console.log('Numéro d\'assurance récupéré:', this.numeroAssurance);
             return this.vehiculeService.listAssuranceVehiculesNumero(this.token);
           })
         ).subscribe({
@@ -282,6 +292,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
   acceptGarageWarning(): void {
     this.hasAcceptedGarageWarning = true;
     this.showGarageWarningStep = false;
+    // Soumettre directement le sinistre
     this.submitSinistre();
   }
 
@@ -295,9 +306,9 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  // ✅ MODIFIÉ : Validation des 2 photos obligatoires uniquement
   private hasRequiredPhotos(): boolean {
-    return this.photoSteps['plaque'].length > 0 && this.photoSteps['degats'].length > 0;
+    return this.photoSteps['plaque'].length > 0 && 
+           this.photoSteps['degats'].length > 0;
   }
 
   toggleAssuranceDropdown(): void {
@@ -309,24 +320,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.isAssuranceDropdownOpen = false;
   }
 
-  // ✅ MODIFIÉ : Validation simplifiée (description + 2 photos)
-  canProceed(): boolean {
-    switch (this.currentStep) {
-      case 1:
-        return !!this.selectedVehicle && !!this.vehicleStatus;
-      case 2:
-        return !!this.selectedTypeAssurance && !!this.lieuSinistre &&
-          !!this.incidentDescription && this.hasRequiredPhotos();
-      case 3:
-        return this.hasAcceptedGarageWarning &&
-          this.nomAssure !== '' &&
-          this.adresseAssure !== '' &&
-          this.telephoneAssure !== '' &&
-          this.prenomAssure !== '';
-      default:
-        return false;
-    }
-  }
+
 
   selectVehicle(vehicle: string): void {
     this.selectedVehicle = vehicle;
@@ -334,6 +328,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
     if (this.vehicleStatus === 'not-rolling') {
       this.showAssuranceStep = true;
+      console.log('Véhicule sélectionné :', this.selectedVehicle);
     } else {
       this.showAssuranceStep = false;
     }
@@ -371,8 +366,7 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  // ✅ MODIFIÉ : Upload photo pour une catégorie spécifique
-  onPhotoSelect(event: Event, category: string): void {
+  onPhotoSelect(event: Event, photoType: string): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.length) {
       const file = input.files[0];
@@ -384,11 +378,16 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
 
       const reader = new FileReader();
       reader.onload = (e: any) => {
-        // Limiter à 1 photo par catégorie
-        this.photoSteps[category] = [{
+        // Remplacer l'ancienne photo s'il y en a une
+        if (this.photoSteps[photoType].length > 0) {
+          URL.revokeObjectURL(this.photoSteps[photoType][0].url);
+          this.photoSteps[photoType] = [];
+        }
+
+        this.photoSteps[photoType].push({
           url: e.target.result,
           file: file
-        }];
+        });
       };
       reader.readAsDataURL(file);
 
@@ -396,11 +395,43 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     }
   }
 
-  // ✅ NOUVEAU : Supprimer photo d'une catégorie
-  removePhoto(category: string): void {
-    if (this.photoSteps[category].length > 0) {
-      URL.revokeObjectURL(this.photoSteps[category][0].url);
-      this.photoSteps[category] = [];
+  getCurrentStepPhotos() {
+    return this.photoSteps[this.currentPhotoStep];
+  }
+
+  setPhotoStep(step: number): void {
+    if (this.currentPhotoStep !== step) {
+      this.currentPhotoStep = step;
+    }
+  }
+
+  nextPhotoStep(): void {
+    if (this.currentPhotoStep < 4) {
+      this.currentPhotoStep++;
+    } else {
+      // Marquer que les photos sont complètes et afficher un toast
+      this.photosCompleted = true;
+      // Auto-cacher le toast après 3 secondes
+      setTimeout(() => {
+        this.photosCompleted = false;
+      }, 3000);
+    }
+  }
+
+  prevPhotoStep(): void {
+    if (this.currentPhotoStep > 1) {
+      this.currentPhotoStep--;
+    }
+  }
+
+  canProceedPhotoStep(): boolean {
+    return this.photoSteps[this.currentPhotoStep].length > 0;
+  }
+
+  removePhoto(photoType: string): void {
+    if (this.photoSteps[photoType].length > 0) {
+      URL.revokeObjectURL(this.photoSteps[photoType][0].url);
+      this.photoSteps[photoType] = [];
     }
   }
 
@@ -413,6 +444,19 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     this.showPdfViewer = false;
   }
 
+  scrollToConstat(): void {
+    // Scroll vers la section constat
+    setTimeout(() => {
+      const constatSection = document.querySelector('.upload-section');
+      if (constatSection) {
+        constatSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  }
+
+  /**
+   * Récupère le nom de l'assurance du véhicule sélectionné
+   */
   getSelectedVehicleAssurance(): string {
     if (this.selectedAssurance) {
       return this.selectedAssurance;
@@ -421,75 +465,129 @@ export class DeclarationsComponent implements OnDestroy, OnInit {
     return vehicule?.nomAssurence || 'Non spécifiée';
   }
 
-  // Soumission du sinistre
+  // Soumission du sinistre (simplifiée, sans signature)
   async submitSinistre(): Promise<void> {
     this.isSubmitting = true;
 
     try {
-      const vehiculeid = parseInt(this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.id || 0);
+      // 1. Trouver le véhicule sélectionné
+      const selectedVehiculeData = this.vehiclesAll.find(
+        v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle
+      );
 
-      // ✅ Upload toutes les photos (obligatoires + optionnelles)
-      const allFiles: File[] = Object.values(this.photoSteps).flat().map(item => item.file);
-      let images2: string[] = [];
-
-      try {
-        const images = await this.sinistreService.uploadImages(vehiculeid + '', allFiles);
-        console.log('✅ Upload photos réussi', images);
-        images2 = images;
-      } catch (err) {
-        console.error('❌ Erreur upload images', err);
+      if (!selectedVehiculeData) {
+        throw new Error('Véhicule non trouvé');
       }
 
-      // Upload du constat si présent
-      let constatUrl = '';
-      if (this.constatFile) {
-        try {
-          constatUrl = await this.sinistreService.uploadConstat(vehiculeid + '', this.constatFile);
-          console.log('✅ Upload constat réussi:', constatUrl);
-        } catch (err) {
-          console.error('❌ Erreur upload constat', err);
-        }
+      const vehiculeid = parseInt(selectedVehiculeData.id);
+
+      // 2. Vérifier les photos obligatoires
+      if (!this.hasRequiredPhotos()) {
+        alert('⚠️ Veuillez ajouter au moins les 2 photos obligatoires (plaque d\'immatriculation et dégâts)');
+        this.isSubmitting = false;
+        return;
       }
 
-      const imageObjects = (images2 || []).map((url: string, index: number) => ({
-        imageName: url.split('/').pop() || `image_${index}.jpg`,
-        imageType: 'AVANT',
-        objectStorageUrl: url,
-      }));
-
+      // 3. Préparer les données du sinistre (SANS constat et SANS photos)
       const sinistrePayload = {
         type: this.selectedTypeAssurance,
         contactAssistance: this.email,
-        lienConstat: constatUrl || '',
+        
         conditionsAcceptees: true,
         lieu: this.lieuSinistre,
         vehiculeId: vehiculeid,
-        assuranceName: this.vehiclesAll.find(v => v.marque + '(' + v.immatriculation + ')' === this.selectedVehicle)?.nomAssurence || '',
+        assuranceName: selectedVehiculeData.nomAssurence || '',
         description: this.incidentDescription || '',
         etatVehicule: this.vehicleStatus === 'rolling' ? 'ROULANT' : 'NON_ROULANT',
-        images: imageObjects,
+        images: [] 
       };
 
-      console.log('🚀 Soumission du sinistre:', sinistrePayload);
+      console.log('🚀 Création du sinistre:', sinistrePayload);
 
-      (await this.sinistreService.addSinistrePost(sinistrePayload)).subscribe({
-        next: (sinistreResponse: any) => {
-          console.log("✅ Sinistre créé :", sinistreResponse);
-          this.isSubmitting = false;
-          this.currentStep = 4;
-        },
-        error: (error) => {
-          console.error("❌ Erreur création sinistre:", error);
-          this.isSubmitting = false;
-          let msg = error.error?.message || error.error || "Erreur lors de la création du sinistre.";
-          alert(msg);
+      // 4. Créer le sinistre
+      const sinistreResponse: any = await this.sinistreService.addSinistrePost(sinistrePayload);
+      
+      console.log('✅ Sinistre créé:', sinistreResponse);
+
+      const sinistreId = sinistreResponse.id;
+
+      if (!sinistreId) {
+        throw new Error('ID du sinistre non trouvé dans la réponse');
+      }
+
+      // 5. Upload du constat vers le SINISTRE (si présent)
+      if (this.constatFile) {
+        try {
+          console.log('📄 Upload du constat vers sinistre', sinistreId);
+          await this.sinistreService.uploadConstat(sinistreId.toString(), this.constatFile);
+          console.log('✅ Constat uploadé avec succès');
+        } catch (err) {
+          console.error('⚠️ Erreur upload constat (on continue):', err);
         }
-      });
+      }
 
-    } catch (error) {
-      console.error('❌ Erreur générale:', error);
+      // 6. Collecter toutes les photos (obligatoires + optionnelles)
+      const allFiles: File[] = [];
+      
+      // Photos obligatoires
+      if (this.photoSteps['plaque'][0]) allFiles.push(this.photoSteps['plaque'][0].file);
+      if (this.photoSteps['degats'][0]) allFiles.push(this.photoSteps['degats'][0].file);
+      
+      // Photos optionnelles
+      if (this.photoSteps['avant'][0]) allFiles.push(this.photoSteps['avant'][0].file);
+      if (this.photoSteps['cote'][0]) allFiles.push(this.photoSteps['cote'][0].file);
+
+      // 7. Upload des photos vers le SINISTRE
+      if (allFiles.length > 0) {
+        try {
+          console.log(`📸 Upload de ${allFiles.length} photo(s) vers sinistre ${sinistreId}...`);
+          
+          await this.sinistreService.uploadImages(sinistreId.toString(), allFiles);
+          
+          console.log('✅ Photos uploadées avec succès vers le sinistre');
+        } catch (err) {
+          console.error('⚠️ Erreur upload photos:', err);
+          alert('⚠️ Le sinistre a été créé mais certaines photos n\'ont pas pu être ajoutées. Vous pouvez les ajouter depuis la liste des sinistres.');
+        }
+      }
+
+      // 8. Succès !
       this.isSubmitting = false;
-      alert('Une erreur est survenue lors de l\'enregistrement des fichiers.');
+      this.currentStep = 4; // Étape de confirmation
+      alert('✅ Sinistre déclaré avec succès !');
+
+    } catch (error: any) {
+      console.error('❌ Erreur lors de la déclaration:', error);
+      this.isSubmitting = false;
+      
+      let errorMessage = 'Une erreur est survenue lors de la déclaration du sinistre.';
+      
+      if (error?.error?.message) {
+        errorMessage = error.error.message;
+      } else if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error?.error === 'string') {
+        errorMessage = error.error;
+      }
+      
+      alert('❌ ' + errorMessage);
+    }
+  }
+
+  // ✅ MODIFIER canProceed() :
+  canProceed(): boolean {
+    switch (this.currentStep) {
+      case 1:
+        return !!this.selectedVehicle && !!this.vehicleStatus;
+      case 2:
+        return !!this.selectedTypeAssurance && 
+               !!this.lieuSinistre &&
+               !!this.incidentDescription &&
+               this.hasRequiredPhotos();
+      case 3:
+        return true;
+      default:
+        return false;
     }
   }
 }

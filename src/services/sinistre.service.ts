@@ -14,7 +14,6 @@ export class SinistreService {
     private authService = inject(AuthService);
     private token: string | null = null;
 
-    // 🔐 Charge le token si nécessaire
     private async loadToken(): Promise<void> {
         if (!this.token) {
             this.token = await this.authService.getKeycloakInstance();
@@ -22,59 +21,82 @@ export class SinistreService {
     }
 
     /**
-     * ✅ CORRIGÉ : Upload des images
+     * ✅ Upload des photos - CORRIGÉ : Utilise 'files' comme le mobile !
      */
     async uploadImages(sinistreId: string, files: File[]): Promise<any> {
-  const formData = new FormData();
+        const formData = new FormData();
+        
+        // ✅ 'files' au lieu de 'images' pour matcher le backend et le mobile !
+        files.forEach((file) => {
+            formData.append('files', file, file.name);
+        });
 
-  // ⚠️ le backend mobile attend "files"
-  files.forEach((file) => {
-    formData.append('files', file, file.name);
-  });
+        await this.loadToken();
 
-  await this.loadToken();
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
 
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${this.token}`,
-    // ❌ ne pas mettre Content-Type avec FormData
-  });
+        const url = `${environment.apiUrlLocale}/sinistre/${sinistreId}/photos`;
+        console.log('📤 Upload photos - URL:', url);
+        console.log('📁 Nombre de fichiers:', files.length);
 
-  // ✅ même endpoint que mobile
-  return await lastValueFrom(
-    this.http.put<any>(
-      `${environment.apiUrlLocale}/api/sinistre/${sinistreId}/photos`,
-      formData,
-      { headers }
-    )
-  );
-}
-
-// ✅ Upload du constat (comme mobile)
-async uploadConstat(sinistreId: string, file: File): Promise<any> {
-  const formData = new FormData();
-
-  // ⚠️ le backend mobile attend "file"
-  formData.append('file', file, file.name);
-
-  await this.loadToken();
-
-  const headers = new HttpHeaders({
-    Authorization: `Bearer ${this.token}`,
-  });
-
-  // ✅ même endpoint que mobile
-  return await lastValueFrom(
-    this.http.put<any>(
-      `${environment.apiUrlLocale}/api/sinistre/${sinistreId}/constat`,
-      formData,
-      { headers }
-    )
-  );
-}
+        try {
+            const result = await lastValueFrom(
+                this.http.put<any>(url, formData, { headers })
+            );
+            console.log('✅ Photos uploadées:', result);
+            return result;
+        } catch (error: any) {
+            console.error('❌ Erreur HTTP:', error);
+            
+            // ✅ Si la réponse n'est pas du JSON, on la log
+            if (error.error && typeof error.error === 'string') {
+                console.error('❌ Réponse texte (pas JSON):', error.error);
+            }
+            
+            throw error;
+        }
+    }
 
     /**
-     * Mettre à jour le statut d'un sinistre
+     * ✅ Upload du constat
      */
+    async uploadConstat(sinistreId: string, file: File): Promise<any> {
+
+      
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+
+        await this.loadToken();
+
+        const headers = new HttpHeaders({
+            'Authorization': `Bearer ${this.token}`
+        });
+
+
+        
+        const url = `${environment.apiUrlLocale}/sinistre/${sinistreId}/constat`;
+        console.log('📤 Upload constat - URL:', url);
+        console.log('📄 Fichier:', file.name);
+
+        try {
+            const result = await lastValueFrom(
+                this.http.put<any>(url, formData, { headers })
+            );
+            console.log('✅ Constat uploadé:', result);
+            return result;
+        } catch (error: any) {
+            console.error('❌ Erreur upload constat:', error);
+            
+            if (error.error && typeof error.error === 'string') {
+                console.error('❌ Réponse texte (pas JSON):', error.error);
+            }
+            
+            throw error;
+        }
+    }
+
     async updateSinistreStatus(sinistreId: number, newStatus: string): Promise<Observable<any>> {
         await this.loadToken();
 
@@ -88,9 +110,6 @@ async uploadConstat(sinistreId: string, file: File): Promise<any> {
         return this.http.patch(`${this.apiUrl2}/${sinistreId}`, body, { headers });
     }
 
-    /**
-     * Récupérer un sinistre par ID
-     */
     async getSinistreById(sinistreId: number): Promise<Observable<any>> {
         await this.loadToken();
 
@@ -101,9 +120,6 @@ async uploadConstat(sinistreId: string, file: File): Promise<any> {
         return this.http.get(`${this.apiUrl2}/find_by/${sinistreId}`, { headers });
     }
 
-    /**
-     * Mettre à jour un sinistre complet
-     */
     async updateSinistre(sinistreId: number, sinistreData: any): Promise<Observable<any>> {
         await this.loadToken();
 
@@ -115,16 +131,24 @@ async uploadConstat(sinistreId: string, file: File): Promise<any> {
         return this.http.put(`${this.apiUrl2}/${sinistreId}`, sinistreData, { headers });
     }
 
-    async addSinistrePost(body: any): Promise<Observable<any>> {
-        await this.loadToken();
-
-        const headers = new HttpHeaders({
-            'Authorization': `Bearer ${this.token}`,
-            'Content-Type': 'application/json'
-        });
-
-        return this.http.post(this.apiUrl, body, { headers });
+    async addSinistrePost(body: any): Promise<any> {
+    await this.loadToken();
+    const headers = new HttpHeaders({
+        'Authorization': `Bearer ${this.token}`,
+        'Content-Type': 'application/json'
+    });
+    
+    try {
+        const result = await lastValueFrom(
+            this.http.post(this.apiUrl, body, { headers })
+        );
+        console.log('✅ Sinistre créé:', result);
+        return result;
+    } catch (error: any) {
+        console.error('❌ Erreur création sinistre:', error);
+        throw error;
     }
+}
 
     async getsinistreGet(id: number): Promise<Observable<any>> {
         await this.loadToken();

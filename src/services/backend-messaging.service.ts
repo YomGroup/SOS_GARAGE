@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { WebSocketService, WebSocketMessage } from './websocket.service';
 
 // ✅ URL de production Railway
-const BASE_URL = 'http://localhost:8083/V1/api';
+const BASE_URL = 'http://localhost:8083/V1';
 
 export interface ChatMessage {
   id?: number;
