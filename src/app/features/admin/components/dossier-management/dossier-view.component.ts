@@ -153,6 +153,8 @@ export class DossierViewComponent implements OnChanges, OnInit {
     this.chargerVehiculeSinistre();
     this.chargerAssurancesJson();
     this.chargerExpertsDisponibles();
+    console.log("-----------------------------------"+this.mission?.lienExpertise);
+    console.log("-----------------------------------"+this.mission?.id);
   }
 
   close() {

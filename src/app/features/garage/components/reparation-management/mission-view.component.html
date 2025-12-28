@@ -153,11 +153,11 @@
               <div class="upload-section">
                 <h4><i class="fas fa-upload me-2"></i>Ajouter des documents</h4>
                 <div class="upload-buttons">
-                  <button type="button" class="btn btn-outline-primary upload-btn" (click)="uploadRapportExpertise()" [disabled]="uploadingFiles">
+                  <button type="button" class="btn btn-outline-primary upload-btn" (click)="uploadDocument('EXPERTISE')" [disabled]="uploadingFiles">
                     <i class="fas fa-file-invoice me-2"></i>
                     {{ uploadingFiles ? 'Upload en cours...' : 'Upload Rapport expertise' }}
                   </button>
-                  <button type="button" class="btn btn-outline-success upload-btn" (click)="uploadRapportExpertise()" [disabled]="uploadingFiles">
+                  <button type="button" class="btn btn-outline-success upload-btn" (click)="uploadDocument('FACTURE')" [disabled]="uploadingFiles">
                     <i class="fas fa-file-invoice-dollar me-2"></i>
                     {{ uploadingFiles ? 'Upload en cours...' : 'Upload Facture' }}
                   </button>

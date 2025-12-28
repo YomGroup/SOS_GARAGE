@@ -33,61 +33,63 @@ export class MinioStorageService {
    * @param file - File to upload
    * @returns Observable<string> - Download URL
    */
-  uploadImage(id: string | number, file: File): Observable<string> {
-    const formData = new FormData();
-    formData.append('images', file, file.name);
+  uploadImage(id: string | number, file: File): Observable<string[]> {
+  const formData = new FormData();
+  formData.append('images', file, file.name);
 
-    return this.http.post<string>(`${this.apiUrl}/uploads/${id}`, formData, {
-      responseType: 'text' as 'json'
-    });
-  }
+  return this.http.post<string[]>(
+    `${this.apiUrl}/uploads/${id}`,
+    formData
+  );
+}
+
 
   /**
    * Upload a PDF document for a mission
    */
-  uploadPdfFile(file: File, missionId: number): Observable<string> {
+  uploadPdfFile(file: File, missionId: number): Observable<string[]> {
     return this.uploadImage(`mission_${missionId}_pdf`, file);
   }
 
   /**
    * Upload a devis document for a mission
    */
-  uploadDevisFile(file: File, missionId: number): Observable<string> {
+  uploadDevisFile(file: File, missionId: number): Observable<string[]> {
     return this.uploadImage(`mission_${missionId}_devis`, file);
   }
 
   /**
    * Upload a facture document for a mission
    */
-  uploadFactureFile(file: File, missionId: number): Observable<string> {
+  uploadFactureFile(file: File, missionId: number): Observable<string[]> {
     return this.uploadImage(`mission_${missionId}_facture`, file);
   }
 
   /**
    * Upload an image for a mission
    */
-  uploadImageFile(file: File, missionId: number): Observable<string> {
+  uploadImageFile(file: File, missionId: number): Observable<string[]> {
     return this.uploadImage(`mission_${missionId}_image`, file);
   }
 
   /**
    * Upload garage logo
    */
-  uploadGarageLogo(file: File, garageId: number): Observable<string> {
+  uploadGarageLogo(file: File, garageId: number): Observable<string[]> {
     return this.uploadImage(`garage_${garageId}_logo`, file);
   }
 
   /**
    * Upload garage image (reparation or gallery)
    */
-  uploadGarageImage(file: File, garageId: number): Observable<string> {
+  uploadGarageImage(file: File, garageId: number): Observable<string[]> {
     return this.uploadImage(`garage_${garageId}_gallery`, file);
   }
 
   /**
    * Upload vehicule pret image
    */
-  uploadVehiculePretImage(file: File, garageId: number): Observable<string> {
+  uploadVehiculePretImage(file: File, garageId: number): Observable<string[]> {
     return this.uploadImage(`garage_${garageId}_vehicule_pret`, file);
   }
 

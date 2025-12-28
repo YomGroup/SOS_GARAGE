@@ -61,7 +61,9 @@ export class MissionViewComponent implements OnChanges {
   statutAvancementEdit: string | null = null;
   rapportsGarage: string[] = [];
   uploadErrorMessage: string = '';
-
+  
+  lienExpertise:string='';
+  lienFacture:string='';
   // Exposer l'enum pour le template
   StatutAvancementSinistre = StatutAvancementSinistre;
 
@@ -145,9 +147,10 @@ export class MissionViewComponent implements OnChanges {
     fetch(`${environment.apiUrl}/assurances/${encodeURIComponent(nomAssur)}`)
       .then(r => r.ok ? r.json() : null)
       .then(assurance => {
-        if (assurance && assurance.nom) {
+        console.log('Données assurance récupérées :', assurance);
+        if (assurance && assurance.nomAssurence) {
           this.assuranceContactInfo = {
-            nom: assurance.nom,
+            nom: assurance.nomAssurence,
             telephone: assurance.telephone || '',
             email: assurance.email || '',
             adresse: assurance.adresse || ''
@@ -322,6 +325,10 @@ export class MissionViewComponent implements OnChanges {
         missionUpdate.commissionPourcentage = commissionPourcentage;
       }
     }
+
+    missionUpdate.lienExpertise=this.lienExpertise;
+    missionUpdate.lienFacture=this.lienFacture;
+
     // Calcul et sauvegarde du montant de la commission
     missionUpdate.commissionMontant = this.calculerCommission(
       this.missionEdit.factureFinale,
@@ -780,6 +787,80 @@ export class MissionViewComponent implements OnChanges {
     });
   }
 
+  /// lien lienFacture
+  uploadRapportFacture(){
+    
+  }
+
+  /// lien lienExpertise
+
+  uploadRapportExepertise2(){
+
+  }
+
+  uploadDocument(type: 'EXPERTISE' | 'FACTURE'): void {
+  if (!this.mission?.id) {
+    alert('Mission non trouvée');
+    return;
+  }
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/pdf';
+  input.multiple = false;
+
+  input.onchange = (event: any) => {
+    const file: File = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    this.uploadingFiles = true;
+
+    const missionId = this.mission?.id;
+    if (!missionId) {
+      alert('Mission non trouvée');
+      this.uploadingFiles = false;
+      return;
+    }
+
+    this.minioService.uploadPdfFile(file, missionId).subscribe({
+      next: (downloadURLs: string[]) => {
+
+        const downloadURL = downloadURLs[0];
+        console.log(downloadURLs);
+        if (type === 'EXPERTISE') {
+          this.lienExpertise = downloadURL;
+          if (!this.expertiseEdit) this.expertiseEdit = {};
+          this.expertiseEdit.rapportExpertise = downloadURL;
+          console.log('URL du rapport d\'expertise:', downloadURL);
+        }
+
+        if (type === 'FACTURE') {
+          this.lienFacture = downloadURL;
+          if (!this.expertiseEdit) this.expertiseEdit = {};
+          this.expertiseEdit.facture = downloadURL;
+          console.log('URL de la facture:', downloadURL);
+        }
+
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+
+        alert(`Document ${type.toLowerCase()} uploadé avec succès`);
+      },
+      error: (err) => {
+        this.uploadingFiles = false;
+        this.cdr.detectChanges();
+        console.error(err);
+        alert('Erreur lors de l’upload');
+      }
+    });
+  };
+
+  input.click();
+}
+
+
   // Méthode pour uploader le rapport d'expertise
   uploadRapportExpertise() {
     const input = document.createElement('input');
@@ -811,7 +892,7 @@ export class MissionViewComponent implements OnChanges {
     }
 
     this.minioService.uploadPdfFile(file, this.mission.id).subscribe({
-      next: (downloadURL: string) => {
+      next: (downloadURL: any) => {
         console.log('Rapport d\'expertise uploadé:', downloadURL);
         
         // Mettre à jour l'URL du rapport dans l'expertise
@@ -820,7 +901,7 @@ export class MissionViewComponent implements OnChanges {
         }
         this.expertiseEdit.rapportExpertise = downloadURL;
 
-        this.uploadingFiles = false;
+        this.uploadingFiles = true;
         this.cdr.detectChanges();
         
         alert('Rapport d\'expertise uploadé avec succès !');
