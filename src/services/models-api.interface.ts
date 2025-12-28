@@ -87,6 +87,8 @@ export interface Mission {
   dateDebutTravaux?: string; // ISO
   delaiEstime?: number; // en jours
   dateFinTravaux?: string; // ISO
+  lienExpertise?: string;
+  lienFacture?: string;
 }
 
 // Interface Reparateur
@@ -265,4 +267,6 @@ export interface MissionUpdate {
   franchiseApplicable?: number;
   commissionPourcentage?: number;
   commissionMontant?: number;
+  lienExpertise?:string;
+  lienFacture?:string;
 }
