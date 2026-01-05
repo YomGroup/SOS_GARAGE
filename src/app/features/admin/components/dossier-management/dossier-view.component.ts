@@ -925,24 +925,55 @@ getMSinistreDate(mission: Mission | null): string {
 }
 
 
-  // Normalise les images du sinistre : supporte l'ancien champ imgUrl: string[]
-  // et le nouveau champ images: { objectStorageUrl }[]
-  getSinistreImageUrls(): string[] {
- //   const s = this.sinistre || this.dossier || this.mission?.sinistre;
-   const s=this.dossier;
- ///   if (!s) return [];
-    // Prioritise le nouveau champ images[].objectStorageUrl
-    if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
-      return (s as any).images
-        .map((i: any) => i?.objectStorageUrl)
-        .filter((u: any) => typeof u === 'string' && u.length > 0);
+ getSinistreImageUrls(): string[] {
+  const s = this.dossier;
+  
+  if (!s) return [];
+
+  if ((s as any).imgUrl) {
+    console.log('🔍 URLs des images:', (s as any).imgUrl);
+    console.log('🔍 Première URL complète:', (s as any).imgUrl[0]);
+    
+    // Tester si l'URL est accessible
+    if ((s as any).imgUrl[0]) {
+      console.log('🔍 Essayez d\'ouvrir cette URL dans un nouvel onglet:', (s as any).imgUrl[0]);
     }
-    // Fallback vers l'ancien champ imgUrl
-    if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
-      return (s as any).images.filter((u: any) => typeof u === 'string' && u.length > 0);
-    }
-    return [];
   }
+  
+  // Priorité 1: images[].objectStorageUrl (futur)
+  if (Array.isArray((s as any).images) && (s as any).images.length > 0) {
+    const urls = (s as any).images
+      .map((i: any) => i?.objectStorageUrl)
+      .filter((u: any) => typeof u === 'string' && u.length > 0);
+    if (urls.length > 0) return urls;
+  }
+  
+  // Priorité 2: imgUrl (ce que le backend retourne MAINTENANT !)
+  if ((s as any).imgUrl) {
+    let urls: string[] = [];
+    
+    if (Array.isArray((s as any).imgUrl)) {
+      urls = (s as any).imgUrl.filter((u: any) => typeof u === 'string' && u.length > 0);
+    } else if (typeof (s as any).imgUrl === 'string') {
+      urls = [(s as any).imgUrl];
+    }
+    
+    if (urls.length > 0) return urls;
+  }
+  
+  // Priorité 3: Fallback mission.sinistre
+  if (this.mission?.sinistre?.imgUrl) {
+    let urls: string[] = [];
+    if (Array.isArray(this.mission.sinistre.imgUrl)) {
+      urls = this.mission.sinistre.imgUrl.filter((u: any) => typeof u === 'string' && u.length > 0);
+    } else if (typeof this.mission.sinistre.imgUrl === 'string') {
+      urls = [this.mission.sinistre.imgUrl];
+    }
+    if (urls.length > 0) return urls;
+  }
+  
+  return [];
+}
 
   public getStatutAvancementLabel(statut: string | undefined): string {
     if (!statut) return 'En attente de traitement';

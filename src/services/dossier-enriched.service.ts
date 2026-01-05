@@ -113,7 +113,11 @@ export class DossierEnrichedService {
   getDossiersEnriched(page: number = 0, size: number = 10): Observable<DossierPageResponse> {
     return this.http.get<DossierPageResponse>(`${this.apiUrl}/enriched?page=${page}&size=${size}`);
   }
+
+  /**
+   * Supprime un dossier par son ID
+   */
+  deleteDossier(dossierId: number): Observable<any> {
+    return this.http.delete(`${environment.apiUrl}/sinistre/${dossierId}`);
+  }
 }
-
-
-

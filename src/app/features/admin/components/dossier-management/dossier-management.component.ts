@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { DossiersService, Dossier, PaginatedResponse } from '../../../../../services/dossiers.service';
+import { DossierEnrichedService, DossierEnriched } from '../../../../../services/dossier-enriched.service'; // ⬅️ AJOUT
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { from, of, forkJoin, Subject } from 'rxjs';
@@ -108,34 +109,43 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   pageSize: number = 10;
   pageSizeOptions: number[] = [5, 10, 20, 50];
 
-  // Dossiers nouveaux : ceux qui n'ont pas encore de mission
+  // Dossiers nouveaux/non traités : utilise statusDisplay du backend
   get dossiersNouveaux() {
-    return this.dataSource.data.filter(dossier =>
-      !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)
-    );
-  }
-
-  // Dossiers en cours : au moins une mission, aucune mission terminée (peu importe la casse ou le genre)
-  get dossiersEnCours() {
     return this.dataSource.data.filter(dossier => {
-      const missionsAssociees = this.missions.filter(m => m.sinistre && m.sinistre.id === dossier.id);
-      return (
-        missionsAssociees.length > 0 &&
-        !missionsAssociees.some(m =>
-          m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase())
-        )
-      );
+      const d = dossier as any;
+      // Utiliser statusDisplay du backend (plus fiable)
+      if (d.statusDisplay !== undefined) {
+        return d.statusDisplay === 'Non traité';
+      }
+      // Fallback: sans mission OU avec mission non commencée
+      return !d.hasMission || (d.hasMission && !d.enCours && !d.termine);
     });
   }
 
-  // Dossiers terminés : au moins une mission avec statut terminé (peu importe la casse ou le genre)
+  // Dossiers en cours : utilise statusDisplay du backend
+  get dossiersEnCours() {
+    return this.dataSource.data.filter(dossier => {
+      const d = dossier as any;
+      // Utiliser statusDisplay du backend
+      if (d.statusDisplay !== undefined) {
+        return d.statusDisplay === 'En cours';
+      }
+      // Fallback
+      return d.enCours === true;
+    });
+  }
+
+  // Dossiers terminés : utilise statusDisplay du backend
   get dossiersTermines() {
-    return this.dataSource.data.filter(dossier =>
-      this.missions.some(m =>
-        m.sinistre && m.sinistre.id === dossier.id &&
-        m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase())
-      )
-    );
+    return this.dataSource.data.filter(dossier => {
+      const d = dossier as any;
+      // Utiliser statusDisplay du backend
+      if (d.statusDisplay !== undefined) {
+        return d.statusDisplay === 'Terminé';
+      }
+      // Fallback
+      return d.termine === true;
+    });
   }
 
   get dossiersFiltres() {
@@ -154,14 +164,15 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
 
   constructor(
     private dossiersService: DossiersService,
+    private dossierEnrichedService: DossierEnrichedService, // ⬅️ AJOUT
     private missionService: MissionService,
     private dialog: MatDialog,
     private router: Router,
     private route: ActivatedRoute,
     private viewContainerRef: ViewContainerRef,
     private cdr: ChangeDetectorRef,
-    private auth: AuthService,               // ⬅️ AJOUT
-    private messageService: MessageService, // ⬅️ AJOUT
+    private auth: AuthService,
+    private messageService: MessageService,
     private dossierFilterService: DossierFilterService
   ) {
     this.dataSource = new MatTableDataSource();
@@ -281,120 +292,152 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     }
   }
 
+  // ============================================
+  // ⬇️⬇️⬇️ MÉTHODE MODIFIÉE ⬇️⬇️⬇️
+  // ============================================
   private loadData(page: number = 0, size: number = 10): void {
     this.isLoadingDossiers = true;
     this.cdr.detectChanges();
 
-    forkJoin({
-      apiDossiers: this.dossiersService.getDossiers(page, size),
-      missions: this.missionService.getAllMissions()
-    }).subscribe({
-      next: ({ apiDossiers, missions }) => {
-        this.missions = missions;
-        const dossiersArray: Dossier[] = apiDossiers.content || [];
+    // ⬇️ APPEL AU SERVICE ENRICHI
+    this.dossierEnrichedService.getDossiersEnriched(page, size).subscribe({
+      next: (response) => {
+        console.log('✅ Données enrichies reçues:', response);
+        console.log(`📊 Total: ${response.totalElements}, Affichés: ${response.content.length}`);
+        console.log('📸 Premier dossier avec photos:', response.content[0]?.imgUrl);
+        
+        // Charger les missions pour compatibilité avec les getters existants
+        this.missionService.getAllMissions().subscribe({
+          next: (missions) => {
+            this.missions = missions;
+            
+            // ⬇️ CONVERTIR DossierEnriched en DossierAffichage (garde TOUTES les infos)
+            const dossiersArray: DossierAffichage[] = response.content.map((d: DossierEnriched) => ({
+              // IDs et numéros
+              id: d.id,
+              numero: d.numero,
+              
+              // Dates
+              dateCreation: d.dateCreation ? new Date(d.dateCreation) : new Date(),
+              createdAt: d.dateCreation,
+              dateSinistre: d.dateCreation ? new Date(d.dateCreation) : new Date(),
+              
+              // Statuts
+              type: d.type,
+              statut: d.statut,
+              statusDisplay: d.statusDisplay, // ⬅️ IMPORTANT pour les getters
+              
+              // ⬇️ VÉHICULE (déjà enrichi avec marque, modèle, année, immatriculation)
+              vehicule: d.vehicule ? {
+                id: d.vehicule.id,
+                marque: d.vehicule.marque,
+                modele: d.vehicule.modele,
+                immatriculation: d.vehicule.immatriculation,
+                annee: d.vehicule.annee,
+                dateMiseEnCirculation: d.vehicule.dateCreationFormatted,
+                nomAssurence: d.vehicule.nomAssurance,
+                typeAssurence: d.vehicule.typeAssurance
+              } : {},
+              
+              // Assurance
+              assurance: d.vehicule?.nomAssurance || 'Non spécifiée',
+              
+              // ⬇️ ASSURÉ (nom, prénom, email, téléphone)
+              nom: d.assure?.nom || '',
+              prenom: d.assure?.prenom || '',
+              email: d.assure?.email || '',
+              telephone: d.assure?.telephone || '',
+              
+              // ⬇️ PHOTOS ET DOCUMENTS (CORRECTION POUR GERER TOUS LES CAS)
+              imgUrl: Array.isArray(d.imgUrl) ? d.imgUrl : (d.imgUrl ? [d.imgUrl] : []),
+              
+              // ⬇️ FLAGS DU BACKEND (pour les getters)
+              hasMission: d.hasMission,
+              enCours: d.enCours,
+              termine: d.termine,
+              
+              // Contact et localisation
+              contactAssistance: d.contactAssistance || '',
+              contact: d.contactAssistance || '',
+              lieu: d.lieu || '',
+              description: d.description || '',
+              
+              // Constat
+              lienConstat: d.lienConstat || '',
+              conditionsAcceptees: d.conditionsAcceptees || false,
+              
+              // Autres propriétés requises par l'interface
+              documents: [],
+              notifications: [],
+              isvalid: true
+            } as any));
 
-        this.totalDossiers = apiDossiers.totalElements;
-        this.pageSize = apiDossiers.size;
+            console.log('📦 Dossiers transformés:', dossiersArray.length);
+            console.log('📸 Photos du premier dossier:', dossiersArray[0]?.imgUrl);
+            console.log('🎯 Flags des dossiers:', dossiersArray.map(d => ({
+              id: d.id,
+              hasMission: (d as any).hasMission,
+              enCours: (d as any).enCours,
+              termine: (d as any).termine,
+              photos: d.imgUrl?.length || 0
+            })));
+            
+            // ⬇️ METTRE À JOUR LES DONNÉES
+            this.dataSource.data = dossiersArray;
+            this.sinistreDissier = dossiersArray as Dossier[];
+            
+            // ⬇️ STATISTIQUES DU BACKEND (déjà calculées correctement)
+            this.totalDossiers = response.stats.totalDossiers;
+            this.nbDossiersNonTraites = response.stats.dossiersNonTraites;
+            this.nbDossiersEnCours = response.stats.dossiersEnCours;
+            this.dossiersTraites = response.stats.dossiersTermines;
+            this.dossiersCommissionPayee = response.stats.dossiersCommissionPayee;
+            this.pageSize = response.size;
 
-        // Transformer les dossiers pour l'affichage
-        const dossiersAvecVehicules = dossiersArray.map((d: Dossier) => ({
-          ...d,
-          numero: d.id?.toString() || 'N/A',
-          dateCreation: d.dateCreation ? new Date(d.dateCreation) : new Date(),
-          statut: d.statut ?? (d.conditionsAcceptees ? 'VALIDÉ' : 'EN_ATTENTE'),
-          vehicule: d.vehicule || {},
-          type: d.type || 'Non spécifié',
-          assurance: d.assurance || 'Non spécifiée'
-        } as DossierAffichage));
+            console.log('📊 Statistiques:', {
+              total: this.totalDossiers,
+              nonTraites: this.nbDossiersNonTraites,
+              enCours: this.nbDossiersEnCours,
+              traites: this.dossiersTraites
+            });
 
-        // Mettre à jour les deux sources de données
-        this.dataSource.data = dossiersAvecVehicules;
-        this.sinistreDissier = dossiersArray;
-        this.totalDossiers = apiDossiers.totalElements ?? dossiersArray.length;
+            // Configurer le filtre (garde la logique existante)
+            this.dataSource.filterPredicate = (data: DossierAffichage, filter: string) => {
+              const f = JSON.parse(filter || '{}');
+              const matchesRecherche = this.matchesRecherche(data, f.q || '');
+              const matchesStatut = this.matchesStatutAffichage(data, f.statut || '');
+              const matchesClient = this.matchesClient(data, f.client || '');
+              const inFiltreActuel = this.isInFiltreActuel(data);
+              return matchesRecherche && matchesStatut && matchesClient && inFiltreActuel;
+            };
 
-        // Configurer le filtre custom pour MatTable
-        this.dataSource.filterPredicate = (data: DossierAffichage, filter: string) => {
-          const f = JSON.parse(filter || '{}');
-          const matchesRecherche = this.matchesRecherche(data, f.q || '');
-          const matchesStatut = this.matchesStatutAffichage(data, f.statut || '');
-          const matchesClient = this.matchesClient(data, f.client || '');
-          const inFiltreActuel = this.isInFiltreActuel(data);
-          return matchesRecherche && matchesStatut && matchesClient && inFiltreActuel;
-        };
-
-        // Calculer les statistiques
-        this.nbDossiersNonTraites = dossiersArray.filter((dossier: Dossier) =>
-          !this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)
-        ).length;
-
-        const dossiersAvecMission = dossiersArray.filter((dossier: Dossier) =>
-          this.missions.some(m => m.sinistre && m.sinistre.id === dossier.id)
-        );
-
-        this.dossiersTraites = dossiersAvecMission.filter((dossier: Dossier) =>
-          this.missions.some(m =>
-            m.sinistre && m.sinistre.id === dossier.id &&
-            m.statut && ['terminé', 'terminée'].includes(m.statut.toLowerCase())
-          )
-        ).length;
-
-        this.nbDossiersEnCours = dossiersAvecMission.length - this.dossiersTraites;
-        this.dossiersCommissionPayee = dossiersArray.filter((dossier: Dossier) =>
-          dossier.statut && dossier.statut.toLowerCase().includes('commission')
-        ).length;
-
-        // Charger les véhicules manquants
-        this.loadVehiculesForDossiers(dossiersAvecVehicules);
-
-        this.isLoadingDossiers = false;
-        this.cdr.detectChanges();
+            // ⬇️ PLUS BESOIN de loadVehiculesForDossiers - tout est déjà là !
+            
+            this.isLoadingDossiers = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('❌ Erreur chargement missions:', err);
+            this.isLoadingDossiers = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: (err) => {
-        console.error('Erreur lors du chargement des dossiers :', err);
+        console.error('❌ Erreur chargement dossiers enrichis:', err);
         this.isLoadingDossiers = false;
         this.cdr.detectChanges();
       }
     });
   }
+  // ============================================
+  // ⬆️⬆️⬆️ FIN MÉTHODE MODIFIÉE ⬆️⬆️⬆️
+  // ============================================
 
   private loadVehiculesForDossiers(dossiers: DossierAffichage[]): void {
-    dossiers.forEach((dossier: DossierAffichage & { vehiculeId?: number }) => {
-      if (!dossier.id) return;
-
-      const hasVehiculeInfo = !!(dossier.vehicule && dossier.vehicule.marque);
-      const vehiculeIdFromDossier = dossier.vehiculeId;
-
-      if (!hasVehiculeInfo && vehiculeIdFromDossier) {
-        this.vehiculesEnChargement.add(dossier.id);
-        this.dossiersService.getVehiculeById(vehiculeIdFromDossier).subscribe({
-          next: (vehicule) => {
-            if (vehicule) dossier.vehicule = vehicule;
-            this.vehiculesEnChargement.delete(dossier.id);
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            this.vehiculesEnChargement.delete(dossier.id);
-            this.cdr.detectChanges();
-          }
-        });
-      } else if (!hasVehiculeInfo) {
-        this.vehiculesEnChargement.add(dossier.id);
-        this.dossiersService.getVehiculeFromSinistreId(dossier.id).subscribe({
-          next: (vehicule) => {
-            if (vehicule) dossier.vehicule = vehicule;
-            this.vehiculesEnChargement.delete(dossier.id);
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            this.vehiculesEnChargement.delete(dossier.id);
-            this.cdr.detectChanges();
-          }
-        });
-      }
-    });
+    // ⬇️ PLUS BESOIN - garde pour compatibilité mais ne fait rien
+    console.log('Véhicules déjà chargés via le service enrichi');
   }
-
-
 
   private isInFiltreActuel(dossier: DossierAffichage): boolean {
     switch (this.filtreActuel) {
@@ -451,11 +494,10 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
   }
 
   onPageChange(event: PageEvent): void {
-  this.pageIndex = event.pageIndex;
-  this.pageSize = event.pageSize;
-
-  this.loadData(this.pageIndex, this.pageSize);
-}
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.loadData(this.pageIndex, this.pageSize);
+  }
 
   // Sous-ensemble paginé selon la vue cartes
   get dossiersFiltresPagine(): DossierAffichage[] {
@@ -585,7 +627,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     // 2) Appel API : mise à jour du réparateur de la mission
     this.missionService.updateMissionReparateur(missionId, reparateur).pipe(
 
-      // 3) S’assurer qu’on a bien les IDs Keycloak (assuré & garage)
+      // 3) S'assurer qu'on a bien les IDs Keycloak (assuré & garage)
       switchMap((missionMaj: Mission) => {
         // Essai 1 : extraire depuis la réponse du PATCH
         const assureIdFromPatch =
@@ -662,7 +704,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
         }
       },
       error: (err) => {
-        console.error('Erreur lors de l’attribution au sinistre:', err);
+        console.error('Erreur lors de l\'attribution au sinistre:', err);
       }
     });
   }
@@ -684,11 +726,13 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     if (this.suppressionEnCours || !dossier) return;
 
     this.suppressionEnCours = true;
-    this.dossiersService.deleteDossier(dossier.id).subscribe({
+    
+    // ⬇️ Utilise le service enrichi pour la suppression
+    this.dossierEnrichedService.deleteDossier(dossier.id).subscribe({
       next: () => {
         this.handleSuccessfulDeletion(dossier.id);
       },
-      error: (error) => {
+      error: (error: any) => {
         if (error && (error.status === 200 || error.status === 204 || error.status === 500)) {
           this.handleSuccessfulDeletion(dossier.id);
         } else {
@@ -741,8 +785,6 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     });
   }
 
-
-
   ouvrirDossierView(dossier: any, edition: boolean = false) {
     const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier.id);
     if (mission) {
@@ -774,41 +816,44 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     this.dossierSelectionne = updated;
   }
 
-  // Méthode pour obtenir les informations de véhicule formatées
-  // Méthode pour obtenir les informations de véhicule formatées
-getVehiculeInfo(dossier: any): any {
-  if (!dossier?.vehicule) {
+  getVehiculeInfo(dossier: any): any {
+    if (!dossier?.vehicule) {
+      return {
+        marque: 'Marque non spécifiée',
+        modele: 'Modèle non spécifié',
+        annee: 'Année non spécifiée',
+        immatriculation: 'Immatriculation non spécifiée',
+        assurance: 'Assurance non spécifiée'
+      };
+    }
+
+    const vehicule = dossier.vehicule;
+
+    // Utilise directement ta méthode formatDateVehicule
+    let annee = 'Année non spécifiée';
+
+    if (vehicule.dateMiseEnCirculation) {
+      const formattedDate = this.formatDateVehicule(vehicule.dateMiseEnCirculation);
+
+      // Si la date est valide, extraire l'année
+      if (formattedDate !== 'N/A') {
+        annee = formattedDate.substring(0, 4);
+      }
+    }
+
+    // ⬇️ Si le véhicule vient du service enrichi, il a déjà l'année
+    if (vehicule.annee) {
+      annee = vehicule.annee;
+    }
+
     return {
-      marque: 'Marque non spécifiée',
-      modele: 'Modèle non spécifié',
-      annee: 'Année non spécifiée',
-      immatriculation: 'Immatriculation non spécifiée',
-      assurance: 'Assurance non spécifiée'
+      marque: vehicule.marque || 'Marque non spécifiée',
+      modele: vehicule.modele || 'Modèle non spécifié',
+      annee: annee,
+      immatriculation: vehicule.immatriculation || 'Immatriculation non spécifiée',
+      assurance: vehicule.nomAssurence || vehicule.nomAssurance || 'Assurance non spécifiée'
     };
   }
-
-  const vehicule = dossier.vehicule;
-
-  // Utilise directement ta méthode formatDateVehicule
-  let annee = 'Année non spécifiée';
-
-  if (vehicule.dateMiseEnCirculation) {
-    const formattedDate = this.formatDateVehicule(vehicule.dateMiseEnCirculation);
-
-    // Si la date est valide, extraire l’année
-    if (formattedDate !== 'N/A') {
-      annee = formattedDate.substring(0, 4);
-    }
-  }
-
-  return {
-    marque: vehicule.marque || 'Marque non spécifiée',
-    modele: vehicule.modele || 'Modèle non spécifié',
-    annee: annee,
-    immatriculation: vehicule.immatriculation || 'Immatriculation non spécifiée',
-    assurance: vehicule.nomAssurence || 'Assurance non spécifiée'
-  };
-}
 
   /**
    * Formate une date de véhicule
@@ -819,10 +864,6 @@ getVehiculeInfo(dossier: any): any {
     return formatted === 'N/A' ? '—' : formatted;
   }
 
-
-
-
-
   // Méthode pour vérifier si un véhicule a des informations complètes
   hasVehiculeInfo(dossier: DossierAffichage): boolean {
     return !!(dossier.vehicule &&
@@ -831,10 +872,15 @@ getVehiculeInfo(dossier: any): any {
       dossier.vehicule.dateMiseEnCirculation);
   }
 
-  // Méthode pour vérifier si un véhicule est en cours de chargement
+  // ============================================
+  // ⬇️⬇️⬇️ MÉTHODE MODIFIÉE ⬇️⬇️⬇️
+  // ============================================
   isVehiculeLoading(dossierId: any): boolean {
-    return this.vehiculesEnChargement.has(dossierId);
+    return false; // ⬅️ Toujours false car tout est déjà chargé !
   }
+  // ============================================
+  // ⬆️⬆️⬆️ FIN MÉTHODE MODIFIÉE ⬆️⬆️⬆️
+  // ============================================
 
   /**
    * Retourne le statut d'affichage simplifié (3 catégories: Non traité, En cours, Terminé)
@@ -933,4 +979,18 @@ getVehiculeInfo(dossier: any): any {
   setFiltre(filtre: 'nouveaux' | 'nonTraites' | 'termines' | 'tous') {
     this.filtreActuel = filtre;
   }
+
+  // ============================================
+  // ⬇️⬇️⬇️ MÉTHODES AJOUTÉES POUR LES PHOTOS ⬇️⬇️⬇️
+  // ============================================
+  getPhotos(dossier: DossierAffichage): string[] {
+    return dossier.imgUrl || [];
+  }
+
+  hasPhotos(dossier: DossierAffichage): boolean {
+    return !!(dossier.imgUrl && dossier.imgUrl.length > 0);
+  }
+  // ============================================
+  // ⬆️⬆️⬆️ FIN MÉTHODES AJOUTÉES ⬆️⬆️⬆️
+  // ============================================
 }
