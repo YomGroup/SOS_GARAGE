@@ -8,7 +8,7 @@ export class KeycloakInitService {
   init(): Promise<boolean> {
     return this.keycloak.init({
       config: {
-        url: 'http://localhost:8080/auth', // adapte à ton Keycloak
+        url: 'https://prolific-quietude-production.up.railway.app//auth', // adapte à ton Keycloak
         realm: 'sos-garage',
         clientId: 'sosmongarage', // le nom exact du client
       },

@@ -1,4 +1,4 @@
 export const environment = {
-    apiUrl: 'http://localhost:8083/V1/api',
+    apiUrl: 'https://prolific-quietude-production.up.railway.app//V1/api',
 };
   

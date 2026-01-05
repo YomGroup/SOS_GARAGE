@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { WebSocketService, WebSocketMessage } from './websocket.service';
 
 // ✅ URL de production Railway
-const BASE_URL = 'http://localhost:8083/V1';
+const BASE_URL = 'https://prolific-quietude-production.up.railway.app//V1';
 
 export interface ChatMessage {
   id?: number;
