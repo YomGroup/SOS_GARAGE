@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSelectModule } from '@angular/material/select';
 import { FormsModule } from '@angular/forms';
 import { DossiersService, Dossier, PaginatedResponse } from '../../../../../services/dossiers.service';
-import { DossierEnrichedService, DossierEnriched } from '../../../../../services/dossier-enriched.service'; // ⬅️ AJOUT
+import { DossierEnrichedService, DossierEnriched, MissionInfo  } from '../../../../../services/dossier-enriched.service'; // ⬅️ AJOUT
 import { MatDialog } from '@angular/material/dialog';
 import { Router, RouterModule, ActivatedRoute, NavigationEnd } from '@angular/router';
 import { from, of, forkJoin, Subject } from 'rxjs';
@@ -40,6 +40,7 @@ import {
 export interface DossierAffichage extends Dossier {
   numero: string;
   dateCreation: Date;
+  mission?: MissionInfo | null;
 }
 
 @Component({
@@ -886,94 +887,127 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
    * Retourne le statut d'affichage simplifié (3 catégories: Non traité, En cours, Terminé)
    * Utilise le statusDisplay du backend si disponible, sinon fait le mapping localement
    */
-  getStatutAffichage(dossier: any): DisplayStatus {
-    // Vérifier d'abord si le dossier a une mission associée
-    const mission = this.missions.find(m => m.sinistre && m.sinistre.id === dossier?.id);
-    
-    if (!mission) {
-      // Pas de mission = Non traité
+  // ✅ REMPLACE CES MÉTHODES dans dossier-management.component.ts
+
+/**
+ * Retourne le statut d'affichage (MISSION prioritaire sur SINISTRE)
+ */
+getStatutAffichage(dossier: any): string {
+  // ⬇️⬇️⬇️ PRIORITÉ 1 : Statut de la mission si elle existe ⬇️⬇️⬇️
+  if (dossier.mission && dossier.mission.statusDisplay) {
+    return dossier.mission.statusDisplay; // "Non traité", "En cours", "Terminé"
+  }
+  
+  // ⬇️⬇️⬇️ PRIORITÉ 2 : Statut du sinistre ⬇️⬇️⬇️
+  if (dossier.statusDisplay) {
+    return dossier.statusDisplay;
+  }
+  
+  // ⬇️⬇️⬇️ FALLBACK : Non traité ⬇️⬇️⬇️
+  return 'Non traité';
+}
+
+/**
+ * Retourne le libellé détaillé du statut d'avancement
+ */
+getStatutAvancementLabel(statut: string | undefined): string {
+  // ⬇️⬇️⬇️ IMPORTANT : Utiliser le statusDisplay de la mission si disponible ⬇️⬇️⬇️
+  // Cette méthode est appelée avec dossier.mission?.statut ou dossier.statut
+  
+  if (!statut) return 'Non traité';
+  
+  const normalized = statut.toUpperCase().replace(/ /g, '_');
+  
+  switch (normalized) {
+    case 'EN_ATTENTE_TRAITEMENT':
+    case 'EN_ATTENTE_DE_TRAITEMENT':
+    case 'PENDING':
+    case 'DRAFT':
+    case 'NON_TRAITEE':
       return 'Non traité';
-    }
     
-    // Utiliser le statusDisplay du backend s'il existe
-    if (mission.statusDisplay) {
-      return mission.statusDisplay as DisplayStatus;
-    }
+    case 'EN_ATTENTE_EXPERTISE':
+      return 'En attente d\'expertise';
     
-    // Fallback: utiliser l'utilitaire centralisé
-    return getDisplayStatus(mission);
+    case 'EN_ATTENTE_REPARATION':
+      return 'En attente de réparation';
+    
+    case 'EN_COURS_REPARATION':
+    case 'EN_COURS_DE_REPARATION':
+    case 'IN_PROGRESS':
+    case 'EN_COUR':
+    case 'ASSIGNED':
+      return 'En cours';
+    
+    case 'REPARATION_TERMINEE':
+    case 'TERMINEE':
+    case 'TERMINE':
+    case 'COMPLETED':
+      return 'Terminé';
+    
+    case 'VALIDÉ':
+    case 'VALIDE':
+      return 'Validé';
+    
+    case 'EN_ATTENTE':
+      return 'En attente';
+    
+    case 'REJETÉ':
+    case 'REJETE':
+    case 'CANCELLED':
+      return 'Rejeté';
+    
+    default:
+      // Retourner le mapping simplifié pour les statuts inconnus
+      const lower = statut.toLowerCase();
+      if (lower.includes('terminé') || lower.includes('terminee')) return 'Terminé';
+      if (lower.includes('en cours') || lower.includes('en_cours')) return 'En cours';
+      return 'Non traité';
   }
+}
 
-  /**
-   * Retourne le libellé lisible du statut d'avancement détaillé
-   */
-  getStatutAvancementLabel(statut: string | undefined): string {
-    if (!statut) return 'Non traité';
-    const s = statut.toUpperCase().replace(/ /g, '_');
-    switch (s) {
-      case 'EN_ATTENTE_TRAITEMENT':
-      case 'EN_ATTENTE_DE_TRAITEMENT':
-      case 'PENDING':
-      case 'DRAFT':
-      case 'NON_TRAITEE':
-        return 'Non traité';
-      case 'EN_ATTENTE_EXPERTISE':
-        return 'En attente d\'expertise';
-      case 'EN_ATTENTE_REPARATION':
-        return 'En attente de réparation';
-      case 'EN_COURS_REPARATION':
-      case 'EN_COURS_DE_REPARATION':
-      case 'IN_PROGRESS':
-      case 'EN_COUR':
-      case 'ASSIGNED':
-        return 'En cours';
-      case 'REPARATION_TERMINEE':
-      case 'TERMINEE':
-      case 'TERMINE':
-      case 'COMPLETED':
-        return 'Terminé';
-      case 'VALIDÉ':
-      case 'VALIDE':
-        return 'Validé';
-      case 'EN_ATTENTE':
-        return 'En attente';
-      case 'REJETÉ':
-      case 'REJETE':
-      case 'CANCELLED':
-        return 'Rejeté';
-      default:
-        // Retourner le mapping simplifié pour les statuts inconnus
-        const lower = statut.toLowerCase();
-        if (lower.includes('terminé') || lower.includes('terminee')) return 'Terminé';
-        if (lower.includes('en cours') || lower.includes('en_cours')) return 'En cours';
-        return 'Non traité';
-    }
+/**
+ * Retourne la classe CSS du statut d'avancement
+ */
+getStatutAvancementClass(statut: string | undefined): string {
+  const label = this.getStatutAvancementLabel(statut);
+  
+  switch (label) {
+    case 'Terminé':
+    case 'Validé':
+      return 'statut-terminee';
+    
+    case 'En cours':
+    case 'En cours de réparation':
+    case 'En attente d\'expertise':
+    case 'En attente de réparation':
+      return 'statut-encours';
+    
+    case 'Non traité':
+    case 'En attente':
+    case 'En attente de traitement':
+      return 'statut-attente';
+    
+    case 'Rejeté':
+      return 'statut-rejete';
+    
+    default:
+      return 'statut-default';
   }
+}
 
-  /**
-   * Retourne la classe CSS du statut d'avancement
-   */
-  getStatutAvancementClass(statut: string | undefined): string {
-    const label = this.getStatutAvancementLabel(statut);
-    switch (label) {
-      case 'Terminé':
-      case 'Validé':
-        return 'statut-terminee';
-      case 'En cours':
-      case 'En cours de réparation':
-      case 'En attente d\'expertise':
-      case 'En attente de réparation':
-        return 'statut-encours';
-      case 'Non traité':
-      case 'En attente':
-      case 'En attente de traitement':
-        return 'statut-attente';
-      case 'Rejeté':
-        return 'statut-rejete';
-      default:
-        return 'statut-default';
-    }
+/**
+ * ⬇️⬇️⬇️ NOUVELLE MÉTHODE : Récupère le statut à afficher (mission ou sinistre) ⬇️⬇️⬇️
+ */
+getStatutToDisplay(dossier: any): string {
+  // Si le dossier a une mission, utiliser son statut
+  if (dossier.mission && dossier.mission.statut) {
+    return dossier.mission.statut;
   }
+  
+  // Sinon, utiliser le statut du sinistre
+  return dossier.statut || '';
+}
 
   // Méthode publique pour changer le filtre depuis l'extérieur (sidebar ou parent)
   setFiltre(filtre: 'nouveaux' | 'nonTraites' | 'termines' | 'tous') {

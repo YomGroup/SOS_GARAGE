@@ -164,8 +164,12 @@
               </div>
             </div>
             <div class="dossier-statut-badge">
-              <span class="statut-text" [ngClass]="getStatutAvancementClass(dossier?.statut)">{{ getStatutAvancementLabel(dossier?.statut) }}</span>
-            </div>
+  <!-- ⬇️⬇️⬇️ Utiliser le statut de la mission si disponible ⬇️⬇️⬇️ -->
+  <span class="statut-text" 
+        [ngClass]="getStatutAvancementClass(dossier.mission?.statut || dossier.statut)">
+    {{ getStatutAvancementLabel(dossier.mission?.statut || dossier.statut) }}
+  </span>
+</div>
           </div>
 
           <!-- Corps de la carte -->
