@@ -165,60 +165,7 @@
   </div>
 </div>
 
-              <!-- ✅ SECTION STATUT -->
-              <div class="detail-section">
-                <div class="section-header">
-                  <h6><i class="bi bi-flag me-2"></i>Statut du sinistre</h6>
-                  <button 
-                    *ngIf="!isEditingStatus" 
-                    class="btn-edit"
-                    (click)="startEditingStatus(sinistre); $event.stopPropagation()">
-                    <i class="bi bi-pencil"></i> Modifier
-                  </button>
-                </div>
 
-                <!-- Mode lecture -->
-                <div *ngIf="!isEditingStatus" class="section-content">
-                  <span class="status-badge-large"
-                        [ngClass]="{
-                          'status-pending': getMainStatus(sinistre.statut) === 'nonTraite',
-                          'status-progress': getMainStatus(sinistre.statut) === 'enCours',
-                          'status-completed': getMainStatus(sinistre.statut) === 'termine'
-                        }">
-                    <i [ngClass]="{
-                         'bi bi-pause-circle': getMainStatus(sinistre.statut) === 'nonTraite',
-                         'bi bi-clock': getMainStatus(sinistre.statut) === 'enCours',
-                         'bi bi-check-circle': getMainStatus(sinistre.statut) === 'termine'
-                       }">
-                    </i>
-                    {{ formatStatut(sinistre.statut) }}
-                  </span>
-                </div>
-
-                <!-- Mode édition -->
-                <div *ngIf="isEditingStatus" class="edit-form" (click)="$event.stopPropagation()">
-                  <div class="row g-3">
-                    <div class="col-md-8">
-                      <label class="form-label">Nouveau statut</label>
-                      <select class="form-select" [(ngModel)]="editForm.statut">
-                        <option *ngFor="let statut of availableStatuts" [value]="statut.value">
-                          {{ statut.label }}
-                        </option>
-                      </select>
-                    </div>
-                    <div class="col-12">
-                      <button class="btn btn-primary me-2" (click)="saveStatus(); $event.stopPropagation()">
-                        <i class="bi bi-check-lg me-1"></i>Enregistrer
-                      </button>
-                      <button class="btn btn-outline-secondary" (click)="cancelEditingStatus(); $event.stopPropagation()">
-                        <i class="bi bi-x-lg me-1"></i>Annuler
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="divider"></div>
 
               <!-- ✅ SECTION DÉTAILS -->
               <div class="detail-section">
