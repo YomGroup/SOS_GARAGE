@@ -26,6 +26,7 @@ export class MissionService {
   getAllMissions(): Observable<Mission[]> {
   const now = Date.now();
   if (this.missionsCache && now - this.missionsCache.addedAt < this.missionsCache.ttl) {
+    console.log('Retour depuis le cache des missions', this.missionsCache.data);
     return of(this.missionsCache.data);
   }
 

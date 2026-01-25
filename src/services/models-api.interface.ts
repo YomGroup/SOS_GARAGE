@@ -82,6 +82,7 @@ export interface Mission {
   montantStatue?: number;
   franchiseApplicable?: number;
   commissionPourcentage?: number;
+  commissionMontant?: number;
   montantCommission?: number;
   // Ajout pour gestion des travaux garage
   dateDebutTravaux?: string; // ISO

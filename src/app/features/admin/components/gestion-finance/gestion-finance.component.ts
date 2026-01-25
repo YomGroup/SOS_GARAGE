@@ -96,12 +96,14 @@ export class GestionFinanceComponent implements OnInit {
       this.totalCommissions = stats.totalCommissions;
       this.netBalance = stats.netBalance;
       
+      console.log('Statistiques financières reçues du backend:', stats);
       // Convertir les missions du backend en format attendu
       this._missions = stats.missions.map(m => this.convertMissionFinancialToMission(m));
       
       this._clearCache();
       this.cdr.detectChanges();
       console.log('Données financières chargées depuis le backend');
+      console.log('Missions chargées:', this._missions);
       
     } catch (err) {
       console.warn('API admin/financial non disponible, fallback vers méthode classique', err);
@@ -122,6 +124,7 @@ export class GestionFinanceComponent implements OnInit {
       devis: m.devis,
       factureFinale: m.factureFinale,
       commissionPourcentage: m.commissionPourcentage,
+      commissionMontant: m.commissionMontant,
       dateCreation: m.dateCreation,
       assureName: m.assureNom && m.assurePrenom ? `${m.assureNom} ${m.assurePrenom}` : 'N/A',
       reparateur: m.reparateurId ? {
@@ -187,6 +190,7 @@ export class GestionFinanceComponent implements OnInit {
       if (missionCopy.reparateur?.id && !missionCopy.reparateur.commission && reparateursMap.has(missionCopy.reparateur.id)) {
         missionCopy.reparateur = reparateursMap.get(missionCopy.reparateur.id)!;
       }
+      console.log('Mission enrichie:', missionCopy);
 
       return missionCopy;
     });
@@ -274,8 +278,10 @@ export class GestionFinanceComponent implements OnInit {
 
   // Méthodes existantes inchangées
   getCommission(mission: Mission): number {
-    const taux = mission.reparateur?.commission || 0;
-    return (mission.factureFinale || 0) * (taux / 100);
+    //const taux = mission.reparateur?.commission || 0;
+    //return (mission.factureFinale || 0) * (taux / 100);
+    console.log('Calcul de la commission pour la mission', mission.id, 'Montant de la commission:', mission.commissionMontant);
+    return mission.commissionMontant || 0;
   }
 
   openMissionDetail(missionId: number): void {
@@ -402,6 +408,6 @@ export class GestionFinanceComponent implements OnInit {
     this.totalDevis = this._missions.reduce((sum, m) => sum + (m.devis || 0), 0);
     this.totalFactures = this._missions.reduce((sum, m) => sum + (m.factureFinale || 0), 0);
     this.totalCommissions = this._missions.reduce((sum, m) => sum + this.getCommission(m), 0);
-    this.netBalance = this.totalFactures - this.totalCommissions;
+    this.netBalance = this._missions.filter(m => m.commissionStatut === 'payée').reduce((sum, m) => sum + this.getCommission(m), 0);
   }
 }

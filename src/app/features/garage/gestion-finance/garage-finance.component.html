@@ -141,7 +141,7 @@
               </td>
               <td>{{ mission.devis | number:'1.2-2' }} €</td>
               <td>{{ mission.factureFinale | number:'1.2-2' }} €</td>
-              <td>{{ getCommission(mission) | number:'1.2-2' }} €</td>
+              <td>{{ mission.commissionMontant | number:'1.2-2' }} €</td>
               <td>
                 <span class="status-badge" [class]="'status-' + (mission.commissionStatut === 'payée' ? 'paid' : 'unpaid')">
                   {{ mission.commissionStatut }}

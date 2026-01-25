@@ -82,15 +82,16 @@ export class GarageFinanceComponent implements OnInit {
   }
 
   getCommission(mission: Mission): number {
-    const taux = mission.reparateur?.commission || 0;
-    return (mission.factureFinale || 0) * (taux / 100);
+ //   const taux = mission.reparateur?.commission || 0;
+ //   return (mission.factureFinale || 0) * (taux / 100);
+    return mission.commissionMontant || 0;
   }
 
   private calculateKPIs(): void {
     this.totalDevis = this._missions.reduce((sum, m) => sum + (m.devis || 0), 0);
     this.totalFactures = this._missions.reduce((sum, m) => sum + (m.factureFinale || 0), 0);
     this.totalCommissions = this._missions.reduce((sum, m) => sum + this.getCommission(m), 0);
-    this.netBalance = this.totalFactures - this.totalCommissions;
+    this.netBalance = this._missions.filter(m => m.commissionStatut === 'payée').reduce((sum, m) => sum + this.getCommission(m), 0);
   }
 
   // Getters optimisés avec cache
