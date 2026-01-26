@@ -21,7 +21,7 @@ export class ContactComponent {
     {
       icon: '📞',
       title: 'Téléphone',
-      value: '01 23 45 67 89',
+      value: '+33 6 10 75 31 66',
       description: 'Lun - Ven, 9h - 18h'
     },
     {
@@ -33,15 +33,15 @@ export class ContactComponent {
     {
       icon: '📍',
       title: 'Adresse',
-      value: '123 Avenue des Champs-Élysées',
-      description: '75008 Paris'
+      value: '229 rue Saint Honoré',
+      description: '75001 Paris'
     },
-    {
-      icon: '⏰',
-      title: 'Urgences',
-      value: '0 800 123 456',
-      description: '24h/24, 7j/7'
-    }
+    // {
+    //   icon: '⏰',
+    //   title: 'Urgences',
+    //   value: '0 800 123 456',
+    //   description: '24h/24, 7j/7'
+    // }
   ];
 
   isSubmitting = false;

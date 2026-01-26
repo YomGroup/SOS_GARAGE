@@ -97,19 +97,24 @@
   background-color: #ffffff;
 }
 
+/* ✅ MODIFICATION : Conteneur centré et plus large */
 .contact-info-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 colonnes au lieu de 4 */
+  gap: 32px; /* Gap plus large */
+  max-width: 1000px; /* Largeur maximale augmentée */
+  margin: 0 auto; /* Centrage */
+  padding: 0 20px; /* Padding latéral */
 }
 
 .contact-card {
   background-color: #ffffff;
   border-radius: 20px;
-  padding: 20px 18px;
+  padding: 28px 24px; /* Padding augmenté */
   border: 1px solid #e5e7eb;
   box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  text-align: center; /* Centrer le contenu */
 }
 
 .contact-card:hover {
@@ -119,12 +124,14 @@
 }
 
 .contact-card-icon-wrapper {
-  margin-bottom: 12px;
+  margin-bottom: 16px; /* Espacement augmenté */
+  display: flex;
+  justify-content: center; /* Centrer l'icône */
 }
 
 .contact-card-icon-bg {
-  width: 48px;
-  height: 48px;
+  width: 56px; /* Taille augmentée */
+  height: 56px;
   border-radius: 16px;
   background: linear-gradient(135deg, #004aad, #aa38cb);
   display: flex;
@@ -134,29 +141,29 @@
 }
 
 .contact-card-icon {
-  font-size: 1.4rem;
+  font-size: 1.6rem; /* Icône plus grande */
   color: #ffffff;
 }
 
 .contact-card-title {
-  font-size: 0.95rem;
+  font-size: 1.05rem; /* Taille augmentée */
   font-weight: 600;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 
 .contact-card-value {
-  font-size: 1.1rem;
+  font-size: 1.2rem; /* Taille augmentée */
   font-weight: 700;
   background: linear-gradient(135deg, #004aad, #aa38cb);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .contact-card-desc {
-  font-size: 0.85rem;
+  font-size: 0.9rem; /* Taille légèrement augmentée */
   color: #6b7280;
 }
 
@@ -438,6 +445,11 @@
   height: 100%;
   object-fit: cover;
 }
+.contact-card-value {
+  word-break: break-word;       /* coupe intelligemment */
+  overflow-wrap: anywhere;      /* autorise la coupure partout */
+  text-align: center;           /* plus clean visuellement */
+}
 
 .contact-map-gradient {
   position: absolute;
@@ -452,8 +464,10 @@
     font-size: 2.2rem;
   }
 
+  /* ✅ 2 colonnes sur tablette */
   .contact-info-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 700px;
   }
 
   .contact-form-grid {
@@ -483,8 +497,10 @@
     font-size: 1.9rem;
   }
 
+  /* ✅ 1 colonne sur mobile */
   .contact-info-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .contact-two-cols {

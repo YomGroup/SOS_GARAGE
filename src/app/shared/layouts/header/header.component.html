@@ -11,6 +11,7 @@
       <div class="header-date">{{ getCurrentDate() }}</div>
     </div>
     <div class="user-info">
+      <!-- Messages Menu -->
       <!-- <span class="icon-envelope" [matMenuTriggerFor]="messageMenu" style="cursor:pointer; position: relative;">
         <i class="bi bi-envelope-fill"></i>
         <span class="notification-badge" *ngIf="messageUnreadCount() > 0">+{{ messageUnreadCount() }}</span>
@@ -32,6 +33,8 @@
           <span class="empty-message" style="padding: 8px 16px; display: block; color: gray;">Aucun message</span>
         </ng-template>
       </mat-menu>
+
+      <!-- Notifications Bell -->
       <span class="icon-bell" [matMenuTriggerFor]="notificationMenu" style="cursor:pointer;">
         <i class="bi bi-bell-fill"></i>
       </span>
@@ -47,16 +50,24 @@
           <span class="empty-notif" style="padding: 8px 16px; display: block; color: gray;">Aucune notification</span>
         </ng-template>
       </mat-menu>
+
+      <!-- User Profile Menu -->
       <span class="user-avatar" [matMenuTriggerFor]="profileMenu" style="cursor:pointer;">
         {{ userName() ? userName().charAt(0).toUpperCase() : 'U' }}
       </span>
-      <mat-menu #profileMenu="matMenu">
-        <div style="padding: 12px 24px; max-width: 220px;">
-          <div style="font-weight: bold;">{{ userName() }}</div>
-          <div style="font-size: 0.9em; color: gray;">{{ userEmail() }}</div>
+      <mat-menu #profileMenu="matMenu" class="profile-menu">
+        <!-- User Info Section -->
+        <div class="profile-header">
+          <div class="profile-username">{{ userName() }}</div>
+          <div class="profile-email">{{ userEmail() }}</div>
         </div>
         <mat-divider></mat-divider>
 
+        <!-- Logout Button -->
+        <button mat-menu-item class="logout-button" (click)="logout()">
+          <mat-icon class="logout-icon">logout</mat-icon>
+          <span>Déconnexion</span>
+        </button>
       </mat-menu>
     </div>
   </div>

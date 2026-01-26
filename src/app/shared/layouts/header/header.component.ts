@@ -13,6 +13,7 @@ import { Notification, NotificationType } from '../../models/notification.model'
 import { NotificationService } from '../../../../services/notification.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { KeycloakService } from 'keycloak-angular'; // ✅ AJOUT
 
 @Component({
   selector: 'app-header',
@@ -41,7 +42,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   userAvatar = 'assets/images/avatar.png';
   userName = signal('Chargement...');
   userEmail = signal('Chargement...');
-  // Compteur de messages non lus (enveloppe)
   messageUnreadCount = signal(0);
   hasNewMessages = signal(false);
   notifications = signal<Notification[]>([
@@ -66,6 +66,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode;
 
   private router = inject(Router);
+  private keycloakService = inject(KeycloakService); // ✅ AJOUT
   private subscriptions: Subscription[] = [];
 
   constructor(
@@ -80,7 +81,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadUserInfo();
     this.loadNotifications();
-    // S'abonner aux flux de notifications de messages
     this.subscriptions.push(
       this.notificationService.unreadMessagesCount$.subscribe(count => {
         this.messageUnreadCount.set(count);
@@ -96,27 +96,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private loadUserInfo(): void {
     const token = this.authService.getToken();
     if (token) {
-      // Utiliser le nom préféré ou le nom complet du token décodé
       const nomUnique = token.preferred_username || token.name || `${token.given_name || ''} ${token.family_name || ''}`.trim();
       this.userName.set(nomUnique);
       this.userEmail.set(token.email || '');
     } else {
-      // Fallback si le token n'est pas disponible
       this.userName.set('Utilisateur');
       this.userEmail.set('');
     }
   }
 
   private loadNotifications(): void {
-    /* this.notificationService.getUserNotifications().subscribe((notifications: any[]) => {
-       const mappedNotifications = notifications.map(n => ({
-         type: n.type,
-         message: n.message,
-         time: n.timestamp ? new Date(n.timestamp) : new Date()
-       }));
-       this.notifications.set(mappedNotifications);
-       this.notificationCount.set(mappedNotifications.length);
-     });*/
+    // Implémenter si nécessaire
   }
 
   toggleTheme(): void {
@@ -147,8 +137,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     return classes[type] || 'bg-gray-500';
   }
 
+  /**
+   * ✅ Déconnexion via Keycloak
+   */
   logout(): void {
-    // Implémenter la logique de déconnexion
+    this.keycloakService.logout(window.location.origin);
   }
 
   onToggleSidebar() {

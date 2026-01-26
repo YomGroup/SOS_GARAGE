@@ -44,13 +44,13 @@ export class DocumentGenerationComponent implements OnInit {
     },
     { 
       value: 'cession1', 
-      label: 'Cession Type 1', 
+      label: 'Cession de créance', 
       icon: 'fas fa-file-signature',
       description: 'Formulaire de cession de véhicule - Version 1'
     },
     { 
       value: 'cession2', 
-      label: 'Cession Type 2', 
+      label: 'Mandat de Gestion', 
       icon: 'fas fa-file-contract',
       description: 'Formulaire de cession de véhicule - Version 2'
     }
