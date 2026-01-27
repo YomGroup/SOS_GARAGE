@@ -128,7 +128,7 @@
               <th>Facture finale</th>
               <th>Commission</th>
               <th>Statut Commission</th>
-              <th>Actions</th>
+              <!--<th>Actions</th>-->
             </tr>
           </thead>
           <tbody>
@@ -147,11 +147,13 @@
                   {{ mission.commissionStatut }}
                 </span>
               </td>
+              <!---
               <td>
                 <button class="btn-detail" (click)="mission.id !== undefined && openMissionView(mission.id); $event.stopPropagation();" [disabled]="mission.id === undefined">
                   Voir détail
                 </button>
               </td>
+              --->
             </tr>
           </tbody>
         </table>

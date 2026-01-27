@@ -161,9 +161,11 @@
               </td>
               <td style="white-space: nowrap;">
                 <div style="display: flex; align-items: center; gap: 4px;">
+                  <!-- 
                   <button class="btn-detail" (click)="openMissionDetail(mission.id ?? 0); $event.stopPropagation();">
                     Voir détail
                   </button>
+                   -->
                   <button
                     *ngIf="mission.commissionStatut !== 'payée'"
                     class="btn-pay-commission"
