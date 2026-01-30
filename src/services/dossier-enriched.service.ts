@@ -47,8 +47,21 @@ export interface VehiculeInfo {
   modele: string;
   annee: string;
   dateCreationFormatted: string;
+  dateMiseEnCirculation: string;
+  dateDerniereCg: string;
   nomAssurance: string;
   typeAssurance: string;
+  energie: string;
+  nomCommerciale: string;
+  puissanceChevaux: string;
+  puissanceFiscale: string;
+  boiteVitesse: string;
+  imgUrl:any;
+  cylindree: string;
+  carteGrise: string;
+  typeMine: string;
+  version: string;
+  contratAssurance: string;
 }
 
 export interface AssureInfo {

@@ -293,9 +293,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     }
   }
 
-  // ============================================
-  // ⬇️⬇️⬇️ MÉTHODE MODIFIÉE ⬇️⬇️⬇️
-  // ============================================
+
   private loadData(page: number = 0, size: number = 10): void {
     this.isLoadingDossiers = true;
     this.cdr.detectChanges();
@@ -335,9 +333,21 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
                 modele: d.vehicule.modele,
                 immatriculation: d.vehicule.immatriculation,
                 annee: d.vehicule.annee,
-                dateMiseEnCirculation: d.vehicule.dateCreationFormatted,
+                dateMiseEnCirculation: d.vehicule.dateMiseEnCirculation,
                 nomAssurence: d.vehicule.nomAssurance,
-                typeAssurence: d.vehicule.typeAssurance
+                typeAssurence: d.vehicule.typeAssurance,
+                energie: d.vehicule.energie || 'Energie non spécifiée',
+                nomCommerciale: d.vehicule.nomCommerciale,
+                puissanceChevaux: d.vehicule.puissanceChevaux,
+                puissanceFiscale: d.vehicule.puissanceFiscale,
+                dateCreationFormatted: d.vehicule.dateCreationFormatted,
+                imgUrl: d.vehicule.imgUrl,
+                boiteVitesse: d.vehicule.boiteVitesse,
+                cylindree: d.vehicule.cylindree,
+                carteGrise: d.vehicule.carteGrise,
+                typeMine: d.vehicule.typeMine,
+                version: d.vehicule.version,
+                contratAssurance: d.vehicule.contratAssurance
               } : {},
               
               // Assurance
