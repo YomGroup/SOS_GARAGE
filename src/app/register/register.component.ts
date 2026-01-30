@@ -21,6 +21,7 @@ export class RegisterComponent implements OnInit {
   registerForm!: FormGroup;
   userType: 'assure' | 'garagiste' | null = null;
   isForced = false;
+  isLoading = false; // ⬅️ AJOUT
 
   constructor(private fb: FormBuilder) {}
 
@@ -44,7 +45,7 @@ export class RegisterComponent implements OnInit {
         nom: [''],
         prenom: [''],
         email: [''],
-        telephone: [''],
+        telephone: ['', [Validators.required, Validators.pattern(/^\+33[1-9]\d{8}$/)]], // ⬅️ MODIFIÉ
         adresse: [''],
         password: [''],
         adressePostale:['']
@@ -53,7 +54,7 @@ export class RegisterComponent implements OnInit {
       this.registerForm = this.fb.group({
         nomDuGarage: ['', Validators.required],
         email: ['', [Validators.required, Validators.email]],
-        telephone: ['', Validators.required],
+        telephone: ['', [Validators.required, Validators.pattern(/^\+33[1-9]\d{8}$/)]], // ⬅️ MODIFIÉ
         adresse: ['', Validators.required],
         password: ['', [Validators.required, Validators.minLength(8)]],
         isvalids: [false],
@@ -69,12 +70,17 @@ export class RegisterComponent implements OnInit {
       return;
     }
 
+    // ⬇️⬇️⬇️ ACTIVER LE CHARGEMENT
+    this.isLoading = true;
+
     const formData = this.registerForm.value;
-    formData.telephone = '+33' + formData.telephone;
+    // ⬇️⬇️⬇️ RETIRER CETTE LIGNE (on n'ajoute plus +33 automatiquement)
+    // formData.telephone = '+33' + formData.telephone;
 
     if (this.userType === 'assure') {
       this.authService.registerAssure(formData).subscribe({
         next: () => {
+          this.isLoading = false; // ⬅️ DÉSACTIVER LE CHARGEMENT
           Swal.fire({
             icon: 'success',
             title: 'Succès !',
@@ -87,6 +93,7 @@ export class RegisterComponent implements OnInit {
           if (!this.isForced) this.userType = null;
         },
         error: (error) => {
+          this.isLoading = false; // ⬅️ DÉSACTIVER LE CHARGEMENT
           console.error(error);
           Swal.fire({
             icon: 'error',
@@ -116,6 +123,7 @@ export class RegisterComponent implements OnInit {
 
       this.authService.registerGaragistre(reparateurPayload).subscribe({
         next: () => {
+          this.isLoading = false; // ⬅️ DÉSACTIVER LE CHARGEMENT
           Swal.fire({
             icon: 'success',
             title: 'Succès !',
@@ -127,6 +135,7 @@ export class RegisterComponent implements OnInit {
           if (!this.isForced) this.userType = null;
         },
         error: (error) => {
+          this.isLoading = false; // ⬅️ DÉSACTIVER LE CHARGEMENT
           console.error('Erreur API :', error);
           const errorMessage = error.error?.message || error.message || error.error || error;
           console.error("Message d'erreur brut:", errorMessage);
