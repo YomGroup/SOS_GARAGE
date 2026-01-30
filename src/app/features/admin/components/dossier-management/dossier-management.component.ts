@@ -806,6 +806,7 @@ export class DossierManagementComponent implements OnInit, AfterViewInit, OnChan
     this.dossierSelectionne = null;
     this.dossierEnEdition = false;
     this.dossierAffichageSelectionne = null;
+    this.loadData(this.pageIndex, this.pageSize);
   }
 
   onMissionUpdated(updated: Mission) {

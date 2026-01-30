@@ -408,17 +408,30 @@ export class ReparationManagementComponent implements OnInit, AfterViewInit {
     this.missionSelectionnee = null;
     this.dossierSelectionne = null;
     this.missionEnEdition = false;
+    this.refreshData();
     this.cdr.detectChanges();
   }
 
   onMissionUpdated(updatedMission: Mission): void {
-    const idx = this.missions.findIndex(m => m.id === updatedMission.id);
-    if (idx !== -1) this.missions[idx] = updatedMission;
-
-    this.missionSelectionnee = updatedMission;
-    this.dataSource._updateChangeSubscription();
-    this.cdr.detectChanges();
+  // Mettre à jour la mission dans la liste
+  const idx = this.missions.findIndex(m => m.id === updatedMission.id);
+  if (idx !== -1) {
+    this.missions[idx] = updatedMission;
   }
+
+  // Mettre à jour aussi la mission sélectionnée
+  this.missionSelectionnee = updatedMission;
+  
+  // Rafraîchir la source de données
+  this.dataSource.data = this.missionsFiltres;
+  this.dataSource._updateChangeSubscription();
+  
+  // Forcer la détection de changements
+  this.cdr.markForCheck();
+  this.cdr.detectChanges();
+  
+  console.log('Mission mise à jour:', updatedMission);
+}
 
   modifierMission(_: Reparation): void {
     alert('Fonctionnalité de modification à implémenter');

@@ -158,12 +158,17 @@ export class DossierViewComponent implements OnChanges, OnInit {
   }
 
   close() {
-    this.editionEnCours = false;
-    this.missionEdit = {};
-    this.edition = false;
-    this.closed.emit();
+  this.editionEnCours = false;
+  this.missionEdit = {};
+  this.edition = false;
+  
+  // Émettre la mission mise à jour avant de fermer (si elle existe)
+  if (this.mission) {
+    this.missionUpdated.emit(this.mission);
   }
-
+  
+  this.closed.emit();
+}
   lancerEdition() {
     if (this.mission) {
       this.editionEnCours = true;
@@ -332,76 +337,103 @@ getMSinistreDate(mission: Mission | null): string {
     this.chargerReparateursValides();
   }
 
-  creerMissionPourDossier() {
-    if (!this.selectedReparateurId || !this.dossier) return;
-    const nouvelleMission = {
-      idSinistre: this.dossier.id,
-      idReparateur: this.selectedReparateurId,
-      //statut: 'en cours',
-      dateCreation: new Date().toISOString(),
-      photosVehicule: [],
-      constatAccident: '',
-      documentsAssurance: [],
-      cessionCreance: '',
-      ordreReparation: '',
-      devis: 0,
-      factureFinale: 0,
-      pretVehicule: false,
-      //avantages: [],
-     // messages: [],
-      //reparation: null,
-      declareCommeEpave: false,
-      epaveValideeParAdmin: false,
-      dateDeclarationEpave: '',
-      //assure: this.assureInfo?.id ?? 0,
-      commissionStatut: 'non payée'
-    };
-    this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
-      next: async (mission) => {
-        this.attributionEnCours = false;
-        this.selectedReparateurId = null;
-        
-        try {
-          // Récupération des infos Assuré et Réparateur en parallèle
-          const [assure, reparateur] = await Promise.all([
-            this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
-            this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
-          ]);
 
-          if (reparateur && assure && reparateur.id && assure.id) {
-            // Création du chat dans le backend (PostgreSQL)
-            try {
-              const chatId = await this.chatService.createChatForMission(
-                assure.id,
-                reparateur.id
-              );
-              console.log('✅ Chat créé:', { 
-                chatId, 
-                assureId: assure.id, 
-                assureName: `${assure.name || ''} ${assure.prenom || ''}`.trim(),
-                reparateurId: reparateur.id,
-                garageName: reparateur.nomDuGarage || reparateur.name,
-                missionId: mission.id 
-              });
-            } catch (chatError) {
-              console.error('❌ Erreur création chat:', chatError);
-            }
-          } else {
-            console.warn('⚠️ IDs assuré/réparateur manquants pour créer le chat');
+
+creerMissionPourDossier() {
+  if (!this.selectedReparateurId || !this.dossier) return;
+  
+  // Activer l'état de chargement
+  this.attributionEnCours = true;
+  this.attributionSuccess = false;
+  this.attributionError = false;
+  this.attributionMessage = '';
+  
+  const nouvelleMission = {
+    idSinistre: this.dossier.id,
+    idReparateur: this.selectedReparateurId,
+    dateCreation: new Date().toISOString(),
+    photosVehicule: [],
+    constatAccident: '',
+    documentsAssurance: [],
+    cessionCreance: '',
+    ordreReparation: '',
+    devis: 0,
+    factureFinale: 0,
+    pretVehicule: false,
+    declareCommeEpave: false,
+    epaveValideeParAdmin: false,
+    dateDeclarationEpave: '',
+    commissionStatut: 'non payée'
+  };
+  
+  this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
+    next: async (mission) => {
+      try {
+        // Récupération des infos Assuré et Réparateur en parallèle
+        const [assure, reparateur] = await Promise.all([
+          this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
+          this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
+        ]);
+
+        if (reparateur && assure && reparateur.id && assure.id) {
+          try {
+            const chatId = await this.chatService.createChatForMission(
+              assure.id,
+              reparateur.id
+            );
+            console.log('✅ Chat créé:', { 
+              chatId, 
+              assureId: assure.id, 
+              assureName: `${assure.name || ''} ${assure.prenom || ''}`.trim(),
+              reparateurId: reparateur.id,
+              garageName: reparateur.nomDuGarage || reparateur.name,
+              missionId: mission.id 
+            });
+          } catch (chatError) {
+            console.error('❌ Erreur création chat:', chatError);
           }
-        } catch (error) {
-          console.error('❌ Erreur lors de la récupération des infos:', error);
         }
-
-        alert('Mission créée avec succès ! Une conversation a été ouverte avec l\'assuré.');
-        this.missionUpdated.emit(mission);
-      },
-      error: (err) => {
-        console.error('Erreur lors de la création de la mission:', err);
-        alert('Erreur lors de la création de la mission');
+      } catch (error) {
+        console.error('❌ Erreur lors de la récupération des infos:', error);
       }
-    });
-  }
+
+      // Désactiver le chargement et afficher le succès
+      this.attributionEnCours = false;
+      this.attributionSuccess = true;
+      this.attributionMessage = 'Mission créée avec succès ! Une conversation a été ouverte avec l\'assuré.';
+      this.selectedReparateurId = null;
+      
+      // Mettre à jour la mission locale
+      this.mission = mission;
+      
+      // Émettre l'événement de mise à jour
+      this.missionUpdated.emit(mission);
+      
+      // Forcer la détection de changements
+      this.cdr.detectChanges();
+      
+      // Masquer le message de succès après 5 secondes
+      setTimeout(() => {
+        this.attributionSuccess = false;
+        this.attributionMessage = '';
+        this.cdr.detectChanges();
+      }, 5000);
+    },
+    error: (err) => {
+      console.error('Erreur lors de la création de la mission:', err);
+      this.attributionEnCours = false;
+      this.attributionError = true;
+      this.attributionMessage = 'Erreur lors de la création de la mission : ' + (err.message || 'Erreur inconnue');
+      
+      // Masquer le message d'erreur après 5 secondes
+      setTimeout(() => {
+        this.attributionError = false;
+        this.attributionMessage = '';
+        this.cdr.detectChanges();
+      }, 5000);
+    }
+  });
+}
 
   // Nouvelles méthodes pour la gestion des documents Firebase
   ouvrirUploadDirect() {
@@ -626,19 +658,46 @@ getMSinistreDate(mission: Mission | null): string {
       return;
     }
 
-    // 3. Appel API
-    this.missionService.updateMissionReparateur(this.mission.id!, nouveauReparateur).subscribe({
-      next: (missionMaj) => {
-        this.attributionSuccess = true;
-        this.missionUpdated.emit(missionMaj);
-        this.mission = missionMaj;
-      },
-      error: (err) => {
-        console.error('Erreur:', err);
-        this.attributionError = true;
-        this.attributionMessage = 'Échec du changement';
-      }
-    });
+
+      // Activer l'état de chargement
+  this.attributionEnCours = true;
+  this.attributionSuccess = false;
+  this.attributionError = false;
+  this.attributionMessage = '';
+
+  this.missionService.updateMissionReparateur(this.mission.id!, nouveauReparateur).subscribe({
+    next: (missionMaj) => {
+      this.attributionEnCours = false;
+      this.attributionSuccess = true;
+      this.attributionMessage = 'Réparateur changé avec succès !';
+      this.mission = missionMaj;
+      this.missionUpdated.emit(missionMaj);
+      this.selectedReparateurId = null;
+      this.changerReparateurEnCours = false;
+      
+      this.cdr.detectChanges();
+      
+      // Masquer le message après 5 secondes
+      setTimeout(() => {
+        this.attributionSuccess = false;
+        this.attributionMessage = '';
+        this.cdr.detectChanges();
+      }, 5000);
+    },
+    error: (err) => {
+      console.error('Erreur:', err);
+      this.attributionEnCours = false;
+      this.attributionError = true;
+      this.attributionMessage = 'Échec du changement de réparateur';
+      
+      setTimeout(() => {
+        this.attributionError = false;
+        this.attributionMessage = '';
+        this.cdr.detectChanges();
+      }, 5000);
+    }
+  });
+
   }
 
   saveCommissionStatut() {

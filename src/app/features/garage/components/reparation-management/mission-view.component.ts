@@ -227,11 +227,17 @@ export class MissionViewComponent implements OnChanges {
   }
 
   close() {
-    this.editionEnCours = false;
-    this.missionEdit = {};
-    this.edition = false;
-    this.closed.emit();
+  this.editionEnCours = false;
+  this.missionEdit = {};
+  this.edition = false;
+  
+  // Émettre un événement avec la mission mise à jour avant de fermer
+  if (this.mission) {
+    this.missionUpdated.emit(this.mission);
   }
+  
+  this.closed.emit();
+}
 
   lancerEdition() {
     // Empêcher l'édition si la mission est terminée
@@ -272,85 +278,110 @@ export class MissionViewComponent implements OnChanges {
   }
 
   enregistrerModification() {
-    if (!this.mission) return;
-    
-    const missionUpdate: MissionUpdate = {};
-    
-    // Validation et conversion des données
-    if (this.missionEdit.devis !== undefined && this.missionEdit.devis !== null) {
-      const devis = Number(this.missionEdit.devis);
-      if (!isNaN(devis) && devis >= 0) {
-        missionUpdate.devis = devis;
-      }
+  if (!this.mission) return;
+  
+  // Activer l'état de chargement
+  this.uploadingFiles = true;
+  this.uploadErrorMessage = '';
+  
+  const missionUpdate: MissionUpdate = {};
+  
+  // Validation et conversion des données
+  if (this.missionEdit.devis !== undefined && this.missionEdit.devis !== null) {
+    const devis = Number(this.missionEdit.devis);
+    if (!isNaN(devis) && devis >= 0) {
+      missionUpdate.devis = devis;
     }
-    
-    if (this.missionEdit.factureFinale !== undefined && this.missionEdit.factureFinale !== null) {
-      const facture = Number(this.missionEdit.factureFinale);
-      if (!isNaN(facture) && facture >= 0) {
-        missionUpdate.factureFinale = facture;
-      }
-    }
-    
-    if (this.missionEdit.pretVehicule !== undefined) {
-      missionUpdate.pretVehicule = Boolean(this.missionEdit.pretVehicule);
-    }
-    
-    if (this.missionEdit.statut && ['en attente', 'en cours', 'terminée'].includes(this.missionEdit.statut)) {
-      missionUpdate.statut = this.missionEdit.statut;
-    }
-
-    // Inclure les documents d'assurance (convertir en URLs si objets)
-    if (this.missionEdit.documentsAssurance) {
-      missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance.map((doc: any) =>
-        (doc && typeof doc === 'object' && doc.url) ? doc.url : doc
-      );
-    }
-
-    // Champs financiers ajoutés
-    if (this.missionEdit.montantStatue !== undefined && this.missionEdit.montantStatue !== null) {
-      const montantStatue = Number(this.missionEdit.montantStatue);
-      if (!isNaN(montantStatue) && montantStatue >= 0) {
-        missionUpdate.montantStatue = montantStatue;
-      }
-    }
-    if (this.missionEdit.franchiseApplicable !== undefined && this.missionEdit.franchiseApplicable !== null) {
-      const franchiseApplicable = Number(this.missionEdit.franchiseApplicable);
-      if (!isNaN(franchiseApplicable) && franchiseApplicable >= 0) {
-        missionUpdate.franchiseApplicable = franchiseApplicable;
-      }
-    }
-    if (this.missionEdit.commissionPourcentage !== undefined && this.missionEdit.commissionPourcentage !== null) {
-      const commissionPourcentage = Number(this.missionEdit.commissionPourcentage);
-      if (!isNaN(commissionPourcentage) && commissionPourcentage >= 0) {
-        missionUpdate.commissionPourcentage = commissionPourcentage;
-      }
-    }
-
-    missionUpdate.lienExpertise=this.lienExpertise;
-    missionUpdate.lienFacture=this.lienFacture;
-
-    // Calcul et sauvegarde du montant de la commission
-    missionUpdate.commissionMontant = this.calculerCommission(
-      this.missionEdit.factureFinale,
-      this.missionEdit.franchiseApplicable,
-      this.missionEdit.commissionPourcentage
-    );
-
-    console.log('Données à envoyer:', missionUpdate);
-
-    this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
-      next: (updatedMission) => {
-        console.log('Mission mise à jour avec succès:', updatedMission);
-        this.editionEnCours = false;
-        this.missionEdit = { documentsAssurance: [] };
-        this.missionUpdated.emit(updatedMission);
-      },
-      error: (error) => {
-        console.error('Erreur lors de la modification:', error);
-        alert(`Erreur: ${error.message}`);
-      }
-    });
   }
+  
+  if (this.missionEdit.factureFinale !== undefined && this.missionEdit.factureFinale !== null) {
+    const facture = Number(this.missionEdit.factureFinale);
+    if (!isNaN(facture) && facture >= 0) {
+      missionUpdate.factureFinale = facture;
+    }
+  }
+  
+  if (this.missionEdit.pretVehicule !== undefined) {
+    missionUpdate.pretVehicule = Boolean(this.missionEdit.pretVehicule);
+  }
+  
+  if (this.missionEdit.statut && ['en attente', 'en cours', 'terminée'].includes(this.missionEdit.statut)) {
+    missionUpdate.statut = this.missionEdit.statut;
+  }
+
+  // Inclure les documents d'assurance (convertir en URLs si objets)
+  if (this.missionEdit.documentsAssurance) {
+    missionUpdate.documentsAssurance = this.missionEdit.documentsAssurance.map((doc: any) =>
+      (doc && typeof doc === 'object' && doc.url) ? doc.url : doc
+    );
+  }
+
+  // Champs financiers ajoutés
+  if (this.missionEdit.montantStatue !== undefined && this.missionEdit.montantStatue !== null) {
+    const montantStatue = Number(this.missionEdit.montantStatue);
+    if (!isNaN(montantStatue) && montantStatue >= 0) {
+      missionUpdate.montantStatue = montantStatue;
+    }
+  }
+  if (this.missionEdit.franchiseApplicable !== undefined && this.missionEdit.franchiseApplicable !== null) {
+    const franchiseApplicable = Number(this.missionEdit.franchiseApplicable);
+    if (!isNaN(franchiseApplicable) && franchiseApplicable >= 0) {
+      missionUpdate.franchiseApplicable = franchiseApplicable;
+    }
+  }
+  if (this.missionEdit.commissionPourcentage !== undefined && this.missionEdit.commissionPourcentage !== null) {
+    const commissionPourcentage = Number(this.missionEdit.commissionPourcentage);
+    if (!isNaN(commissionPourcentage) && commissionPourcentage >= 0) {
+      missionUpdate.commissionPourcentage = commissionPourcentage;
+    }
+  }
+
+  missionUpdate.lienExpertise = this.lienExpertise;
+  missionUpdate.lienFacture = this.lienFacture;
+
+  // Calcul et sauvegarde du montant de la commission
+  missionUpdate.commissionMontant = this.calculerCommission(
+    this.missionEdit.factureFinale,
+    this.missionEdit.franchiseApplicable,
+    this.missionEdit.commissionPourcentage
+  );
+
+  console.log('Données à envoyer:', missionUpdate);
+
+  this.missionService.updateMission(this.mission.id ?? 0, missionUpdate).subscribe({
+    next: (updatedMission) => {
+      console.log('Mission mise à jour avec succès:', updatedMission);
+      
+      // Désactiver le chargement
+      this.uploadingFiles = false;
+      this.editionEnCours = false;
+      this.missionEdit = { documentsAssurance: [] };
+      
+      // Émettre la mission mise à jour
+      this.missionUpdated.emit(updatedMission);
+      
+      // Forcer la détection de changements
+      this.cdr.detectChanges();
+      
+      // Message de succès optionnel
+      alert('Données financières mises à jour avec succès !');
+    },
+    error: (error) => {
+      console.error('Erreur lors de la modification:', error);
+      
+      // Désactiver le chargement
+      this.uploadingFiles = false;
+      
+      // Afficher l'erreur
+      this.uploadErrorMessage = `Erreur: ${error.message}`;
+      
+      // Forcer la détection de changements
+      this.cdr.detectChanges();
+      
+      alert(`Erreur: ${error.message}`);
+    }
+  });
+}
 
   // Nouvelles méthodes pour les uploads spécifiques
   uploadDevis() {
@@ -643,29 +674,68 @@ export class MissionViewComponent implements OnChanges {
   }
 
   enregistrerStatutAvancement() {
-    if (!this.mission?.sinistre?.id) return;
-    
-    // Envoyer seulement la valeur du statut, pas un objet
-    const statutValue = this.statutAvancementEdit || '';
+  if (!this.mission?.sinistre?.id) return;
+  
+  // Activer l'état de chargement
+  this.uploadingFiles = true;
+  this.uploadErrorMessage = '';
+  
+  // Envoyer seulement la valeur du statut, pas un objet
+  const statutValue = this.statutAvancementEdit || '';
 
-    // Utiliser le service dossiers pour mettre à jour le sinistre
-    this.dossiersService.updateStatutSinistre(this.mission.sinistre.id, statutValue).subscribe({
-      next: (updatedSinistre) => {
-        console.log('Statut mis à jour avec succès:', updatedSinistre);
-        this.statutAvancementEdit = null;
-        this.editionEnCours = false;
-        // Mettre à jour la mission avec les nouvelles données
-        if (this.mission) {
-          this.mission.sinistre = { ...this.mission.sinistre, statut: statutValue };
-          this.missionUpdated.emit(this.mission);
-        }
-      },
-      error: (error) => {
-        console.error('Erreur lors de la modification du statut:', error);
-        alert(`Erreur: ${error.message}`);
+  // Utiliser le service dossiers pour mettre à jour le sinistre
+  this.dossiersService.updateStatutSinistre(this.mission.sinistre.id, statutValue).subscribe({
+    next: (updatedSinistre) => {
+      console.log('Statut mis à jour avec succès:', updatedSinistre);
+      
+      // Désactiver le chargement
+      this.uploadingFiles = false;
+      this.statutAvancementEdit = null;
+      this.editionEnCours = false;
+      
+      // Mettre à jour le statut dans la mission ET dans le sinistre
+      if (this.mission) {
+        // Mettre à jour le sinistre
+        this.mission.sinistre = { 
+          ...this.mission.sinistre, 
+          statut: statutValue 
+        };
+        
+        // Mettre à jour aussi le statut de la mission pour synchronisation
+        this.mission.statut = statutValue;
+        
+        // Émettre la mission mise à jour
+        this.missionUpdated.emit(this.mission);
       }
-    });
-  }
+      
+      // Forcer PLUSIEURS détections de changements pour être sûr
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+      
+      // Forcer un second cycle de détection après un court délai
+      setTimeout(() => {
+        this.cdr.detectChanges();
+      }, 0);
+      
+      // Message de succès
+      alert('Statut d\'avancement mis à jour avec succès !');
+    },
+    error: (error) => {
+      console.error('Erreur lors de la modification du statut:', error);
+      
+      // Désactiver le chargement
+      this.uploadingFiles = false;
+      
+      // Afficher l'erreur
+      this.uploadErrorMessage = `Erreur: ${error.message}`;
+      
+      // Forcer la détection de changements
+      this.cdr.detectChanges();
+      
+      alert(`Erreur: ${error.message}`);
+    }
+  });
+}
 
   // Méthodes pour l'édition de l'expert
   lancerEditionExpert() {

@@ -13,7 +13,28 @@
   z-index: 1050;
   padding: 20px;
 }
+/* Animation pour les messages */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Style pour le spinner */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.2em;
+}
 .view-modal {
   background: white;
   border-radius: 15px;

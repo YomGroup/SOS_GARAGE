@@ -148,41 +148,45 @@
 
       <!-- Attribution du réparateur (pour les dossiers sans mission) -->
       <div class="form-section" *ngIf="!mission && dossier">
-        <h3>
-          <i class="fas fa-user-cog me-2"></i>Attribuer ce dossier à un
-          réparateur
-        </h3>
-        <p>
-          Ce dossier n'est pas encore traité. Veuillez attribuer un réparateur
-          pour commencer le processus.
-        </p>
-        <label for="reparateurSelect">Sélectionner un réparateur :</label>
-        <select
-          id="reparateurSelect"
-          class="form-select"
-          [(ngModel)]="selectedReparateurId"
-        >
-          <option [ngValue]="null">-- Choisir --</option>
-          <option *ngFor="let rep of reparateursValides" [ngValue]="rep.id">
-            {{ rep.nomDuGarage }} ({{ rep.name }} {{ rep.prenom }})
-          </option>
-        </select>
-        <div class="d-flex justify-content-center gap-2 mt-2">
-          <button
-            class="btn btn-success"
-            (click)="creerMissionPourDossier()"
-            [disabled]="!selectedReparateurId"
-          >
-            Valider
-          </button>
-        </div>
-        <div *ngIf="attributionSuccess" class="alert alert-success mt-2">
-          {{ attributionMessage }}
-        </div>
-        <div *ngIf="attributionError" class="alert alert-danger mt-2">
-          {{ attributionMessage }}
-        </div>
-      </div>
+  <h3>
+    <i class="fas fa-user-cog me-2"></i>Attribuer ce dossier à un réparateur
+  </h3>
+  <p>
+    Ce dossier n'est pas encore traité. Veuillez attribuer un réparateur
+    pour commencer le processus.
+  </p>
+  <label for="reparateurSelect">Sélectionner un réparateur :</label>
+  <select
+    id="reparateurSelect"
+    class="form-select"
+    [(ngModel)]="selectedReparateurId"
+    [disabled]="attributionEnCours"
+  >
+    <option [ngValue]="null">-- Choisir --</option>
+    <option *ngFor="let rep of reparateursValides" [ngValue]="rep.id">
+      {{ rep.nomDuGarage }} ({{ rep.name }} {{ rep.prenom }})
+    </option>
+  </select>
+  
+  <div class="d-flex justify-content-center gap-2 mt-2">
+    <button
+      class="btn btn-success"
+      (click)="creerMissionPourDossier()"
+      [disabled]="!selectedReparateurId || attributionEnCours"
+    >
+      <span *ngIf="attributionEnCours" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      <i *ngIf="!attributionEnCours" class="fas fa-check me-2"></i>
+      {{ attributionEnCours ? 'Attribution en cours...' : 'Valider' }}
+    </button>
+  </div>
+  
+  <div *ngIf="attributionSuccess" class="alert alert-success mt-2 fade-in">
+    <i class="fas fa-check-circle me-2"></i>{{ attributionMessage }}
+  </div>
+  <div *ngIf="attributionError" class="alert alert-danger mt-2 fade-in">
+    <i class="fas fa-exclamation-triangle me-2"></i>{{ attributionMessage }}
+  </div>
+</div>
 
       <!-- Sections déroulantes -->
       <div class="accordion-section">

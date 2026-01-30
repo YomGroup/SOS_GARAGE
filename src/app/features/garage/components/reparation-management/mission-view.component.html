@@ -12,35 +12,43 @@
     <div class="dialog-content">
       <!-- Statut d'avancement en vedette (tout en haut) -->
       <div class="statut-avancement-section">
-        <h3><i class="fas fa-tasks me-2"></i>État d'avancement du traitement</h3>
-        <div class="statut-avancement-display">
-          <span class="badge-large" [ngClass]="getStatutAvancementClass(mission?.sinistre?.statut)">
-            {{ getStatutAvancementLabel(mission?.statut) }}
-          </span>
-        </div>
+  <h3><i class="fas fa-tasks me-2"></i>État d'avancement du traitement</h3>
+  <div class="statut-avancement-display">
+    <span class="badge-large" [ngClass]="getStatutAvancementClass(mission?.sinistre?.statut)">
+      {{ getStatutAvancementLabel(mission?.sinistre?.statut) }}
+    </span>
+  </div>
         
         <!-- Mode édition pour le statut -->
-        <form *ngIf="canEditMission() && editionEnCours; else statutLectureSeule" (ngSubmit)="enregistrerStatutAvancement()" class="statut-edit-form">
-          <div class="form-group">
-            <label>Statut d'avancement</label>
-            <select class="form-select" [(ngModel)]="statutAvancementEdit" name="statutAvancement">
-              <option [ngValue]="null">Sélectionner un statut</option>
-              <option value="EN_ATTENTE_TRAITEMENT">En attente de traitement</option>
-              <option value="EN_ATTENTE_EXPERTISE">En attente d'expertise</option>
-              <option value="EN_ATTENTE_REPARATION">En attente de réparation</option>
-              <option value="EN_COURS_REPARATION">En cours de réparation</option>
-              <option value="REPARATION_TERMINEE">Réparation terminée</option>
-            </select>
-          </div>
-          <div class="statut-actions">
-            <button type="button" class="btn btn-secondary btn-sm" (click)="annulerStatutAvancement()">
-              <i class="fas fa-times me-2"></i>Annuler
-            </button>
-            <button type="submit" class="btn btn-success btn-sm">
-              <i class="fas fa-check me-2"></i>Enregistrer
-            </button>
-          </div>
-        </form>
+       <form *ngIf="canEditMission() && editionEnCours; else statutLectureSeule" (ngSubmit)="enregistrerStatutAvancement()" class="statut-edit-form">
+  <div class="form-group">
+    <label>Statut d'avancement</label>
+    <select class="form-select" [(ngModel)]="statutAvancementEdit" name="statutAvancement" [disabled]="uploadingFiles">
+      <option [ngValue]="null">Sélectionner un statut</option>
+      <option value="EN_ATTENTE_TRAITEMENT">En attente de traitement</option>
+      <option value="EN_ATTENTE_EXPERTISE">En attente d'expertise</option>
+      <option value="EN_ATTENTE_REPARATION">En attente de réparation</option>
+      <option value="EN_COURS_REPARATION">En cours de réparation</option>
+      <option value="REPARATION_TERMINEE">Réparation terminée</option>
+    </select>
+  </div>
+  
+  <!-- Message d'erreur -->
+  <div *ngIf="uploadErrorMessage" class="alert alert-danger mt-2 fade-in">
+    <i class="fas fa-exclamation-triangle me-2"></i>{{ uploadErrorMessage }}
+  </div>
+  
+  <div class="statut-actions">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="annulerStatutAvancement()" [disabled]="uploadingFiles">
+      <i class="fas fa-times me-2"></i>Annuler
+    </button>
+    <button type="submit" class="btn btn-success btn-sm" [disabled]="uploadingFiles || !statutAvancementEdit">
+      <span *ngIf="uploadingFiles" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      <i *ngIf="!uploadingFiles" class="fas fa-check me-2"></i>
+      {{ uploadingFiles ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
+  </div>
+</form>
 
         <!-- Mode lecture seule pour le statut -->
         <ng-template #statutLectureSeule>
@@ -193,7 +201,11 @@
               </div>
               <div class="actions-grid">
                 <button type="button" class="btn btn-secondary" (click)="annulerEdition()">Annuler</button>
-                <button type="submit" class="btn btn-success">Enregistrer</button>
+                <button type="submit" class="btn btn-success" [disabled]="uploadingFiles">
+  <span *ngIf="uploadingFiles" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+  <i *ngIf="!uploadingFiles" class="fas fa-check me-2"></i>
+  {{ uploadingFiles ? 'Enregistrement en cours...' : 'Enregistrer' }}
+</button>
               </div>
             </form>
             <ng-template #lectureSeuleFinanciere>
