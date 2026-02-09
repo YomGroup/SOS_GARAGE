@@ -342,7 +342,6 @@ getMSinistreDate(mission: Mission | null): string {
 creerMissionPourDossier() {
   if (!this.selectedReparateurId || !this.dossier) return;
   
-  // Activer l'état de chargement
   this.attributionEnCours = true;
   this.attributionSuccess = false;
   this.attributionError = false;
@@ -369,7 +368,6 @@ creerMissionPourDossier() {
   this.missionService.createMission(nouvelleMission as unknown as Mission).subscribe({
     next: async (mission) => {
       try {
-        // Récupération des infos Assuré et Réparateur en parallèle
         const [assure, reparateur] = await Promise.all([
           this.assureService.getAssureBySinistreId(nouvelleMission.idSinistre).toPromise(),
           this.reparateurService.getReparateur(nouvelleMission.idReparateur).toPromise()
@@ -381,14 +379,7 @@ creerMissionPourDossier() {
               assure.id,
               reparateur.id
             );
-            console.log('✅ Chat créé:', { 
-              chatId, 
-              assureId: assure.id, 
-              assureName: `${assure.name || ''} ${assure.prenom || ''}`.trim(),
-              reparateurId: reparateur.id,
-              garageName: reparateur.nomDuGarage || reparateur.name,
-              missionId: mission.id 
-            });
+            console.log('✅ Chat créé:', { chatId, missionId: mission.id });
           } catch (chatError) {
             console.error('❌ Erreur création chat:', chatError);
           }
@@ -397,27 +388,28 @@ creerMissionPourDossier() {
         console.error('❌ Erreur lors de la récupération des infos:', error);
       }
 
-      // Désactiver le chargement et afficher le succès
       this.attributionEnCours = false;
       this.attributionSuccess = true;
-      this.attributionMessage = 'Mission créée avec succès ! Une conversation a été ouverte avec l\'assuré.';
+      this.attributionMessage = 'Mission créée avec succès !';
       this.selectedReparateurId = null;
       
-      // Mettre à jour la mission locale
+      // ⬇️⬇️⬇️ IMPORTANT : Mettre à jour le dossier local ⬇️⬇️⬇️
       this.mission = mission;
       
-      // Émettre l'événement de mise à jour
+      // ⬇️⬇️⬇️ FORCER LE RECHARGEMENT DES DONNÉES DANS LE PARENT ⬇️⬇️⬇️
       this.missionUpdated.emit(mission);
       
-      // Forcer la détection de changements
       this.cdr.detectChanges();
       
-      // Masquer le message de succès après 5 secondes
       setTimeout(() => {
         this.attributionSuccess = false;
         this.attributionMessage = '';
+        
+        // ⬇️⬇️⬇️ FERMER LA VUE DÉTAILLÉE POUR FORCER LE REFRESH ⬇️⬇️⬇️
+        this.close(); // Cela va émettre closed et recharger les dossiers
+        
         this.cdr.detectChanges();
-      }, 5000);
+      }, 2000);
     },
     error: (err) => {
       console.error('Erreur lors de la création de la mission:', err);
@@ -425,7 +417,6 @@ creerMissionPourDossier() {
       this.attributionError = true;
       this.attributionMessage = 'Erreur lors de la création de la mission : ' + (err.message || 'Erreur inconnue');
       
-      // Masquer le message d'erreur après 5 secondes
       setTimeout(() => {
         this.attributionError = false;
         this.attributionMessage = '';

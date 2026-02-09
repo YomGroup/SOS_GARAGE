@@ -126,13 +126,17 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-content">
+      
+      <!-- ============================================ -->
+      <!-- SECTION 1 : MARQUE (reste identique) -->
+      <!-- ============================================ -->
       <div class="footer-section">
         <div class="footer-brand">
           <div class="footer-logo">🚗</div>
           <span class="footer-brand-text">SOS MON GARAGE</span>
         </div>
         <p>
-          Votre partenaire de confiance pour la gestion de vos sinistres automobiles.
+          Votre partenaire de confiance pour la gestion de vos sinistres auto et moto.
           Nous nous occupons de tout, de A à Z.
         </p>
         <div class="social-links">
@@ -148,47 +152,52 @@
         </div>
       </div>
       
-      <!-- <div class="footer-section">
-        <h4>Services</h4>
-        <ul>
-          <li>Déclaration de sinistre</li>
-          <li>Gestion d'expertise</li>
-          <li>Réseau de garages</li>
-          <li>Véhicule de remplacement</li>
-          <li>Avance de frais</li>
-        </ul>
-      </div> -->
-      
+      <!-- ============================================ -->
+      <!-- SECTION 2 : ENTREPRISE (reste identique) -->
+      <!-- ============================================ -->
       <div class="footer-section">
         <h4>Entreprise</h4>
         <ul>
           <li routerLink="/client/services">Services</li>
-          <li routerLink="/client/class">Comment ça marche</li>
+          <li routerLink="/client/comment-ca-marche">Comment ça marche</li>
           <li routerLink="/client/contact">Contact</li>
-          <!-- <li>Actualités</li>
-          <li>Partenaires</li> -->
         </ul>
       </div>
       
+      <!-- ============================================ -->
+      <!-- SECTION 3 : SUPPORT (Contact + FAQ) -->
+      <!-- ============================================ -->
       <div class="footer-section">
-        <h4>Support</h4>
+        <h4>Contact</h4>
         <ul>
-          <li routerLink="/client/contact">Contact</li>
+          
           <li (click)="scrollTo('contact-info', '/client/contact')">Nous contacter</li>
           <li (click)="scrollTo('faq', '/client/comment-ca-marche')">FAQ</li>
-          <li>Conditions d'utilisation</li>
-          <li>Politique de confidentialité</li>
+          <li routerLink="/client/support">Support client</li>
         </ul>
       </div>
+
+      <!-- ============================================ -->
+      <!-- 🆕 SECTION 4 : LÉGAL (Documents légaux) -->
+      <!-- ============================================ -->
+      <div class="footer-section">
+        <h4>Légal</h4>
+        <ul>
+          <li routerLink="/client/mentions-legales">Mentions légales</li>
+          <li routerLink="/client/conditions-utilisation">Conditions d'utilisation</li>
+          <li routerLink="/client/politique-confidentialite">Politique de confidentialité</li>
+          <li routerLink="/client/cookies">Cookies</li>
+        </ul>
+      </div>
+      
     </div>
     
+    <!-- ============================================ -->
+    <!-- FOOTER BOTTOM (simplifié) -->
+    <!-- ============================================ -->
     <div class="footer-bottom">
       <div class="footer-bottom-content">
         <p>&copy; 2025 SOS MON GARAGE. Tous droits réservés.</p>
-        <div class="footer-bottom-links">
-          <a href="#">Mentions légales</a>
-          <a href="#">Cookies</a>
-        </div>
       </div>
     </div>
   </div>

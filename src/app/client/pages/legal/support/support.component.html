@@ -1,0 +1,120 @@
+<div class="support-page">
+
+  <!-- HERO -->
+  <section class="support-hero">
+    <div class="support-hero-bg-top"></div>
+    <div class="support-hero-bg-bottom"></div>
+
+    <div class="page-container support-hero-inner">
+      <span class="support-badge">
+        <span class="support-badge-text">Support Client</span>
+      </span>
+
+      <h1 class="support-hero-title">
+        Besoin d'aide ?<br />
+        <span class="support-hero-gradient">
+          Nous sommes là pour vous
+        </span>
+      </h1>
+
+      <p class="support-hero-subtitle">
+        Contactez-nous par email ou WhatsApp. Notre équipe vous répond rapidement.
+      </p>
+    </div>
+  </section>
+
+  <!-- MÉTHODES DE CONTACT -->
+  <section class="support-methods">
+    <div class="page-container">
+      <div class="support-methods-grid">
+        <div
+          class="support-card"
+          *ngFor="let method of supportMethods"
+        >
+          <div class="support-card-icon-wrapper">
+            <div class="support-card-icon-bg">
+              <span class="support-card-icon">{{ method.icon }}</span>
+            </div>
+          </div>
+
+          <h3 class="support-card-title">
+            {{ method.title }}
+          </h3>
+
+          <p class="support-card-value">
+            {{ method.value }}
+          </p>
+
+          <p class="support-card-desc">
+            {{ method.description }}
+          </p>
+
+          <button
+            class="support-card-btn"
+            (click)="openLink(method.link)"
+          >
+            {{ method.linkText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="support-faq" id="faq">
+    <div class="page-container">
+      <div class="support-faq-header">
+        <h2 class="support-faq-title">
+          Questions fréquentes
+        </h2>
+        <p class="support-faq-subtitle">
+          Trouvez rapidement des réponses à vos questions
+        </p>
+      </div>
+
+      <div class="support-faq-list">
+        <div
+          class="support-faq-item"
+          *ngFor="let item of faqItems; let i = index"
+          [class.is-open]="item.isOpen"
+        >
+          <button
+            class="support-faq-question"
+            (click)="toggleFaq(i)"
+          >
+            <span class="support-faq-question-text">
+              {{ item.question }}
+            </span>
+            <span class="support-faq-icon" [class.rotated]="item.isOpen">
+              ▼
+            </span>
+          </button>
+
+          <div class="support-faq-answer" *ngIf="item.isOpen">
+            <p>{{ item.answer }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HORAIRES & DISPONIBILITÉ -->
+  <section class="support-availability">
+    <div class="page-container">
+      <div class="support-availability-card">
+        <div class="support-availability-content">
+          <div class="support-availability-icon">⏰</div>
+          <h3 class="support-availability-title">Nos horaires</h3>
+          <p class="support-availability-text">
+            Lundi - Vendredi : 9h - 18h<br />
+            Samedi - Dimanche : Fermé
+          </p>
+          <p class="support-availability-note">
+            Les demandes reçues en dehors de ces horaires seront traitées le jour ouvrable suivant.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>

@@ -1,0 +1,243 @@
+<div class="legal-container">
+  <div class="legal-header">
+    <h1>Charte des Cookies</h1>
+    <p class="subtitle">SOS Mon Garage</p>
+  </div>
+
+  <div class="legal-content">
+    <section class="legal-section">
+      <h2>1. Qu'est-ce qu'un cookie ?</h2>
+      <div class="text-block">
+        <p>Un cookie est un petit fichier texte déposé sur votre terminal (ordinateur, smartphone, tablette) lors de votre visite sur l'application ou le site web SOS Mon Garage. Les cookies permettent de reconnaître votre terminal lors de vos prochaines visites.</p>
+        
+        <div class="cookie-info-grid">
+          <div class="cookie-info-card">
+            <h4>🍪 Cookies de session</h4>
+            <p>Temporaires, supprimés à la fermeture du navigateur</p>
+          </div>
+          <div class="cookie-info-card">
+            <h4>💾 Cookies persistants</h4>
+            <p>Conservés sur votre terminal pendant une durée déterminée</p>
+          </div>
+          <div class="cookie-info-card">
+            <h4>🌐 Cookies tiers</h4>
+            <p>Déposés par des partenaires externes</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="legal-section">
+      <h2>2. Pourquoi utilisons-nous des cookies ?</h2>
+      <div class="text-block">
+        <ul class="custom-list">
+          <li>Assurer le bon fonctionnement de l'application</li>
+          <li>Améliorer votre expérience utilisateur</li>
+          <li>Personnaliser votre navigation</li>
+          <li>Analyser l'utilisation de l'application</li>
+          <li>Vous proposer des publicités adaptées</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="legal-section">
+      <h2>3. Types de cookies utilisés</h2>
+
+      <!-- Cookies essentiels -->
+      <div class="cookie-category essential">
+        <div class="category-header">
+          <h3>🔐 Cookies strictement nécessaires</h3>
+          <span class="badge required">Obligatoires</span>
+        </div>
+        <p class="category-description">Ces cookies sont indispensables au fonctionnement de l'application. Ils ne peuvent pas être désactivés.</p>
+        
+        <div class="cookies-table">
+          <div class="table-header">
+            <span>Nom du cookie</span>
+            <span>Finalité</span>
+            <span>Durée</span>
+          </div>
+          <div class="table-row" *ngFor="let cookie of essentialCookies">
+            <span class="cookie-name">{{ cookie.name }}</span>
+            <span class="cookie-purpose">{{ cookie.purpose }}</span>
+            <span class="cookie-duration">{{ cookie.duration }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cookies de performance -->
+      <div class="cookie-category performance">
+        <div class="category-header">
+          <h3>📊 Cookies de performance et d'analyse</h3>
+          <span class="badge optional">Optionnels</span>
+        </div>
+        <p class="category-description">Ces cookies nous permettent d'analyser comment vous utilisez l'application pour l'améliorer.</p>
+        
+        <div class="cookies-table">
+          <div class="table-header">
+            <span>Nom du cookie</span>
+            <span>Finalité</span>
+            <span>Durée</span>
+          </div>
+          <div class="table-row" *ngFor="let cookie of performanceCookies">
+            <span class="cookie-name">{{ cookie.name }}</span>
+            <span class="cookie-purpose">{{ cookie.purpose }}</span>
+            <span class="cookie-duration">{{ cookie.duration }}</span>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <p><strong>Ces cookies collectent :</strong></p>
+          <ul class="custom-list">
+            <li>Pages visitées</li>
+            <li>Durée de visite</li>
+            <li>Source de trafic</li>
+            <li>Comportement de navigation</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Cookies marketing -->
+      <div class="cookie-category marketing">
+        <div class="category-header">
+          <h3>🎯 Cookies publicitaires et de ciblage</h3>
+          <span class="badge optional">Optionnels - Consentement requis</span>
+        </div>
+        <p class="category-description">Avec votre consentement, ces cookies permettent de vous proposer des publicités pertinentes.</p>
+        
+        <div class="cookies-table">
+          <div class="table-header">
+            <span>Nom</span>
+            <span>Fournisseur</span>
+            <span>Finalité</span>
+            <span>Durée</span>
+          </div>
+          <div class="table-row" *ngFor="let cookie of marketingCookies">
+            <span class="cookie-name">{{ cookie.name }}</span>
+            <span class="cookie-provider">{{ cookie.provider }}</span>
+            <span class="cookie-purpose">{{ cookie.purpose }}</span>
+            <span class="cookie-duration">{{ cookie.duration }}</span>
+          </div>
+        </div>
+
+        <div class="warning-box">
+          <p><strong>Ces cookies permettent :</strong></p>
+          <ul class="custom-list">
+            <li>D'afficher des publicités en rapport avec vos intérêts</li>
+            <li>De limiter le nombre d'affichages d'une même publicité</li>
+            <li>De mesurer l'efficacité des campagnes publicitaires</li>
+            <li>De personnaliser les offres proposées</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="legal-section">
+      <h2>4. Gérer vos préférences de cookies</h2>
+
+      <div class="preferences-section">
+        <h3>🎛️ Paramétrage dans l'application</h3>
+        <p>Vous pouvez gérer vos préférences de cookies directement :</p>
+        
+        <div class="preferences-buttons">
+          <button class="btn btn-accept" (click)="acceptAllCookies()">
+            ✓ Accepter tous les cookies
+          </button>
+          <button class="btn btn-refuse" (click)="refuseOptionalCookies()">
+            ✗ Refuser les cookies optionnels
+          </button>
+        </div>
+      </div>
+
+      <div class="browser-settings">
+        <h3>🌐 Paramétrage du navigateur</h3>
+        <p>Vous pouvez également gérer les cookies via votre navigateur :</p>
+        
+        <div class="browser-grid">
+          <div class="browser-card">
+            <h4>Google Chrome</h4>
+            <p>Menu → Paramètres → Confidentialité et sécurité → Cookies</p>
+          </div>
+          <div class="browser-card">
+            <h4>Firefox</h4>
+            <p>Menu → Options → Vie privée et sécurité → Cookies</p>
+          </div>
+          <div class="browser-card">
+            <h4>Safari</h4>
+            <p>Préférences → Confidentialité → Cookies et données</p>
+          </div>
+          <div class="browser-card">
+            <h4>Microsoft Edge</h4>
+            <p>Paramètres → Confidentialité → Cookies</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="legal-section">
+      <h2>5. Conséquences du refus des cookies</h2>
+
+      <div class="consequences-grid">
+        <div class="consequence-card essential-card">
+          <h4>❌ Cookies essentiels</h4>
+          <p>Le refus rendra l'application inutilisable</p>
+          <ul class="custom-list small">
+            <li>Connexion impossible</li>
+            <li>Sécurité compromise</li>
+            <li>Perte de données</li>
+          </ul>
+        </div>
+
+        <div class="consequence-card performance-card">
+          <h4>⚠️ Cookies de performance</h4>
+          <p>L'application fonctionnera, mais :</p>
+          <ul class="custom-list small">
+            <li>Moins d'améliorations</li>
+            <li>Bugs non détectés</li>
+            <li>Expérience non optimisée</li>
+          </ul>
+        </div>
+
+        <div class="consequence-card marketing-card">
+          <h4>📢 Cookies marketing</h4>
+          <p>Vous verrez toujours des publicités, mais :</p>
+          <ul class="custom-list small">
+            <li>Moins pertinentes</li>
+            <li>Répétitives</li>
+            <li>Non personnalisées</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="legal-section">
+      <h2>6. Technologies similaires</h2>
+      <div class="text-block">
+        <p>En plus des cookies, nous utilisons :</p>
+
+        <div class="tech-list">
+          <div class="tech-item">
+            <h4>💿 Local Storage & Session Storage</h4>
+            <p>Pour améliorer les performances et conserver des données temporaires</p>
+          </div>
+          <div class="tech-item">
+            <h4>🔍 Pixels invisibles</h4>
+            <p>Images 1x1 pixel dans les emails pour mesurer le taux d'ouverture</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="contact-section">
+      <h3>❓ Questions sur les cookies ?</h3>
+      <p>Contactez-nous à <a href="mailto:sosmongarage2025@gmail.com">sosmongarage2025&#64;gmail.com</a></p>
+    </div>
+
+    <div class="update-date">
+      <p><strong>Dernière mise à jour :</strong> {{ lastUpdate }}</p>
+    </div>
+  </div>
+
+
+  <button class="scroll-top-btn" (click)="scrollToTop()">↑</button>
+</div>
